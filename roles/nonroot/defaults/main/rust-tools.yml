@@ -6,6 +6,8 @@ rustup_macos_os: apple-darwin
 rustup_url: https://static.rust-lang.org/rustup/rustup-init.sh
 cargo_binstall_url: "https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz"
 cargo_binstall_download: "{{ dot_download_dir }}/cargo-binstall-x86_64-unknown-linux-musl"
+cargo_binstall_installer_url: "https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh"
+cargo_binstall_installer_oneliner: "curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash"
 rustup_script_path: "{{ dotfiles_user_home }}/rustup-init.sh"
 rustup_home_dir: "{{ dotfiles_user_home }}/.rustup"
 rustup_toolchain: "stable"
