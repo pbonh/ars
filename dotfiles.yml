@@ -2,30 +2,30 @@
 - name: Install Tools(Devbox)
   hosts: localhost
   connection: local
-  when: tool_provider == 'devbox'
   tasks:
     - import_role:
         name: devbox
+      when: tool_provider == 'devbox'
       tags:
         - install
 
 - name: Install Tools(Homebrew)
   hosts: localhost
   connection: local
-  when: tool_provider == 'homebrew'
   tasks:
     - import_role:
         name: homebrew
+      when: tool_provider == 'homebrew'
       tags:
         - install
 
 - name: Install Tools(Non-Root)
   hosts: localhost
   connection: local
-  when: tool_provider == 'nonroot'
   tasks:
     - import_role:
         name: nonroot
+      when: tool_provider == 'nonroot'
       tags:
         - install
 
