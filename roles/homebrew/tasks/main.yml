@@ -1,2 +1,6 @@
 ---
-# tasks file for homebrew
+- name: Homebrew | Install Homebrew Unattended | shell
+  become: true
+  shell: "{{ homebrew_install_cmd }}"
+  args:
+    creates: "{{ homebrew_install_path }}"

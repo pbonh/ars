@@ -1,2 +1,8 @@
 ---
-# defaults file for homebrew
+system_home: "/home"
+homebrew_install_path: "{{ system_home }}/linuxbrew/.linuxbrew"
+homebrew_path: "{{ homebrew_install_path }}/bin"
+homebrew_install_path_macos: "{{ system_home }}/homebrew/.homebrew"
+homebrew_path_macos: "{{ homebrew_install_path_macos }}/bin"
+homebrew_install_url: "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
+homebrew_install_cmd: "NONINTERACTIVE=1 /bin/bash -c \"$(curl -fsSL {{ homebrew_install_url }})\""
