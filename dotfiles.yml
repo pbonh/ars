@@ -1,7 +1,6 @@
 ---
 - name: Install Tools(Devbox)
   hosts: localhost
-  connection: local
   tasks:
     - import_role:
         name: devbox
@@ -11,7 +10,6 @@
 
 - name: Install Tools(Homebrew)
   hosts: localhost
-  connection: local
   tasks:
     - import_role:
         name: homebrew
@@ -21,7 +19,6 @@
 
 - name: Install Tools(Non-Root)
   hosts: localhost
-  connection: local
   tasks:
     - import_role:
         name: nonroot
@@ -31,7 +28,6 @@
 
 - name: Configure Environment
   hosts: localhost
-  connection: local
   vars:
     tool_provider: "{{ lookup('env', 'TOOL_PROVIDER') }}"
   tasks:
