@@ -1,2 +1,10 @@
 ---
-# tasks file for devbox
+- name: Devbox | Install Developer Tools | task
+  import_tasks: tasks/install_devbox_tools.yml
+  tags:
+  - core
+
+- name: Devbox | Install Developer Tools(All) | task
+  import_tasks: tasks/install_devbox_tools_all.yml
+  tags:
+  - extra

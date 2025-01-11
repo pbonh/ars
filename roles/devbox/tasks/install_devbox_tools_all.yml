@@ -1,0 +1,6 @@
+---
+- name: Devbox | Install Devbox Developer Tools(All) | command
+  ignore_errors: true
+  command:
+    cmd: "{{ devbox_exe }} global add {{ item }}"
+  loop: "{{ devbox_dev_all_tools }}"
