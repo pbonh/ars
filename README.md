@@ -34,9 +34,9 @@ ln -s .envrc .env
 echo "TOOL_PROVIDER=\"homebrew\"" > .envrc
 ```
 OR
-Ansible Pull
+Ansible Pull(Non-Root, Shell Tools Only)
 ```bash
-ansible-pull -U https://github.com/pbonh/ars.git -i "$(hostname --short),"
+ansible-pull -U https://github.com/pbonh/ars.git playbook.yml --tags "env" -e "{tool_provider: \"nonroot\"}"
 ```
 
 License
