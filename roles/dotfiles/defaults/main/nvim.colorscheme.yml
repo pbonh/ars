@@ -1,0 +1,62 @@
+---
+nvim_colorscheme_default:
+  lazy: |
+    {
+      'sainnhe/gruvbox-material',
+      lazy = false,
+    },
+  config: |
+    vim.o.background = 'dark'
+    vim.cmd([[colorscheme gruvbox-material]])
+  keymaps: ''
+nvim_colorscheme_gruvbox:
+  lazy: |
+    {
+      'sainnhe/gruvbox-material',
+      lazy = false,
+      init = function()
+        vim.o.background = 'dark'
+        vim.cmd([[colorscheme gruvbox-material]])
+      end,
+    },
+    {
+      'NoahTheDuke/vim-just',
+      lazy = false,
+    },
+  config: ""
+  keymaps: ""
+nvim_colorscheme_onedark:
+  lazy: |
+    {
+      'navarasu/onedark.nvim',
+      lazy = false,
+      init = function()
+        vim.o.background = 'dark'
+        vim.cmd([[colorscheme onedark]])
+      end,
+    },
+    {
+      'NoahTheDuke/vim-just',
+      lazy = false,
+    },
+  config: |
+    require('onedark').setup({
+      style = 'deep',
+    })
+  keymaps: ""
+nvim_colorscheme_nightfox:
+  lazy: |
+    {
+      "EdenEast/nightfox.nvim",
+      lazy = false,
+      init = function()
+        vim.o.background = 'dark'
+        vim.cmd([[colorscheme carbonfox]])
+      end,
+    },
+    {
+      'NoahTheDuke/vim-just',
+      lazy = false,
+    },
+  config: ""
+  keymaps: ""

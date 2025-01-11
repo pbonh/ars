@@ -1,0 +1,13 @@
+---
+- name: XDG | Create XDG Directories | file
+  file:
+    path: "{{ item.value }}"
+    state: directory
+  loop: "{{ xdg_config_dirs | dict2items }}"
+
+- name: PATH | Create PATH Directories | file
+  file:
+    path: "{{ item.value.path }}"
+    state: directory
+  loop: "{{ path_directories | dict2items }}"
+

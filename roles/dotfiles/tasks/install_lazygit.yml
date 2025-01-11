@@ -1,0 +1,11 @@
+---
+- name: Setup Lazygit Config Directory
+  file:
+    path: "{{ lazygit_config }}"
+    state: directory
+    mode: "0755"
+
+- name: Lazygit | Copies Lazygit Config | template
+  template:
+    src: lazygit/config.yml.j2
+    dest: "{{ lazygit_config_file }}"

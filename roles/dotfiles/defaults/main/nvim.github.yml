@@ -1,0 +1,15 @@
+---
+extra_nvim_plugins_github: |
+  use { 'github/copilot.vim' }
+extra_nvim_plugins_github_lazy: |
+  {
+    'github/copilot.vim',
+    lazy = true,
+  },
+extra_nvim_config_github: ""
+extra_nvim_keymap_github: |
+  { '<leader>co', {
+      n = '<cmd>Copilot enable<CR>',
+    },
+    description = 'Github-Copilot: Enable',
+  },

@@ -1,0 +1,15 @@
+// Zellij Session Layout: {{ yazelix_session_name }}
+layout {
+    cwd "{{ yazelix_cwd | indent(4) }}"
+
+    {{ yazelix_tab_template | indent(4) }}
+
+    {{ yazelix_layout_info | indent(4) }}
+}
+
+keybinds {
+    {{ yazelix_keybindings | indent(4) }}
+}
+
+session_name "{{ yazelix_session_name }}"
+attach_to_session true

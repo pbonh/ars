@@ -1,0 +1,23 @@
+---
+fzf_install_dir: "{{ dotfiles_user_home }}/.fzf"
+fzf_exe: "{{ fzf_install_dir }}/bin/fzf"
+fzf_share_exe: "{{ fzf_install_dir }}/bin/fzf-share"
+fzf_env:
+  completion_opts:
+    name: FZF_COMPLETION_OPTS
+    env: "+c -x"
+  default_command:
+    name: FZF_DEFAULT_COMMAND
+    env: "{{ fd_exe }} --type f"
+  ctrl_t_command:
+    name: FZF_CTRL_T_COMMAND
+    env: "{{ fd_exe }} --type f"
+  ctrl_t_opts:
+    name: FZF_CTRL_T_OPTS
+    env: "--preview \"{{ bat_exe }} --color=always --line-range :500 {}\""
+  alt_c_command:
+    name: FZF_ALT_C_COMMAND
+    env: "{{ fd_exe }} --type d . --color=never"
+  default_opts:
+    name: FZF_DEFAULT_OPTS
+    env: "--height 75% --multi --reverse --bind ctrl-f:page-down,ctrl-b:page-up"

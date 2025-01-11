@@ -1,0 +1,20 @@
+---
+- name: tcsh | Copies .tcshrc | template
+  template:
+    src: tcsh/tcshrc.j2
+    dest: "{{ tcsh_config_file }}"
+
+- name: tcsh | Setup tcsh Config Directory | file
+  file:
+    path: "{{ tcsh_config_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: tcsh | Copy Tcsh Config Files | template
+  vars:
+    tcsh_plugin_source: "{{ item.value.script }}"
+  ansible.builtin.template:
+    src: tcsh/tcshrc.d.j2
+    dest: "{{ tcsh_plugins }}/{{ item.value.name }}"
+  loop: "{{ tcsh_plugins_source | dict2items }}"
+

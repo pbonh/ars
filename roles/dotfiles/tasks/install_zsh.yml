@@ -1,0 +1,32 @@
+---
+- name: zsh | Copies .zshrc | template
+  template:
+    src: zsh/zshrc.j2
+    dest: "{{ dotfiles_user_home }}/.zshrc"
+
+- name: Zsh | Setup Zsh Plugins Directory | file
+  file:
+    path: "{{ zsh_plugins }}"
+    state: directory
+    mode: '0755'
+
+- name: Zsh | Setup Zsh Completions Directory | file
+  file:
+    path: "{{ zsh_completions }}"
+    state: directory
+    mode: '0755'
+
+- name: Zsh | Install FZF-Tab Plugin | git
+  git:
+    repo: "https://github.com/Aloxaf/fzf-tab"
+    dest: "{{ zsh_fzf_tab }}"
+
+- name: Zsh | Install Git Fuzzy Plugin | git
+  git:
+    repo: "https://github.com/bigH/git-fuzzy"
+    dest: "{{ zsh_git_fuzzy }}"
+
+- name: Zsh | Install Zsh Just Completions | shell
+  shell: "{{ just_exe }} --completions=zsh > {{ zsh_completion_just }}"
+  args:
+    creates: "{{ zsh_completion_just }}"

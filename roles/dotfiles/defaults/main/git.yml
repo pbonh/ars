@@ -1,0 +1,12 @@
+---
+git_exe: "git"
+git_name: "{{ lookup('env', 'DOTFILES_BOOTSTRAP_GIT_NAME') }}"
+git_email: "{{ lookup('env', 'DOTFILES_BOOTSTRAP_GIT_EMAIL') }}"
+github_username: "{{ lookup('env', 'DOTFILES_BOOTSTRAP_GITHUB_USERNAME') }}"
+git_ssh: /usr/bin/ssh
+code_checkout_path: "{{ dotfiles_user_home }}/Code"
+code_checkout_path_github: "{{ code_checkout_path }}/github.com"
+code_checkout_path_gitlab: "{{ code_checkout_path }}/gitlab.com"
+code_home_dir: "{{ code_checkout_path_github }}"
+homelab_dir: "{{ code_checkout_path_github }}/homelab"
+dotfiles_checkout_dir: "{{ code_checkout_path_github }}/{{ github_username }}/term-dev.nix"

@@ -1,0 +1,62 @@
+---
+nvim_overseer_reldir: "lua/overseer/template/user"
+nvim_overseer_tasks:
+  just_choose: |
+    name = "Just Choose",
+    builder = function()
+      -- Full path to current file (see :help expand())
+      local file = vim.fn.expand("%:p")
+      return {
+        cmd = { "{{ just_exe }}" },
+        args = { "--choose" },
+        components = { { "on_output_quickfix", open = true }, "default" },
+      }
+    end,
+nvim_tasks_default:
+  lazy: |
+    {
+      'stevearc/overseer.nvim',
+      dependencies = {
+          {'akinsho/toggleterm.nvim'},
+      },
+    },
+  config: |
+    require('overseer').setup({
+      strategy = "toggleterm",
+    })
+  keymaps: |
+    { '<leader>O', description = 'Overseer', },
+    { '<leader>Or', { n = '<cmd>OverseerRun<CR>', }, description = 'Overseer: Select Task', },
+nvim_tasks:
+  lazy: |
+    {
+      'stevearc/overseer.nvim',
+      dependencies = {
+          {'akinsho/toggleterm.nvim'},
+      },
+      config = function()
+        require('overseer').setup({
+          strategy = "toggleterm",
+        })
+        require("dap.ext.vscode").json_decode = require("overseer.json").decode
+      end,
+    },
+  config: ""
+  keymaps: |
+    { '<leader>O', description = 'Overseer', },
+    { '<leader>Or', { n = '<cmd>OverseerRun<CR>', }, description = 'Overseer: Select Task', },
+nvim_tasks_nodap:
+  lazy: |
+    {
+      'stevearc/overseer.nvim',
+      dependencies = {
+          {'akinsho/toggleterm.nvim'},
+      },
+      config = function()
+        require('overseer').setup({
+          strategy = "toggleterm",
+        })
+      end,
+    },
+  config: ""
+  keymaps: "{{ nvim_tasks['keymaps'] }}"

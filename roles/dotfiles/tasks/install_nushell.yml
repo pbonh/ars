@@ -1,0 +1,25 @@
+---
+- name: nushell | Setup nushell Config Directory | file
+  file:
+    path: "{{ nushell_config_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: nushell | Copy nushell Config Files | template
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ nushell_config_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
+  with_community.general.filetree: "../templates/nushell"
+  when: item.state == 'file'
+
+- name: nushell | Setup nushell Starship Integration | file
+  file:
+    path: "{{ nushell_starship_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: nushell | Setup Carapace Directory | file
+  file:
+    path: "{{ carapace_dir }}"
+    state: directory
+    mode: '0755'

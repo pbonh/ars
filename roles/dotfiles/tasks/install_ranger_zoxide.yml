@@ -1,0 +1,22 @@
+---
+- name: Ranger | Setup Ranger Config Directory | directory
+  file:
+    path: "{{ ranger_config }}"
+    state: directory
+    mode: '0755'
+
+- name: Ranger | Copies Ranger config | template
+  template:
+    src: ranger/rc.conf.j2
+    dest: "{{ ranger_config }}/rc.conf"
+
+- name: Ranger | Setup Ranger Plugins Directory | directory
+  file:
+    path: "{{ ranger_plugins }}"
+    state: directory
+    mode: '0755'
+
+- name: Ranger | Install Ranger-Zoxide Plugin | git
+  git:
+    repo: 'https://github.com/jchook/ranger-zoxide.git'
+    dest: "{{ ranger_plugins }}/ranger-zoxide"

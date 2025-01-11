@@ -1,0 +1,198 @@
+---
+rustup_dev_packages:
+  rust-src:
+    name: rust-src
+    path: "{{ rustup_path }}../share/doc/rust"
+  clippy:
+    name: clippy
+    path: "{{ rustup_path }}cargo-clippy"
+  rust-analyzer:
+    name: rust-analyzer
+    path: "{{ rustup_path }}rust-analyzer"
+rust_dev_packages:
+  bacon:
+    name: bacon
+    path: "{{ cargo_path }}bacon"
+  cargo-edit:
+    name: cargo-edit
+    path: "{{ cargo_path }}cargo-edit"
+  rustfmt:
+    name: rustfmt
+    path: "{{ cargo_path }}rustfmt"
+  cargo-readme:
+    name: cargo-readme
+    path: "{{ cargo_path }}cargo-readme"
+nvim_extra_plugins_rust:
+  lazy: "{{ extra_nvim_plugins_rust_lazy }}"
+  config: "{{ extra_nvim_config_rust }}"
+  keymaps: "{{ extra_nvim_keymap_rust }}"
+extra_nvim_language_keymaps_rust:
+  mappings: "{{ nvim_keymap_rust }}"
+  ext: "{{ rust_file_extensions }}"
+treesitter_parsers_rust:
+  - rust
+treesitter_custom_parsers_rust:
+  - egg
+treesitter_parsers_egg_parser_config: |
+  parser_configs.egg = {
+      install_info = {
+          url = 'https://github.com/segeljakt/tree-sitter-egg',
+          files = {
+            'src/parser.c',
+            'src/tree_sitter/parser.h',
+          },
+          branch = 'master'
+      },
+  }
+neotest_adapters_rust: |
+  -- require('rustaceanvim.neotest'),
+  require("neotest-rust") {
+    args = { "--no-capture" },
+    dap_adapter = "codelldb",
+  }
+rust_tools_nix:
+  - vscode-extensions.vadimcn.vscode-lldb
+rust_file_extensions:
+  - rust
+rust_file_extensions_comma_list: "{{ '\"' + rust_file_extensions |join('\", \"') + '\"' }}"
+rust_dbg: "rust-lldb"
+codelldb_extension_url: https://github.com/vadimcn/vscode-lldb.git
+codelldb_extension_version: "1.10.0"
+codelldb_extension_path: "vscode/extensions/vadimcn.vscode-lldb-{{ codelldb_extension_version }}"
+codelldb_install_path: "{{ dotfiles_user_home }}/.{{ codelldb_extension_path }}"
+codelldb_install_flatpak_path: "{{ dotfiles_user_home }}/.var/app/com.visualstudio.code/data/{{ codelldb_extension_path }}"
+codelldb_install_devbox_path: "./.devbox/nix/profile/default/share/vscode/extensions/vadimcn.vscode-lldb"
+codelldb_bin_path: adapter/codelldb
+codelldb_liblldb_path: lldb/lib/liblldb.so
+lsp_providers_rust:
+  - rust_analyzer
+lsp_providers_rust_setup: []
+rust_extra_lua_plugin_settings: []
+rust_analyzer_exe: "rust-analyzer"
+clippy_exe: "cargo-clippy"
+extra_nvim_plugins_rust_lazy: |
+  {
+    'mrcjkb/rustaceanvim',
+    version = '^5',
+    lazy = false,
+    ft = { 'rust' },
+  },
+  { 'rust-lang/rust.vim' },
+  { 'segeljakt/tree-sitter-egg' },
+  { 'rouge8/neotest-rust' },
+extra_nvim_config_rust: |
+  local extension_path = '{{ codelldb_install_path }}/'
+  local codelldb_path = extension_path .. '{{ codelldb_bin_path }}'
+  local liblldb_path = extension_path .. '{{ codelldb_liblldb_path }}'
+  dap.adapters.codelldb = {
+    type = 'server',
+    port = "${port}",
+    executable = {
+      command = codelldb_path,
+      args = {"--port", "${port}"},
+    }
+  }
+  vim.g.rustaceanvim = {
+    -- LSP configuration
+    server = {
+      cmd = { '{{ rust_analyzer_exe }}' },
+      settings = {
+        -- rust-analyzer language server configuration
+        ['rust-analyzer'] = {
+          cargo = {
+            allFeatures = true,
+          },
+          checkOnSave = true,
+          check = {
+            command = 'clippy',
+          },
+        },
+      },
+    },
+    tools = {
+      executor = require('rustaceanvim.executors').toggleterm,
+      test_executor = require('rustaceanvim.executors').toggleterm,
+      float_win_config = {
+        auto_focus = true,
+      },
+    },
+    dap = {
+      adapter = require('rustaceanvim.config').get_codelldb_adapter(codelldb_path, liblldb_path),
+    },
+  }
+  local Terminal  = require('toggleterm.terminal').Terminal
+  local bacon_watch = Terminal:new({ cmd = 'bacon', close_on_exit = true, hidden = true })
+  function bacon_watch_terminal_runner()
+    bacon_watch:toggle()
+  end
+  -- vim.api.nvim_create_augroup("RustFormat", {})
+  -- vim.api.nvim_create_autocmd(
+  --     "BufWritePost",
+  --     {
+  --         pattern = "*.rs",
+  --         group = "RustFormat",
+  --         callback = function()
+  --             vim.cmd("silent !black --quiet %")
+  --             vim.cmd("edit")
+  --         end,
+  --     }
+  -- )
+  vim.api.nvim_create_autocmd("BufWritePre", {
+      callback = function()
+          local mode = vim.api.nvim_get_mode().mode
+          local filetype = vim.bo.filetype
+          if vim.bo.modified == true and mode == 'n' and filetype == "rust" then
+              vim.cmd('lua vim.lsp.buf.format()')
+          else
+          end
+      end
+  })
+extra_nvim_keymap_rust: |
+  -- { '<leader>c', description = 'Rust', filters = { ft = 'rust' } },
+  -- { '<leader>ch', {
+  --     n = '<cmd>RustLsp hover actions<CR>',
+  --   },
+  --   description = 'Rust-Tools: Hover Actions',
+  --   filters = { ft = 'rust' },
+  --   opts = { silent = true, noremap = true, },
+  -- },
+  -- { '<leader>ca', {
+  --     n = '<cmd>lua vim.cmd.RustLsp("codeAction")<CR>',
+  --   },
+  --   description = 'Rust-Tools: Code Action Group',
+  --   filters = { ft = 'rust' },
+  --   opts = { silent = true, noremap = true },
+  -- },
+  -- { '<leader>cd', {
+  --     n = '<cmd>RustLsp debuggables<CR>',
+  --   },
+  --   description = 'Rust-Tools: Select Rust Debuggable',
+  --   filters = { ft = 'rust' },
+  --   opts = { silent = true, noremap = true },
+  -- },
+  -- { '<leader>cw', {
+  --     n = '<cmd>lua bacon_watch_terminal_runner()<CR>',
+  --   },
+  --   description = 'Rust: Bacon Codebase Watcher',
+  --   filters = { ft = 'rust' },
+  --   opts = { silent = true, noremap = true },
+  -- },
+nvim_keymap_rust: |
+  local group = vim.api.nvim_create_augroup("rust_autocommands", { clear = true })
+  vim.api.nvim_create_autocmd("FileType", {
+      pattern = {
+        "rust",
+      },
+      callback = function(ev)
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ch', '<cmd>RustLsp hover actions<CR><cmd>RustLsp hover actions<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ca', '<cmd>lua vim.cmd.RustLsp("codeAction")<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cd', '<cmd>RustLsp debuggables<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cw', '<cmd>lua bacon_watch_terminal_runner()<CR>', { noremap = true, silent = true })
+      end,
+      group = group
+  })
+  vim.filetype.add({
+    pattern = {
+      [".*.llhd"] = "llvm",
+    },
+  })

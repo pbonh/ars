@@ -1,0 +1,7 @@
+---
+tmux_config_dir: "{{ xdg_config_dir }}/tmux"
+tmux_config_file: "{{ tmux_config_dir }}/tmux.conf"
+tmux_plugin_dir: "{{ dotfiles_user_home }}/.tmux/plugins"
+tmux_tpm_dir: "{{ tmux_plugin_dir }}/tpm"
+tmux_tpm_url: https://github.com/tmux-plugins/tpm
+tmux_keybindings_file: "{{ tmux_config_dir }}/keybindings.conf"

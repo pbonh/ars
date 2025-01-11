@@ -1,0 +1,5 @@
+---
+- name: Vars | Set Homebrew Variables | set_fact
+  ansible.builtin.set_fact:
+    zsh_homebrew_env: "eval \"$({{ homebrew_path }}/brew shellenv)\""
+    bash_homebrew_env: "eval \"$({{ homebrew_path }}/brew shellenv)\""

@@ -1,0 +1,44 @@
+---
+nvim_git_default:
+  lazy: |
+    { 'sindrets/diffview.nvim', dependencies = 'nvim-lua/plenary.nvim' },
+    { 'TimUntersberger/neogit', dependencies = 'nvim-lua/plenary.nvim' },
+  config: |
+    require('diffview').setup()
+    require('neogit').setup()
+  keymaps: |
+    -- { '<leader>gb', { n = '<cmd>lua require(\'telescope.builtin\').git_branches()<CR>', }, description = 'Git: Pick Branch'},
+    -- { '<leader>gl', { n = '<cmd>lua require(\'telescope.builtin\').git_commits()<CR>', }, description = 'Git: Pick Commits'},
+    -- { '<leader>gc', { n = '<cmd>lua require(\'telescope.builtin\').git_bcommits()<CR>', }, description = 'Git: Pick Buffer Commits'},
+    -- { '<leader>gs', { n = '<cmd>lua require(\'telescope.builtin\').git_stash()<CR>', }, description = 'Git: Show Stash'},
+    -- { '<leader>gd', { n = '<cmd>DiffviewOpen<CR>', }, description = 'Git: Show Diff'},
+    -- { '<leader>gh', { n = '<cmd>DiffviewFileHistory<CR>', }, description = 'Git: Show Diff'},
+nvim_git:
+  lazy: |
+    {
+      'sindrets/diffview.nvim',
+      dependencies = 'nvim-lua/plenary.nvim',
+      config = function()
+        require('diffview').setup({
+           git_cmd = { "{{ git_exe }}" },
+        })
+      end,
+    },
+    {
+      "NeogitOrg/neogit",
+      dependencies = {
+        "nvim-lua/plenary.nvim",         -- required
+        "sindrets/diffview.nvim",        -- optional - Diff integration
+        "ibhagwan/fzf-lua",
+        "nvim-telescope/telescope.nvim", -- optional
+      },
+      config = true
+    },
+  config: ""
+  keymaps: |
+    -- { '<leader>gb', { n = '<cmd>lua require(\'telescope.builtin\').git_branches()<CR>', }, description = 'Git: Pick Branch'},
+    -- { '<leader>gl', { n = '<cmd>lua require(\'telescope.builtin\').git_commits()<CR>', }, description = 'Git: Pick Commits'},
+    -- { '<leader>gc', { n = '<cmd>lua require(\'telescope.builtin\').git_bcommits()<CR>', }, description = 'Git: Pick Buffer Commits'},
+    -- { '<leader>gs', { n = '<cmd>lua require(\'telescope.builtin\').git_stash()<CR>', }, description = 'Git: Show Stash'},
+    -- { '<leader>gd', { n = '<cmd>DiffviewOpen<CR>', }, description = 'Git: Show Diff'},
+    -- { '<leader>gh', { n = '<cmd>DiffviewFileHistory<CR>', }, description = 'Git: Show Diff'},

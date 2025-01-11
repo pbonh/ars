@@ -1,0 +1,5 @@
+---
+helix_config_dir: "{{ xdg_config_dir }}/helix"
+helix_config_file: "{{ helix_config_dir }}/config.toml"
+helix_lang_file: "{{ helix_config_dir }}/languages.toml"
+helix_shell: "{{ interactive_shell }}"

@@ -1,0 +1,308 @@
+---
+cpp_tools_nix:
+  - clang-tools
+  - cmake
+  - ninja
+lsp_providers_cpp:
+  - clangd
+gcc_bin: "{{ nix_bin }}/gcc"
+gpp_bin: "{{ nix_bin }}/g++"
+gdb_bin: "{{ nix_bin }}/gdb"
+lldb_vscode_bin: "{{ nix_bin }}/lldb-vscode"
+cmake_bin: "{{ nix_bin }}/cmake"
+clangd_bin: "{{ nix_bin }}/clangd"
+nvim_share_dir: "{{ xdg_share_dir }}/nvim"
+nvim_config_dir: "{{ xdg_config_dir }}/nvim"
+nvim_cmake_copy_compile_commands: CMakeCopyCompileCommands
+nvim_cmake_build_dir: build/linux-debug
+ccls_clang_args: {}
+ccls_tmp_dir: /tmp/ccls
+clang_format_fileoption: file
+vscode_cpptools_version: 1.15.31
+vscode_cpptools_download: "{{ tool_install_dir }}/vscode-cpptools"
+vscode_cpptools_extension: cpptools-linux
+vscode_cpptools_extension_path: "{{ vscode_cpptools_download }}/{{ vscode_cpptools_extension }}"
+vscode_cpptools_vsix_file_path: "{{ vscode_cpptools_extension_path }}.vsix"
+vscode_cpptools_extension_file_path: "{{ vscode_cpptools_extension_path }}/extension"
+vscode_cpptools_executable_path: "{{ vscode_cpptools_extension_file_path }}/debugAdapters/bin/OpenDebugAD7"
+vscode_cpptools_executable_path_mono: "{{ vscode_cpptools_extension_path }}/extensions/debugAdapters/bin/mono.linux"
+vscode_cpptools_extension_json_config: "{{ vscode_cpptools_extension_file_path }}/cppdbg.ad7Engine.json"
+vscode_cpptools_extension_neovim_json_config: "{{ vscode_cpptools_extension_file_path }}/debugAdapters/bin/nvim-dap.ad7Engine.json"
+vscode_cpptools_runner: |
+    {
+      name = 'Launch file',
+      type = 'cppdbg',
+      request = 'launch',
+      program = function()
+        return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+      end,
+      cwd = '${workspaceFolder}',
+      stopOnEntry = true,
+    },
+    {
+      name = 'Attach to gdbserver :1234',
+      type = 'cppdbg',
+      request = 'launch',
+      MIMode = 'gdb',
+      miDebuggerServerAddress = 'localhost:1234',
+      miDebuggerPath = '{{ gdb_bin }}',
+      cwd = '${workspaceFolder}',
+      program = function()
+        return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+      end,
+    },
+    {
+      -- If you get an 'Operation not permitted' error using this, try disabling YAMA:
+      --  echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+      name = 'Attach to process',
+      type = 'cppdbg',  -- Adjust this to match your adapter name (`dap.adapters.<name>`)
+      request = 'attach',
+      pid = require('dap.utils').pick_process,
+      args = {},
+    },
+lldb_vscode_runner: |
+    {
+      name = 'LLDB-Debug',
+      type = 'lldb',
+      request = 'launch',
+      program = '/tmp/a.out',
+      args = {
+        'one',
+        'two',
+        'three',
+      },
+      env = {
+        'FOO=1',
+        'BAR',
+      },
+    },
+    {
+      name = 'Launch',
+      type = 'lldb',
+      request = 'launch',
+      program = function()
+        return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+      end,
+      cwd = '${workspaceFolder}',
+      stopOnEntry = false,
+      args = {},
+      env = function()
+        local variables = {}
+        for k, v in pairs(vim.fn.environ()) do
+          table.insert(variables, string.format("%s=%s", k, v))
+        end
+        return variables
+      end,
+
+      -- if you change `runInTerminal` to true, you might need to change the yama/ptrace_scope setting:
+      --
+      --    echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+      --
+      -- Otherwise you might get the following error:
+      --
+      --    Error on launch: Failed to attach to the target process
+      --
+      -- But you should be aware of the implications:
+      -- https://www.kernel.org/doc/html/latest/admin-guide/LSM/Yama.html
+      -- runInTerminal = false,
+    },
+cpp_file_extensions:
+  - c
+  - cc
+  - cpp
+  - cxx
+  - hpp
+  - hxx
+  - c++
+  - objc
+  - objcpp
+  - mlir
+  - llvm
+  - tablegen
+# cpp_file_extensions_comma_list: "{{ '\"' + cpp_file_extensions |join('\", \"') + '\"' }}"
+cargo_cpp_packages:
+  - { name: neocmakelsp, path: neocmakelsp }
+nvim_extra_plugins_cpp:
+  lazy: "{{ extra_nvim_plugins_cpp_lazy }}"
+  config: "{{ extra_nvim_config_cpp }}"
+  keymaps: "{{ extra_nvim_keymap_cpp }}"
+extra_nvim_language_keymaps_cpp:
+  mappings: "{{ nvim_keymap_cpp }}"
+  ext: "{{ cpp_file_extensions }}"
+treesitter_parsers_cpp:
+  - cpp
+  - c
+  - llvm
+  - cmake
+  - mlir
+  - tablegen
+treesitter_extra_config_cpp: |
+  nt_cpp_tools = {
+    enable = true,
+    preview = {
+      quit = 'q', -- optional keymapping for quit preview
+      accept = '<tab>' -- optional keymapping for accept preview
+    },
+    header_extension = 'h', -- optional
+    source_extension = 'cxx', -- optional
+  },
+extra_nvim_plugins_cpp_lazy: |
+  { 'p00f/clangd_extensions.nvim' },
+  { 'Shatur/neovim-cmake',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'mfussenegger/nvim-dap',
+      'stevearc/dressing.nvim'
+    }
+  },
+  { 'Badhi/nvim-treesitter-cpp-tools',
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter'
+    }
+  },
+extra_nvim_config_cpp: |
+  require('clangd_extensions').setup()
+  local configs = require('lspconfig.configs')
+  local nvim_lsp = require('lspconfig')
+  if not configs.neocmake then
+      configs.neocmake = {
+          default_config = {
+              cmd = { 'neocmakelsp' },
+              filetypes = { 'cmake' },
+              root_dir = function(fname)
+                  return nvim_lsp.util.find_git_ancestor(fname)
+              end,
+              single_file_support = true,-- suggested
+              on_attach = on_attach
+          }
+      }
+      nvim_lsp.neocmake.setup({})
+  end
+  dap.adapters.cppdbg = {
+    id = 'cppdbg',
+    type = 'executable',
+    command = '{{ vscode_cpptools_executable_path }}',
+  }
+  dap.adapters.lldb = {
+    type = 'executable',
+    command = '{{ lldb_vscode_bin }}', -- adjust as needed, must be absolute path
+    name = 'lldb'
+  }
+  dap.configurations.cpp = {
+    {{ vscode_cpptools_runner | indent(width=2) }}
+    {{ lldb_vscode_runner | indent(width=2) }}
+  }
+  dap.configurations.c = dap.configurations.cpp
+  local Path = require('plenary.path')
+  require('cmake').setup({
+    cmake_executable = '{{ cmake_bin }}', -- CMake executable to run.
+    save_before_build = true, -- Save all buffers before building.
+    parameters_file = 'neovim.json', -- JSON file to store information about selected target, run arguments and build type.
+    build_dir = tostring(Path:new('{cwd}', 'build', '{os}-{build_type}')), -- Build directory. The expressions `{cwd}`, `{os}` and `{build_type}` will be expanded with the corresponding text values. Could be a function that return the path to the build directory.
+    default_projects_path = tostring(Path:new(vim.loop.os_homedir(), '{{ code_checkout_path_github }}')), -- Default folder for creating project.
+    configure_args = {
+      '-G',
+      'Ninja',
+      '-D',
+      'CMAKE_EXPORT_COMPILE_COMMANDS=1',
+      '-D',
+      'CMAKE_C_COMPILER={{ gcc_bin }}',
+      '-D',
+      'CMAKE_CXX_COMPILER={{ gpp_bin }}',
+    }, -- Default arguments that will be always passed at cmake configure step. By default tells cmake to generate `compile_commands.json`.
+    build_args = {}, -- Default arguments that will be always passed at cmake build step.
+    on_build_output = nil, -- Callback that will be called each time data is received by the current process. Accepts the received data as an argument.
+    quickfix = {
+      pos = 'botright', -- Where to open quickfix
+      height = 10, -- Height of the opened quickfix.
+      only_on_error = false, -- Open quickfix window only if target build failed.
+    },
+    copy_compile_commands = true, -- Copy compile_commands.json to current working directory.
+    dap_configuration = {
+      type = 'lldb',
+      request = 'launch',
+      stopOnEntry = false,
+      runInTerminal = false,
+    },
+    dap_open_command = require('dapui').open,
+  })
+extra_nvim_keymap_cpp: |
+  -- { '<leader>c', description = 'CMake', filters = { ft = 'cpp' } },
+  -- { '<leader>cc', {
+  --     n = '<cmd>CMake configure<CR>',
+  --   },
+  --   description = 'CMake: Configure',
+  --   filters = { ft = 'cpp' },
+  -- },
+  -- { '<leader>ct', {
+  --     n = '<cmd>CMake select_target<CR>',
+  --   },
+  --   description = 'CMake: Select Target',
+  --   filters = { ft = 'cpp' },
+  -- },
+  -- { '<leader>cb', {
+  --     n = '<cmd>CMake build<CR>',
+  --   },
+  --   description = 'CMake: Build Target',
+  --   filters = { ft = 'cpp' },
+  -- },
+  -- { '<leader>ca', {
+  --     n = '<cmd>CMake build_all<CR>',
+  --   },
+  --   description = 'CMake: Build All Targets',
+  --   filters = { ft = 'cpp' },
+  -- },
+  -- { '<leader>cr', {
+  --     n = '<cmd>CMake run<CR>',
+  --   },
+  --   description = 'CMake: Run Target',
+  --   filters = { ft = 'cpp' },
+  -- },
+  -- { '<leader>cd', {
+  --     n = '<cmd>CMake debug<CR>',
+  --   },
+  --   description = 'CMake: Debug Target',
+  --   filters = { ft = 'cpp' },
+  -- },
+  -- { '<leader>cl', {
+  --     n = '<cmd>CMake clean<CR>',
+  --   },
+  --   description = 'CMake: Clean',
+  --   filters = { ft = 'cpp' },
+  -- },
+nvim_keymap_cpp: |
+  local group = vim.api.nvim_create_augroup("cpp_autocommands", { clear = true })
+  vim.api.nvim_create_autocmd("FileType", {
+      pattern = {
+        "cpp",
+        "cc",
+        "c",
+        "hpp",
+        "h",
+      },
+      callback = function(ev)
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cc', '<cmd>CMake configure<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ct', '<cmd>CMake select_target<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cb', '<cmd>CMake build<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ca', '<cmd>CMake build_all<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cr', '<cmd>CMake run<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cd', '<cmd>CMake debug<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cl', '<cmd>CMake clean<CR>', { noremap = true, silent = true })
+      end,
+      group = group 
+  })
+
+nvim_completion_config_cpp: ""
+# nvim_completion_config_cpp: |
+#   sorting = {
+#     comparators = {
+#       cmp.config.compare.offset,
+#       cmp.config.compare.exact,
+#       cmp.config.compare.recently_used,
+#       require('clangd_extensions.cmp_scores'),
+#       cmp.config.compare.kind,
+#       cmp.config.compare.sort_text,
+#       cmp.config.compare.length,
+#       cmp.config.compare.order,
+#     },
+#   },

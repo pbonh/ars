@@ -1,0 +1,512 @@
+---
+nvim_ui_default:
+  lazy: |
+    { 'kdheepak/tabline.nvim',
+      dependencies = {
+        'nvim-lualine/lualine.nvim',
+        'nvim-tree/nvim-web-devicons',
+        'b0o/incline.nvim',
+      },
+    },
+    {
+      'mawkler/modicator.nvim',
+      dependencies = 'sainnhe/gruvbox-material',
+      init = function()
+        -- These are required for Modicator to work
+        vim.o.cursorline = true
+        vim.o.number = true
+        vim.o.termguicolors = true
+      end,
+      opts = {},
+    },
+    { 'petertriho/nvim-scrollbar',
+      dependencies = {
+        'kevinhwang91/nvim-hlslens',
+        'lewis6991/gitsigns.nvim',
+      },
+    },
+    {
+      'goolord/alpha-nvim',
+      dependencies = {
+        'nvim-tree/nvim-web-devicons'
+      },
+      config = function ()
+          local alpha = require("alpha")
+          local dashboard = require("alpha.themes.dashboard")
+          dashboard.section.buttons.val = {
+            dashboard.button("e", "  New file", "<cmd>ene <CR>"),
+            dashboard.button("SPC f f", "  Find file", "<cmd>Telescope find_files<CR>"),
+            dashboard.button("SPC ?", "  Recently opened files", "<cmd>Telescope oldfiles<CR>"),
+            dashboard.button("SPC f r", "  Frecency/MRU"),
+            dashboard.button("SPC Q", "  Find word",  "<cmd>Telescope live_grep<CR>"),
+            dashboard.button("SPC f p", "  Jump to bookmarks",  "<cmd>CdProject<CR>"),
+            -- dashboard.button("SPC s l", "  Open last session", "<cmd>SessionManager load_last_session<CR>"),
+          }
+          alpha.setup(dashboard.config)
+
+          require'alpha'.setup(require'alpha.themes.dashboard'.config)
+      end
+    },
+    { 'stevearc/oil.nvim',
+      dependencies = {
+        'nvim-tree/nvim-web-devicons',
+      },
+    },
+    { 'chentoast/marks.nvim' },
+    { 'rcarriga/nvim-notify' },
+    { 'nvim-neo-tree/neo-tree.nvim',
+      branch = 'v2.x',
+      dependencies = {
+        'nvim-lua/plenary.nvim',
+        'nvim-tree/nvim-web-devicons',
+        'MunifTanjim/nui.nvim',
+      },
+    },
+    { 'nvim-tree/nvim-tree.lua',
+      dependencies = {
+        'nvim-tree/nvim-web-devicons',
+      },
+    },
+    { 'nyngwang/NeoZoom.lua' },
+  config: |
+    require("neo-tree").setup({
+      close_if_last_window = false, -- Close Neo-tree if it is the last window left in the tab
+      popup_border_style = "rounded",
+      enable_git_status = true,
+      enable_diagnostics = true,
+      sort_case_insensitive = false, -- used when sorting files and directories in the tree
+      sort_function = nil , -- use a custom function for sorting files and directories in the tree 
+      -- sort_function = function (a,b)
+      --       if a.type == b.type then
+      --           return a.path > b.path
+      --       else
+      --           return a.type > b.type
+      --       end
+      --   end , -- this sorts files and directories descendantly
+      default_component_configs = {
+        container = {
+          enable_character_fade = true
+        },
+        indent = {
+          indent_size = 2,
+          padding = 1, -- extra padding on left hand side
+          -- indent guides
+          with_markers = true,
+          indent_marker = "│",
+          last_indent_marker = "└",
+          highlight = "NeoTreeIndentMarker",
+          -- expander config, needed for nesting files
+          with_expanders = nil, -- if nil and file nesting is enabled, will enable expanders
+          expander_collapsed = "",
+          expander_expanded = "",
+          expander_highlight = "NeoTreeExpander",
+        },
+        icon = {
+          folder_closed = "",
+          folder_open = "",
+          folder_empty = "ﰊ",
+          -- The next two settings are only a fallback, if you use nvim-web-devicons and configure default icons there
+          -- then these will never be used.
+          default = "*",
+          highlight = "NeoTreeFileIcon"
+        },
+        modified = {
+          symbol = "[+]",
+          highlight = "NeoTreeModified",
+        },
+        name = {
+          trailing_slash = false,
+          use_git_status_colors = true,
+          highlight = "NeoTreeFileName",
+        },
+        git_status = {
+          symbols = {
+            -- Change type
+            added     = "", -- or "✚", but this is redundant info if you use git_status_colors on the name
+            modified  = "", -- or "", but this is redundant info if you use git_status_colors on the name
+            deleted   = "✖",-- this can only be used in the git_status source
+            renamed   = "",-- this can only be used in the git_status source
+            -- Status type
+            untracked = "",
+            ignored   = "",
+            unstaged  = "",
+            staged    = "",
+            conflict  = "",
+          }
+        },
+      },
+      window = {
+        position = "left",
+        width = 40,
+        mapping_options = {
+          noremap = true,
+          nowait = true,
+        },
+        mappings = {
+          ["<space>"] = { 
+              "toggle_node", 
+              nowait = false, -- disable `nowait` if you have existing combos starting with this char that you want to use 
+          },
+          ["<2-LeftMouse>"] = "open",
+          ["<cr>"] = "open",
+          ["<esc>"] = "revert_preview",
+          ["P"] = { "toggle_preview", config = { use_float = true } },
+          ["l"] = "focus_preview",
+          ["S"] = "open_split",
+          ["s"] = "open_vsplit",
+          -- ["S"] = "split_with_window_picker",
+          -- ["s"] = "vsplit_with_window_picker",
+          ["t"] = "open_tabnew",
+          -- ["<cr>"] = "open_drop",
+          -- ["t"] = "open_tab_drop",
+          ["w"] = "open_with_window_picker",
+          --["P"] = "toggle_preview", -- enter preview mode, which shows the current node without focusing
+          ["C"] = "close_node",
+          ["z"] = "close_all_nodes",
+          --["Z"] = "expand_all_nodes",
+          ["a"] = { 
+            "add",
+            -- this command supports BASH style brace expansion ("x{a,b,c}" -> xa,xb,xc). see `:h neo-tree-file-actions` for details
+            -- some commands may take optional config options, see `:h neo-tree-mappings` for details
+            config = {
+              show_path = "none" -- "none", "relative", "absolute"
+            }
+          },
+          ["A"] = "add_directory", -- also accepts the optional config.show_path option like "add". this also supports BASH style brace expansion.
+          ["d"] = "delete",
+          ["r"] = "rename",
+          ["y"] = "copy_to_clipboard",
+          ["x"] = "cut_to_clipboard",
+          ["p"] = "paste_from_clipboard",
+          ["c"] = "copy", -- takes text input for destination, also accepts the optional config.show_path option like "add":
+          -- ["c"] = {
+          --  "copy",
+          --  config = {
+          --    show_path = "none" -- "none", "relative", "absolute"
+          --  }
+          --}
+          ["m"] = "move", -- takes text input for destination, also accepts the optional config.show_path option like "add".
+          ["q"] = "close_window",
+          ["R"] = "refresh",
+          ["?"] = "show_help",
+          ["<"] = "prev_source",
+          [">"] = "next_source",
+        }
+      },
+      nesting_rules = {},
+      filesystem = {
+        filtered_items = {
+          visible = false, -- when true, they will just be displayed differently than normal items
+          hide_dotfiles = true,
+          hide_gitignored = true,
+          hide_hidden = true, -- only works on Windows for hidden files/directories
+          hide_by_name = {
+            --"node_modules"
+          },
+          hide_by_pattern = { -- uses glob style patterns
+            --"*.meta",
+            --"*/src/*/tsconfig.json",
+          },
+          always_show = { -- remains visible even if other settings would normally hide it
+            --".gitignored",
+          },
+          never_show = { -- remains hidden even if visible is toggled to true, this overrides always_show
+            --".DS_Store",
+            --"thumbs.db"
+          },
+          never_show_by_pattern = { -- uses glob style patterns
+            --".null-ls_*",
+          },
+        },
+        follow_current_file = false, -- This will find and focus the file in the active buffer every
+                                     -- time the current file is changed while the tree is open.
+        group_empty_dirs = false, -- when true, empty folders will be grouped together
+        hijack_netrw_behavior = "open_default", -- netrw disabled, opening a directory opens neo-tree
+                                                -- in whatever position is specified in window.position
+                              -- "open_current",  -- netrw disabled, opening a directory opens within the
+                                                -- window like netrw would, regardless of window.position
+                              -- "disabled",    -- netrw left alone, neo-tree does not handle opening dirs
+        use_libuv_file_watcher = false, -- This will use the OS level file watchers to detect changes
+                                        -- instead of relying on nvim autocmd events.
+        window = {
+          mappings = {
+            ["<bs>"] = "navigate_up",
+            ["."] = "set_root",
+            ["H"] = "toggle_hidden",
+            ["/"] = "fuzzy_finder",
+            ["D"] = "fuzzy_finder_directory",
+            ["f"] = "filter_on_submit",
+            ["<c-x>"] = "clear_filter",
+            ["[g"] = "prev_git_modified",
+            ["]g"] = "next_git_modified",
+          }
+        }
+      },
+      buffers = {
+        follow_current_file = true, -- This will find and focus the file in the active buffer every
+                                     -- time the current file is changed while the tree is open.
+        group_empty_dirs = true, -- when true, empty folders will be grouped together
+        show_unloaded = true,
+        window = {
+          mappings = {
+            ["bd"] = "buffer_delete",
+            ["<bs>"] = "navigate_up",
+            ["."] = "set_root",
+          }
+        },
+      },
+      git_status = {
+        window = {
+          position = "float",
+          mappings = {
+            ["A"]  = "git_add_all",
+            ["gu"] = "git_unstage_file",
+            ["ga"] = "git_add_file",
+            ["gr"] = "git_revert_file",
+            ["gc"] = "git_commit",
+            ["gp"] = "git_push",
+            ["gg"] = "git_commit_and_push",
+          }
+        }
+      }
+    })
+    require('marks').setup()
+    require('nvim-tree').setup()
+    require('lualine').setup({
+      options = { theme  = gruvbox },
+      options = {
+        section_separators = { left = '', right = '' },
+        component_separators = { left = '', right = '' },
+        globalstatus = true,
+        disabled_filetypes = {
+            'packer', 'NVimTree'
+        }
+      },
+    })
+    require'tabline'.setup({
+      enable = true,
+      options = {
+        max_bufferline_percent = 66, -- set to nil by default, and it uses vim.o.columns * 2/3
+        show_tabs_always = true, -- this shows tabs only when there are more than one tab or if the first tab is named
+        show_devicons = true, -- this shows devicons in buffer section
+        show_bufnr = false, -- this appends [bufnr] to buffer section,
+        show_filename_only = false, -- shows base filename only instead of relative path in filename
+        modified_icon = '+ ', -- change the default modified icon
+      }
+    })
+    require('incline').setup()
+    require('scrollbar').setup()
+    require('gitsigns').setup()
+    require('hlslens').setup()
+    require('oil').setup()
+    require('neo-zoom').setup {
+      winopts = {
+        offset = {
+          -- NOTE: you can omit `top` and/or `left` to center the floating window.
+          -- top = 0,
+          -- left = 0.17,
+          width = 150,
+          height = 0.85,
+        },
+        -- NOTE: check :help nvim_open_win() for possible border values.
+        -- border = 'double',
+      },
+      -- exclude_filetypes = { 'lspinfo', 'mason', 'lazy', 'fzf', 'qf' },
+      exclude_buftypes = { 'terminal' },
+      presets = {
+        {
+          filetypes = { 'dapui_.*', 'dap-repl' },
+          config = {
+            top = 0.25,
+            left = 0.6,
+            width = 0.4,
+            height = 0.65,
+          },
+          callbacks = {
+            function () vim.wo.wrap = true end,
+          },
+        },
+      },
+      -- popup = {
+      --   -- NOTE: Add popup-effect (replace the window on-zoom with a `[No Name]`).
+      --   -- This way you won't see two windows of the same buffer
+      --   -- got updated at the same time.
+      --   enabled = true,
+      --   exclude_filetypes = {},
+      --   exclude_buftypes = {},
+      -- },
+    }
+    require('modicator').setup()
+  keymaps: |
+    { 'n', { n = '<Cmd>execute(\'normal! \' . v:count1 . \'n\')<CR><Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Next Search Result', },
+    { 'N', { n = '<Cmd>execute(\'normal! \' . v:count1 . \'N\')<CR><Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Previous Search Result', },
+    { '*', { n = '*<Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Search Cursorword', },
+    { '#', { n = '#<Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Search Cursorword In Reverse', },
+    { 'g*', { n = 'g*<Cmd>lua require(\'hlslens\').start()<CR>', }, 'HLSLens: Search Nearest Cursorword', },
+    { 'g#', { n = 'g#<Cmd>lua require(\'hlslens\').start()<CR>', }, description =  'HLSLens: Search Nearest Cursorword In Reverse', },
+    { '<C-]>', { n = ':noh<CR>', }, description = 'HLSLens: Clear Search Result', },
+    { '-', { n = ':Oil --float<CR>', }, description = 'Oil: Open Parent Directory', },
+    -- { '<leader>s', { n = '<cmd>NvimTreeToggle %:p:~:.:h<CR>', }, description = 'Nvim-Tree: Toggle Tree on Current File', },
+    { '<leader>s', { n = '<cmd>Neotree reveal<CR>', }, description = 'Neo-Tree: Toggle Tree', },
+    { '<leader>z', { n = '<cmd>NeoZoomToggle<CR>', }, description = 'Neo-Zoom: Toggle Float/Zoom Window', },
+nvim_ui:
+  lazy: |
+    {
+      'nvim-lualine/lualine.nvim',
+      dependencies = {
+        'nvim-tree/nvim-web-devicons',
+        'b0o/incline.nvim',
+      },
+      config = function()
+        local function maximize_status()
+          return vim.t.maximized and '   ' or ''
+        end
+
+        require('lualine').setup({
+          options = {
+            -- theme  = gruvbox,
+            section_separators = { left = '', right = '' },
+            component_separators = { left = '', right = '' },
+            globalstatus = true,
+            disabled_filetypes = {
+                'packer', 'NVimTree'
+            },
+            sections = {
+              lualine_c = { maximize_status }
+            }
+          },
+        })
+        require('incline').setup()
+      end,
+    },
+    {
+      'mawkler/modicator.nvim',
+      dependencies = 'sainnhe/gruvbox-material',
+      init = function()
+        -- These are required for Modicator to work
+        vim.o.cursorline = true
+        vim.o.number = true
+        vim.o.termguicolors = true
+      end,
+      config = function()
+        require('modicator').setup()
+      end,
+      opts = {},
+    },
+    {
+      'petertriho/nvim-scrollbar',
+      dependencies = {
+        'kevinhwang91/nvim-hlslens',
+        'lewis6991/gitsigns.nvim',
+      },
+      config = function()
+        require('scrollbar').setup()
+        require('gitsigns').setup()
+        require('hlslens').setup()
+      end,
+    },
+    {
+      'goolord/alpha-nvim',
+      dependencies = {
+        'nvim-tree/nvim-web-devicons'
+      },
+      config = function ()
+          local alpha = require("alpha")
+          local dashboard = require("alpha.themes.dashboard")
+          dashboard.section.buttons.val = {
+            dashboard.button("e", "  New file", "<cmd>ene <CR>"),
+            dashboard.button("SPC f f", "  Find file", "<cmd>FzfLua files<CR>"),
+            dashboard.button("SPC f ?", "  Recently opened files", "<cmd>FzfLua oldfiles<CR>"),
+            dashboard.button("SPC f Q", "  Find word",  "<cmd>FzfLua live_grep<CR>"),
+            dashboard.button("SPC f p", "  Jump to bookmarks",  "<cmd>CdProject<CR>"),
+            -- dashboard.button("SPC f r", "  Frecency/MRU"),
+            -- dashboard.button("SPC s l", "  Open last session", "<cmd>SessionManager load_last_session<CR>"),
+          }
+          alpha.setup(dashboard.config)
+
+          require'alpha'.setup(require'alpha.themes.dashboard'.config)
+      end,
+    },
+    {
+      'kevinhwang91/nvim-bqf',
+      ft = 'qf',
+    },
+    {
+      'nvim-focus/focus.nvim',
+      version = '*',
+      config = function()
+        require('focus').setup({
+          ui = {
+            hybridnumber = true, -- Display hybrid line numbers in the focussed window only
+            absolutenumber_unfocussed = true, -- Preserve absolute numbers in the unfocussed windows
+          },
+        })
+      end,
+    },
+    -- { 'stevearc/oil.nvim',
+    --   dependencies = {
+    --     'nvim-tree/nvim-web-devicons',
+    --   },
+    --   config = function()
+    --     require('oil').setup()
+    --   end,
+    -- },
+    -- {
+    --   'chentoast/marks.nvim',
+    --   config = function()
+    --     require('marks').setup()
+    --   end,
+    -- },
+    -- { 'rcarriga/nvim-notify' },
+    -- {
+    --   'nyngwang/NeoZoom.lua',
+    --   config = function()
+    --     require('neo-zoom').setup({
+    --       winopts = {
+    --         offset = {
+    --           -- NOTE: you can omit `top` and/or `left` to center the floating window.
+    --           -- top = 0,
+    --           -- left = 0.17,
+    --           width = 150,
+    --           height = 0.85,
+    --         },
+    --         -- NOTE: check :help nvim_open_win() for possible border values.
+    --         -- border = 'double',
+    --       },
+    --       -- exclude_filetypes = { 'lspinfo', 'mason', 'lazy', 'fzf', 'qf' },
+    --       exclude_buftypes = { 'terminal' },
+    --       presets = {
+    --         {
+    --           filetypes = { 'dapui_.*', 'dap-repl' },
+    --           config = {
+    --             top = 0.25,
+    --             left = 0.6,
+    --             width = 0.4,
+    --             height = 0.65,
+    --           },
+    --           callbacks = {
+    --             function () vim.wo.wrap = true end,
+    --           },
+    --         },
+    --       },
+    --       -- popup = {
+    --       --   -- NOTE: Add popup-effect (replace the window on-zoom with a `[No Name]`).
+    --       --   -- This way you won't see two windows of the same buffer
+    --       --   -- got updated at the same time.
+    --       --   enabled = true,
+    --       --   exclude_filetypes = {},
+    --       --   exclude_buftypes = {},
+    --       -- },
+    --     })
+    --   end,
+    -- },
+  config: ""
+  keymaps: |
+    { 'n', { n = '<Cmd>execute(\'normal! \' . v:count1 . \'n\')<CR><Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Next Search Result', },
+    { 'N', { n = '<Cmd>execute(\'normal! \' . v:count1 . \'N\')<CR><Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Previous Search Result', },
+    { '*', { n = '*<Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Search Cursorword', },
+    { '#', { n = '#<Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Search Cursorword In Reverse', },
+    { 'g*', { n = 'g*<Cmd>lua require(\'hlslens\').start()<CR>', }, 'HLSLens: Search Nearest Cursorword', },
+    { 'g#', { n = 'g#<Cmd>lua require(\'hlslens\').start()<CR>', }, description =  'HLSLens: Search Nearest Cursorword In Reverse', },
+    -- { '-', { n = ':Oil --float<CR>', }, description = 'Oil: Open Parent Directory', },
+    -- { '<leader>z', { n = '<cmd>NeoZoomToggle<CR>', }, description = 'Neo-Zoom: Toggle Float/Zoom Window', },

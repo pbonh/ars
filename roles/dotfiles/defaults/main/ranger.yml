@@ -1,0 +1,3 @@
+---
+ranger_config: "{{ xdg_config_dir }}/ranger"
+ranger_plugins: "{{ ranger_config }}/plugins"

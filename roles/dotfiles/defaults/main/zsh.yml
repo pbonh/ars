@@ -1,0 +1,219 @@
+---
+zsh_username: "{{ ansible_env.USER }}"
+zsh_plugins: "{{ dotfiles_user_home }}/.zsh"
+zsh_completions: "{{ zsh_plugins }}/completion"
+zsh_completion_just: "{{ zsh_completions }}/_just"
+zsh_fzf_tab: "{{ zsh_plugins }}/fzf-tab"
+zsh_git_fuzzy: "{{ zsh_plugins }}/git-fuzzy"
+zsh_git_fuzzy_upstream: origin
+zsh_git_fuzzy_branch: main
+zsh_homebrew_env: |
+    if [[ -n {{ homebrew_path }} ]]; then
+      eval "$({{ homebrew_path }}/brew shellenv)"
+    fi
+zsh_devbox_env: |
+  #. /home/{{ zsh_username }}/.nix-profile/etc/profile.d/nix.sh
+  #. /home/{{ zsh_username }}/.nix-profile/etc/profile.d/hm-session-vars.sh
+  export PATH=$PATH:{{ devbox_nix_root_path }}
+  # export LANG=C.UTF-8
+  # export LC_CTYPE=en_US.UTF-8
+  # export LC_ALL=en_US.UTF-8
+  export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
+  # export LANG=en_US.UTF-8
+  export LANG=C.UTF-8
+  export LC_CTYPE=C.UTF-8
+  if  command -v devbox &> /dev/null
+  then
+    eval "$(devbox global shellenv --init-hook)"
+  fi
+zsh_default_options: |
+  HISTFILE=~/.histfile
+  HISTSIZE=1000
+  SAVEHIST=1000
+  bindkey -v
+  zstyle :compinstall filename '{{ dotfiles_user_home }}/.zshrc'
+  fpath=({{ zsh_completions }} $fpath)
+  autoload -Uz compinit
+  compinit
+zsh_default_env: |
+  {{ zsh_devbox_env }}
+  {{ zsh_homebrew_env }}
+  {% for path_info in path_directories -%}
+  {% if path_directories[path_info]['prepend'] == false %}
+  {{ "export PATH=$PATH:" + path_directories[path_info]['path'] }}
+  {% else %}
+  {{ "export PATH=" + path_directories[path_info]['path'] + ":$PATH" }}
+  {% endif %}
+  {% endfor %}
+  # export SHELL="{{ interactive_shell }}"
+  export GIT_SSH="{{ git_ssh }}"
+  export EDITOR="{{ nvim_exe }}"
+  export VISUAL="{{ nvim_exe }} --cmd 'let g:flatten_wait=1'"
+zsh_extra_env: ""
+zsh_default_plugins: |
+  #eval "$({{ atuin_exe }} init zsh)"
+  eval "$({{ direnv_exe }} hook zsh)"
+  eval "$({{ starship_exe }} init zsh)"
+  eval "$({{ zoxide_exe }} init zsh)"
+zsh_fzf_setup: |
+  # export PATH=$PATH:{{ fzf_install_dir }}/bin
+  if [ -n "${commands[fzf-share]}" ]; then
+    source "$(fzf-share)/key-bindings.zsh"
+    source "$(fzf-share)/completion.zsh"
+  else
+    source "$({{ fzf_share_exe }})/key-bindings.zsh"
+    source "$({{ fzf_share_exe }})/completion.zsh"
+  fi
+  source {{ zsh_fzf_tab }}/fzf-tab.plugin.zsh
+  # source {{ fzf_install_dir }}/shell/key-bindings.zsh
+  export PATH=$PATH:{{ zsh_git_fuzzy }}/bin
+  export GF_BASE_REMOTE={{ zsh_git_fuzzy_upstream }}
+  export GF_BASE_BRANCH={{ zsh_git_fuzzy_branch }}
+  export SKIM_DEFAULT_COMMAND="{{ fd_exe }} --type f || git ls-tree -r --name-only HEAD || {{ rg_exe }} --files || find ."
+  fzf_find_edit() {
+      local file=$(
+          {{ fzf_exe }} --query="$1" --no-multi --select-1 --exit-0 \
+          --preview '{{ bat_exe }} --color=always --line-range :500 {}'
+      )
+      if [[ -n $file ]]; then
+          $EDITOR "$file"
+      fi
+  }
+  fzf_change_directory() {
+      local directory=$(
+      {{ fd_exe }} --type d | \
+          {{ fzf_exe }} --query="$1" --no-multi --select-1 --exit-0 \
+          --preview 'tree -C {} | head -100'
+      )
+      if [[ -n $directory ]]; then
+          cd "$directory"
+      fi
+  }
+  fzf_change_directory_arg() {
+      if [[ $# == 0 ]]; then
+          echo 'Error: search term was not provided.'
+          return
+      fi
+      local directory=$(
+      {{ fd_exe }} --type d $1 | \
+          {{ fzf_exe }} --query="$2" --no-multi --select-1 --exit-0 \
+          --preview 'tree -C {} | head -100'
+      )
+      if [[ -n $directory ]]; then
+          cd "$directory"
+      fi
+  }
+  fzf_grep_edit(){
+      if [[ $# == 0 ]]; then
+          echo 'Error: search term was not provided.'
+          return
+      fi
+      local match=$(
+      {{ rg_exe }} --color=never --line-number "$1" |
+          {{ fzf_exe }} --no-multi --delimiter : \
+          --preview "{{ bat_exe }} --color=always --line-range {2}: {1}"
+      )
+      local file=$(echo "$match" | cut -d':' -f1)
+      if [[ -n $file ]]; then
+          $EDITOR "$file" +$(echo "$match" | cut -d':' -f2)
+      fi
+  }
+  fzf_kill() {
+      local pid_col
+      if [[ $(uname) = Linux ]]; then
+          pid_col=2
+      elif [[ $(uname) = Darwin ]]; then
+          pid_col=3;
+      else
+          echo 'Error: unknown platform'
+          return
+      fi
+      local pids=$(
+          ps -f -u $USER | sed 1d | {{ fzf_exe }} --multi | tr -s [:blank:] | cut -d' ' -f"$pid_col"
+      )
+      if [[ -n $pids ]]; then
+          echo "$pids" | xargs kill -9 "$@"
+      fi
+  }
+  alias cdg='cd $(cdscuts_glob_echo | {{ fzf_exe }})'
+  alias mkcd='make_directory_then_change'
+  alias ffe='fzf_find_edit'
+  alias fcd='fzf_change_directory'
+  alias fcdd='fzf_change_directory_arg'
+  alias fge='fzf_grep_edit'
+  alias fkill='fzf_kill'
+  alias fsk='{{ skim_exe }} --ansi -i -c '"'"'{{ fd_exe }} --type f "{}"'"'"''
+  alias gsk='{{ skim_exe }} --ansi -i -c '"'"'{{ rg_exe }} --color=always --line-number "{}"'"'"''
+  alias dsk='{{ skim_exe }} --ansi -i -c '"'"'{{ fd_exe }} --type d "{}"'"'"''
+  alias skvi='f(){ x="$({{ skim_exe }} --bind "ctrl-p:toggle-preview" --ansi --preview="{{ bat_exe }} {} --color=always" --preview-window=right:60%:hidden)"; [[ $? -eq 0 ]] && {{ nvim_exe }} "$x" || true }; f'
+  {% for fzf_env_var in fzf_env -%}
+  {{ "export " + fzf_env[fzf_env_var]['name'] + "='" + fzf_env[fzf_env_var]['env'] + "'" }}
+  {% endfor %}
+zsh_yazi_setup: |
+  function yy() {
+    local tmp="$(mktemp -t "yazi-cwd.XXXXX")"
+    {{ yazi_exe }} "$@" --cwd-file="$tmp"
+    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+            cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+  }
+zsh_navi_setup: |
+  # eval "$({{ navi_exe }} widget zsh)"
+  _navi_call() {
+     local result="$({{ navi_exe }} "$@" </dev/tty)"
+     printf "%s" "$result"
+  }
+  _navi_widget() {
+     local -r input="${LBUFFER}"
+     local -r last_command="$(echo "${input}" | {{ navi_exe }} fn widget::last_command)"
+     local replacement="$last_command"
+     if [ -z "$last_command" ]; then
+        replacement="$(_navi_call --print)"
+     elif [ "$LASTWIDGET" = "_navi_widget" ] && [ "$input" = "$previous_output" ]; then
+        replacement="$(_navi_call --print --query "$last_command")"
+     else
+        replacement="$(_navi_call --print --best-match --query "$last_command")"
+     fi
+     if [ -n "$replacement" ]; then
+        local -r find="${last_command}_NAVIEND"
+        previous_output="${input}_NAVIEND"
+        previous_output="${previous_output//$find/$replacement}"
+     else
+        previous_output="$input"
+     fi
+     zle kill-whole-line
+     LBUFFER="${previous_output}"
+     region_highlight=("P0 100 bold")
+     zle redisplay
+  }
+  zle -N _navi_widget
+  bindkey '^a' _navi_widget
+  alias nvi='{{ navi_shell_cmd }}'
+zsh_nvim_setup: |
+  {% for nvim_profile_name in nvim_xdg_modular_profiles -%}
+  {{ "alias vim-" + nvim_xdg_modular_profiles[nvim_profile_name]['name'] + "='NVIM_APPNAME=" + nvim_xdg_modular_profiles[nvim_profile_name]['appname'] + "-modular " + nvim_exe + "'" }}
+  {% endfor %}
+zsh_default_aliases: |
+  alias cat={{ bat_exe }}
+  alias ls='{{ lsd_exe }} --group-dirs first'
+  alias ll='{{ lsd_exe }} --group-dirs first -l'
+  alias jchoose='{{ just_exe }} --choose'
+  alias vim='{{ nvim_exe_bone_bash }}'
+zsh_ssh_setup: |
+  env={{ dotfiles_user_home }}/.ssh/agent.env
+  agent_load_env () { test -f "$env" && . "$env" >| /dev/null ; }
+  agent_start () {
+      (umask 077; ssh-agent >| "$env")
+      . "$env" >| /dev/null ; }
+  agent_load_env
+  # agent_run_state: 0=agent running w/ key; 1=agent w/o key; 2=agent not running
+  agent_run_state=$(ssh-add -l >| /dev/null 2>&1; echo $?)
+  if [ ! "$SSH_AUTH_SOCK" ] || [ $agent_run_state = 2 ]; then
+      agent_start
+      ssh-add
+  elif [ "$SSH_AUTH_SOCK" ] && [ $agent_run_state = 1 ]; then
+      ssh-add
+  fi
+  unset env
+extra_zsh_aliases: ""

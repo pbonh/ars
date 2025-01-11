@@ -1,0 +1,40 @@
+---
+tcsh_config_file: "{{ dotfiles_user_home }}/.cshrc"
+tcsh_config_dir: "{{ xdg_config_dir }}/tcsh"
+tcsh_plugins: "{{ tcsh_config_dir }}"
+tcsh_default_options: ""
+tcsh_default_env: |
+  #setenv PATH $PATH\:{{ cargo_path }}\:{{ bin_directory }}
+  {% for path_info in path_directories -%}
+  {% if path_directories[path_info]['prepend'] == false %}
+  {{ "set path = ($path " + path_directories[path_info]['path'] + ")" }}
+  {% else %}
+  {{ "set path = (" + path_directories[path_info]['path'] + " $path)" }}
+  {% endif %}
+  {% endfor %}
+tcsh_extra_env: ""
+tcsh_default_plugins: |
+  foreach cshrc_file ( `ls {{ tcsh_config_dir }}` )
+    source {{ tcsh_config_dir }}/$cshrc_file
+  end
+tcsh_plugins_source:
+  devbox:
+    name: devbox
+    script: |
+      set path = ($path {{ devbox_nix_root_path }})
+tcsh_fzf_setup: |
+  {% for fzf_env_var in fzf_env -%}
+  {{ "setenv " + fzf_env[fzf_env_var]['name'] + " '" + fzf_env[fzf_env_var]['env'] + "'" }}
+  {% endfor %}
+  setenv SKIM_DEFAULT_COMMAND '{{ fd_exe }} --type f || git ls-tree -r --name-only HEAD || {{ rg_exe }} --files || find .'
+tcsh_yazi_setup: ""
+tcsh_navi_setup: ""
+tcsh_default_aliases: |
+  alias mkcd 'mkdir \!:1 && cd \!:1'
+  alias cat {{ bat_exe }}
+  alias ls '{{ lsd_exe }} --group-dirs first'
+tcsh_extra_aliases: |
+  alias cdg 'set dest_dir=`{{ bin_directory }}cdscuts_glob_echo | {{ skim_exe }} --reverse --bind ctrl-f:page-down,ctrl-b:page-up` && cd "$dest_dir"'
+  alias fcd 'set dest_dir=`{{ fd_exe }} --type d | {{ skim_exe }} --reverse --bind ctrl-f:page-down,ctrl-b:page-up` && cd "$dest_dir"'
+  alias ffe '{{ nvim_exe }} `{{ skim_exe }} --reverse --bind ctrl-f:page-down,ctrl-b:page-up`'
+  alias jchoose '{{ just_exe }} --choose'

@@ -1,0 +1,8 @@
+---
+- name: Neovim | Setup Neovim Profile Directories(Modular) | file
+  file:
+    path: "{{ item.0.value }}/{{ item.1.value.appname }}-modular"
+    state: absent
+    mode: '0755'
+  loop: "{{ xdg_config_dirs | dict2items | product(nvim_xdg_modular_profiles | dict2items) | list }}"
+

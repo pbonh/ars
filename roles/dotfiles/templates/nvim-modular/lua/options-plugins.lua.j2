@@ -1,0 +1,5 @@
+{% for plugin_group in nvim_lazy_plugin_groups.values() -%}
+{{ plugin_group['config'] }}
+{% endfor %}
+
+-- vim: ts=2 sts=2 sw=2 et

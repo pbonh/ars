@@ -1,0 +1,30 @@
+---
+neotest_adapters:
+  - "{{ neotest_adapters_rust }}"
+neotest_adapters_luafile: |
+  {% for neotest_adapter in neotest_adapters -%}
+  {{ neotest_adapter }}
+  {% endfor %}
+nvim_test:
+  lazy: |
+    {
+      'nvim-neotest/neotest',
+      dependencies = {
+        'nvim-neotest/nvim-nio',
+        'nvim-lua/plenary.nvim',
+        'antoinemadec/FixCursorHold.nvim',
+        'nvim-treesitter/nvim-treesitter',
+      },
+    },
+  config: |
+    require("neotest").setup({
+      adapters = {% raw %}{{% endraw %}
+        -- Language Adapters
+        {{ neotest_adapters_luafile }}
+        -- Language Adapters(End)
+      {% raw %}}{% endraw %},
+    })
+  keymaps: |
+    { '<leader>t', description = 'NeoTest', },
+    { '<leader>tt', { n = '<cmd>lua require("neotest").run.run()<CR>', }, description = 'NeoTest: Run Nearest Test', },
+    { '<leader>td', { n = '<cmd>lua require("neotest").run.run({strategy = "dap"})<CR>', }, description = 'NeoTest: Debug Nearest Test', },

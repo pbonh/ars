@@ -1,0 +1,150 @@
+{ config, pkgs, ... }:
+
+{
+  # Home Manager needs a bit of information about you and the
+  # paths it should manage.
+  home.username = "{{ ansible_env.USER }}";
+  home.homeDirectory = "{{ ansible_env.HOME }}";
+
+  # Packages that should be installed to the user profile.
+  home.packages = with pkgs; [
+    gcc
+    spotify-tui
+    joplin
+    zellij
+    tmux
+    oil
+    tcsh
+    zsh
+    zoxide
+    zsh-powerlevel10k
+    starship
+    nushell
+    gum
+    glow
+    just
+    direnv
+    nix-direnv
+    rargs
+    fzf
+    tree
+    fd
+    ripgrep
+    ugrep
+    bat
+    exa
+    lsd
+    kmon
+    navi
+    skim
+    hyperfine
+    procs
+    sd
+    rnr
+    diskonaut
+    du-dust
+    tokei
+    bottom
+    grex
+    curl
+    delta
+    git
+    gitAndTools.gh
+    act
+    lazygit
+    gitflow
+    gitui
+    gitoxide
+    soft-serve
+    diffr
+    python39Packages.pipx
+    btop
+    clifm
+    ranger
+    xplr
+    joshuto
+    gotop
+    screenfetch
+    macchina
+    jq
+    yq
+    fx
+    nnn
+    fff
+    ghq
+    broot
+    lf
+    sc-im
+    glances
+    watchman
+    aspell
+    bc
+    gdb
+    emscripten
+    nox
+    cookiecutter
+    helix
+    neovim
+    neovim-remote
+    tree-sitter
+    python39Packages.pynvim
+    (python39.withPackages (ps: with ps; [
+      pip
+      ranger
+      powerline
+      pygments
+      neovim
+      neovim-remote
+      pynvim
+    ]))
+    nodejs
+    yarn
+    ctags
+    nodePackages.prettier
+    nodePackages.bash-language-server
+    nodePackages.yaml-language-server
+    sumneko-lua-language-server
+    shfmt
+    /* Language Tools Start */
+
+    {{ lang_tools_nix_file | indent(4) or "/* No Language Tools Installed */" }}
+
+    /* Language Tools End */
+  ];
+
+  # This value determines the Home Manager release that your
+  # configuration is compatible with. This helps avoid breakage
+  # when a new Home Manager release introduces backwards
+  # incompatible changes.
+  #
+  # You can update Home Manager without changing this value. See
+  # the Home Manager release notes for a list of state version
+  # changes in each release.
+  home.stateVersion = "22.05";
+
+  # Let Home Manager install and manage itself.
+  programs.home-manager.enable = true;
+
+  programs.direnv.enable = true;
+  programs.direnv.nix-direnv.enable = true;
+  #programs.zsh.enable = true;
+
+  # Neovim Tools
+  # programs.neovim = {
+  #   enable = true;
+  #   withPython3 = true;
+
+  #   extraPackages = with pkgs; [
+  #     tree-sitter
+  #     neovim-remote
+  #     python39Packages.pynvim
+  #     ranger
+  #   ];
+
+  #   extraPython3Packages = (ps: with ps; [ 
+  #     pip
+  #     pygments
+  #     pynvim
+  #   ]);
+  # };
+}

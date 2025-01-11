@@ -1,0 +1,21 @@
+use-grammars = { only = [ "rust", "c", "cpp" ] }
+
+[[language]]
+name = "rust"
+auto-format = false
+
+[[language]]
+name = "cpp"
+auto-format = false
+
+[[grammar]]
+name = "rust"
+source = { git = "https://github.com/tree-sitter/tree-sitter-rust", rev = "a250c4582510ff34767ec3b7dcdd3c24e8c8aa68" }
+
+[[grammar]]
+name = "c"
+source = { git = "https://github.com/tree-sitter/tree-sitter-c" }
+
+[[grammar]]
+name = "cpp"
+source = { git = "https://github.com/tree-sitter/tree-sitter-cpp" }

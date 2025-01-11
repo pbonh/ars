@@ -1,0 +1,138 @@
+---
+nvim_debugger_default:
+  lazy: |
+    { 'rcarriga/nvim-dap-ui', dependencies = { 'mfussenegger/nvim-dap' } },
+    { 'nvim-telescope/telescope-dap.nvim',
+      dependencies = {
+          {'mfussenegger/nvim-dap'},
+          {'nvim-telescope/telescope.nvim'}
+      }
+    },
+    {  'theHamsta/nvim-dap-virtual-text',
+      dependencies = {
+          {'mfussenegger/nvim-dap'},
+          {'nvim-treesitter/nvim-treesitter'}
+      }
+    },
+  config: |
+    local dap = require('dap')
+    require('dapui').setup()
+    require('nvim-dap-virtual-text').setup()
+  keymaps: |
+    { '<leader>db', { n = '<cmd>lua require(\'dap\').toggle_breakpoint()<CR>', }, description = 'DAP: Toggle Breakpoint', },
+    { '<leader>dc', { n = '<cmd>lua require(\'dap\').continue()<CR>', }, description = 'DAP: Continue', },
+    { '<leader>dv', { n = '<cmd>lua require(\'dap\').step_over()<CR>', }, description = 'DAP: Step Over', },
+    { '<leader>di', { n = '<cmd>lua require(\'dap\').step_into()<CR>', }, description = 'DAP: Step Into', },
+    { '<leader>do', { n = '<cmd>lua require(\'dap\').step_out()<CR>', }, description = 'DAP: Step Out', },
+    { '<leader>dr', { n = '<cmd>lua require(\'dap\').repl.open()<CR>', }, description = 'DAP: Open REPL', },
+    { '<leader>dd', { n = '<cmd>lua require(\'dapui\').toggle()<CR>', }, description = 'DAP: Toggle Debugger UI', },
+    { '<leader>dt', { n = '<cmd>Telescope dap commands<CR>', }, description = 'DAP: List DAP Commands', },
+    { '<leader>dl', { n = '<cmd>Telescope dap list_breakpoints<CR>', }, description = 'DAP: List DAP Breakpoints', },
+    { '<F5>', { n = '<cmd>lua require(\'dap\').continue()<CR>', }, description = 'DAP: Continue', },
+    { '<F10>', { n = '<cmd>lua require(\'dap\').step_over()<CR>', }, description = 'DAP: Step Over', },
+    { '<F11>', { n = '<cmd>lua require(\'dap\').step_into()<CR>', }, description = 'DAP: Step Into', },
+    { '<F12>', { n = '<cmd>lua require(\'dap\').step_out()<CR>', }, description = 'DAP: Step Out', },
+nvim_debugger_nondap:
+  lazy: |
+    {
+      'sakhnik/nvim-gdb'
+    },
+  config: |
+    vim.cmd([[ let g:nvimgdb_use_find_executables=0 ]])
+
+    local telescope = require('telescope')
+    local pickers = require('telescope.pickers')
+    local finders = require('telescope.finders')
+    local actions = require('telescope.actions')
+    local action_state = require('telescope.actions.state')
+
+    local function gdb_with_directory()
+      local cmd = "{{ fd_exe }} /path/to/your/directories --type d -mindepth 2 -maxdepth 2"
+      local results = vim.fn.systemlist(cmd)
+
+      pickers.new({}, {
+        prompt_title = "< GDB Directory Picker >",
+        finder = finders.new_table {
+          results = results,
+          entry_maker = function(entry)
+            return {
+              value = entry,
+              ordinal = entry,
+              display = entry,
+            }
+          end,
+        },
+        sorter = require('telescope.sorters').get_generic_fuzzy_sorter(),
+        attach_mappings = function(prompt_bufnr, map)
+          map('i', '<CR>', function()
+            local selection = action_state.get_selected_entry()
+            actions.close(prompt_bufnr)
+
+            local dir_name = selection.value
+            local cmd = "{{ gdb_bin }} -q --args program_exe " .. dir_name
+            vim.cmd('GdbStart ' .. cmd)
+          end)
+
+          return true
+        end,
+      }):find()
+    end
+  keymaps: |
+    { '<leader>dd', { n = '<cmd>GdbStart {{ gdb_bin }} -q --args ./a.out arg1 arg2<CR>', }, description = 'Neovim-GDB: Start Debugger', },
+    { '<leader>dt', { n = '<cmd>lua gdb_with_directory()<CR>', }, description = 'Neovim-GDB: Start Debugger in Directory', },
+nvim_debugger:
+  lazy: |
+    {
+      'rcarriga/nvim-dap-ui',
+      dependencies = {
+        "mfussenegger/nvim-dap",
+        "nvim-neotest/nvim-nio"
+      },
+      config = function()
+        require('dapui').setup()
+      end,
+    },
+    { 'nvim-telescope/telescope-dap.nvim',
+      dependencies = {
+          {'mfussenegger/nvim-dap'},
+          {'nvim-telescope/telescope.nvim'}
+      },
+    },
+    {  'theHamsta/nvim-dap-virtual-text',
+      dependencies = {
+          {'mfussenegger/nvim-dap'},
+          {'nvim-treesitter/nvim-treesitter'}
+      },
+      config = function()
+        require('nvim-dap-virtual-text').setup()
+      end,
+    },
+  config: |
+    local dap, dapui = require("dap"), require("dapui")
+    dap.listeners.before.attach.dapui_config = function()
+      dapui.open()
+    end
+    dap.listeners.before.launch.dapui_config = function()
+      dapui.open()
+    end
+    dap.listeners.before.event_terminated.dapui_config = function()
+      dapui.close()
+    end
+    dap.listeners.before.event_exited.dapui_config = function()
+      dapui.close()
+    end
+  keymaps: |
+    { '<leader>d', description = 'DAP', },
+    { '<leader>db', { n = '<cmd>lua require(\'dap\').toggle_breakpoint()<CR>', }, description = 'DAP: Toggle Breakpoint', },
+    { '<leader>dc', { n = '<cmd>lua require(\'dap\').continue()<CR>', }, description = 'DAP: Continue', },
+    { '<leader>dv', { n = '<cmd>lua require(\'dap\').step_over()<CR>', }, description = 'DAP: Step Over', },
+    { '<leader>di', { n = '<cmd>lua require(\'dap\').step_into()<CR>', }, description = 'DAP: Step Into', },
+    { '<leader>do', { n = '<cmd>lua require(\'dap\').step_out()<CR>', }, description = 'DAP: Step Out', },
+    { '<leader>dr', { n = '<cmd>lua require(\'dap\').repl.open()<CR>', }, description = 'DAP: Open REPL', },
+    { '<leader>dd', { n = '<cmd>lua require(\'dapui\').toggle()<CR>', }, description = 'DAP: Toggle Debugger UI', },
+    { '<leader>dt', { n = '<cmd>Telescope dap commands<CR>', }, description = 'DAP: List DAP Commands', },
+    { '<leader>dl', { n = '<cmd>Telescope dap list_breakpoints<CR>', }, description = 'DAP: List DAP Breakpoints', },
+    { '<F5>', { n = '<cmd>lua require(\'dap\').continue()<CR>', }, description = 'DAP: Continue', },
+    { '<F10>', { n = '<cmd>lua require(\'dap\').step_over()<CR>', }, description = 'DAP: Step Over', },
+    { '<F11>', { n = '<cmd>lua require(\'dap\').step_into()<CR>', }, description = 'DAP: Step Into', },
+    { '<F12>', { n = '<cmd>lua require(\'dap\').step_out()<CR>', }, description = 'DAP: Step Out', },

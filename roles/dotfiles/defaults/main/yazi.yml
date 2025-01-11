@@ -1,0 +1,10 @@
+---
+yazi_config: "{{ xdg_config_dir }}/yazi"
+yazi_config_file: "{{ yazi_config }}/yazi.toml"
+yazi_plugin_dir: "{{ yazi_config }}/plugins"
+yazi_plugins:
+  starship:
+    name: starship
+    url: "https://github.com/Rolv-Apneseth/starship.yazi"
+    dest_name: "starship.yazi"
+    pack: "Rolv-Apneseth/starship"

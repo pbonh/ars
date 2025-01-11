@@ -1,0 +1,12 @@
+# Default Plugins
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+# Extra Plugins
+set -g @plugin 'whame/tmux-modal'
+
+set-option -g default-shell {{ nix_bin }}/zsh
+set -g default-terminal "screen-256color"
+set -g @modal-keybindings-conf {{ tmux_keybindings_file }}
+
+# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+run '~/.tmux/plugins/tpm/tpm'

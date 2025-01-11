@@ -1,0 +1,163 @@
+---
+nvim_toggleterm_shell: "{{ interactive_shell }}"
+nvim_terminal_default:
+  lazy: |
+    { 'akinsho/toggleterm.nvim',
+      dependencies = {
+        'is0n/fm-nvim',
+        'rolv-apneseth/tfm.nvim',
+      },
+    },
+    {
+      "willothy/flatten.nvim",
+      config = true,
+      lazy = false,
+      priority = 1001,
+    },
+  config: |
+    require('toggleterm').setup({
+      size = function(term)
+        if term.direction == 'horizontal' then
+          return 25
+        elseif term.direction == 'vertical' then
+          return vim.o.columns * 0.4
+        end
+      end,
+      open_mapping = [[<c-s>]],
+      direction = 'float',
+      close_on_exit = false,
+      shell = "{{ nvim_toggleterm_shell }}",
+      float_opts = {
+        border = 'shadow',
+        width = function()
+          return math.floor(vim.o.columns * 0.85)
+        end,
+        height = function()
+          return math.floor(vim.o.lines * 0.85)
+        end,
+        winblend = 3,
+        -- highlights = {
+        --    border = 'Normal',
+        --    background = 'Normal',
+        --  }
+      }
+    })
+    local Terminal  = require('toggleterm.terminal').Terminal
+    local justchoose = Terminal:new({
+      cmd = '{{ just_exe }} --choose',
+      shell = '{{ command_shell }}',
+      hidden = true,
+      start_in_insert = true,
+    })
+    function just_terminal_runner()
+      justchoose:toggle()
+    end
+    local xplr = Terminal:new({
+      cmd = '{{ xplr_exe }}',
+      hidden = true,
+      start_in_insert = true,
+      close_on_exit = true,
+    })
+    function xplr_terminal_runner()
+      xplr:toggle()
+    end
+    local yazi = Terminal:new({
+      cmd = '{{ yazi_exe }}',
+      dir = vim.fn.getcwd(),
+      hidden = true,
+      start_in_insert = true,
+      close_on_exit = true,
+    })
+    function yazi_terminal_runner()
+      yazi:toggle()
+    end
+    local yazi_cwd = Terminal:new({
+      cmd = '{{ yazi_exe }}',
+      dir = vim.fn.expand('%:p:~:.:h'),
+      hidden = true,
+      start_in_insert = true,
+      close_on_exit = true,
+    })
+    function yazi_cwd_terminal_runner()
+      yazi_cwd:toggle()
+    end
+  keymaps: |
+    -- { '<leader>sj', { n = '<cmd>lua require(\'fm-nvim\').Joshuto(vim.fm.expand(\'%:p:~:.:h\'))<CR>', }, description = 'ToggleTerm: Joshuto(Current File)', },
+    -- { '<leader>sJ', { n = '<cmd>lua require(\'fm-nvim\').Joshuto()<CR>', }, description = 'ToggleTerm: Joshuto(Project Root)', },
+    -- { '<leader>x', { n = '<cmd>lua require(\'fm-nvim\').Xplr(vim.fn.expand(\'%:p:~:.:h\'))<CR>', }, description = 'ToggleTerm: XPLR(Current File)', },
+    -- { '<leader>X', { n = '<cmd>lua require(\'fm-nvim\').Xplr()<CR>', }, description = 'ToggleTerm: XPLR(Project Root)', },
+    -- { '<leader>gg', { n = '<cmd>lua gitui_terminal_runner()<CR>', }, description = 'ToggleTerm: GitUI', },
+    { '<leader>j', { n = '<cmd>lua just_terminal_runner()<CR>', }, description = 'ToggleTerm: Justfile Chooser', },
+    { '<leader>x', { n = '<cmd>lua require("tfm").open()<CR>', }, description = 'FM-Nvim: Yazi(Current File)', },
+    { '<leader>X', { n = '<cmd>lua require("tfm").open(vim.fn.getcwd())<CR>', }, description = 'FM-Nvim: Yazi(Project Root)', },
+    -- { '<leader>x', { n = '<cmd>lua require("tfm").open(vim.fn.expand("%:p:~:.:h"))<CR>', }, description = 'FM-Nvim: Yazi(Current File)', },
+    -- { '<leader>X', { n = '<cmd>lua yazi_terminal_runner()<CR>', }, description = 'ToggleTerm: Yazi(Project Root)', },
+    -- { '<leader>x', { n = '<cmd>lua yazi_cwd_terminal_runner()<CR>', }, description = 'ToggleTerm: Yazi(Current File)', },
+nvim_terminal:
+  lazy: |
+    { 'akinsho/toggleterm.nvim',
+      dependencies = {
+        'is0n/fm-nvim',
+      },
+      config = function()
+        require('toggleterm').setup({
+          size = function(term)
+            if term.direction == 'horizontal' then
+              return 25
+            elseif term.direction == 'vertical' then
+              return vim.o.columns * 0.4
+            end
+          end,
+          open_mapping = [[<c-s>]],
+          direction = 'float',
+          close_on_exit = false,
+          shell = "{{ nvim_toggleterm_shell }}",
+          float_opts = {
+            border = 'double',
+            width = function()
+              return math.floor(vim.o.columns * 0.8)
+            end,
+            height = function()
+              return math.floor(vim.o.lines * 0.8)
+            end,
+            winblend = 1,
+          }
+        })
+        local Terminal  = require('toggleterm.terminal').Terminal
+        local justchoose = Terminal:new({
+          cmd = '{{ just_exe }} --choose',
+          shell = '{{ command_shell }}',
+          hidden = true,
+          start_in_insert = true,
+        })
+        function just_terminal_runner()
+          justchoose:toggle()
+        end
+      end,
+    },
+    {
+      "mikavilpas/yazi.nvim",
+      event = "VeryLazy",
+      opts = {
+        open_for_directories = true,
+        floating_window_scaling_factor = 0.8,
+        keymaps = {
+          show_help = '<f1>',
+          open_file_in_horizontal_split = '<c-s>',
+          grep_in_directory = '<c-x>',
+        },
+      },
+    },
+    {
+      "willothy/flatten.nvim",
+      config = true,
+      lazy = false,
+      priority = 1001,
+    },
+  config: ""
+  keymaps: |
+    { '<leader>j', { n = '<cmd>lua just_terminal_runner()<CR>', }, description = 'ToggleTerm: Justfile Chooser', },
+    -- { '<leader>x', { n = '<cmd>lua require("tfm").open()<CR>', }, description = 'FM-Nvim: Yazi(Current File)', },
+    -- { '<leader>X', { n = '<cmd>lua require("tfm").open(vim.fn.getcwd())<CR>', }, description = 'FM-Nvim: Yazi(Project Root)', },
+     { '<leader>x', { n = '<cmd>Yazi<CR>', }, description = 'Yazi-Nvim: Yazi(Current File)', },
+     { '<leader>X', { n = '<cmd>Yazi cwd<CR>', }, description = 'Yazi-Nvim: Yazi(Project Root)', },

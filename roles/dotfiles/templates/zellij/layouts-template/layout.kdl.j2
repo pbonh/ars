@@ -1,0 +1,8 @@
+// Zellij Session Layout: {{ zellij_kdl_session_name }}
+layout {
+    cwd "{{ zellij_kdl_cwd or ansible_env.HOME }}"
+    {{ zellij_kdl_template_info | indent(4) }}
+    {{ zellij_kdl_layout_info | indent(4) }}
+}
+session_name "{{ zellij_kdl_session_name }}"
+attach_to_session true

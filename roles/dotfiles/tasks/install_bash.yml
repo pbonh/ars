@@ -1,0 +1,29 @@
+---
+- name: Bash | Copies .bashrc | template
+  template:
+    src: bash/bashrc.j2
+    dest: "{{ dotfiles_user_home }}/.bashrc"
+
+- name: Bash | Setup Bash Plugins Directory | directory
+  file:
+    path: "{{ bash_plugins }}"
+    state: directory
+    mode: '0755'
+
+- name: Bash | Install Plugin Sources | template
+  vars:
+    bash_plugin_source: "{{ item.value.script }}"
+  template:
+    src: bash/bashrc.d.j2
+    dest: "{{ bash_plugins }}/{{ item.value.name }}"
+  loop: "{{ bash_plugins_source | dict2items }}"
+
+- name: Bash | Install FZF-Tab Plugin | git
+  git:
+    repo: "https://github.com/lincheney/fzf-tab-completion"
+    dest: "{{ bash_fzf_tab }}"
+
+- name: Bash | Install Git Fuzzy Plugin | git
+  git:
+    repo: "https://github.com/bigH/git-fuzzy"
+    dest: "{{ bash_git_fuzzy }}"

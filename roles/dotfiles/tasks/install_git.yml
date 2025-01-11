@@ -1,0 +1,10 @@
+---
+- name: Git | Copies git config | template
+  template:
+    src: git/gitconfig.j2
+    dest: "{{ dotfiles_user_home }}/.gitconfig"
+
+- name: Git | Copies git ignore(global) | template
+  template:
+    src: git/gitignore.j2
+    dest: "{{ dotfiles_user_home }}/.gitignore"

@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# 1. Search for text in files using Ripgrep
+# 2. Interactively narrow down the list using fzf
+# 3. Open the file in Vim
+IFS=: read -ra selected < <(
+  {{ nix_bin }}/rg --color=always --line-number --no-heading --smart-case "${*:-}" |
+    {{ nix_bin }}/fzf --ansi \
+        --color "hl:-1:underline,hl+:-1:underline:reverse" \
+        --delimiter : \
+        --preview '{{ nix_bin }}/bat --color=always {1} --highlight-line {2}' \
+        --preview-window 'up,60%,border-bottom,+{2}+3/3,~3'
+)
+[ -n "${selected[0]}" ] && {{ nix_bin }}/nvim "${selected[0]}" "+${selected[1]}"

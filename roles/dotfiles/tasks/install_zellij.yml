@@ -1,0 +1,70 @@
+---
+- name: Setup Zellij Config Directory
+  file:
+    path: "{{ zellij_config_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Zellij | Copies Zellij Config(KDL) | template
+  template:
+    src: zellij/config.kdl.j2
+    dest: "{{ zellij_kdl_config_file }}"
+
+- name: Setup Zellij Layout Directory
+  file:
+    path: "{{ zellij_layout_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Setup Zellij Themes Directory
+  file:
+    path: "{{ zellij_themes_dir }}"
+    state: directory
+    mode: '0755'
+
+# - name: Zellij | Copies Zellij Default Layouts | template
+#   template:
+#     src: '{{ item.src }}'
+#     dest: "{{ zellij_layout_dir }}/{{ item.path  | regex_replace('\\.j2$', '') }}"
+#   with_filetree: '../templates/zellij/layouts'
+#   when: item.state == 'file'
+
+- name: Zellij | Copies Zellij User Layouts(KDL) | template
+  vars:
+    zellij_kdl_session_name: "{{ item.value.name }}"
+    zellij_kdl_template_info: "{{ item.value.template_info }}"
+    zellij_kdl_layout_info: "{{ item.value.layout_info }}"
+    zellij_kdl_cwd: "{{ item.value.cwd }}"
+  template:
+    src: zellij/layouts-template/layout.kdl.j2
+    dest: "{{ zellij_layout_dir }}/{{ item.value.name  | regex_replace('\\.j2$', '') }}.kdl"
+  loop: "{{ zellij_kdl_layouts | dict2items }}"
+
+- name: Zellij | Copies Zellij Yazelix Layouts(KDL) | template
+  vars:
+    yazelix_session_name: "{{ item.value.name }}"
+    yazelix_cwd: "{{ item.value.cwd }}"
+    yazelix_tab_template: "{{ item.value.tab_template }}"
+    yazelix_layout_info: "{{ item.value.layout_info }}"
+    yazelix_keybindings: "{{ item.value.keybindings }}"
+  template:
+    src: zellij/layouts-yazelix-template/yazelix.kdl.j2
+    dest: "{{ zellij_layout_dir }}/{{ item.value.name  | regex_replace('\\.j2$', '') }}.kdl"
+  loop: "{{ yazelix_layouts | dict2items }}"
+
+- name: Zellij | Copies Zellij Yazelix Swap Layouts(KDL) | template
+  vars:
+    yazelix_session_name: "{{ item.value.name }}"
+    yazelix_swap_sidebar_open: "{{ item.value.sidebar_open }}"
+    yazelix_swap_sidebar_closed: "{{ item.value.sidebar_closed }}"
+  template:
+    src: zellij/layouts-yazelix-template/yazelix.swap.kdl.j2
+    dest: "{{ zellij_layout_dir }}/{{ item.value.name  | regex_replace('\\.j2$', '') }}.swap.kdl"
+  loop: "{{ yazelix_layouts | dict2items }}"
+
+- name: Zellij | Copies Zellij Default Themes | template
+  template:
+    src: '{{ item.src }}'
+    dest: "{{ zellij_themes_dir }}/{{ item.path  | regex_replace('\\.j2$', '') }}"
+  with_filetree: '../templates/zellij/themes'
+  when: item.state == 'file'

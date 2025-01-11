@@ -1,0 +1,108 @@
+---
+nvim_legendary_config: |
+  require('legendary').setup({
+    extensions = {
+      which_key = {
+        auto_register = false,
+        use_groups = false,
+      },
+      lazy_nvim = true,
+      diffview = true,
+    },
+    keymaps = {
+      {{ nvim_legendary['keymaps'] | indent(2) }}
+      {% for nvim_lazy_plugin_group in nvim_lazy_plugin_groups -%}
+      {{ nvim_lazy_plugin_groups[nvim_lazy_plugin_group]['keymaps'] | indent(4) }}
+      {% endfor %}
+    },
+  })
+  {% for extra_nvim_language in extra_nvim_language_keymaps -%}
+  {{ extra_nvim_language_keymaps[extra_nvim_language]['mappings'] }}
+  {% endfor %}
+nvim_legendary_default:
+  lazy: |
+    {
+      'mrjones2014/legendary.nvim',
+      version = 'v2.13.6',
+      priority = 10000,
+      lazy = false,
+      dependencies = {
+        'kkharji/sqlite.lua',
+        'folke/which-key.nvim',
+      },
+    },
+  config: |
+    require('which-key').setup({
+      triggers = {'<leader>', 'g'},
+      triggers_blacklist = {
+        n = { '<C-w>', '<C-g>' },
+        v = { '<C-w>', '<C-g>' },
+      },
+    })
+  keymaps: |
+    { '<CR>', {
+        n = ':',
+      },
+      description = 'Enter Ex Commands',
+    },
+    { ':', {
+        n = ',',
+      },
+      description = 'Remap Repeat',
+    },
+    { '<leader>l', {
+        n = ':Legendary<CR>',
+      },
+      description = 'List Legendary Commands',
+    },
+nvim_legendary:
+  lazy: |
+    {
+      'mrjones2014/legendary.nvim',
+      version = 'v2.13.9',
+      priority = 10000,
+      lazy = false,
+      dependencies = {
+        'kkharji/sqlite.lua',
+        {
+          'folke/which-key.nvim',
+          config = function ()
+            require('which-key').setup({
+              disable = {
+                ft = { 'grug-far' },
+              },
+            })
+          end,
+        },
+      },
+    },
+  config: ""
+  keymaps: |
+    { '<CR>', {
+        n = ':',
+        v = ':',
+      },
+      description = 'Vim: Enter Ex Commands',
+    },
+    { ':', {
+        n = ',',
+        v = ',',
+      },
+      description = 'Vim: Remap Repeat',
+    },
+    { '<leader>l', {
+        n = ':Legendary<CR>',
+      },
+      description = 'Legendary: List Commands',
+    },
+    { '<leader>L', {
+        n = ':Lazy<CR>',
+      },
+      description = 'Lazy: Launch UI',
+    },
+    {
+      '<C-]>', {
+        n = ':noh<CR>',
+      },
+      description = 'Vim: Clear Search Result',
+    },

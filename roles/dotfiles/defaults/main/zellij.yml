@@ -1,0 +1,234 @@
+---
+zellij_version: "0.39.1"
+zellij_plugin_dir: "{{ dotfiles_user_home }}/.zellij-plugins"
+zellij_shell: "{{ interactive_shell }}"
+zellij_shell_cmd: "{{ interactive_shell_cmd }}"
+zellij_nvim_app: "nvim-lazy-modular"
+zellij_config_dir: "{{ xdg_config_dir }}/zellij"
+zellij_config_file: "{{ zellij_config_dir }}/config.yaml"
+zellij_themes_dir: "{{ zellij_config_dir }}/themes"
+zellij_layout_dir: "{{ zellij_config_dir }}/layouts"
+zellij_env_variables:
+  nvim_appname: "{{ zellij_nvim_app }}"
+  shell: "{{ zellij_shell }}"
+  anthropic_api_key: "{{ anthropic_api_key }}"
+  openai_api_key: "{{ openai_api_key }}"
+zellij_env_variables_file: |
+  {% for env_var, env_value in zellij_env_variables.items() %}
+  {{ env_var | upper }} "{{ env_value }}"
+  {% if not loop.last %}
+  {% endif %}
+  {% endfor %}
+zellij_plugins:
+  mini_ci:
+    url: "https://github.com/imsnif/multitask/releases/download/0.38.2v2/multitask.wasm"
+  forgot:
+    url: "https://github.com/karimould/zellij-forgot/releases/download/0.3.0/zellij_forgot.wasm"
+    keybindings:
+      shared_except_locked: |
+        bind "Ctrl k" {
+            LaunchOrFocusPlugin "file:{{ zellij_plugin_dir }}/zellij_forgot.wasm" {
+                "LOAD_ZELLIJ_BINDINGS" "true"
+                floating true
+            }
+        }
+  room:
+    url: "https://github.com/rvcas/room/releases/latest/download/room.wasm"
+    keybindings:
+      shared_except_locked: |
+        bind "Ctrl y" {
+           LaunchOrFocusPlugin "file:{{ zellij_plugin_dir }}/room.wasm" {
+                floating true
+                ignore_case true
+            }
+        }
+  harpoon:
+    url: "https://github.com/Nacho114/harpoon/releases/download/v0.1.0/harpoon.wasm"
+    keybindings:
+      shared_except_locked: |
+        bind "Ctrl z" {
+            LaunchOrFocusPlugin "file:{{ zellij_plugin_dir }}/harpoon.wasm" {
+                floating true; move_to_focused_tab true;
+            }
+        }
+  zjstatus:
+    url: "https://github.com/dj95/zjstatus/releases/download/v0.13.1/zjstatus.wasm"
+  # monocle:
+  #   url: "https://github.com/imsnif/monocle/releases/latest/download/monocle.wasm"
+  #   keybindings:
+  #     shared_except_locked: |
+  #       bind "Ctrl f" {
+  #           LaunchPlugin "file:{{ zellij_plugin_dir }}/monocle.wasm" {
+  #               in_place true
+  #               kiosk true
+  #           };
+  #           SwitchToMode "Normal"
+  #       }
+zellij_kdl_config_file: "{{ zellij_config_dir }}/config.kdl"
+zellij_kdl_template_info_default: |
+  tab_template name="shell-in-dir" {
+      pane size=1 borderless=true {
+          plugin location="zellij:tab-bar"
+      }
+  }
+  default_tab_template {
+      // the default zellij tab-bar and status bar plugins
+      pane size=1 borderless=true {
+          plugin location="zellij:tab-bar"
+      }
+      children
+      pane size=1 borderless=true {
+          plugin location="zellij:status-bar"
+      }
+  }
+zellij_kdl_template_info_zjstatus: |
+  default_tab_template {
+      children
+      pane size=1 borderless=true {
+          plugin location="file:{{ zellij_plugin_dir }}/zjstatus.wasm" {
+              format_left  "#[fg=#FFFFFF,bold] {session} {mode} {tabs}"
+              format_right "#[bg=#8A8A8A,fg=#000000] #[bg=#8A8A8A,fg=#000000,bold]{swap_layout} #[bg=#000000,fg=#8A8A8A]"
+
+              mode_locked "#[fg=#FF00D9,bold] {name} "
+              mode_normal "#[fg=#AFFF00,bold] {name} "
+              mode_resize "#[fg=#D75F00,bold] {name} "
+              mode_default_to_mode "resize"
+
+              tab_normal "#[bg=#8A8A8A,fg=#000000] #[bg=#8A8A8A,fg=#000000,bold]{name} {sync_indicator}{fullscreen_indicator}{floating_indicator} #[bg=#000000,fg=#8A8A8A]"
+              tab_active "#[bg=#AFFF00,fg=#000000] #[bg=#AFFF00,fg=#000000,bold]{name} {sync_indicator}{fullscreen_indicator}{floating_indicator} #[bg=#000000,fg=#AFFF00]"
+
+              tab_sync_indicator       " "
+              tab_fullscreen_indicator "□ "
+              tab_floating_indicator   "󰉈 "
+          }
+      }
+  }
+zellij_kdl_layouts:
+  example:
+    name: dev1
+    cwd: "{{ ansible_env.HOME }}"
+    template_info: "{{ zellij_kdl_template_info_default }}"
+    layout_info: |
+      tab name="Notes" split_direction="vertical" focus=true {
+          pane {
+              command "{{ nvim_exe }}"
+              cwd "{{ nvim_neorg_dir }}"
+          }
+      }
+      tab name="main tab" split_direction="vertical" cwd="{{ dotfiles_user_home }}" {
+          pane
+          pane {
+              command "{{ nvim_exe }}"
+              cwd "{{ xdg_config_dir }}"
+          }
+      }
+      tab name="second tab" cwd="{{ xdg_config_dir }}" {
+          pane {
+              command "{{ nvim_exe }}"
+              cwd "{{ xdg_config_dir }}"
+          }
+      }
+yazelix_tab_template_default: |
+    tab_template name="ui" {
+        pane size=1 borderless=true {
+           plugin location="zellij:tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+           plugin location="zellij:status-bar"
+        }
+    }
+yazelix_layout_info_default: |
+    default_tab_template {
+        pane size=1 borderless=true {
+           plugin location="zellij:tab-bar"
+        }
+        pane split_direction="vertical" {
+            pane name="sidebar" {
+                command "env"
+                args "YAZI_CONFIG_HOME={{ zellij_config_dir }}/yazi/sidebar" "{{ yazi_exe }}"
+                size "20%"
+            }
+            pane {
+                focus true
+            }
+        }
+        pane size=2 borderless=true {
+           plugin location="zellij:status-bar"
+        }
+    }
+yazelix_keybindings_default: |
+    shared {
+        // Previously: Ctrl + o (in helix: jump_backward)
+        bind "Ctrl e" { SwitchToMode "Session"; }
+
+        // Previously: Ctrl + s (in helix: save_selection)
+        // bind "Alt 1" { SwitchToMode "Scroll"; }
+        bind "Ctrl y" { SwitchToMode "Scroll"; }
+
+        // Previously: Alt + i (in helix: shrink_selection)
+        bind "Alt w" { MoveTab "Left"; }
+
+        // Previously: Alt + o (in helix: expand_selection)
+        bind "Alt q" { MoveTab "Right"; }
+
+        // Previously: Alt + n (in helix: select_next_sibling)
+        bind "Alt m" { NewPane; }
+
+        // Previously: Ctrl + b (in helix: move_page_up)
+        bind "Alt 2" { SwitchToMode "Tmux"; }
+    }
+
+    session {
+        // Exit session mode
+        bind "Ctrl e" { SwitchToMode "Normal"; }
+    }
+
+    scroll {
+        // Exit scroll mode
+        // bind "Alt 1" { SwitchToMode "Normal"; }
+        bind "Ctrl y" { SwitchToMode "Normal"; }
+    }
+
+    tmux {
+        // Exit tmux mode
+        bind "Alt 2" { SwitchToMode "Normal"; }
+    }
+yazelix_swap_sidebar_open_default: |
+    ui min_panes=5 {
+        pane split_direction="vertical" {
+            pane name="sidebar" {
+                command "env"
+                args "YAZI_CONFIG_HOME={{ zellij_config_dir }}/yazi/sidebar" "{{ yazi_exe }}"
+                size "20%"
+            }
+            pane name="main" split_direction="vertical" {
+                pane 
+                pane  stacked=true { children; }
+            }
+        }
+    }
+yazelix_swap_sidebar_closed_default: |
+    ui min_panes=5 {
+        pane split_direction="vertical" {
+            pane name="sidebar" {
+                command "env"
+                args "YAZI_CONFIG_HOME={{ zellij_config_dir }}/yazi/sidebar" "{{ yazi_exe }}"
+                size "1%"
+            }
+
+            pane name="main" split_direction="vertical" {
+                pane 
+                pane stacked=true { children; }
+            }
+        }
+    }
+yazelix_layouts:
+  example:
+    name: dev1
+    cwd: "{{ ansible_env.HOME }}"
+    tab_template: "{{ yazelix_tab_template_default }}"
+    layout_info: "{{ yazelix_layout_info_default }}"
+    keybindings: ""
+    sidebar_open: "{{ yazelix_swap_sidebar_open_default }}"
+    sidebar_closed: "{{ yazelix_swap_sidebar_closed_default }}"

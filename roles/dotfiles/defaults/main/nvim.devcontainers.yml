@@ -1,0 +1,49 @@
+---
+extra_nvim_plugins_devcontainers: |
+  use {
+    'https://codeberg.org/esensar/nvim-dev-container',
+  },
+extra_nvim_plugins_devcontainers_lazy: |
+  {
+    'https://codeberg.org/esensar/nvim-dev-container',
+    dependencies = 'nvim-treesitter/nvim-treesitter'
+  },
+extra_nvim_config_devcontainers: |
+  require("devcontainer").setup({
+    autocommands = {
+      init = true,
+      clean = true,
+      update = true,
+    },
+    attach_mounts = {
+      always = true,
+      neovim_config = {
+        enabled = true,
+        options = { "readonly" }
+      },
+      neovim_data = {
+        enabled = true,
+      },
+      -- Only useful if using neovim 0.8.0+
+      neovim_state = {
+        enabled = true,
+      },
+    },
+    nvim_installation_commands_provider = function(path_binaries, version_string)
+      -- Returns table - list of commands to run when adding neovim to container
+      -- Each command can either be a string or a table (list of command parts)
+      -- Takes binaries available in path on current container and version_string passed to the command or current version of neovim
+      return {
+        '[ -z "$(which nvim 2> /dev/null)" ] || return',
+        'cd "$HOME" && curl -s -JLO https://github.com/neovim/neovim/releases/download/stable/nvim-linux64.tar.gz',
+        'tar xzvf nvim-linux64.tar.gz',
+        'rm -rdf nvim-linux64.tar.gz',
+        'mv "$HOME"/nvim-linux64 "$HOME"/.neovim',
+        '[ -d ~/.local ] || mkdir ~/.local',
+        '[ -d ~/.local/bin ] || mkdir ~/.local/bin',
+        'ln -s "$HOME"/.neovim/bin/nvim "$HOME"/.local/bin/',
+      }
+    end,
+  })
+extra_nvim_keymap_devcontainers: ""
+devcontainers_file_extensions: []

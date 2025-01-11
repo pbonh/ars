@@ -1,0 +1,237 @@
+---
+nvim_profile_dir_name: "nvim-profiles"
+nvim_xdg_profile_dir:
+  config: "{{ xdg_config_dir }}/{{ nvim_profile_dir_name }}"
+  share: "{{ xdg_share_dir }}/{{ nvim_profile_dir_name }}"
+  cache: "{{ xdg_cache_dir }}/{{ nvim_profile_dir_name }}"
+nvim_default_editor_options: |
+  vim.g.loaded_netrw = 1
+  vim.g.loaded_netrwPlugin = 1
+  vim.opt.shell= '{{ command_shell }}'
+  vim.opt.termguicolors = true
+  vim.opt.hidden = true
+  vim.opt.magic = true
+  vim.opt.virtualedit = 'block'
+  vim.opt.clipboard = 'unnamedplus'
+  vim.opt.wildignorecase = true
+  vim.opt.swapfile = false
+  -- vim.opt.directory = '{{ nvim_cache_dir }}' .. 'swap/'
+  -- vim.opt.undodir = '{{ nvim_cache_dir }}' .. 'undo/'
+  -- vim.opt.backupdir = '{{ nvim_cache_dir }}' .. 'backup/'
+  -- vim.opt.viewdir = '{{ nvim_cache_dir }}' .. 'view/'
+  -- vim.opt.spellfile = '{{ nvim_cache_dir }}' .. 'spell/en.uft-8.add'
+  vim.opt.history = 2000
+  vim.opt.timeout = true
+  vim.opt.ttimeout = true
+  vim.opt.timeoutlen = 100
+  vim.opt.ttimeoutlen = 10
+  vim.opt.updatetime = 100
+  vim.opt.redrawtime = 1500
+  vim.opt.ignorecase = true
+  vim.opt.smartcase = true
+  vim.opt.infercase = true
+  vim.opt.grepformat = '%f:%l:%c:%m,%f:%l:%m'
+  vim.opt.grepprg = '{{ rg_exe }} --vimgrep --no-heading --smart-case'
+  vim.opt.completeopt = 'menu,menuone,noselect'
+  vim.opt.showmode = false
+  vim.opt.shortmess = 'aoOTIcF'
+  vim.opt.scrolloff = 2
+  vim.opt.sidescrolloff = 5
+  vim.opt.ruler = false
+  vim.opt.showtabline = 0
+  vim.opt.winwidth = 10
+  vim.opt.pumheight = 15
+  vim.opt.showcmd = false
+  vim.opt.cmdheight = 0
+  vim.opt.laststatus = 3
+  vim.opt.list = true
+  vim.opt.listchars = 'tab:»·,nbsp:+,trail:·,extends:→,precedes:←'
+  vim.opt.pumblend = 10
+  vim.opt.winblend = 10
+  vim.opt.undofile = true
+  vim.opt.smarttab = true
+  vim.opt.expandtab = true
+  -- vim.opt.autoindent = true
+  vim.opt.tabstop = 2
+  vim.opt.shiftwidth = 2
+  vim.opt.linebreak = true
+  vim.opt.whichwrap = 'h,l,<,>,[,],~'
+  -- vim.opt.breakindentopt = 'shift:2,min:20'
+  vim.opt.showbreak = '↳  '
+  vim.opt.number = true
+  vim.opt.relativenumber = true
+  vim.opt.cursorline = true
+  vim.opt.wrap = false
+  vim.opt.signcolumn = 'yes'
+  vim.opt.spelloptions = 'camel'
+  vim.opt.textwidth = 100
+  vim.opt.colorcolumn = '100'
+  -- vim.g.python3_host_prog = '{{ nvim_python_exe }}'
+  -- vim.opt.conceallevel = 2
+  -- vim.opt.concealcursor = 'niv'
+  vim.opt.sessionoptions = 'buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,globals'
+nvim_kickstart_editor_options: |
+  -- [[ Setting options ]]
+  -- See `:help vim.opt`
+  -- NOTE: You can change these options as you wish!
+  --  For more options, you can see `:help option-list`
+
+  -- Make line numbers default
+  vim.opt.number = true
+  -- You can also add relative line numbers, for help with jumping.
+  --  Experiment for yourself to see if you like it!
+  -- vim.opt.relativenumber = true
+
+  -- Enable mouse mode, can be useful for resizing splits for example!
+  vim.opt.mouse = 'a'
+
+  -- Don't show the mode, since it's already in status line
+  vim.opt.showmode = false
+
+  -- Sync clipboard between OS and Neovim.
+  --  Remove this option if you want your OS clipboard to remain independent.
+  --  See `:help 'clipboard'`
+  vim.opt.clipboard = 'unnamedplus'
+
+  -- Enable break indent
+  vim.opt.breakindent = true
+
+  -- Save undo history
+  vim.opt.undofile = true
+
+  -- Case-insensitive searching UNLESS \C or capital in search
+  vim.opt.ignorecase = true
+  vim.opt.smartcase = true
+
+  -- Keep signcolumn on by default
+  vim.opt.signcolumn = 'yes'
+
+  -- Decrease update time
+  vim.opt.updatetime = 250
+  vim.opt.timeoutlen = 300
+
+  -- Configure how new splits should be opened
+  vim.opt.splitright = true
+  vim.opt.splitbelow = true
+
+  -- Sets how neovim will display certain whitespace in the editor.
+  --  See `:help 'list'`
+  --  and `:help 'listchars'`
+  vim.opt.list = true
+  vim.opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
+
+  -- Preview substitutions live, as you type!
+  vim.opt.inccommand = 'split'
+
+  -- Show which line your cursor is on
+  vim.opt.cursorline = true
+
+  -- Minimal number of screen lines to keep above and below the cursor.
+  vim.opt.scrolloff = 10
+nvim_default_keymap_options: |
+  vim.g.mapleader = ' '
+  vim.g.maplocalleader = ','
+  vim.keymap.set('', '<Space>', '<Nop>', { noremap = true, silent = true })
+  vim.keymap.set('t', '<C-]>', '<C-\\><C-n> ', { noremap = true, silent = true })
+  vim.keymap.set('t', '<C-h>', '<C-\\><C-n><C-W>h ', { noremap = true, silent = true })
+  vim.keymap.set('t', '<C-j>', '<C-\\><C-n><C-W>j ', { noremap = true, silent = true })
+  vim.keymap.set('t', '<C-k>', '<C-\\><C-n><C-W>k ', { noremap = true, silent = true })
+  vim.keymap.set('t', '<C-l>', '<C-\\><C-n><C-W>l ', { noremap = true, silent = true })
+  -- vim.api.nvim_set_keymap('n', 'k', \"v:count == 0 ? 'gk' : 'k'\", { noremap = true, expr = true, silent = true })
+  -- vim.api.nvim_set_keymap('n', 'j', \"v:count == 0 ? 'gj' : 'j'\", { noremap = true, expr = true, silent = true })
+  vim.keymap.set('n', '<C-]>', '<cmd>nohlsearch<CR>')
+  vim.api.nvim_create_user_command('ChangeTabDirectory', function(_)
+    vim.api.nvim_command('tcd %:p:h')
+  end, { desc = 'Vim: Change Tab Directory to that of Current Buffer' })
+
+  -- [[ Basic Autocommands ]]
+  --  See `:help lua-guide-autocommands`
+
+  -- Highlight when yanking (copying) text
+  --  Try it with `yap` in normal mode
+  --  See `:help vim.highlight.on_yank()`
+  vim.api.nvim_create_autocmd('TextYankPost', {
+    desc = 'Highlight when yanking (copying) text',
+    group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
+    callback = function()
+      vim.highlight.on_yank()
+    end,
+  })
+nvim_default_ui_options: |
+  -- vim.opt.sessionoptions = 'buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,globals'
+nvim_plugin_example:
+  plugin:
+    lazy: |
+      { 'path/to/plugin' },
+    config: |
+      require('plugin').setup()
+    keymaps: |
+      { '<leader>_', { n = '<cmd>command<CR>', }, description = 'Description', },
+nvim_default_plugins:
+  ui: "{{ nvim_ui_default }}"
+  project: "{{ nvim_project_default }}"
+  legendary: "{{ nvim_legendary_default }}"
+  telescope: "{{ nvim_telescope_default }}"
+  hydra: "{{ nvim_hydra_default }}"
+  treesitter: "{{ nvim_treesitter_default }}"
+  git: "{{ nvim_git_default }}"
+  terminal: "{{ nvim_terminal_default }}"
+  motion: "{{ nvim_motion_default }}"
+  colorscheme: "{{ nvim_colorscheme_default }}"
+  intellisense: "{{ nvim_intellisense_default }}"
+  debugger: "{{ nvim_debugger_default }}"
+nvim_extra_plugins: {}
+nvim_startup_commands: ""
+nvim_xdg_modular_lua_hierarchy:
+  - ""
+  - lua
+  - lua/plugins
+nvim_plugin_groups_all:
+  ui: "{{ nvim_ui }}"
+  telescope: "{{ nvim_fzf_lua }}"
+  project: "{{ nvim_project }}"
+  hydra: "{{ nvim_hydra }}"
+  treesitter: "{{ nvim_treesitter }}"
+  git: "{{ nvim_git }}"
+  terminal: "{{ nvim_terminal }}"
+  colorscheme: "{{ nvim_colorscheme_nightfox }}"
+  intellisense: "{{ nvim_lspconfig_cmp_navbuddy }}"
+  debugger: "{{ nvim_debugger }}"
+  tasks: "{{ nvim_tasks }}"
+  test: "{{ nvim_test }}"
+  notes: "{{ nvim_neorg_legacy }}"
+  motion: "{{ nvim_motion }}"
+  ai: "{{ nvim_ai_avante }}"
+nvim_plugin_groups_bone:
+  telescope: "{{ nvim_fzf_lua }}"
+  project: "{{ nvim_project }}"
+  hydra: "{{ nvim_hydra }}"
+  treesitter: "{{ nvim_treesitter }}"
+  git: "{{ nvim_git }}"
+  terminal: "{{ nvim_terminal }}"
+  tasks: "{{ nvim_tasks_nodap }}"
+  notes: "{{ nvim_neorg_legacy }}"
+  motion: "{{ nvim_motion }}"
+nvim_xdg_modular_profiles:
+  lazy:
+    name: lazy
+    appname: nvim-lazy
+    config:
+      options: "{{ nvim_default_editor_options }}"
+      keymaps: "{{ nvim_default_keymap_options }}"
+      plugin_groups: "{{ nvim_plugin_groups_all | ansible.builtin.combine(nvim_extra_plugins) }}"
+  bone:
+    name: bone
+    appname: nvim-bone
+    config:
+      options: "{{ nvim_default_editor_options }}"
+      keymaps: "{{ nvim_default_keymap_options }}"
+      plugin_groups: "{{ nvim_plugin_groups_bone }}"
+nvim_lazy_modular_config_base:
+  - health.lua
+  - lazy-bootstrap.lua
+  - lazy-plugins.lua
+  - options.lua
+  - options-plugins.lua
+  - keymaps.lua
+  - keymaps-legendary.lua

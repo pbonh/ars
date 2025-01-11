@@ -1,0 +1,5 @@
+[
+  {% for project in projects %}
+  {{ "{\"name\": \"" + projects[project]['path'].split('/').pop() + "\", \"path\": \"" + projects[project]['path'] + "\"}" }}{% if not loop.last %},{% endif %}
+  {% endfor %}
+]

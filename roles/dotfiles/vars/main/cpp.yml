@@ -1,0 +1,17 @@
+---
+ccls_coc_config:
+  ccls:
+    command: "{{ nix_bin }}/ccls"
+    filetypes: "{{ cpp_file_extensions }}"
+    rootPatterns:
+      - .ccls
+      - compile_commands.json
+      - .git/
+      - .vscode
+    initializationOptions:
+      clang: "{{ ccls_clang_args }}"
+      cache:
+        directory: "{{ ccls_tmp_dir }}"
+      highlight:
+        lsRanges: true
+lsp_provider_coc_settings: "{{ ccls_coc_config }}"

@@ -1,0 +1,83 @@
+{
+  /* pkgs = import <nixos-21.11>; */
+  packageOverrides = pkgs: with pkgs; {
+    devPack = pkgs.buildEnv {
+      name = "dev-pack";
+      paths = [
+        /* (hiPrio nixUnstable) */
+        coreutils
+        binutils
+        (hiPrio gcc)
+        zsh
+        zoxide
+        zsh-powerlevel10k
+        starship
+        direnv
+        rargs
+        fzf
+        fd
+        ripgrep
+        bat
+        exa
+        lsd
+        kmon
+        navi
+        skim
+        hyperfine
+        procs
+        sd
+        diskonaut
+        du-dust
+        tokei
+        bottom
+        grex
+        curl
+        delta
+        git
+        gitAndTools.gh
+        lazygit
+        gitflow
+        grv
+        gitui
+        diffr
+        python39Packages.pipx
+        bpytop
+        ranger
+        xplr
+        joshuto
+        gotop
+        screenfetch
+        macchina
+        jq
+        yq
+        fx
+        nnn
+        ghq
+        broot
+        lf
+        sc-im
+        glances
+        watchman
+        aspell
+        bc
+        gdb
+        emscripten
+        nox
+        cookiecutter
+        neovim
+        neovim-remote
+        python39Packages.pynvim
+        nodePackages.neovim
+        nodejs
+        yarn
+        ctags
+        nodePackages.prettier
+        shfmt
+        /* Language Tools Start */
+        {{ lang_tools_nix_file or "/* No Language Tools Installed */" }}
+        /* Language Tools End */
+      ];
+      extraOutputsToInstall = [ "man" "doc" ];
+    };
+  };
+}

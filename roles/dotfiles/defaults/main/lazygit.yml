@@ -1,0 +1,3 @@
+---
+lazygit_config: "{{ xdg_config_dir }}/lazygit"
+lazygit_config_file: "{{ lazygit_config }}/config.yml"

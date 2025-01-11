@@ -1,0 +1,19 @@
+---
+- name: Scripts | Setup Scripts Directory | file
+  file:
+    path: "{{ bin_directory }}"
+    state: directory
+
+- name: Scripts | Copies Scripts | template
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ bin_directory }}{{ item.path  | regex_replace('\\.j2$', '') }}"
+  with_filetree: '../templates/scripts'
+  when: item.state == 'file'
+
+- name: Scripts | Change Script Permissions | file
+  file:
+    path: "{{ bin_directory }}"
+    mode: +x
+    state: directory
+    recurse: yes

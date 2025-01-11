@@ -1,0 +1,77 @@
+---
+nushell_config_dir: "{{ xdg_config_dir }}/nushell"
+nu_devbox_env: |
+  $env.PATH = ($env.PATH | split row (char esep) | append '{{ devbox_nix_root_path }}')
+nu_homebrew_env: ""
+nushell_path_env: |
+  {% for path_info in path_directories -%}
+  {% if path_directories[path_info]['prepend'] == false %}
+  {{ "$env.PATH = ($env.PATH | split row (char esep) | append '" + path_directories[path_info]['path'] + "')" }}
+  {% else %}
+  {{ "$env.PATH = ($env.PATH | split row (char esep) | prepend '" + path_directories[path_info]['path'] + "')" }}
+  {% endif %}
+  {% endfor %}
+nushell_fzf_env: |
+  {% for fzf_env_var in fzf_env -%}
+  {{ "$env." + fzf_env[fzf_env_var]['name'] + " = '" + fzf_env[fzf_env_var]['env'] + "'" }}
+  {% endfor %}
+  $env.SKIM_DEFAULT_COMMAND = '{{ fd_exe }} --type f || git ls-tree -r --name-only HEAD || {{ rg_exe }} --files || find .'
+nushell_carapace_config_file: "{{ carapace_dir }}/init.nu"
+nushell_carapace_config: |
+  source {{ nushell_carapace_config_file }}
+nushell_carapace_env: |
+  {{ carapace_exe }} _carapace nushell | save --force {{ nushell_carapace_config_file }}
+nushell_starship_env: |
+  {{ starship_exe }} init nu | save -f {{ nushell_starship_source }}
+nushell_custom_config: |
+  $env.config = {
+    show_banner: false
+    edit_mode: vi
+    keybindings: [
+      {
+        name: find_with_fzf
+        modifier: CONTROL
+        keycode: Char_t
+        mode: vi_insert
+        event: {
+            send: executehostcommand
+            cmd: "commandline edit --insert ({{ fzf_exe }} --layout=reverse)"
+        }
+      }
+      {
+        name: run_cmd_navi
+        modifier: CONTROL
+        keycode: Char_a
+        mode: vi_insert
+        event: {
+            send: executehostcommand
+            cmd: "commandline edit --insert ({{ navi_exe }} --print)"
+        }
+      }
+    ]
+  }
+nushell_fzf_config: |
+  alias cdg = cd ({{ bin_directory }}cdscuts_glob_echo | {{ fzf_exe }} | decode utf-8 | str trim)
+  # alias fcd = cd (ls | where type == dir | each { |it| $it.name} | str join (char nl) | {{ fzf_exe }} | decode utf-8 | str trim)
+  alias fcd = cd ({{ fd_exe }} -H -t d -E .git | {{ fzf_exe }} | decode utf-8 | str trim)
+  alias ffe = {{ nvim_exe }} ({{ fzf_exe }} --layout=reverse)
+nushell_yazi_config: |
+  def --env yy [...args] {
+    let tmp = (mktemp -t "yazi-cwd.XXXXX")
+    {{ yazi_exe }} ...$args --cwd-file $tmp
+    let cwd = (open $tmp)
+    if $cwd != "" and $cwd != $env.PWD {
+      cd $cwd
+    }
+    rm -fp $tmp
+  }
+nushell_aliases: |
+  alias mkcd = mkdir $env.1 and cd $env.1
+  alias cat = {{ bat_exe }}
+  # alias ls = {{ lsd_exe }} --group-dirs first
+  alias ll = {{ lsd_exe }} --group-dirs first -l
+nushell_extra_aliases: ""
+nushell_starship_dir: "{{ xdg_cache_dir }}/starship"
+nushell_starship_source: "{{ nushell_starship_dir }}/init.nu"
+nushell_starship_config: |
+  use {{ nushell_starship_source }}

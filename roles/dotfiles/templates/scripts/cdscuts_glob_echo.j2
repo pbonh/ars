@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+system_wide_filelist=''
+user_filelist=''
+
+if [ -r {{ cdg_paths_global }} ]; then
+   system_wide_filelist=$(cdscuts_list_echo {{ cdg_paths_global }})
+fi
+if [ -r {{ cdg_paths_user }} ]; then
+   user_filelist=$(cdscuts_list_echo {{ cdg_paths_user }})
+fi
+
+echo -e "$system_wide_filelist\n$user_filelist" | sed '/^\s*$/d'

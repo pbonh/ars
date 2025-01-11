@@ -1,0 +1,66 @@
+---
+python_dev_virtualenv_home: "{{ dotfiles_user_home }}/.virtualenvs"
+homebrew_packages_python:
+  - openssl
+  - readline
+  - sqlite3
+  - xz
+  - zlib
+pyenv_home: "{{ dotfiles_user_home }}/.pyenv"
+pyenv_home_bin: "{{ pyenv_home }}/bin/pyenv"
+pyenv_exe: "{{ bin_directory }}pyenv"
+pyenv_python_version: "3.10.9"
+pyenv_python_exe: "{{ pyenv_home }}/versions/{{ pyenv_python_version }}/bin/python"
+python_tools_nix:
+  - pyenv
+  - debugpy
+debugpy_version: "debugpy"
+debugpy_python_exe_relative: debugpy/bin/python
+debugpy_python_exe: "{{ python_dev_virtualenv_home }}/{{ debugpy_python_exe_relative }}"
+pls_version: "python-lsp-server[all]"
+pls_bin_path_relative: "python-lsp-server/bin"
+pls_python_exe_relative: "{{ pls_bin_path_relative }}/python"
+pls_exe_relative: "{{ pls_bin_path_relative }}/pylsp"
+pls_python_exe: "{{ python_dev_virtualenv_home }}/{{ pls_python_exe_relative }}"
+pls_exe: "{{ python_dev_virtualenv_home }}/{{ pls_exe_relative }}"
+lsp_providers_python:
+  - pylsp
+treesitter_parsers_python:
+  - python
+python_file_extensions:
+  - python
+nvim_extra_plugins_python:
+  lazy: "{{ extra_nvim_plugins_python_lazy }}"
+  config: "{{ extra_nvim_config_python }}"
+  keymaps: "{{ extra_nvim_keymap_python }}"
+extra_nvim_language_keymaps_python:
+  mappings: "{{ nvim_keymap_python }}"
+  ext: "{{ python_file_extensions }}"
+extra_nvim_plugins_python_lazy: |
+  {
+    'mfussenegger/nvim-dap-python',
+    lazy = true,
+  },
+extra_nvim_config_python: |
+  require('lspconfig').pylsp.setup({
+    cmd = { '{{ pls_exe }}' }
+  })
+  require('dap-python').setup('{{ debugpy_python_exe }}')
+extra_nvim_keymap_python: |
+  -- { '<leader>cd', {
+  --     n = '<cmd>lua require(\'dap-python\').debug_selection()<CR>',
+  --   },
+  --   description = 'Python-DAP: Debugger Selection',
+  --   filters = { ft = 'python' },
+  -- },
+nvim_keymap_python: |
+  local group = vim.api.nvim_create_augroup("python_autocommands", { clear = true })
+  vim.api.nvim_create_autocmd("FileType", {
+      pattern = {
+        "python",
+      },
+      callback = function(ev)
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cd', '<cmd>lua require(\'dap-python\').debug_selection()<CR>', { noremap = true, silent = true })
+      end,
+      group = group 
+  })

@@ -1,0 +1,3 @@
+{% for project in projects %}
+{{ "ghq get " + projects[project]['url'] }}
+{% endfor %}

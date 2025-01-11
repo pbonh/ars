@@ -1,0 +1,11 @@
+---
+- name: Setup Gitui Config Directory
+  file:
+    path: "{{ gitui_config }}"
+    state: directory
+    mode: "0755"
+
+- name: Gitui | Copies Gitui Config | template
+  template:
+    src: gitui/key_bindings.ron.j2
+    dest: "{{ gitui_config_file }}"

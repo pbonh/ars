@@ -1,0 +1,5 @@
+---
+- name: Direnv | Copies Direnv Config | template
+  template:
+    src: "direnv/direnvrc.j2"
+    dest: "{{ direnv_config }}"

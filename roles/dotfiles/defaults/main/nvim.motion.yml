@@ -1,0 +1,214 @@
+---
+nvim_motion_default:
+  lazy: |
+    { 'ggandor/flit.nvim',
+      dependencies = {
+        'ggandor/leap.nvim',
+        'ggandor/leap-spooky.nvim',
+        'https://tpope.io/vim/repeat.git',
+      },
+    },
+    { 'cbochs/portal.nvim',
+      dependencies = {
+        'cbochs/grapple.nvim',  -- Optional: provides the 'grapple' query item
+        'ThePrimeagen/harpoon', -- Optional: provides the 'harpoon' query item
+      },
+    },
+    { 'kylechui/nvim-surround' },
+  config: |
+    require('leap').set_default_keymaps(true)
+    require('leap').add_repeat_mappings(';', ',', {
+      -- False by default. If set to true, the keys will work like the
+      -- native semicolon/comma, i.e., forward/backward is understood in
+      -- relation to the last motion.
+      relative_directions = true,
+      -- By default, all modes are included.
+      modes = {'n', 'x', 'o'},
+    })
+    require('leap-spooky').setup()
+    require('flit').setup()
+    require('portal').setup()
+    require('nvim-surround').setup()
+  keymaps: |
+    { '<C-o>', { n = '<cmd>Portal jumplist backward<CR>', }, description = 'Portal: Jump Backward', },
+    { '<C-i>', { n = '<cmd>Portal jumplist forward<CR>', }, description = 'Portal: Jump Forward', },
+nvim_motion_flash:
+  lazy: |
+    {
+      'folke/flash.nvim',
+      event = 'VeryLazy',
+      ---@type Flash.Config
+      opts = {},
+      -- stylua: ignore
+      keys = {
+        { 's', mode = { 'n', 'x', 'o' }, function() require('flash').jump() end, desc = 'Flash' },
+        { 'S', mode = { 'n', 'x', 'o' }, function() require('flash').treesitter() end, desc = 'Flash Treesitter' },
+        { 'r', mode = 'o', function() require('flash').remote() end, desc = 'Remote Flash' },
+        { 'R', mode = { 'o', 'x' }, function() require('flash').treesitter_search() end, desc = 'Treesitter Search' },
+        { '<c-s>', mode = { 'c' }, function() require('flash').toggle() end, desc = 'Toggle Flash Search' },
+      },
+    },
+    { 'cbochs/portal.nvim',
+      dependencies = {
+        'cbochs/grapple.nvim',  -- Optional: provides the 'grapple' query item
+        'ThePrimeagen/harpoon', -- Optional: provides the 'harpoon' query item
+      },
+    },
+    { 'kylechui/nvim-surround' },
+  config: |
+    require('portal').setup()
+    require('nvim-surround').setup()
+  keymaps: |
+    { '<C-o>', { n = '<cmd>Portal jumplist backward<CR>', }, description = 'Portal: Jump Backward', },
+    { '<C-i>', { n = '<cmd>Portal jumplist forward<CR>', }, description = 'Portal: Jump Forward', },
+nvim_motion:
+  lazy: |
+    {
+      'folke/flash.nvim',
+      event = 'VeryLazy',
+      ---@type Flash.Config
+      opts = {},
+      -- stylua: ignore
+      keys = {
+        { 's', mode = { 'n', 'x', 'o' }, function() require('flash').jump() end, desc = 'Flash' },
+        -- { 'S', mode = { 'n', 'x', 'o' }, function() require('flash').treesitter() end, desc = 'Flash Treesitter' },
+        { 'r', mode = 'o', function() require('flash').remote() end, desc = 'Remote Flash' },
+        { 'R', mode = { 'o', 'x' }, function() require('flash').treesitter_search() end, desc = 'Treesitter Search' },
+        -- { '<c-s>', mode = { 'c' }, function() require('flash').toggle() end, desc = 'Toggle Flash Search' },
+     -- { 'S', mode = { 'n', 'x', 'o' }, function()
+     --     require("flash").jump({
+     --       search = { mode = "search", max_length = 0 },
+     --       label = { after = { 0, 0 } },
+     --       pattern = "^"
+     --     })
+     --   end, desc = 'Flash Line Jump'
+     -- },
+        { 'S', mode = { 'n', 'x', 'o' }, function()
+          local Flash = require("flash")
+
+          ---@param opts Flash.Format
+          local function format(opts)
+            -- always show first and second label
+            return {
+              { opts.match.label1, "FlashMatch" },
+              { opts.match.label2, "FlashLabel" },
+            }
+          end
+
+          Flash.jump({
+            search = { mode = "search" },
+            label = { after = false, before = { 0, 0 }, uppercase = false, format = format },
+            pattern = [[\<]],
+            action = function(match, state)
+              state:hide()
+              Flash.jump({
+                search = { max_length = 0 },
+                highlight = { matches = false },
+                label = { format = format },
+                matcher = function(win)
+                  -- limit matches to the current label
+                  return vim.tbl_filter(function(m)
+                    return m.label == match.label and m.win == win
+                  end, state.results)
+                end,
+                labeler = function(matches)
+                  for _, m in ipairs(matches) do
+                    m.label = m.label2 -- use the second label
+                  end
+                end,
+              })
+            end,
+            labeler = function(matches, state)
+              local labels = state:labels()
+              for m, match in ipairs(matches) do
+                match.label1 = labels[math.floor((m - 1) / #labels) + 1]
+                match.label2 = labels[(m - 1) % #labels + 1]
+                match.label = match.label1
+              end
+            end,
+          })
+          end, desc = 'Flash Hop Jump'
+        },
+        -- { 'S', mode = { 'n', 'x', 'o' }, function()
+        --     require("flash").jump({
+        --       pattern = ".", -- initialize pattern with any char
+        --       search = {
+        --         mode = function(pattern)
+        --           -- remove leading dot
+        --           if pattern:sub(1, 1) == "." then
+        --             pattern = pattern:sub(2)
+        --           end
+        --           -- return word pattern and proper skip pattern
+        --           return ([[\<%s\w*\>]]):format(pattern), ([[\<%s]]):format(pattern)
+        --         end,
+        --       },
+        --       -- select the range
+        --       jump = { pos = "range" },
+        --     })
+        --   end, desc = 'Flash All Words'
+        -- },
+      },
+    },
+    { 'cbochs/portal.nvim',
+      config = function()
+        require('portal').setup()
+      end,
+    },
+    {
+      "cbochs/grapple.nvim",
+      opts = {
+        scope = "git_branch",
+        icons = true,
+        quick_select = "123456789",
+      },
+      event = { "BufReadPost", "BufNewFile" },
+      cmd = "Grapple",
+      keys = {
+        { "<leader>mm", "<cmd>Grapple toggle<cr>", desc = "Grapple toggle tag" },
+        { "<leader>mk", "<cmd>Grapple toggle_tags<cr>", desc = "Grapple toggle tags" },
+        { "<leader>mK", "<cmd>Grapple toggle_scopes<cr>", desc = "Grapple toggle scopes" },
+        { "<leader>mj", "<cmd>Grapple cycle forward<cr>", desc = "Grapple cycle forward" },
+        { "<leader>mJ", "<cmd>Grapple cycle backward<cr>", desc = "Grapple cycle backward" },
+        { "<leader>m1", "<cmd>Grapple select index=1<cr>", desc = "Grapple select 1" },
+        { "<leader>m2", "<cmd>Grapple select index=2<cr>", desc = "Grapple select 2" },
+        { "<leader>m3", "<cmd>Grapple select index=3<cr>", desc = "Grapple select 3" },
+        { "<leader>m4", "<cmd>Grapple select index=4<cr>", desc = "Grapple select 4" },
+      },
+    },
+    {
+      'kylechui/nvim-surround',
+      config = function()
+        require('nvim-surround').setup()
+      end,
+    },
+    {
+      'tris203/precognition.nvim',
+      event = { "BufReadPost", "BufNewFile" },
+      opts = {
+        startVisible = false,
+        showBlankVirtLine = true,
+        highlightColor = { link = "Comment" },
+        hints = {
+          Caret = { text = "^", prio = 2 },
+          Dollar = { text = "$", prio = 1 },
+          MatchingPair = { text = "%", prio = 5 },
+          Zero = { text = "0", prio = 1 },
+          w = { text = "w", prio = 10 },
+          b = { text = "b", prio = 9 },
+          e = { text = "e", prio = 8 },
+          W = { text = "W", prio = 7 },
+          B = { text = "B", prio = 6 },
+          E = { text = "E", prio = 5 },
+        },
+        gutterHints = {
+          G = { text = "G", prio = 10 },
+          gg = { text = "gg", prio = 9 },
+          PrevParagraph = { text = "{", prio = 8 },
+          NextParagraph = { text = "}", prio = 8 },
+        },
+      },
+    },
+  config: ""
+  keymaps: |
+    { '<C-o>', { n = '<cmd>Portal jumplist backward<CR>', }, description = 'Portal: Jump Backward', },
+    { '<C-i>', { n = '<cmd>Portal jumplist forward<CR>', }, description = 'Portal: Jump Forward', },

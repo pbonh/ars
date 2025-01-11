@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+dest_dir=$(cdscuts_glob_echo | {{ skim_exe }} )
+if [[ $dest_dir != '' ]]; then
+  cd "$dest_dir"
+fi

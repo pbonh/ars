@@ -1,0 +1,185 @@
+---
+rustup_arch: x86_64
+rustup_os: linux-gnu
+rustup_macos_arch: aarch64
+rustup_macos_os: apple-darwin
+rustup_url: https://static.rust-lang.org/rustup/rustup-init.sh
+rustup_script_path: "{{ dotfiles_user_home }}/rustup-init.sh"
+rustup_toolchain: "stable"
+rustup_musl_target: "{{ rustup_arch }}-unknown-linux-musl"
+rustup_path: "{{ dotfiles_user_home }}/.rustup/toolchains/{{ rustup_toolchain }}-{{ rustup_arch }}-{{ rustup_os }}/bin/"
+cargo_home: "{{ dotfiles_user_home }}/.cargo"
+cargo_path: "{{ cargo_home }}/bin/"
+cargo_bin: "{{ cargo_path }}cargo"
+rustup_exe: "{{ cargo_path }}rustup"
+cargo_binstall_exe: "{{ cargo_path }}cargo-binstall"
+rustc_env_variables: ""
+cargo_binstall_args: ""
+cargo_packages:
+  binstall:
+    name: cargo-binstall
+    path: "{{ cargo_path }}cargo-binstall"
+  cargo-update:
+    name: cargo-update
+    path: "{{ cargo_path }}cargo-update"
+cargo_binstall_packages:
+  atuin:
+    name: atuin
+    path: "{{ cargo_path }}atuin"
+  ast-grep:
+    name: ast-grep
+    path: "{{ cargo_path }}sg"
+  bat:
+    name: bat
+    path: "{{ cargo_path }}bat"
+  broot:
+    name: broot
+    path: "{{ cargo_path }}broot"
+  bottom:
+    name: bottom
+    path: "{{ cargo_path }}btm"
+  choose:
+    name: choose
+    path: "{{ cargo_path }}choose"
+  counts:
+    name: counts
+    path: "{{ cargo_path }}counts"
+  git-delta:
+    name: git-delta
+    path: "{{ cargo_path }}delta"
+  difftastic:
+    name: difftastic
+    path: "{{ cargo_path }}difft"
+  diffr:
+    name: diffr
+    path: "{{ cargo_path }}diffr"
+  du-dust:
+    name: du-dust
+    path: "{{ cargo_path }}dust"
+  erdtree:
+    name: erdtree
+    path: "{{ cargo_path }}erd"
+  eva:
+    name: eva
+    path: "{{ cargo_path }}eva"
+  exa:
+    name: exa
+    path: "{{ cargo_path }}exa"
+  fd-find:
+    name: fd-find
+    path: "{{ cargo_path }}fd"
+  felix:
+    name: felix
+    path: "{{ cargo_path }}fx"
+  fend:
+    name: fend
+    path: "{{ cargo_path }}fend"
+  grex:
+    name: grex
+    path: "{{ cargo_path }}grex"
+  gitui:
+    name: gitui
+    path: "{{ cargo_path }}gitui"
+  hyperfine:
+    name: hyperfine
+    path: "{{ cargo_path }}hyperfine"
+  joshuto:
+    name: joshuto
+    path: "{{ cargo_path }}joshuto"
+  just:
+    name: just
+    path: "{{ cargo_path }}just"
+  lsd:
+    name: lsd
+    path: "{{ cargo_path }}lsd"
+  macchina:
+    name: macchina
+    path: "{{ cargo_path }}macchina"
+  mprocs:
+    name: mprocs
+    path: "{{ cargo_path }}mprocs"
+  navi:
+    name: navi
+    path: "{{ cargo_path }}navi"
+  nu:
+    name: nu
+    path: "{{ cargo_path }}nu"
+  ouch:
+    name: ouch
+    path: "{{ cargo_path }}ouch"
+  procs:
+    name: procs
+    path: "{{ cargo_path }}procs"
+  ripgrep:
+    name: ripgrep
+    path: "{{ cargo_path }}rg"
+  rnr:
+    name: rnr
+    path: "{{ cargo_path }}rnr"
+  sd:
+    name: sd
+    path: "{{ cargo_path }}sd"
+  skim:
+    name: skim
+    path: "{{ cargo_path }}sk"
+  starship:
+    name: starship
+    path: "{{ cargo_path }}starship"
+  wikitui:
+    name: wiki-tui
+    path: "{{ cargo_path }}wiki-tui"
+  xcp:
+    name: xcp
+    path: "{{ cargo_path }}xcp"
+  xplr:
+    name: xplr
+    path: "{{ cargo_path }}xplr"
+  yazi:
+    name: yazi-fm
+    path: "{{ cargo_path }}yazi"
+  zellij:
+    name: zellij
+    path: "{{ cargo_path }}zellij"
+  zoxide:
+    name: zoxide
+    path: "{{ cargo_path }}zoxide"
+atuin_exe: "{{ cargo_binstall_packages['atuin']['path'] }}"
+astgrep_exe: "{{ cargo_binstall_packages['ast-grep']['path'] }}"
+bat_exe: "{{ cargo_binstall_packages['bat']['path'] }}"
+broot_exe: "{{ cargo_binstall_packages['broot']['path'] }}"
+bottom_exe: "{{ cargo_binstall_packages['bottom']['path'] }}"
+choose_exe: "{{ cargo_binstall_packages['choose']['path'] }}"
+counts_exe: "{{ cargo_binstall_packages['counts']['path'] }}"
+delta_exe: "{{ cargo_binstall_packages['git-delta']['path'] }}"
+difftastic_exe: "{{ cargo_binstall_packages['difftastic']['path'] }}"
+diffr_exe: "{{ cargo_binstall_packages['diffr']['path'] }}"
+dust_exe: "{{ cargo_binstall_packages['du-dust']['path'] }}"
+eva_exe: "{{ cargo_binstall_packages['eva']['path'] }}"
+erdtree_exe: "{{ cargo_binstall_packages['erdtree']['path'] }}"
+exa_exe: "{{ cargo_binstall_packages['exa']['path'] }}"
+fd_exe: "{{ cargo_binstall_packages['fd-find']['path'] }}"
+felix_exe: "{{ cargo_binstall_packages['felix']['path'] }}"
+fend_exe: "{{ cargo_binstall_packages['fend']['path'] }}"
+grex_exe: "{{ cargo_binstall_packages['grex']['path'] }}"
+gitui_exe: "{{ cargo_binstall_packages['gitui']['path'] }}"
+hyperfine_exe: "{{ cargo_binstall_packages['hyperfine']['path'] }}"
+joshuto_exe: "{{ cargo_binstall_packages['joshuto']['path'] }}"
+just_exe: "{{ cargo_binstall_packages['just']['path'] }}"
+lsd_exe: "{{ cargo_binstall_packages['lsd']['path'] }}"
+macchina_exe: "{{ cargo_binstall_packages['macchina']['path'] }}"
+mprocs_exe: "{{ cargo_binstall_packages['mprocs']['path'] }}"
+navi_exe: "{{ cargo_binstall_packages['navi']['path'] }}"
+nu_exe: "{{ cargo_binstall_packages['nu']['path'] }}"
+ouch_exe: "{{ cargo_binstall_packages['ouch']['path'] }}"
+procs_exe: "{{ cargo_binstall_packages['procs']['path'] }}"
+rg_exe: "{{ cargo_binstall_packages['ripgrep']['path'] }}"
+rnr_exe: "{{ cargo_binstall_packages['rnr']['path'] }}"
+sd_exe: "{{ cargo_binstall_packages['sd']['path'] }}"
+skim_exe: "{{ cargo_binstall_packages['skim']['path'] }}"
+starship_exe: "{{ cargo_binstall_packages['starship']['path'] }}"
+wikitui_exe: "{{ cargo_binstall_packages['wikitui']['path'] }}"
+xcp_exe: "{{ cargo_binstall_packages['xcp']['path'] }}"
+xplr_exe: "{{ cargo_binstall_packages['xplr']['path'] }}"
+yazi_exe: "{{ cargo_binstall_packages['yazi']['path'] }}"
+zellij_exe: "{{ cargo_binstall_packages['zellij']['path'] }}"
+zoxide_exe: "{{ cargo_binstall_packages['zoxide']['path'] }}"

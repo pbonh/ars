@@ -1,0 +1,53 @@
+---
+system_home: "/home"
+dotfiles_home: "{{ ansible_env.HOME }}"
+dotfiles_user_home: "{{ ansible_env.HOME }}"
+default_home_local: "{{ dotfiles_user_home }}/.local"
+tool_install_dir: "{{ default_home_local }}"
+tool_install_bin: "{{ tool_install_dir }}/bin"
+bin_directory: "{{ tool_install_bin }}/"
+xdg_share_dir: "{{ default_home_local }}/share"
+xdg_config_dir: "{{ dotfiles_user_home }}/.config"
+xdg_cache_dir:  "{{ dotfiles_user_home }}/.cache"
+xdg_config_dirs:
+  share: "{{ xdg_share_dir }}"
+  config: "{{ xdg_config_dir }}"
+  cache: "{{ xdg_cache_dir }}"
+macos_config_dir: "{{ dotfiles_user_home }}/Library/Application\ Support"
+dot_download_dir: "{{ tool_install_dir }}/downloads"
+interactive_shell_cmd: "nu"
+interactive_shell: "{{ nu_exe }}"
+command_shell: "/bin/bash"
+projects:
+  proj1:
+    name: "pbonh/term-dev.nix"
+    url: "https://github.com/pbonh/term-dev.nix"
+    path: "{{ code_checkout_path_github }}/pbonh/term-dev.nix"
+devbox_nix_root_path: /nix/var/nix/profiles/default/bin
+devbox_nix_path_default: "{{ ansible_env.HOME }}/.local/share/devbox/global/default/.devbox/nix/profile/default/bin"
+github_url: "https://github.com"
+github_ssh_url: "ssh://git@github.com"
+codeberg_url: "https://codeberg.org"
+gcc_exe: /usr/bin/gcc
+gpp_exe: /usr/bin/g++
+make_exe: "make"
+cargo_home: "{{ dotfiles_user_home }}/.cargo"
+cargo_path: "{{ cargo_home }}/bin/"
+homebrew_install_path: "/home/linuxbrew/.linuxbrew"
+homebrew_path: "{{ homebrew_install_path }}/bin"
+homebrew_install_path_macos: "/opt/homebrew"
+homebrew_path_macos: "{{ homebrew_install_path_macos }}/bin"
+carapace_dir: "{{ xdg_cache_dir }}/carapace"
+path_directories:
+  local:
+    name: local
+    prepend: false
+    path: "/usr/local/bin"
+  scripts:
+    name: scripts
+    prepend: false
+    path: "{{ tool_install_bin }}"
+lang_tools_nix: "{{ cpp_tools_nix + python_tools_nix }}"
+install_languages:
+  - cpp
+  - python

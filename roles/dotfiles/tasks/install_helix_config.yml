@@ -1,0 +1,16 @@
+---
+- name: Helix | Setup Helix Config Directory | template
+  file:
+    path: "{{ helix_config_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Helix | Copies Helix Config | template
+  template:
+    src: helix/config.toml.j2
+    dest: "{{ helix_config_file }}"
+
+# - name: Helix | Copies Helix Language Config | template
+#   template:
+#     src: helix/languages.toml.j2
+#     dest: "{{ helix_lang_file }}"

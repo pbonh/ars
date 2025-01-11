@@ -1,0 +1,5 @@
+---
+- name: Bookmarks | Copies Bookmarks File | template
+  template:
+    src: "bookmarks/cdg_paths.j2"
+    dest: "{{ cdg_paths_user }}"

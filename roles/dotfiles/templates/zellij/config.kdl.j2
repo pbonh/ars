@@ -1,0 +1,200 @@
+// Default Keybinding Preset + Plugin Section
+keybinds {
+    shared_except "locked" {
+        {% for zellij_plugin in zellij_plugins -%}
+        {{ zellij_plugins[zellij_plugin]['keybindings']['shared_except_locked']  | default('') }}
+        {% endfor %}
+    }
+}
+
+themes {
+    dracula {
+        fg 248 248 242
+        bg 40 42 54
+        red 255 85 85
+        green 80 250 123
+        yellow 241 250 140
+        blue 98 114 164
+        magenta 255 121 198
+        orange 255 184 108
+        cyan 139 233 253
+        black 0 0 0
+        white 255 255 255
+    }
+    gruvbox-dark {
+        bg 40 40 40
+        red 204 36 29
+        green 152 151 26
+        yellow 215 153 33
+        blue 69 133 136
+        magenta 177 98 134
+        orange 214 93 14
+        fg 213 196 161
+        cyan 104 157 106
+        black 60 56 54
+        white 251 241 199
+    }
+}
+
+// Plugin aliases - can be used to change the implementation of Zellij
+// changing these requires a restart to take effect
+plugins {
+    compact-bar location="zellij:compact-bar"
+    configuration location="zellij:configuration"
+    filepicker location="zellij:strider" {
+        cwd "/"
+    }
+    plugin-manager location="zellij:plugin-manager"
+    session-manager location="zellij:session-manager"
+    status-bar location="zellij:status-bar"
+    strider location="zellij:strider"
+    tab-bar location="zellij:tab-bar"
+    welcome-screen location="zellij:session-manager" {
+        welcome_screen true
+    }
+}
+
+// Plugins to load in the background when a new session starts
+// eg. "file:/path/to/my-plugin.wasm"
+// eg. "https://example.com/my-plugin.wasm"
+load_plugins {
+}
+ 
+// Use a simplified UI without special fonts (arrow glyphs)
+// Options:
+//   - true
+//   - false (Default)
+// 
+// simplified_ui true
+ 
+// Choose the theme that is specified in the themes section.
+// Default: default
+// 
+// theme "gruvbox-dark"
+ 
+// Choose the base input mode of zellij.
+// Default: normal
+// 
+default_mode "normal"
+ 
+// Choose the path to the default shell that zellij will use for opening new panes
+// Default: $SHELL
+// 
+// default_shell "fish"
+default_shell "{{ zellij_shell }}"
+ 
+// Choose the path to override cwd that zellij will use for opening new panes
+// 
+// default_cwd "/tmp"
+ 
+// The name of the default layout to load on startup
+// Default: "default"
+// 
+// default_layout "compact"
+ 
+// The folder in which Zellij will look for layouts
+// (Requires restart)
+// 
+// layout_dir "/tmp"
+layout_dir "{{ zellij_layout_dir }}"
+ 
+// The folder in which Zellij will look for themes
+// (Requires restart)
+// 
+// theme_dir "/tmp"
+theme_dir "{{ zellij_themes_dir }}"
+ 
+// Toggle enabling the mouse mode.
+// On certain configurations, or terminals this could
+// potentially interfere with copying text.
+// Options:
+//   - true (default)
+//   - false
+// 
+// mouse_mode false
+ 
+// Toggle having pane frames around the panes
+// Options:
+//   - true (default, enabled)
+//   - false
+// 
+pane_frames false
+ 
+// When attaching to an existing session with other users,
+// should the session be mirrored (true)
+// or should each user have their own cursor (false)
+// (Requires restart)
+// Default: false
+// 
+// mirror_session true
+ 
+// Choose what to do when zellij receives SIGTERM, SIGINT, SIGQUIT or SIGHUP
+// eg. when terminal window with an active zellij session is closed
+// (Requires restart)
+// Options:
+//   - detach (Default)
+//   - quit
+// 
+// on_force_close "quit"
+ 
+// Configure the scroll back buffer size
+// This is the number of lines zellij stores for each pane in the scroll back
+// buffer. Excess number of lines are discarded in a FIFO fashion.
+// (Requires restart)
+// Valid values: positive integers
+// Default value: 10000
+// 
+// scroll_buffer_size 10000
+ 
+// Provide a command to execute when copying text. The text will be piped to
+// the stdin of the program to perform the copy. This can be used with
+// terminal emulators which do not support the OSC 52 ANSI control sequence
+// that will be used by default if this option is not set.
+// Examples:
+//
+// copy_command "xclip -selection clipboard" // x11
+// copy_command "wl-copy"                    // wayland
+// copy_command "pbcopy"                     // osx
+ 
+// Choose the destination for copied text
+// Allows using the primary selection buffer (on x11/wayland) instead of the system clipboard.
+// Does not apply when using copy_command.
+// Options:
+//   - system (default)
+//   - primary
+// 
+// copy_clipboard "primary"
+ 
+// Enable automatic copying (and clearing) of selection when releasing mouse
+// Default: true
+// 
+// copy_on_select true
+ 
+// Path to the default editor to use to edit pane scrollbuffer
+// Default: $EDITOR or $VISUAL
+// scrollback_editor "/usr/bin/vim"
+scrollback_editor "{{ nvim_exe }}"
+ 
+// A fixed name to always give the Zellij session.
+// Consider also setting `attach_to_session true,`
+// otherwise this will error if such a session exists.
+// Default: <RANDOM>
+// 
+// session_name "My singleton session"
+ 
+// When `session_name` is provided, attaches to that session
+// if it is already running or creates it otherwise.
+// Default: false
+// 
+attach_to_session true
+ 
+// Toggle between having Zellij lay out panes according to a predefined set of layouts whenever possible
+// Options:
+//   - true (default)
+//   - false
+// 
+// auto_layout false
+
+env {
+    {{ zellij_env_variables_file | indent(4) }}
+}

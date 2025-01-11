@@ -1,0 +1,42 @@
+---
+nvim_lazy_url: "https://github.com/folke/lazy.nvim.git"
+nvim_xdg_config_dir: "{{ xdg_config_dir }}"
+nvim_xdg_data_dir: "{{ xdg_share_dir }}"
+nvim_xdg_cache_dir: "{{ xdg_cache_dir }}"
+nvim_config_dir: "{{ xdg_config_dir }}/nvim"
+nvim_share_dir: "{{ xdg_share_dir }}/nvim"
+nvim_cache_dir: "{{ xdg_cache_dir }}/nvim"
+default_nvim_config_dir: "{{ nvim_xdg_config_dir }}/nvim"
+default_nvim_share_dir: "{{ nvim_xdg_data_dir }}/nvim"
+default_nvim_cache_dir: "{{ nvim_xdg_cache_dir }}/nvim"
+nvim_python_exe: "{{ tool_system_path }}nvim-python3"
+nvim_make_exe: "{{ make_exe }}"
+nvim_fterm_cmds:
+  - cmd_name: ManLs
+    cmd_str: "man ls"
+  - cmd_name: BTop
+    cmd_str: "btop"
+nvim_nerd_font: "true"
+nvim_checkhealth_log:
+  - "--headless"
+  - "\"+checkhealth\""
+  - "\"+w\\! health.log\""
+  - "+qa"
+nvim_checkhealth_log_cmd: "{{ 'nvim ' + nvim_checkhealth_log | join(' ') }}"
+nvim_exe_default: "{{ bin_directory }}nvim"
+nvim_exe: "nvim"
+nvim_exe_bone_bash: "NVIM_APPNAME=nvim-bone-modular {{ nvim_exe }}"
+nvim_exe_bone_bash_cmd:
+  - "NVIM_APPNAME=nvim-bone-modular"
+  - "bash"
+  - "-c"
+  - "'{{ nvim_exe }}' 'vars/term-dev.yml'"
+nvim_exe_bone: "{{ nvim_exe_bone_bash }}"
+nvim_extra_plugins:
+  cpp: "{{ nvim_extra_plugins_cpp }}"
+  python: "{{ nvim_extra_plugins_python }}"
+  rust: "{{ nvim_extra_plugins_rust }}"
+extra_nvim_language_keymaps:
+  cpp: "{{ extra_nvim_language_keymaps_cpp }}"
+  python: "{{ extra_nvim_language_keymaps_python }}"
+  rust: "{{ extra_nvim_language_keymaps_rust }}"

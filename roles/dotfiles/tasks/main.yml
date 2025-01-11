@@ -1,2 +1,142 @@
 ---
-# tasks file for code
+- name: Ansible Variables | Setup Ansible Variables | task
+  import_tasks: tasks/setup_baremetal_vars.yml
+  when: baremetal == 'yes'
+  tags:
+    - always
+
+- name: Ansible Variables | Setup Ansible Variables | task
+  import_tasks: tasks/setup_homebrew_vars.yml
+  when: homebrew == 'yes'
+  tags:
+    - always
+
+- name: Env | Setup Environment | task
+  import_tasks: tasks/setup_env.yml
+  tags:
+    - setup
+
+- name: Shell | Install Scripts | task
+  import_tasks: tasks/install_scripts.yml
+  tags:
+    - scripts
+
+- name: Install Zsh Config
+  import_tasks: tasks/install_zsh.yml
+  tags:
+    - zsh
+    - env
+
+- name: Install Nushell Config
+  import_tasks: tasks/install_nushell.yml
+  tags:
+    - nushell
+    - env
+
+- name: Install Bash Config
+  import_tasks: tasks/install_bash.yml
+  tags:
+    - bash
+    - env
+
+- name: Install Tcsh Config
+  import_tasks: tasks/install_tcsh.yml
+  tags:
+    - tcsh
+    - env
+
+- name: Install Git Config
+  import_tasks: tasks/install_git.yml
+  tags:
+    - git
+    - env
+
+- name: Install Lazygit Config
+  import_tasks: tasks/install_lazygit.yml
+  tags:
+    - git
+    - env
+
+- name: Install Gitui Config
+  import_tasks: tasks/install_gitui.yml
+  tags:
+    - git
+    - env
+
+- name: Install Yazi Config
+  import_tasks: tasks/install_yazi.yml
+  tags:
+    - yazi
+    - env
+
+- name: Install Navi Config
+  import_tasks: tasks/install_navi.yml
+  tags:
+    - navi
+    - env
+
+- name: Install Broot Config
+  import_tasks: tasks/install_broot.yml
+  tags:
+    - broot
+    - env
+
+- name: Cleanup Neovim Config
+  import_tasks: tasks/install_neovim_configs_cleanup.yml
+  tags:
+    - neovim-config-clean
+    - editor
+
+- name: Install Neovim Config
+  import_tasks: tasks/install_neovim_configs.yml
+  tags:
+    - neovim-config
+    - editor
+
+- name: Install Helix Config
+  import_tasks: tasks/install_helix_config.yml
+  tags:
+    - helix-config
+    - editor
+
+- name: Install Tmux Config
+  import_tasks: tasks/install_tmux.yml
+  tags:
+    - tmux
+    - session
+
+- name: Install Zellij Config
+  import_tasks: tasks/install_zellij.yml
+  tags:
+    - zellij
+    - session
+
+- name: Install Zellij Plugins
+  import_tasks: tasks/install_zellij_plugins.yml
+  tags:
+    - zellij
+    - session
+
+- name: Install Ranger-Zoxide Plugin
+  import_tasks: tasks/install_ranger_zoxide.yml
+  tags:
+    - ranger
+    - env
+
+- name: Install Bookmarks
+  import_tasks: tasks/install_bookmarks.yml
+  tags:
+    - bookmarks
+    - env
+
+- name: Install Direnv Config
+  import_tasks: tasks/install_direnv.yml
+  tags:
+    - direnv
+    - env
+
+- name: Install Joplin Config
+  import_tasks: tasks/install_joplin.yml
+  tags:
+    - joplin
+    - notes

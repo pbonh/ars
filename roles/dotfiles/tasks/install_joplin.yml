@@ -1,0 +1,26 @@
+---
+- name: Joplin | Setup Joplin Config Directory | template
+  file:
+    path: "{{ joplin_config_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Joplin | Copies Joplin Keybindings | template
+  template:
+    src: joplin/joplin-keymap.json.j2
+    dest: "{{ joplin_config_dir }}/keymap.json"
+
+- name: Joplin | Set File Sync | command
+  changed_when: false
+  ignore_errors: true
+  command: "{{ joplin_exe }} config sync.target 2"
+
+- name: Joplin | Set File Sync Directory | command
+  changed_when: false
+  ignore_errors: true
+  command: "{{ joplin_exe }} config sync.2.path {{ nvim_neorg_dir }}"
+
+- name: Joplin | Set Editor | command
+  changed_when: false
+  ignore_errors: true
+  command: "{{ joplin_exe }} config editor \"{{ nvim_exe }}\""

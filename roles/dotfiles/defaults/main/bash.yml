@@ -1,0 +1,165 @@
+---
+bash_plugins: "{{ dotfiles_user_home }}/.bashrc.d"
+bash_fzf_tab: "{{ bash_plugins }}/fzf-tab-completion"
+bash_git_fuzzy: "{{ bash_plugins }}/git-fuzzy"
+bash_default_options: |
+  if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+  fi
+bash_default_env: |
+  {% for path_info in path_directories -%}
+  {% if path_directories[path_info]['prepend'] == false %}
+  {{ "export PATH=$PATH:" + path_directories[path_info]['path'] }}
+  {% else %}
+  {{ "export PATH=" + path_directories[path_info]['path'] + ":$PATH" }}
+  {% endif %}
+  {% endfor %}
+  # export SHELL="{{ interactive_shell }}"
+  export GIT_SSH="{{ git_ssh }}"
+  export EDITOR="{{ nvim_exe }}"
+  export VISUAL="{{ nvim_exe }} --cmd 'let g:flatten_wait=1'"
+  # export LANG=en_US.UTF-8
+  # export LC_CTYPE=en_US.UTF-8
+  export LANG=C.UTF-8
+  export LC_CTYPE=C.UTF-8
+bash_homebrew_env: ""
+bash_extra_env: ""
+bash_default_plugins: |
+  if [ -d {{ bash_plugins }} ]; then
+    for rc in {{ bash_plugins }}/*; do
+      if [ -f "$rc" ]; then
+        . "$rc"
+      fi
+    done
+  fi
+  unset rc
+bash_plugins_source:
+  devbox:
+    name: devbox
+    script: |
+      # Add nix to PATH manually
+      export PATH=$PATH:{{ devbox_nix_root_path }}
+      # Source Devbox Global
+      if  command -v devbox &> /dev/null
+      then
+        eval "$(devbox global shellenv --init-hook)"
+      fi
+  homebrew:
+    name: homebrew
+    script: |
+      if [ -d {{ homebrew_path }} ]; then
+        eval "$({{ homebrew_path }}/brew shellenv)"
+      fi
+bash_fzf_setup: |
+  eval "$({{ fzf_exe }} --bash)"
+  export PATH="$PATH:{{ bash_git_fuzzy }}/bin"
+  fzf_find_edit() {
+    local file=$(
+      {{ fzf_exe }} --query="$1" --no-multi --select-1 --exit-0 \
+          --preview 'bat --color=always --line-range :500 {}'
+    )
+    if [[ -n "$file" ]]; then
+        $EDITOR "$file"
+    fi
+  }
+  fzf_change_directory() {
+    local directory=$(
+      fd --type d | \
+        {{ fzf_exe }} --query="$1" --no-multi --select-1 --exit-0 \
+            --preview 'tree -C {} | head -100'
+    )
+    if [[ -n $directory ]]; then
+        cd "$directory"
+    fi
+  }
+  fzf_kill() {
+    if [[ $(uname) == Linux ]]; then
+        local pids=$(ps -f -u $USER | sed 1d | {{ fzf_exe }} | awk '{print $2}')
+    elif [[ $(uname) == Darwin ]]; then
+        local pids=$(ps -f -u $USER | sed 1d | {{ fzf_exe }} | awk '{print $3}')
+    else
+        echo 'Error: unknown platform'
+        return
+    fi
+    if [[ -n "$pids" ]]; then
+        echo "$pids" | xargs kill -9 "$@"
+    fi
+  }
+  alias ffe='fzf_find_edit'
+  alias fcd='fzf_change_directory'
+  alias fkill='fzf_kill'
+  {% for fzf_env_var in fzf_env -%}
+  {{ "export " + fzf_env[fzf_env_var]['name'] + "='" + fzf_env[fzf_env_var]['env'] + "'" }}
+  {% endfor %}
+bash_yazi_setup: |
+  yy() {
+    local tmp="$(mktemp -t "yazi-cwd.XXXXX")"
+    {{ yazi_exe }} "$@" --cwd-file="$tmp"
+    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+            cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+  }
+  alias yy='yy'
+bash_nvim_setup: |
+  {% for nvim_profile_name in nvim_xdg_modular_profiles -%}
+  {{ "alias vim-" + nvim_xdg_modular_profiles[nvim_profile_name]['name'] + "='NVIM_APPNAME=" + nvim_xdg_modular_profiles[nvim_profile_name]['appname'] + "-modular " + nvim_exe + "'" }}
+  {% endfor %}
+bash_navi_setup: |
+  # eval "$({{ navi_exe }} widget bash)"
+  _navi_call() {
+     local result="$({{ navi_exe }} "$@" </dev/tty)"
+     printf "%s" "$result"
+  }
+  _navi_widget() {
+     local -r input="${READLINE_LINE}"
+     local -r last_command="$(echo "${input}" | {{ navi_exe }} fn widget::last_command)"
+
+     if [ -z "${last_command}" ]; then
+        local -r output="$(_navi_call --print)"
+     else
+        local -r find="${last_command}_NAVIEND"
+        local -r replacement="$(_navi_call --print --query "$last_command")"
+        local output="$input"
+        if [ -n "$replacement" ]; then
+           output="${input}_NAVIEND"
+           output="${output//$find/$replacement}"
+        fi
+     fi
+
+     READLINE_LINE="$output"
+     READLINE_POINT=${% raw %}{{% endraw %}#READLINE_LINE}
+  }
+  _navi_widget_legacy() {
+     _navi_call --print
+  }
+  if [ ${BASH_VERSION:0:1} -lt 4 ]; then
+     bind '"\C-a": " \C-b\C-k \C-u`_navi_widget_legacy`\e\C-e\C-a\C-y\C-h\C-e\e \C-y\ey\C-x\C-x\C-f"'
+  else
+     bind -x '"\C-a": _navi_widget'
+  fi
+bash_default_aliases: |
+  alias cat={{ bat_exe }}
+  alias ls='{{ lsd_exe }} --group-dirs first'
+  alias ll='{{ lsd_exe }} --group-dirs first -l'
+  alias jchoose='{{ just_exe }} --choose'
+  alias vim='{{ nvim_exe_bone_bash }}'
+  alias cdg='cd $(cdscuts_glob_echo | {{ fzf_exe }})'
+  alias nvi='{{ navi_shell_cmd }}'
+bash_extra_aliases: ""
+bash_ssh_setup: |
+  env={{ dotfiles_user_home }}/.ssh/agent.env
+  agent_load_env () { test -f "$env" && . "$env" >| /dev/null ; }
+  agent_start () {
+      (umask 077; ssh-agent >| "$env")
+      . "$env" >| /dev/null ; }
+  agent_load_env
+  # agent_run_state: 0=agent running w/ key; 1=agent w/o key; 2=agent not running
+  agent_run_state=$(ssh-add -l >| /dev/null 2>&1; echo $?)
+  if [ ! "$SSH_AUTH_SOCK" ] || [ $agent_run_state = 2 ]; then
+      agent_start
+      ssh-add
+  elif [ "$SSH_AUTH_SOCK" ] && [ $agent_run_state = 1 ]; then
+      ssh-add
+  fi
+  unset env
