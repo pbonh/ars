@@ -6,8 +6,16 @@ Devbox Configuration
 Requirements
 ------------
 
-Install Devbox
+EITHER
+Install via Bootstrap Script
 ```bash
+wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_devbox.sh | bash
+```
+OR
+Install Nix & Devbox Manually
+```bash
+curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | \
+  sh -s -- install
 curl -fsSL https://get.jetify.com/devbox | bash
 ```
 

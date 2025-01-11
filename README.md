@@ -11,6 +11,16 @@ Configure Git/SSH
 wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_gitssh.sh | bash
 ```
 
+Install Devbox
+```bash
+wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_devbox.sh | bash
+```
+
+Install Homebrew
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
 Setup `.envrc` File(Example)
 ```bash
 touch .envrc
