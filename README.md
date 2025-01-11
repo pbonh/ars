@@ -6,6 +6,11 @@ My Developer Dotfiles, powered by Ansible.
 Installation
 ------------
 
+Install Ansible
+```bash
+wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_ansible.sh | bash
+```
+
 Configure Git/SSH
 ```bash
 wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_gitssh.sh | bash

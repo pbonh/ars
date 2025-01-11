@@ -1,4 +1,0 @@
----
-- name: Install Global Devbox Tools
-  import_role:
-    name: devbox

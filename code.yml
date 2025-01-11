@@ -1,0 +1,12 @@
+---
+- name: Install Developer Coding Tools
+  import_role:
+    name: devbox
+
+- name: Configure Shell Environment
+  import_role:
+    name: shell
+
+- name: Configure Developer Environment
+  import_role:
+    name: code

@@ -1,2 +1,3 @@
 ---
-- import_playbook: devbox.yml
+- import_playbook: code.yml
+- import_playbook: shell.yml

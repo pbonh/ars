@@ -16,6 +16,7 @@ if [[ ! -d "ansible" ]]; then
     done
 fi
 
-# Install Extra Ansible Modules
-python ansible-galaxy install -r requirements.yml
-python ansible-galaxy collection install -r requirements.yml
+# Example Usage
+# python ansible-galaxy install -r requirements.yml
+# python ansible-galaxy collection install -r requirements.yml
+# python ansible-pull -U https://github.com/pbonh/ars.git -i "$(hostname --short),"

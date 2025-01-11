@@ -1,0 +1,8 @@
+---
+- name: Install Shell Tools
+  import_role:
+    name: devbox
+
+- name: Configure Shell Environment
+  import_role:
+    name: shell
