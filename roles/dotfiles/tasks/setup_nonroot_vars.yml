@@ -17,6 +17,7 @@
       $env.PATH = ($env.PATH | split row (char esep) | append '{{ cargo_path }}')
       $env.PATH = ($env.PATH | split row (char esep) | append '{{ fzf_path }}')
     nushell_carapace_env: ""
+    nushell_carapace_config: ""
     treesitter_compiler_exe: "{{ gcc_exe }}"
     atuin_exe: "{{ cargo_path }}atuin"
     astgrep_exe: "{{ cargo_path }}sg"
