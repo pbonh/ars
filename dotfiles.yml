@@ -1,24 +1,41 @@
 ---
 - name: Install Tools
-  import_role:
-    name: devbox
-  tags:
-    - devbox
+  hosts: localhost
+  connection: local
+  tasks:
+    - import_role:
+        name: devbox
+      tags:
+        - install
+        - devbox
 
 - name: Install Tools
-  import_role:
-    name: homebrew
-  tags:
-    - homebrew
+  hosts: localhost
+  connection: local
+  tasks:
+    - import_role:
+        name: homebrew
+      tags:
+        - install
+        - homebrew
 
 - name: Install Tools
-  import_role:
-    name: nonroot
-  tags:
-    - nonroot
+  hosts: localhost
+  connection: local
+  tasks:
+    - import_role:
+        name: nonroot
+      tags:
+        - install
+        - nonroot
 
 - name: Configure Environment
-  import_role:
-    name: dotfiles
-  tags:
-    - always
+  hosts: localhost
+  connection: local
+  vars:
+    tool_provider: "{{ lookup('env', 'TOOL_PROVIDER') }}"
+  tasks:
+    - import_role:
+        name: dotfiles
+      tags:
+        - always

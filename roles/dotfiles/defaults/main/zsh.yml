@@ -7,25 +7,8 @@ zsh_fzf_tab: "{{ zsh_plugins }}/fzf-tab"
 zsh_git_fuzzy: "{{ zsh_plugins }}/git-fuzzy"
 zsh_git_fuzzy_upstream: origin
 zsh_git_fuzzy_branch: main
-zsh_homebrew_env: |
-    if [[ -n {{ homebrew_path }} ]]; then
-      eval "$({{ homebrew_path }}/brew shellenv)"
-    fi
-zsh_devbox_env: |
-  #. /home/{{ zsh_username }}/.nix-profile/etc/profile.d/nix.sh
-  #. /home/{{ zsh_username }}/.nix-profile/etc/profile.d/hm-session-vars.sh
-  export PATH=$PATH:{{ devbox_nix_root_path }}
-  # export LANG=C.UTF-8
-  # export LC_CTYPE=en_US.UTF-8
-  # export LC_ALL=en_US.UTF-8
-  export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
-  # export LANG=en_US.UTF-8
-  export LANG=C.UTF-8
-  export LC_CTYPE=C.UTF-8
-  if  command -v devbox &> /dev/null
-  then
-    eval "$(devbox global shellenv --init-hook)"
-  fi
+zsh_homebrew_env: ""
+zsh_devbox_env: ""
 zsh_default_options: |
   HISTFILE=~/.histfile
   HISTSIZE=1000

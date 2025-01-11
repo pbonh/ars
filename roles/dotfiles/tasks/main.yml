@@ -1,13 +1,19 @@
 ---
 - name: Ansible Variables | Setup Ansible Variables | task
-  import_tasks: tasks/setup_baremetal_vars.yml
-  when: baremetal == 'yes'
+  import_tasks: tasks/setup_devbox_vars.yml
+  when: tool_provider == 'devbox'
   tags:
     - always
 
 - name: Ansible Variables | Setup Ansible Variables | task
   import_tasks: tasks/setup_homebrew_vars.yml
-  when: homebrew == 'yes'
+  when: tool_provider == 'homebrew'
+  tags:
+    - always
+
+- name: Ansible Variables | Setup Ansible Variables | task
+  import_tasks: tasks/setup_nonroot_vars.yml
+  when: tool_provider == 'nonroot'
   tags:
     - always
 

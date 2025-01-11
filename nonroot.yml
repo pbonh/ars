@@ -1,4 +1,7 @@
 ---
 - name: Install Local(Non-Root User) Tools
-  import_role:
-    name: nonroot
+  hosts: localhost
+  connection: local
+  tasks:
+    - import_role:
+        name: nonroot

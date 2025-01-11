@@ -7,8 +7,6 @@
 
 - name: Vars | Set Tool Exe Variables | set_fact
   ansible.builtin.set_fact:
-    zsh_devbox_env: ""
-    nu_devbox_env: ""
     treesitter_compiler_exe: "{{ gcc_exe }}"
     atuin_exe: "{{ cargo_path }}atuin"
     astgrep_exe: "{{ cargo_path }}sg"

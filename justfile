@@ -11,11 +11,8 @@ install-requirements:
   {{ task_prelude }} ansible-galaxy install -r requirements.yml
   {{ task_prelude }} ansible-galaxy collection install -r requirements.yml
 
-shell tag='devbox':
-  {{ task_prelude }} ansible-playbook shell.yml --tags "{{ tag }}"
-
-code tag='devbox':
-  {{ task_prelude }} ansible-playbook code.yml --tags "{{ tag }}"
+dotfiles tag='devbox':
+  {{ task_prelude }} ansible-playbook dotfiles.yml --tags "{{ tag }}"
 
 devbox:
   {{ task_prelude }} ansible-playbook devbox.yml
@@ -25,3 +22,6 @@ homebrew:
 
 nonroot:
   {{ task_prelude }} ansible-playbook nonroot.yml
+
+neovim:
+  {{ task_prelude }} ansible-playbook dotfiles.yml --tags "neovim-config" --skip-tags "install"

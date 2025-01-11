@@ -1,7 +1,6 @@
 ---
 nushell_config_dir: "{{ xdg_config_dir }}/nushell"
-nu_devbox_env: |
-  $env.PATH = ($env.PATH | split row (char esep) | append '{{ devbox_nix_root_path }}')
+nu_devbox_env: ""
 nu_homebrew_env: ""
 nushell_path_env: |
   {% for path_info in path_directories -%}

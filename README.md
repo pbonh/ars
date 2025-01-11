@@ -31,7 +31,7 @@ Checkout Reop & Setup `.envrc` File(Example)
 ```bash
 touch .envrc
 ln -s .envrc .env
-echo "DOTFILES_TASK_PRELUDE=python" > .envrc
+echo "TOOL_PROVIDER=\"homebrew\"" > .envrc
 ```
 OR
 Ansible Pull
