@@ -7,9 +7,15 @@
 
 - name: Vars | Set Tool Exe Variables | set_fact
   ansible.builtin.set_fact:
-    bash_nonroot_env: "export PATH=$PATH:{{ cargo_path }}"
-    zsh_nonroot_env: "export PATH=$PATH:{{ cargo_path }}"
-    nu_nonroot_env: "$env.PATH = ($env.PATH | split row (char esep) | append '{{ cargo_path }}')"
+    bash_nonroot_env: |
+      export PATH=$PATH:{{ cargo_path }}
+      export PATH=$PATH:{{ fzf_path }}
+    zsh_nonroot_env: |
+      export PATH=$PATH:{{ cargo_path }}
+      export PATH=$PATH:{{ fzf_path }}
+    nu_nonroot_env: |
+      $env.PATH = ($env.PATH | split row (char esep) | append '{{ cargo_path }}')
+      $env.PATH = ($env.PATH | split row (char esep) | append '{{ fzf_path }}')
     treesitter_compiler_exe: "{{ gcc_exe }}"
     atuin_exe: "{{ cargo_path }}atuin"
     astgrep_exe: "{{ cargo_path }}sg"
@@ -51,5 +57,5 @@
     yazi_exe: "{{ cargo_path }}yazi"
     zellij_exe: "{{ cargo_path }}zellij"
     zoxide_exe: "{{ cargo_path }}zoxide"
-    fzf_exe: "{{ fzf_install_dir }}/bin/fzf"
+    fzf_exe: "{{ fzf_path }}/fzf"
     nvim_exe: "{{ nvim_exe_default }}"
