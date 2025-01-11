@@ -21,11 +21,17 @@ Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-Setup `.envrc` File(Example)
+EITHER
+Checkout Reop & Setup `.envrc` File(Example)
 ```bash
 touch .envrc
 ln -s .envrc .env
 echo "DOTFILES_TASK_PRELUDE=python" > .envrc
+```
+OR
+Ansible Pull
+```bash
+ansible-pull -U https://github.com/pbonh/ars.git -i "$(hostname --short),"
 ```
 
 License
