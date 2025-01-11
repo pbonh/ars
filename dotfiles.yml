@@ -37,5 +37,3 @@
   tasks:
     - import_role:
         name: dotfiles
-      tags:
-        - always

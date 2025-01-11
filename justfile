@@ -25,3 +25,6 @@ nonroot:
 
 neovim:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "neovim-config" --skip-tags "install"
+
+zellij:
+  {{ task_prelude }} ansible-playbook dotfiles.yml --tags "zellij" --skip-tags "install"
