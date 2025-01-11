@@ -47,6 +47,3 @@ path_directories:
     prepend: false
     path: "{{ tool_install_bin }}"
 lang_tools_nix: "{{ cpp_tools_nix + python_tools_nix }}"
-install_languages:
-  - cpp
-  - python
