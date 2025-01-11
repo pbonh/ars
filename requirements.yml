@@ -1,0 +1,10 @@
+---
+collections:
+- community.general
+- ansible.posix
+
+roles:
+- smbambling.scl
+- jaredhocutt.gnome_extensions
+- geerlingguy.nodejs
+- ktosiek.nix

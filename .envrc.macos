@@ -1,0 +1,1 @@
+DOTFILES_TASK_PRELUDE="eval \"$(/opt/homebrew/bin/brew shellenv)\""
