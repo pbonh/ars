@@ -24,6 +24,7 @@ gcc_exe: /usr/bin/gcc
 gpp_exe: /usr/bin/g++
 make_exe: "make"
 direnv_exe: "{{ tool_system_path }}direnv"
+just_exe: "{{ tool_system_path }}just"
 nu_exe: "nu"
 interactive_shell_cmd: "nu"
 interactive_shell: "{{ nu_exe }}"

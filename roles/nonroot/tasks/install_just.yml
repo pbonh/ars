@@ -1,0 +1,6 @@
+---
+- name: Just | Install Just | shell
+  shell: "curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to {{ tool_system_path }}"
+  args:
+    executable: /bin/bash
+    creates: "{{ just_exe }}"

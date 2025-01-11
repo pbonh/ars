@@ -4,6 +4,11 @@
   tags:
     - setup
 
+- name: Install Just App
+  import_tasks: tasks/install_just.yml
+  tags:
+    - just
+
 - name: Shell | Install FZF | task
   import_tasks: tasks/install_fzf.yml
   tags:
