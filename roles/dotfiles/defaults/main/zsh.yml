@@ -8,6 +8,7 @@ zsh_git_fuzzy: "{{ zsh_plugins }}/git-fuzzy"
 zsh_git_fuzzy_upstream: origin
 zsh_git_fuzzy_branch: main
 zsh_homebrew_env: ""
+zsh_nonroot_env: ""
 zsh_devbox_env: ""
 zsh_default_options: |
   HISTFILE=~/.histfile
@@ -21,6 +22,7 @@ zsh_default_options: |
 zsh_default_env: |
   {{ zsh_devbox_env }}
   {{ zsh_homebrew_env }}
+  {{ zsh_nonroot_env }}
   {% for path_info in path_directories -%}
   {% if path_directories[path_info]['prepend'] == false %}
   {{ "export PATH=$PATH:" + path_directories[path_info]['path'] }}

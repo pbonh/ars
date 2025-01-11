@@ -7,6 +7,9 @@
 
 - name: Vars | Set Tool Exe Variables | set_fact
   ansible.builtin.set_fact:
+    bash_nonroot_env: "export PATH=$PATH:{{ cargo_path }}"
+    zsh_nonroot_env: "export PATH=$PATH:{{ cargo_path }}"
+    nu_nonroot_env: "$env.PATH = ($env.PATH | split row (char esep) | append '{{ cargo_path }}')"
     treesitter_compiler_exe: "{{ gcc_exe }}"
     atuin_exe: "{{ cargo_path }}atuin"
     astgrep_exe: "{{ cargo_path }}sg"

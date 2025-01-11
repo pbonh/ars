@@ -2,6 +2,7 @@
 nushell_config_dir: "{{ xdg_config_dir }}/nushell"
 nu_devbox_env: ""
 nu_homebrew_env: ""
+nu_nonroot_env: ""
 nushell_path_env: |
   {% for path_info in path_directories -%}
   {% if path_directories[path_info]['prepend'] == false %}

@@ -9,6 +9,7 @@ bash_default_options: |
 bash_default_env: |
   {{ bash_devbox_env }}
   {{ bash_homebrew_env }}
+  {{ bash_nonroot_env }}
   {% for path_info in path_directories -%}
   {% if path_directories[path_info]['prepend'] == false %}
   {{ "export PATH=$PATH:" + path_directories[path_info]['path'] }}
@@ -26,6 +27,7 @@ bash_default_env: |
   export LC_CTYPE=C.UTF-8
 bash_devbox_env: ""
 bash_homebrew_env: ""
+bash_nonroot_env: ""
 bash_extra_env: ""
 bash_default_plugins: |
   if [ -d {{ bash_plugins }} ]; then
