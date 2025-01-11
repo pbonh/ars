@@ -1,17 +1,17 @@
-Shell
+Code
 =========
 
-Shell Configuration
+Tool Configuration
 
 Requirements
 ------------
 
-Devbox or Homebrew
+Devbox or Homebrew or Non-Root
 
 Role Variables
 --------------
 
-Configuration files for shells and related tools.
+Configuration files for the tools.
 
 Dependencies
 ------------
@@ -19,14 +19,16 @@ Dependencies
 - Devbox
 OR
 - Homebrew
+OR
+- Non-Root
 
 Example Playbook
 ----------------
 
 ```yaml
-- name: Configure Shells
+- name: Configure Tools
   import_role:
-    name: shell
+    name: dotfiles
 ```
 
 License

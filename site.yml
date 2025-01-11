@@ -1,2 +1,2 @@
 ---
-- import_playbook: code.yml
+- import_playbook: dotfiles.yml

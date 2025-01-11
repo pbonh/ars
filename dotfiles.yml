@@ -17,8 +17,8 @@
   tags:
     - nonroot
 
-- name: Configure Shell Environment
+- name: Configure Environment
   import_role:
-    name: shell
+    name: dotfiles
   tags:
     - always
