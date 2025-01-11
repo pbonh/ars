@@ -1,6 +1,7 @@
 ---
 system_home: "/home"
 immutable_system_home: "/var/home"
+install_languages: []
 dotfiles_user_home: "{{ ansible_env.HOME }}"
 default_home_local: "{{ dotfiles_user_home }}/.local"
 tool_install_dir: "{{ default_home_local }}"
