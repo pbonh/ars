@@ -22,11 +22,13 @@
     - helix-app
     - editor
 
-- name: Install Direnv App
-  import_tasks: tasks/install_direnv.yml
-  tags:
-    - direnv
-    - env
+# # Disabling, since cannot be run as non-root
+# # https://github.com/direnv/direnv/issues/1316
+# - name: Install Direnv App
+#   import_tasks: tasks/install_direnv.yml
+#   tags:
+#     - direnv
+#     - env
 
 - name: Install CLI-FM App
   import_tasks: tasks/install_clifm.yml
