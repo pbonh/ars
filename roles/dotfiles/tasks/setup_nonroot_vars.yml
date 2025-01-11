@@ -16,6 +16,7 @@
     nu_nonroot_env: |
       $env.PATH = ($env.PATH | split row (char esep) | append '{{ cargo_path }}')
       $env.PATH = ($env.PATH | split row (char esep) | append '{{ fzf_path }}')
+    nushell_carapace_env: ""
     treesitter_compiler_exe: "{{ gcc_exe }}"
     atuin_exe: "{{ cargo_path }}atuin"
     astgrep_exe: "{{ cargo_path }}sg"
@@ -51,6 +52,7 @@
     sd_exe: "{{ cargo_path }}sd"
     skim_exe: "{{ cargo_path }}sk"
     starship_exe: "{{ cargo_path }}starship"
+    carapace_exe: "{{ cargo_path }}carapace"
     wikitui_exe: "{{ cargo_path }}wiki-tui"
     xcp_exe: "{{ cargo_path }}xcp"
     xplr_exe: "{{ cargo_path }}xplr"

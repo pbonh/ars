@@ -133,6 +133,9 @@ cargo_binstall_packages:
   starship:
     name: starship
     path: "{{ cargo_path }}starship"
+  carapace:
+    name: carapace
+    path: "{{ cargo_path }}carapace"
   wikitui:
     name: wiki-tui
     path: "{{ cargo_path }}wiki-tui"
