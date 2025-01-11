@@ -1,0 +1,22 @@
+---
+- name: GCCDiag | Setup GCCDiag download folder | file
+  file:
+    path: "{{ gccdiag_download }}"
+    state: directory
+    mode: "0755"
+
+- name: GCCDiag | Setup GCCDiag build folder | file
+  file:
+    path: "{{ gccdiag_download }}/build"
+    state: directory
+    mode: "0755"
+
+- name: GCCDiag | Download GCCDiag | git
+  git:
+    repo: "{{ gccdiag_url }}"
+    dest: "{{ gccdiag_download }}"
+
+- name: GCCDiag | Install GCCDiag | shell
+  shell: "{{ nix_bin }}/cmake -B build -S. && {{ nix_bin }}/cmake --build build"
+  args:
+    chdir: "{{ gccdiag_download }}"

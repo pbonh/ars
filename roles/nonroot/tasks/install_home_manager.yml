@@ -1,0 +1,37 @@
+---
+- name: Nix | Setup Nix Config Directory | file
+  file:
+    path: "{{ nix_config_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Nix | Check if Home-Manager Channel is installed | shell
+  changed_when: false
+  shell: "{{ nix_bin }}/nix-channel --list | grep home-manager"
+  register: home_manager_check
+  ignore_errors: true
+
+- name: Nix | Add Home-Manager Channel | command
+  when: home_manager_check.rc != 0
+  command:
+    cmd: "{{ nix_bin }}/nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager"
+
+- name: Nix | Update Nix Channels | command
+  changed_when: false
+  command:
+    cmd: "{{ nix_bin }}/nix-channel --update"
+
+- name: Nix | Install Home-Manager | command
+  when: home_manager_check.rc != 0
+  shell:
+    cmd: "export NIX_PATH=$HOME/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/root/channels${NIX_PATH:+:$NIX_PATH} && . {{ ansible_env.HOME }}/.nix-profile/etc/profile.d/nix.sh && {{ nix_bin }}/nix-shell '<home-manager>' -A install"
+
+- name: Nix | Copies Nix Home-Manager Config | template
+  template:
+    src: "nix/home.nix.j2"
+    dest: "{{ nix_config_dir }}/home.nix"
+
+- name: Nix | Build & Install Home-Manager Environment | command
+  changed_when: false
+  command:
+    cmd: "{{ nix_bin }}/home-manager switch"

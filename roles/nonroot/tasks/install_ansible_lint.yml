@@ -1,0 +1,10 @@
+---
+- name: Nix | Install Ansible-Lint | pipx
+  community.general.pipx:
+    name: ansible-lint
+    executable: "{{ pipx_exe }}"
+
+- name: Nix | Install YamlLint | pipx
+  community.general.pipx:
+    name: yamllint
+    executable: "{{ pipx_exe }}"

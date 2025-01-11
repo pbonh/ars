@@ -1,0 +1,6 @@
+---
+- name: XXH | Install XXH | import_tasks
+  import_tasks: tasks/install_xxh.yml
+
+- name: Ansible-Lint | Install Ansible-Lint | import_tasks
+  import_tasks: tasks/install_ansible_lint.yml

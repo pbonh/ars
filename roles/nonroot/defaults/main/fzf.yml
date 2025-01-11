@@ -1,0 +1,5 @@
+---
+fzf_url: https://github.com/junegunn/fzf.git
+fzf_install_dir: "{{ dotfiles_user_home }}/.fzf"
+fzf_exe: "{{ fzf_install_dir }}/bin/fzf"
+fzf_share_exe: "{{ fzf_install_dir }}/bin/fzf-share"

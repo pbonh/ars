@@ -1,0 +1,34 @@
+---
+- name: VSCode CppTools | Setup VSCode extension download folder | file
+  file:
+    path: "{{ vscode_cpptools_download }}"
+    state: directory
+    mode: "0755"
+
+- name: VSCode CppTools | Setup VSCode extension folder | file
+  file:
+    path: "{{ vscode_cpptools_extension_path }}"
+    state: directory
+    mode: "0755"
+
+- name: VSCode CppTools | Download VSCode extension | get_url
+  get_url:
+    url: "https://github.com/microsoft/vscode-cpptools/releases/download/{{ vscode_cpptools_version }}/{{ vscode_cpptools_extension }}.vsix"
+    dest: "{{ vscode_cpptools_vsix_file_path }}"
+
+- name: VSCode CppTools | Extract VSCode extension | unarchive
+  unarchive:
+    src: "{{ vscode_cpptools_vsix_file_path }}"
+    dest: "{{ vscode_cpptools_extension_path }}"
+    creates: "{{ vscode_cpptools_executable_path }}"
+
+- name: VSCode CppTools | Make Extension executable | file
+  file:
+    dest: "{{ vscode_cpptools_executable_path }}"
+    mode: +x
+
+- name: VSCode CppTools | Copy File for Neovim Plugin | file
+  copy:
+    src: "{{ vscode_cpptools_extension_json_config }}"
+    dest: "{{ vscode_cpptools_extension_neovim_json_config }}"
+    mode: +x

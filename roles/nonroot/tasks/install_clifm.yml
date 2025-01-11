@@ -1,0 +1,15 @@
+---
+- name: CLIFM | Download CLIFM Repository | git
+  git:
+    repo: "{{ clifm_download_url }}"
+    dest: "{{ dot_download_dir }}/clifm"
+
+- name: CLIFM | Build CLIFM | make
+  ignore_errors: true
+  make:
+    chdir: "{{ dot_download_dir }}/clifm"
+    target: install
+    params:
+      PREFIX: "{{ clifm_install_prefix }}"
+      CC: "{{ gcc_exe }}"
+      CXX: "{{ gpp_exe }}"

@@ -1,2 +1,91 @@
 ---
-# tasks file for nonroot
+- name: Shell | Setup | task
+  import_tasks: tasks/setup_tools.yml
+  tags:
+    - setup
+
+- name: Shell | Install FZF | task
+  import_tasks: tasks/install_fzf.yml
+  tags:
+    - fzf
+    - env
+
+- name: Install Neovim
+  import_tasks: tasks/install_neovim_app.yml
+  tags:
+    - neovim-app
+    - editor
+
+- name: Install Helix App
+  import_tasks: tasks/install_helix_app.yml
+  tags:
+    - helix-app
+    - editor
+
+- name: Install Direnv App
+  import_tasks: tasks/install_direnv.yml
+  tags:
+    - direnv
+    - env
+
+- name: Install CLI-FM App
+  import_tasks: tasks/install_clifm.yml
+  tags:
+    - clifm
+    - notes
+
+- name: Musl | Install Rust Tools | task
+  import_tasks: tasks/install_rust_tools.yml
+  tags:
+    - rust-tools
+
+- name: Boost | Install CppTools | task
+  when: ansible_distribution != 'MacOSX' and 'cpp' in install_languages
+  import_tasks: install_cpp_tools.yml
+  tags:
+    - cpp
+
+- name: VSCode CppTools | Install VSCode CppTools | task
+  when: ansible_distribution != 'MacOSX' and 'cpp' in install_languages
+  import_tasks: install_vscode_cpptools.yml
+  tags:
+    - cpp
+
+- name: Musl | Install Python Development Tools | task
+  when: "'python' in install_languages"
+  import_tasks: tasks/install_python_dev.yml
+  tags:
+    - python-dev
+
+- name: Musl | Install Rust Development Tools | task
+  when: "'rust' in install_languages"
+  import_tasks: tasks/install_rust_dev.yml
+  tags:
+    - rust-dev
+
+# - name: Nix | Install Nix Home-Manager | task
+#   when: ansible_distribution != 'MacOSX'
+#   import_tasks: tasks/install_home_manager.yml
+#   tags:
+#     - home-manager
+#     - nix
+
+# - name: Nix | Install Node Tools | task
+#   when: ansible_distribution != 'MacOSX'
+#   import_tasks: tasks/install_node_tools.yml
+#   tags:
+#     - node-tools
+#     - nix
+
+# - name: Nix | Install Python Tools | task
+#   when: ansible_distribution != 'MacOSX'
+#   import_tasks: tasks/install_python_tools.yml
+#   tags:
+#     - python-tools
+#     - nix
+
+# - name: GCCDiag | Install GCCDiag | task
+#   import_tasks: install_gccdiag.yml
+#   tags:
+#     - cpp
+#   when: "'cpp' in install_languages"

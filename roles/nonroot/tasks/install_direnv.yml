@@ -1,0 +1,6 @@
+---
+- name: Direnv | Install Direnv | shell
+  shell: "curl -sfL https://direnv.net/install.sh | bash"
+  args:
+    executable: /bin/bash
+    creates: "{{ direnv_exe }}"

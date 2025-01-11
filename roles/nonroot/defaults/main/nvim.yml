@@ -1,0 +1,35 @@
+---
+nvim_version: "stable"
+nvim_appimage_version: "{{ nvim_version }}"
+nvim_appimage_url: "https://github.com/neovim/neovim/releases/download/{{ nvim_appimage_version }}/nvim.appimage"
+nvim_appimage_exe: "{{ tool_install_bin }}/nvim.appimage"
+nvim_exe_url: "https://github.com/neovim/neovim/releases/download/{{ nvim_version }}"
+nvim_src_install_option: false
+nvim_appimage_install_option: false
+nvim_src_url: "https://github.com/neovim/neovim"
+nvim_src_download: "{{ dot_download_dir }}/neovim"
+nvim_src_version: "stable"
+nvim_src_install_dir: "{{ tool_install_dir }}/neovim"
+nvim_src_install_exe: "{{ nvim_src_install_dir }}/bin/nvim"
+nvim_cmake_exe: "cmake"
+nvim_gcc_exe: "{{ gcc_exe }}"
+nvim_gpp_exe: "{{ gpp_exe }}"
+nvim_src_make_opts:
+  CMAKE_PRG: "{{ nvim_cmake_exe }}"
+  CMAKE_BUILD_TYPE: Release
+  CMAKE_EXTRA_FLAGS: "-DCMAKE_INSTALL_PREFIX={{ nvim_src_install_dir }} -DCMAKE_C_COMPILER={{ nvim_gcc_exe }} -DCMAKE_CXX_COMPILER={{ nvim_gpp_exe }}"
+nvim_download: nvim-linux64
+nvim_download_archive: "{{ nvim_download }}.tar.gz"
+nvim_download_dir: "{{ dot_download_dir }}"
+nvim_install_dir: "{{ nvim_download_dir }}/{{ nvim_download }}"
+nvim_install_download: "{{ nvim_download_dir }}/{{ nvim_download_archive }}"
+nvim_install_exe: "{{ nvim_download }}/bin/nvim"
+nvim_macos_download: nvim-macos
+nvim_macos_download_archive: "{{ nvim_macos_download }}.tar.gz"
+nvim_macos_download_dir: "{{ dot_download_dir }}"
+nvim_macos_install_dir: "{{ nvim_macos_download_dir }}/{{ nvim_macos_download }}"
+nvim_macos_install_download: "{{ nvim_macos_download_dir }}/{{ nvim_macos_download_archive }}"
+nvim_macos_exe: nvim-macos/bin/nvim
+nvim_exe_default: "{{ bin_directory }}nvim"
+nvim_exe: "{{ nvim_exe_default }}"
+nvim_cmd: "{{ nvim_exe }}"

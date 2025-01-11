@@ -1,0 +1,140 @@
+---
+rustup_dev_packages:
+  rust-src:
+    name: rust-src
+    path: "{{ rustup_path }}../share/doc/rust"
+  clippy:
+    name: clippy
+    path: "{{ rustup_path }}cargo-clippy"
+  rust-analyzer:
+    name: rust-analyzer
+    path: "{{ rustup_path }}rust-analyzer"
+rust_dev_packages:
+  bacon:
+    name: bacon
+    path: "{{ cargo_path }}bacon"
+  cargo-edit:
+    name: cargo-edit
+    path: "{{ cargo_path }}cargo-edit"
+  rustfmt:
+    name: rustfmt
+    path: "{{ cargo_path }}rustfmt"
+  cargo-readme:
+    name: cargo-readme
+    path: "{{ cargo_path }}cargo-readme"
+treesitter_parsers_rust:
+  - rust
+treesitter_parsers_egg_parser_config: |
+  parser_configs.egg = {
+      install_info = {
+          url = 'https://github.com/segeljakt/tree-sitter-egg',
+          files = {
+            'src/parser.c',
+            'src/tree_sitter/parser.h',
+          },
+          branch = 'master'
+      },
+  }
+neotest_adapters_rust: |
+  require('rustaceanvim.neotest'),
+rust_tools_nix:
+  - vscode-extensions.vadimcn.vscode-lldb
+rust_file_extensions:
+  - rust
+rust_file_extensions_comma_list: "{{ '\"' + rust_file_extensions |join('\", \"') + '\"' }}"
+rust_dbg: "{{ nix_bin }}/rust-lldb"
+codelldb_extension_url: https://github.com/vadimcn/vscode-lldb.git
+codelldb_extension_version: "1.10.0"
+codelldb_install_path: "{{ dotfiles_user_home }}/.vscode/extensions/vadimcn.vscode-lldb-{{ codelldb_extension_version }}"
+codelldb_bin_path: adapter/codelldb
+codelldb_liblldb_path: lldb/lib/liblldb.so
+lsp_providers_rust: []
+lsp_providers_rust_setup: []
+rust_extra_lua_plugin_settings: []
+rust_analyzer_exe: "{{ rustup_path }}rust-analyzer"
+clippy_exe: "{{ rustup_path }}cargo-clippy"
+extra_nvim_plugins_rust_lazy: |
+  { 'simrat39/rust-tools.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'mfussenegger/nvim-dap',
+    }
+  },
+  { 'rust-lang/rust.vim' },
+extra_nvim_config_rust: |
+  dap.adapters.rustdbg = {
+    id = 'rustdbg',
+    type = 'executable',
+    command = '{{ rust_dbg }}',
+    name = 'rustdbg'
+  }
+  dap.configurations.rust = {
+    {
+      name = 'Rust Debug',
+      type = 'lldb',
+      request = 'launch',
+      program = function()
+        vim.fn.jobstart('cargo build')
+        return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/target/debug/', 'file')
+      end,
+      cwd = '${workspaceFolder}',
+      stopOnEntry = true,
+    },
+  }
+  -- Update this path
+  local extension_path = '{{ codelldb_install_path }}/'
+  local codelldb_path = extension_path .. '{{ codelldb_bin_path }}'
+  local liblldb_path = extension_path .. '{{ codelldb_liblldb_path }}'
+  local opts = {
+    tools = {
+      executor = require('rust-tools.executors').toggleterm,
+      hover_actions = {
+        auto_focus = true,
+      },
+    },
+    server = {
+      cmd = { '{{ rust_analyzer_exe }}' },
+      settings = {
+        ['rust-analyzer'] = {
+          cargo = {
+            allFeatures = true,
+          },
+          checkOnSave = {
+            allFeatures = true,
+            command = 'clippy',
+          },
+        },
+      }
+    }, -- rust-analyzer options
+    dap = {
+        adapter = require('rust-tools.dap').get_codelldb_adapter(codelldb_path, liblldb_path)
+    },
+  }
+  require('rust-tools').setup(opts)
+  local bacon_watch = Terminal:new({ cmd = '{{ cargo_path }}bacon', close_on_exit = true, hidden = true })
+  function bacon_watch_terminal_runner()
+    bacon_watch:toggle()
+  end
+
+  vim.g.rustfmt_autosave = 1
+extra_nvim_keymap_rust: |
+  { '<leader>ch', {
+      n = '<cmd>lua require(\"rust-tools\").hover_actions.hover_actions()<CR>',
+    },
+    description = 'Rust-Tools: Hover Actions',
+  },
+  { '<leader>ca', {
+      n = '<cmd>lua require(\"rust-tools\").code_action_group.code_action_group()<CR>',
+    },
+    description = 'Rust-Tools: Code Action Group',
+  },
+  { '<leader>cd', {
+      n = '<cmd>RustDebuggables<CR>',
+    },
+    description = 'Rust-Tools: Select Rust Debuggable',
+  },
+  { '<leader>cw', {
+      n = '<cmd>lua bacon_watch_terminal_runner()<CR>',
+    },
+    description = 'Rust: Bacon Codebase Watcher',
+  },

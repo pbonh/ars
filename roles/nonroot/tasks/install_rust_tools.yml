@@ -1,0 +1,51 @@
+---
+- name: Get Rustup
+  get_url:
+    url: "{{ rustup_url }}"
+    dest: "{{ rustup_script_path }}"
+    mode: 0755
+
+- name: Execute the Rustup Installer(Stable)
+  changed_when: false
+  shell: "{{ rustup_script_path }} -y --no-modify-path --default-toolchain {{ rustup_toolchain }}"
+  environment: "{{ rust_tools_env }}"
+
+- name: Remove the Rustup Installer
+  file:
+    path: "{{ rustup_script_path }}"
+    state: absent
+
+- name: Rust | Install Rust MUSL Target | shell
+  changed_when: false
+  shell: "{{ rustup_exe }} target add {{ rustup_musl_target }}"
+  environment: "{{ rust_tools_env }}"
+
+- name: Rust-Tools | Download Cargo Binstall Exe | get_url
+  get_url:
+    url: "{{ cargo_binstall_url }}"
+    dest: "{{ cargo_binstall_download }}"
+    mode: 0755
+
+- name: Rust-Tools | Install Cargo Binstall | unarchive
+  ansible.builtin.unarchive:
+    src: "{{ cargo_binstall_download }}"
+    dest: "{{ cargo_path }}"
+
+- name: Rust-Tools | Install Cargo-Update | shell
+  shell: "{{ rustc_env_variables }} {{ cargo_binstall_exe }} {{ cargo_binstall_args }} --no-confirm cargo-update"
+  args:
+    creates: "{{ cargo_path }}cargo-install-update"
+  environment: "{{ rust_tools_env }}"
+
+- name: Install Cargo/Rust Dev Tools
+  ignore_errors: true
+  shell: "{{ rustc_env_variables }} {{ cargo_binstall_exe }} {{ cargo_binstall_args }} --no-confirm {{ item.value.name }}"
+  args:
+    creates: "{{ item.value.path }}"
+  environment: "{{ rust_tools_env }}"
+  loop: "{{ cargo_binstall_packages | dict2items }}"
+
+# - name: Rust | Update Installed Rust Packages | shell
+#   changed_when: false
+#   shell: "{{ cargo_bin }} install-update -a"
+#   environment: "{{ rust_tools_env }}"

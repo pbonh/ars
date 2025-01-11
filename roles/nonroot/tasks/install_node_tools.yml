@@ -1,0 +1,6 @@
+---
+- name: Install Ansible Language Server
+  import_tasks: tasks/install_ansible_language_server.yml
+
+- name: Install YAML Language Server
+  import_tasks: tasks/install_yaml_language_server.yml

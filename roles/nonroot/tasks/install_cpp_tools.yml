@@ -1,0 +1,40 @@
+---
+- name: C++ | Install Ubuntu C++ Tools | apt
+  become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  apt:
+    name: "{{ cpp_ubuntu_packages }}"
+    state: latest
+    install_recommends: true
+
+- name: C++ | Install Ubuntu Clang | alternatives
+  become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  community.general.alternatives:
+    name: "{{ item }}"
+    link: "/usr/bin/{{ item }}"
+    path: "/usr/bin/{{ item }}-{{ ubuntu_clang_version }}"
+  loop:
+    - clang
+    - clang++
+    - clangd
+    - lldb
+    - lld
+
+- name: C++ | Install Fedora C++ Tools | dnf
+  become: true
+  when: ansible_distribution == 'Fedora'
+  dnf:
+    name: "{{ cpp_fedora_packages }}"
+    state: latest
+
+- name: Conan | Install Conan | command
+  command: "{{ nix_bin }}/pipx install conan"
+  args:
+    creates: "{{ conan_exe }}"
+
+- name: NeoCMakeLSP | Install NeoCMakeLSP | command
+  shell: "{{ rustc_env_variables }} {{ cargo_bin }} install {{ item.name }}"
+  args:
+    creates: "{{ cargo_path }}{{ item.path }}"
+  with_items: "{{ cargo_cpp_packages }}"

@@ -1,0 +1,53 @@
+---
+- name: Helix | Setup Helix Download Directory | file
+  when: ansible_distribution == 'MacOSX'
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ helix_macos_download_dir }}"
+    - "{{ helix_macos_install_dir }}"
+
+- name: Helix | Download Helix Exe | get_url
+  when: ansible_distribution == 'MacOSX'
+  get_url:
+    url: "{{ helix_macos_download_url }}"
+    dest: "{{ helix_macos_install_download }}"
+    mode: 0755
+
+- name: Helix | Fix Helix Download Permissions | shell
+  when: ansible_distribution == 'MacOSX'
+  shell: "xattr -c {{ helix_macos_install_download }}"
+
+- name: Helix | Unarchive Helix Download | unarchive
+  when: ansible_distribution == 'MacOSX'
+  ansible.builtin.unarchive:
+    src: "{{ helix_macos_install_download }}"
+    dest: "{{ helix_macos_install_download_dir }}"
+
+- name: Helix | Symlink Helix Exe | file
+  when: ansible_distribution == 'MacOSX'
+  file:
+    src: "{{ helix_macos_install_download_dir }}/{{ helix_macos_exe }}"
+    path: "{{ helix_exe_default }}"
+    state: link
+
+- name: Helix | Download Helix Appimage | get_url
+  when:
+  - ansible_distribution != 'MacOSX'
+  - helix_appimage_install_option == true
+  get_url:
+    url: "{{ helix_appimage_url }}"
+    dest: "{{ helix_appimage_exe }}"
+    mode: 0755
+
+- name: Helix | Symlink Helix Appimage | get_url
+  when:
+  - ansible_distribution != 'MacOSX'
+  - helix_appimage_install_option == true
+  ansible.builtin.file:
+    src: "{{ helix_appimage_exe }}"
+    dest: "{{ helix_exe_default }}"
+    state: link
+

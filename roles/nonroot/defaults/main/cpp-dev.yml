@@ -1,0 +1,47 @@
+---
+lsp_providers_cpp:
+  - clangd
+cpp_fedora_packages:
+  - boost
+  - boost-devel
+  - clang
+  - clang-tools-extra
+  - lld
+  - cmake
+  - ninja-build
+  - flex
+  - bison
+  - lldb
+ubuntu_clang_version: 12
+cpp_ubuntu_packages:
+  - build-essential
+  - "clang-{{ ubuntu_clang_version }}"
+  - "clang-tools-{{ ubuntu_clang_version }}"
+  - "clangd-{{ ubuntu_clang_version }}"
+  - "lldb-{{ ubuntu_clang_version }}"
+  - "lld-{{ ubuntu_clang_version }}"
+  - libboost-all-dev
+  - cmake
+  - ninja-build
+  - flex
+  - bison
+nvim_cmake_copy_compile_commands: CMakeCopyCompileCommands
+nvim_cmake_build_dir: build/linux-debug
+ccls_clang_args: {}
+ccls_tmp_dir: /tmp/ccls
+clang_format_fileoption: file
+vscode_cpptools_version: 1.15.31
+vscode_cpptools_download: "{{ tool_install_dir }}/vscode-cpptools"
+vscode_cpptools_extension: cpptools-linux
+vscode_cpptools_extension_path: "{{ vscode_cpptools_download }}/{{ vscode_cpptools_extension }}"
+vscode_cpptools_vsix_file_path: "{{ vscode_cpptools_extension_path }}.vsix"
+vscode_cpptools_extension_file_path: "{{ vscode_cpptools_extension_path }}/extension"
+vscode_cpptools_executable_path: "{{ vscode_cpptools_extension_file_path }}/debugAdapters/bin/OpenDebugAD7"
+vscode_cpptools_executable_path_mono: "{{ vscode_cpptools_extension_path }}/extensions/debugAdapters/bin/mono.linux"
+vscode_cpptools_extension_json_config: "{{ vscode_cpptools_extension_file_path }}/cppdbg.ad7Engine.json"
+vscode_cpptools_extension_neovim_json_config: "{{ vscode_cpptools_extension_file_path }}/debugAdapters/bin/nvim-dap.ad7Engine.json"
+gccdiag_url: https://gitlab.com/andrejr/gccdiag
+gccdiag_download: "{{ tool_install_dir }}/gccdiag"
+cargo_bin: "{{ cargo_path }}cargo"
+cargo_cpp_packages:
+  - { name: neocmakelsp, path: neocmakelsp }

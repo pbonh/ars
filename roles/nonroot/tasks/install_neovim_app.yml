@@ -1,0 +1,106 @@
+---
+- name: Neovim | Setup Neovim Download Directory | file
+  when:
+  - nvim_appimage_install_option == false
+  - nvim_src_install_option == false
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ nvim_download_dir }}"
+    - "{{ nvim_install_dir }}"
+
+- name: Neovim | Download Neovim Exe | get_url
+  when:
+  - nvim_appimage_install_option == false
+  - nvim_src_install_option == false
+  get_url:
+    url: "{{ nvim_exe_url }}/{{ nvim_download_archive }}"
+    dest: "{{ nvim_install_download }}"
+    mode: 0755
+
+- name: Neovim | Fix Neovim Download Permissions | shell
+  when:
+  - ansible_distribution == 'MacOSX'
+  - nvim_appimage_install_option == false
+  - nvim_src_install_option == false
+  shell: "xattr -c {{ nvim_install_download }}"
+
+- name: Neovim | Unarchive Neovim Download | unarchive
+  when:
+  - nvim_appimage_install_option == false
+  - nvim_src_install_option == false
+  ansible.builtin.unarchive:
+    src: "{{ nvim_install_download }}"
+    dest: "{{ nvim_install_dir }}"
+
+- name: Neovim | Symlink Neovim Exe | file
+  when:
+  - nvim_appimage_install_option == false
+  - nvim_src_install_option == false
+  file:
+    src: "{{ nvim_install_dir }}/{{ nvim_install_exe }}"
+    path: "{{ nvim_exe_default }}"
+    state: link
+
+- name: Neovim | Download Neovim Appimage | get_url
+  when:
+  - nvim_appimage_install_option == true
+  - nvim_src_install_option == false
+  get_url:
+    url: "{{ nvim_appimage_url }}"
+    dest: "{{ nvim_appimage_exe }}"
+    mode: 0755
+
+- name: Neovim | Symlink Neovim Appimage | get_url
+  when:
+  - nvim_appimage_install_option == true
+  - nvim_src_install_option == false
+  ansible.builtin.file:
+    src: "{{ nvim_appimage_exe }}"
+    dest: "{{ nvim_exe_default }}"
+    state: link
+
+- name: Neovim | Download Neovim Source | git
+  when:
+  - nvim_appimage_install_option == false
+  - nvim_src_install_option == true
+  git:
+    repo: "{{ nvim_src_url }}"
+    dest: "{{ nvim_src_download }}"
+    version: "{{ nvim_src_version }}"
+
+- name: Neovim | Setup Neovim Install Directory | file
+  when:
+  - nvim_appimage_install_option == false
+  - nvim_src_install_option == true
+  file:
+    path: "{{ nvim_src_install_dir }}"
+    state: directory
+
+- name: Neovim | Build Neovim Source | make
+  when:
+  - nvim_appimage_install_option == false
+  - nvim_src_install_option == true
+  community.general.make:
+    chdir: "{{ nvim_src_download }}"
+    params: "{{ nvim_src_make_opts }}"
+
+- name: Neovim | Install Neovim Source | make
+  when:
+  - nvim_appimage_install_option == false
+  - nvim_src_install_option == true
+  community.general.make:
+    chdir: "{{ nvim_src_download }}"
+    target: install
+
+- name: Neovim | Symlink Neovim Binary Install | get_url
+  when:
+  - nvim_appimage_install_option == false
+  - nvim_src_install_option == true
+  ansible.builtin.file:
+    src: "{{ nvim_src_install_exe }}"
+    dest: "{{ nvim_exe_default }}"
+    state: link
+

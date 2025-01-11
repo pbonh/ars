@@ -1,0 +1,7 @@
+---
+- name: Install YAML Language Server
+  become: true
+  community.general.npm:
+    name: yaml-language-server
+    global: yes
+    executable: "{{ nix_bin }}/npm"

@@ -1,0 +1,15 @@
+---
+- name: Install Cargo/Rust Tools for Rust Development
+  ignore_errors: true
+  shell: "{{ rustc_env_variables }} {{ cargo_binstall_exe }} {{ cargo_binstall_args }} --no-confirm {{ item.value.name }}"
+  args:
+    creates: "{{ item.value.path }}"
+  environment: "{{ rust_tools_env }}"
+  loop: "{{ rust_dev_packages | dict2items }}"
+
+- name: Rust | Install Tools for Rust Development | shell
+  command: "{{ rustup_exe }} component add {{ item.value.name }}"
+  args:
+    creates: "{{ item.value.path }}"
+  environment: "{{ rust_tools_env }}"
+  loop: "{{ rustup_dev_packages | dict2items }}"

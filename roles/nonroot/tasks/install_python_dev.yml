@@ -1,0 +1,45 @@
+---
+- name: Python | Install Pyenv | shell
+  shell:
+    cmd: curl https://pyenv.run | bash
+  args:
+    creates: "{{ pyenv_home }}"
+
+- name: Python | Add Pyenv Binary to Path | file
+  ansible.builtin.file:
+    src: "{{ pyenv_home_bin }}"
+    dest: "{{ pyenv_exe }}"
+    state: link
+
+- name: Python | Create Virtualenv Directory | file
+  ansible.builtin.file:
+    path: "{{ python_dev_virtualenv_home }}"
+    state: directory
+
+- name: Python | Create Debugpy Virtualenv | command
+  command:
+    cmd: "{{ pyenv_python_exe }} -m venv debugpy"
+  args:
+    chdir: "{{ python_dev_virtualenv_home }}"
+    creates: "{{ debugpy_python_exe }}"
+
+- name: Python | Install Debugpy | command
+  changed_when: false
+  command:
+    cmd: "{{ debugpy_python_exe }} -m pip install {{ debugpy_version }}"
+  args:
+    chdir: "{{ python_dev_virtualenv_home }}"
+
+- name: Python | Create PLS Virtualenv | command
+  command:
+    cmd: "{{ pyenv_python_exe }} -m venv python-lsp-server"
+  args:
+    chdir: "{{ python_dev_virtualenv_home }}"
+    creates: "{{ pls_python_exe }}"
+
+- name: Python | Install PLS | command
+  changed_when: false
+  command:
+    cmd: "{{ pls_python_exe }} -m pip install {{ pls_version }}"
+  args:
+    chdir: "{{ python_dev_virtualenv_home }}"

@@ -1,0 +1,18 @@
+---
+helix_version: "23.10"
+helix_appimage_install_option: false
+helix_exe_url: "https://github.com/helix-editor/helix/releases/download/{{ helix_version }}"
+helix_appimage_filename: "helix-{{ helix_version }}-x86_64.AppImage"
+helix_appimage_url: "{{ helix_exe_url }}/{{ helix_appimage_filename }}"
+helix_appimage_exe: "{{ tool_install_bin }}/hx.appimage"
+helix_exe_default: "{{ tool_install_bin }}/hx"
+helix_macos_install_download_name: "helix-{{ helix_version }}-aarch64-macos"
+helix_macos_download_archive_name: "{{ helix_macos_install_download_name }}.tar.xz"
+helix_macos_download_url: "{{ helix_exe_url }}/{{ helix_macos_download_archive_name }}"
+helix_macos_download_dir_name: helix-macos
+helix_macos_download_dir: "{{ dot_download_dir }}"
+helix_macos_install_download: "{{ helix_macos_download_dir }}/{{ helix_macos_download_archive_name }}"
+helix_macos_install_download_dir: "{{ helix_macos_download_dir }}/{{ helix_macos_download_dir_name }}/{{ helix_macos_install_download_name }}"
+helix_macos_install_dir: "{{ helix_macos_download_dir }}/{{ helix_macos_download_dir_name }}"
+helix_macos_exe: "hx"
+helix_exe: "{{ helix_exe_default }}"

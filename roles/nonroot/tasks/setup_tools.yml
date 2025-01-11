@@ -1,0 +1,11 @@
+---
+- name: XDG | Create Tool Directories | file
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ default_home_local }}"
+    - "{{ dot_download_dir }}"
+    - "{{ tool_install_dir }}"
+    - "{{ tool_install_bin }}"
+    - "{{ bin_directory }}"

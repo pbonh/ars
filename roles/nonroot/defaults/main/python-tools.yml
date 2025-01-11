@@ -1,0 +1,4 @@
+---
+nix_bin: "{{ ansible_env.HOME }}/.nix-profile/bin"
+pipx_exe: "{{ tool_system_path }}pipx"
+xxh_plugin_dir: "{{ dotfiles_user_home }}/.xxh/.xxh/plugins"
