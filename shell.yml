@@ -1,8 +1,24 @@
 ---
-- name: Install Shell Tools
+- name: Install Tools
   import_role:
     name: devbox
+  tags:
+    - devbox
+
+- name: Install Tools
+  import_role:
+    name: homebrew
+  tags:
+    - homebrew
+
+- name: Install Tools
+  import_role:
+    name: nonroot
+  tags:
+    - nonroot
 
 - name: Configure Shell Environment
   import_role:
     name: shell
+  tags:
+    - always

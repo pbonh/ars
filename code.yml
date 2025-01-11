@@ -1,12 +1,30 @@
 ---
-- name: Install Developer Coding Tools
+- name: Install Tools
   import_role:
     name: devbox
+  tags:
+    - devbox
+
+- name: Install Tools
+  import_role:
+    name: homebrew
+  tags:
+    - homebrew
+
+- name: Install Tools
+  import_role:
+    name: nonroot
+  tags:
+    - nonroot
 
 - name: Configure Shell Environment
   import_role:
     name: shell
+  tags:
+    - prereq
 
 - name: Configure Developer Environment
   import_role:
     name: code
+  tags:
+    - always

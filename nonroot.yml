@@ -1,0 +1,4 @@
+---
+- name: Install Local(Non-Root User) Tools
+  import_role:
+    name: nonroot
