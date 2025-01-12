@@ -27,7 +27,7 @@ Install Homebrew
 ```
 
 EITHER
-Checkout Reop & Setup `.envrc` File(Example)
+Checkout Repo & Setup `.envrc` File(Example)
 ```bash
 touch .envrc
 ln -s .envrc .env
@@ -38,6 +38,7 @@ Ansible Pull
 ```bash
 # (Non-Root, Shell Tools Only)
 ansible-pull -U https://github.com/pbonh/ars.git playbook.yml --tags "env" -e "{tool_provider: \"nonroot\"}"
+
 # (Install Non-Root, Shell Tools Only)
 ansible-pull -U https://github.com/pbonh/ars.git playbook.yml --tags "install,env" -e "{tool_provider: \"nonroot\"}"
 ```
