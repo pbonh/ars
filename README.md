@@ -27,11 +27,18 @@ Install Homebrew
 ```
 
 EITHER
-Checkout Repo & Setup `.envrc` File(Example)
+Checkout repository and create `.envrc` File(Example)
 ```bash
 touch .envrc
 ln -s .envrc .env
-echo "TOOL_PROVIDER=\"homebrew\"" > .envrc
+cat << EOF >> .envrc
+DOTFILES_TASK_PRELUDE=python
+DOTFILES_BOOTSTRAP_GIT_NAME="Your Name"
+DOTFILES_BOOTSTRAP_GIT_EMAIL="your_name@address.com"
+DOTFILES_BOOTSTRAP_GITHUB_USERNAME="username"
+OPENAI_API_KEY="MY_OPENAI_API_KEY"
+ANTHROPIC_API_KEY="MY_ANTHROPIC_API_KEY"
+EOF
 ```
 OR
 Ansible Pull
