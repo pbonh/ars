@@ -8,3 +8,4 @@
     bash_homebrew_env: "eval \"$({{ homebrew_path }}/brew shellenv)\""
     nu_homebrew_env: |
       $env.PATH = ($env.PATH | split row (char esep) | append '{{ homebrew_path }}')
+    direnv_exe: "direnv"
