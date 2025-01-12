@@ -23,6 +23,9 @@ homebrew:
 nonroot:
   {{ task_prelude }} ansible-playbook nonroot.yml
 
+shell:
+  {{ task_prelude }} ansible-playbook dotfiles.yml --tags "env" --skip-tags "install"
+
 neovim:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "neovim-config" --skip-tags "install"
 
