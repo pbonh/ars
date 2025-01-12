@@ -11,6 +11,9 @@ install-requirements:
   {{ task_prelude }} ansible-galaxy install -r requirements.yml
   {{ task_prelude }} ansible-galaxy collection install -r requirements.yml
 
+setup: install-requirements
+  git update-index --skip-worktree vars/local.yml 
+
 dotfiles tag='devbox':
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "{{ tag }}"
 
