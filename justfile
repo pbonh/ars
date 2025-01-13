@@ -34,3 +34,7 @@ neovim:
 
 zellij:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "zellij" --skip-tags "install"
+
+navi:
+  {{ task_prelude }} ansible-playbook dotfiles.yml --tags "navi" --skip-tags "install"
+

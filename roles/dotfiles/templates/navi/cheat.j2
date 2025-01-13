@@ -1,95 +1,48 @@
-% cargo
+# -----------------------------------------------------------------------------
+# Navi Commands
+# -----------------------------------------------------------------------------
+{% for category, commands in navi_cheats.items() %}
+% {{ category }}
 
-# Update Cargo Binary Packages
-cargo install-update -a
+{% for cmd_name, cmd_info in commands.items() %}
+# {{ cmd_info.description }}
+{{ cmd_info.cmd }}{% if cmd_info.args %} {{ cmd_info.args | join(' ') }}{% endif %}
 
-% fedora
+{% endfor %}
 
-# Force DNS Cache Reset/Refresh
-sudo resolvectl flush-caches
+{% endfor %}
 
-# OSTree(Silverblue/Bluefin) Save Working Deployment State/images
-sudo ostree admin pin 0
+# -----------------------------------------------------------------------------
+# Navi Variables
+# -----------------------------------------------------------------------------
+{% for category, commands in navi_cmd_variables.items() %}
+{% for variable_name, variable_info in commands.items() %}
+# {{ variable_info.description }}
+$ {{ variable_name }}: {{ variable_info.cmd }}
 
-% neovim
+{% endfor %}
+{% endfor %}
 
-# Print CheckHealth Log
-{{ nvim_checkhealth_log_cmd }}
-
-% nix
-
-# Source Nix Profile
-source {{ nix_shell_profile }}
-
-# Update Installed Nix Packages
-nix-env -u '*'
-
-# Update Nix & Home-Manager Nix Packages(No SystemD)
-nix-channel --update; nix-env -iA nixpkgs.nix nixpkgs.cacert; home-manager switch
-
-# Update Nix Itself(WSL)
-nix-channel --update; nix-env -iA nixpkgs.nix nixpkgs.cacert;
-
-# Update Nix Itself
-nix-channel --update; nix-env -iA nixpkgs.nix nixpkgs.cacert; systemctl daemon-reload; systemctl restart nix-daemon
-
-# List Installed Nix Packages
-nix-env -f '<nixpkgs>' -qa
-
-# Build Nix Environment
-nix-env -i {{ nix_buildenv_name }}
-
-% git, code
-
-# Change branch
-git checkout <branch>
-
-# Update Submodules
-git submodule update --recursive --remote
-
-# Synchronize Submodules
-git submodule sync --recursive
-
-$ branch: git branch | awk '{print $NF}'
-
-# Pull Latest
-git pull official master
-
-# Fetch & Rebase w\ Master(Update Branch)
-git fetch official; git pull --rebase official master
-
-# This will pick the 3rd column and use the first line as header
-docker rmi <image_id>
-
-# Even though "false/true" is displayed, this will print "0/1"
-echo <mapped>
-
-$ image_id: docker images --- --column 3 --header-lines 1 --delimiter '\s\s+'
-$ mapped: echo 'false true' | tr ' ' '\n' --- --map "grep -q t && echo 1 || echo 0"
-
-# Should print /my/pictures/wallpapers
-echo "<wallpaper_folder>"
-
-$ pictures_folder: echo "/my/pictures"
-$ wallpaper_folder: echo "<pictures_folder>/wallpapers"
-
-# If you select "hello" for <x>, the possible values of <y> will be "hello foo" and "hello bar"
-echo <x> <y>
-
-# If you want to ignore the contents of <x> and only print <y>
-: <x>; echo <y>
-
-$ x: echo "hello hi" | tr ' ' '\n'
-$ y: echo "$x foo;$x bar" | tr ';' '\n'
-
-# This will output "foo\nyes"
-echo foo
-true \
-   && echo yes \
-   || echo no
-
-# This will result into: cat "file1.json" "file2.json"
-cat <jsons>
-
-$ jsons: find . -iname '*.json' -type f -print --- --multi --map "navi fn map::expand"
+# # -----------------------------------------------------------------------------
+# # Navi Examples
+# # -----------------------------------------------------------------------------
+# # If you select "hello" for <x>, the possible values of <y> will be "hello foo" and "hello bar"
+# echo <x> <y>
+# 
+# # If you want to ignore the contents of <x> and only print <y>
+# : <x>; echo <y>
+# 
+# $ x: echo "hello hi" | tr ' ' '\n'
+# $ y: echo "$x foo;$x bar" | tr ';' '\n'
+# 
+# # This will output "foo\nyes"
+# echo foo
+# true \
+#    && echo yes \
+#    || echo no
+# 
+# # This will result into: cat "file1.json" "file2.json"
+# cat <jsons>
+# 
+# $ jsons: find . -iname '*.json' -type f -print --- --multi --map "navi fn map::expand"
 

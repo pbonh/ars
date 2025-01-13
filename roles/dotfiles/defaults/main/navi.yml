@@ -3,3 +3,121 @@
 xdg_config_dir_navi: "{{ xdg_share_dir }}/navi"
 xdg_config_dir_navi_cheats: "{{ xdg_config_dir_navi }}/cheats"
 navi_shell_cmd: "eval \"$(navi --print)\""
+navi_cheats:
+  cargo:
+    update_binstall:
+      description: "Update Cargo Binary Packages"
+      cmd: "cargo"
+      args:
+        - "install-update"
+        - "-a"
+  fedora:
+    dns_reset:
+      description: "Force DNS Cache Reset/Refresh"
+      cmd: "sudo resolvectl"
+      args:
+        - "flush-caches"
+    save_system:
+      description: "OSTree(Silverblue/Bluefin) Save Working Deployment State/images"
+      cmd: "sudo ostree"
+      args:
+        - "admin"
+        - "pin"
+        - "0"
+  neovim:
+    health:
+      description: "Print CheckHealthLog"
+      cmd: "{{ nvim_checkhealth_log_cmd }}"
+      args: []
+  nix:
+    source_profile:
+      description: "Source Nix Profile"
+      cmd: "source"
+      args:
+        - "{{ nix_shell_profile }}"
+    update:
+      description: "Update Installed Nix Packages"
+      cmd: "nix-env"
+      args:
+        - "'*'"
+    update_no_systemd:
+      description: "Update Nix & Home-Manager Nix Packages(No SystemD)"
+      cmd: "nix-channel --update; nix-env -iA nixpkgs.nix nixpkgs.cacert; home-manager switch"
+      args: []
+    update_wsl:
+      description: "Update Nix Itself(WSL)"
+      cmd: "nix-channel --update; nix-env -iA nixpkgs.nix nixpkgs.cacert;"
+      args: []
+    update_nix:
+      description: "Update Nix Itself"
+      cmd: "nix-channel --update; nix-env -iA nixpkgs.nix nixpkgs.cacert; systemctl daemon-reload; systemctl restart nix-daemon"
+      args: []
+    list_installed:
+      description: "List Installed Nix Packages"
+      cmd: "nix-env"
+      args:
+        - "-f"
+        - "'<nixpkgs>'"
+        - "-qa"
+    build_env:
+      description: "Build Nix Environment"
+      cmd: "nix-env"
+      args:
+        - "-i"
+        - "{{ nix_buildenv_name }}"
+  git:
+    checkout_branch:
+      description: "Change/Checkout Branch"
+      cmd: "git"
+      args:
+        - "checkout"
+        - "<branch>"
+    update_submodule:
+      description: "Update Submodules"
+      cmd: "git"
+      args:
+        - "submodule"
+        - "update"
+        - "--recursive"
+        - "--remote"
+    sync_submodule:
+      description: "Sync Submodules"
+      cmd: "git"
+      args:
+        - "submodule"
+        - "sync"
+        - "--recursive"
+    pull_latest:
+      description: "Pull Latest"
+      cmd: "git"
+      args:
+        - "pull"
+        - "<remote_name>"
+        - "<branch_name>"
+    fetch_rebase_latest:
+      description: "Fetch & Rebase Branch(Update Branch)"
+      cmd: "git"
+      args:
+        - "fetch"
+        - "<remote_name>;"
+        - "git"
+        - "pull"
+        - "--rebase"
+        - "<remote_name>;"
+        - "<branch_name>;"
+  docker:
+    delete_image:
+      description: "Delete Docker Image"
+      cmd: "docker"
+      args:
+        - "rmi"
+        - "<image_id>"
+navi_cmd_variables:
+  git:
+    branch:
+      description: "Grep Branch Names of Git Repo"
+      cmd: "git branch | awk '{print $NF}'"
+  docker:
+    image_id:
+      description: "Get Docker Image Info"
+      cmd: "docker images --- --column 3 --header-lines 1 --delimiter '\\s\\s+'"
