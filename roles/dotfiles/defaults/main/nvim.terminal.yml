@@ -133,6 +133,15 @@ nvim_terminal:
         function just_terminal_runner()
           justchoose:toggle()
         end
+        local navi_run = Terminal:new({
+          cmd = '{{ navi_exe }} ',
+          shell = '{{ command_shell }}',
+          hidden = true,
+          start_in_insert = true,
+        })
+        function navi_terminal_runner()
+          navi_run:toggle()
+        end
       end,
     },
     {
@@ -157,6 +166,7 @@ nvim_terminal:
   config: ""
   keymaps: |
     { '<leader>j', { n = '<cmd>lua just_terminal_runner()<CR>', }, description = 'ToggleTerm: Justfile Chooser', },
+    { '<leader>n', { n = '<cmd>lua navi_terminal_runner()<CR>', }, description = 'ToggleTerm: Navi Runner', },
     -- { '<leader>x', { n = '<cmd>lua require("tfm").open()<CR>', }, description = 'FM-Nvim: Yazi(Current File)', },
     -- { '<leader>X', { n = '<cmd>lua require("tfm").open(vim.fn.getcwd())<CR>', }, description = 'FM-Nvim: Yazi(Project Root)', },
      { '<leader>x', { n = '<cmd>Yazi<CR>', }, description = 'Yazi-Nvim: Yazi(Current File)', },
