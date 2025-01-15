@@ -284,9 +284,9 @@ nvim_hydra:
         local hint = [[
          _J_: next hunk   _s_: stage hunk        _d_: show deleted   _b_: blame line
          _K_: prev hunk   _u_: undo last stage   _p_: preview hunk   _B_: blame show full 
-         ^ ^              _S_: stage buffer      ^ ^                 _/_: show base file
+         ^ ^              _S_: stage buffer                          _/_: show base file
          ^
-         ^ ^              _g_: Neogit                                 _q_: exit
+         ^ ^              _g_: Neogit          <esc>: exit           _q_: exit
         ]]
         Hydra({
            name = 'Git',
@@ -348,6 +348,7 @@ nvim_hydra:
               { 'g', '<Cmd>Neogit<CR>', { exit = true, desc = 'Neogit' } },
               -- { 'g', '<Cmd>Gitui<CR>', { exit = true, desc = 'Gitui' } },
               { 'q', nil, { exit = true, nowait = true, desc = 'exit' } },
+              { '<Esc>', nil,  { exit = true, desc = false }}
            }
         })
         local hint = [[
