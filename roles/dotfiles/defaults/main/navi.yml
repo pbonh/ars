@@ -136,6 +136,17 @@ navi_cheats:
       args:
         - "rmi"
         - "<image_id>"
+  linux:
+    list_hardware:
+      description: "List Attached Hardware(USB/PCIe/etc.)"
+      cmd: "lshw"
+      args: []
+    list_gpus:
+      description: "List Attached Graphics Cards(GPUs)"
+      cmd: "lshw"
+      args:
+        - "-C"
+        - "display"
 navi_cmd_variables:
   git:
     branch:
