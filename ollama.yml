@@ -1,0 +1,8 @@
+---
+- name: Install Ollama
+  hosts: localhost
+  vars_files:
+    - vars/local.yml
+  tasks:
+    - import_role:
+        name: ollama

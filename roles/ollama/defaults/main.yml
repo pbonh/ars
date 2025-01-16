@@ -1,0 +1,4 @@
+---
+ollama_linux_installer: "https://ollama.com/install.sh"
+ollama_installer_download_path: "{{ dot_download_dir }}/ollama-installer.sh"
+ollama_cmd: "ollama"
