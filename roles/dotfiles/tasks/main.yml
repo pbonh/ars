@@ -22,6 +22,11 @@
   tags:
     - setup
 
+- name: Directory | Setup Directories | task
+  import_tasks: tasks/setup_tools.yml
+  tags:
+    - setup
+
 - name: Shell | Install Scripts | task
   import_tasks: tasks/install_scripts.yml
   tags:
