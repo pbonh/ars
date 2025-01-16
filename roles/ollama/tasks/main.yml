@@ -1,23 +1,8 @@
 ---
-- name: Ollama | Check for Ollama command | command
-  command: command -v {{ ollama_cmd }} >/dev/null 2>&1
-  register: ollama_installed
-  no_log: true
-  ignore_errors: true
+- name: Ollama | Install Ollama | task
+  when: ansible_distribution == 'Linux'
+  import_tasks: tasks/install_ollama_linux.yml
 
-- name: Ollama | Download Ollama Installer | get_url
-  get_url:
-    url: {{ ollama_linux_installer }}
-    dest: {{ ollama_installer_download_path }}
-    mode: 'u+rwx'
-  when: ollama_installed.rc != 0
-  register: download
-
-- name: Ollama | Run the Installer | shell
-  shell: {{ ollama_installer_download_path }}
-  when: download.changed
-
-- name: Ollama | Remove the Installer | file
-  file:
-    path: {{ ollama_installer_download_path }}
-    state: absent
+- name: Ollama | Install Ollama | task
+  when: ansible_distribution == 'MacOSX'
+  import_tasks: tasks/install_ollama_macos.yml

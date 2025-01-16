@@ -1,0 +1,11 @@
+---
+- name: Ollama | Extract Ollama | unarchive                                                                                                                                                  •
+  unarchive:
+    src: "{{ ollama_macos_installer }}"
+    dest: "{{ ollama_macos_installer_download_path }}"
+    remote_src: true
+
+- name: Ollama | Copy Ollama Application | copy
+  copy:
+    src: "{{ ollama_macos_app }}"
+    dest: "/Applications/{{ ollama_macos_app_name }}"
