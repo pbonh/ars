@@ -443,14 +443,14 @@ nvim_ui:
         })
       end,
     },
-    -- { 'stevearc/oil.nvim',
-    --   dependencies = {
-    --     'nvim-tree/nvim-web-devicons',
-    --   },
-    --   config = function()
-    --     require('oil').setup()
-    --   end,
-    -- },
+    { 'stevearc/oil.nvim',
+      dependencies = {
+        'nvim-tree/nvim-web-devicons',
+      },
+      config = function()
+        require('oil').setup()
+      end,
+    },
     -- {
     --   'chentoast/marks.nvim',
     --   config = function()
@@ -508,5 +508,5 @@ nvim_ui:
     { '#', { n = '#<Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Search Cursorword In Reverse', },
     { 'g*', { n = 'g*<Cmd>lua require(\'hlslens\').start()<CR>', }, 'HLSLens: Search Nearest Cursorword', },
     { 'g#', { n = 'g#<Cmd>lua require(\'hlslens\').start()<CR>', }, description =  'HLSLens: Search Nearest Cursorword In Reverse', },
-    -- { '-', { n = ':Oil --float<CR>', }, description = 'Oil: Open Parent Directory', },
+    { '-', { n = ':Oil --float<CR>', }, description = 'Oil: Open Parent Directory', },
     -- { '<leader>z', { n = '<cmd>NeoZoomToggle<CR>', }, description = 'Neo-Zoom: Toggle Float/Zoom Window', },
