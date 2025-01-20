@@ -6,3 +6,6 @@
 - name: Ollama | Install Ollama | task
   when: ansible_distribution == 'MacOSX'
   import_tasks: tasks/install_ollama_macos.yml
+
+- name: Code2Prompt | Install Code2Prompt | task
+  import_tasks: tasks/install_code2prompt.yml

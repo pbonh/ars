@@ -7,17 +7,17 @@
 
 - name: Ollama | Download Ollama Installer | get_url
   get_url:
-    url: {{ ollama_linux_installer }}
-    dest: {{ ollama_installer_download_path }}
+    url: "{{ ollama_linux_installer }}"
+    dest: "{{ ollama_installer_download_path }}"
     mode: 'u+rwx'
   when: ollama_installed.rc != 0
   register: download
 
 - name: Ollama | Run the Installer | shell
-  shell: {{ ollama_installer_download_path }}
+  shell: "{{ ollama_installer_download_path }}"
   when: download.changed
 
 - name: Ollama | Remove the Installer | file
   file:
-    path: {{ ollama_installer_download_path }}
+    path: "{{ ollama_installer_download_path }}"
     state: absent
