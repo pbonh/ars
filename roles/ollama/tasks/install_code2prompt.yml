@@ -8,3 +8,9 @@
 - name: Code2Prompt | Install Code2Prompt | command
   command: pipx install code2prompt
   when: pipx_installed.rc == 0
+  changed_when: false
+
+# - name: Code2Prompt | Install Code2Prompt | pipx
+#   community.general.pipx:
+#     name: code2prompt
+#     state: latest

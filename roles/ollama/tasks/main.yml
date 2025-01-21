@@ -1,10 +1,10 @@
 ---
 - name: Ollama | Install Ollama | task
-  when: ansible_distribution == 'Linux'
+  when: ansible_facts['system'] == "Linux"
   import_tasks: tasks/install_ollama_linux.yml
 
 - name: Ollama | Install Ollama | task
-  when: ansible_distribution == 'MacOSX'
+  when: ansible_facts['os_family'] == "Darwin"
   import_tasks: tasks/install_ollama_macos.yml
 
 - name: Code2Prompt | Install Code2Prompt | task
