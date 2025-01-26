@@ -4,7 +4,7 @@ ollama_linux_installer_rocm: "https://ollama.com/download/ollama-linux-amd64-roc
 ollama_installer_download_path: "{{ dot_download_dir }}/ollama-installer.sh"
 ollama_installer_download_rocm: "ollama-linux-amd64-rocm"
 ollama_installer_download_path_rocm: "{{ dot_download_dir }}/{{ ollama_installer_download_rocm }}.tgz"
-ollama_installer_path_rocm: "/usr/{{ ollama_installer_download_rocm }}"
+ollama_installer_path_rocm: "/usr"
 ollama_macos_installer: "https://ollama.com/download/Ollama-darwin.zip"
 ollama_macos_installer_download_path: "{{ dot_download_dir }}/Ollama-darwin"
 ollama_macos_app_name: "Ollama.app"
