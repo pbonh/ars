@@ -10,7 +10,7 @@
     url: "{{ ollama_linux_installer }}"
     dest: "{{ ollama_installer_download_path }}"
     mode: 'u+rwx'
-  when: ollama_installed.rc != 0
+  when: ollama_installed.rc == 0
   register: download
 
 - name: Ollama | Run the Installer | shell
