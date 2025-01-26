@@ -1,7 +1,11 @@
 ---
 - name: Vars | Set Devbox Variables | set_fact
   ansible.builtin.set_fact:
-    bash_devbox_env: "eval \"$(devbox global shellenv --init-hook)\""
+    bash_devbox_env: |
+      if  command -v devbox &> /dev/null
+      then
+        eval "$(devbox global shellenv --init-hook)"
+      fi
     zsh_devbox_env: |
       #. /home/{{ zsh_username }}/.nix-profile/etc/profile.d/nix.sh
       #. /home/{{ zsh_username }}/.nix-profile/etc/profile.d/hm-session-vars.sh
