@@ -3,7 +3,7 @@ Role Name
 
 My Developer Dotfiles, powered by Ansible.
 
-Installation
+Installation Examples
 ------------
 
 Install Ansible
@@ -48,6 +48,13 @@ ansible-pull -U https://github.com/pbonh/ars.git playbook.yml --tags "env" -e "{
 
 # (Install Non-Root, Shell Tools Only)
 ansible-pull -U https://github.com/pbonh/ars.git playbook.yml --tags "install,env" -e "{tool_provider: \"nonroot\"}"
+```
+
+Optional Installations
+------------
+Ollama(w/ ROCM)
+```bash
+ansible-pull -U https://github.com/pbonh/ars.git --ask-become-pass ollama.yml -e "{rocm_support: true}"
 ```
 
 Configuration

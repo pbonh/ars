@@ -17,7 +17,21 @@
   shell: "{{ ollama_installer_download_path }}"
   when: download.changed
 
+- name: Ollama | Download Ollama Installer(ROCM) | get_url
+  get_url:
+    url: "{{ ollama_linux_installer_rocm }}"
+    dest: "{{ ollama_installer_download_path_rocm }}"
+    mode: 'u+rwx'
+  when: rocm_support == true
+
+- name: Ollama | Install Ollama ROCM Libraries | unarchive
+  unarchive:
+    src: "{{ ollama_installer_download_path_rocm }}"
+    dest: "{{ ollama_installer_path_rocm }}"
+  when: rocm_support == true
+
 - name: Ollama | Remove the Installer | file
   file:
     path: "{{ ollama_installer_download_path }}"
     state: absent
+

@@ -3,7 +3,6 @@
   unarchive:
     src: "{{ ollama_macos_installer }}"
     dest: "{{ ollama_macos_installer_download_path }}"
-    remote_src: true
 
 - name: Ollama | Copy Ollama Application | copy
   copy:
