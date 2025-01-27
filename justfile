@@ -39,5 +39,5 @@ navi:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "navi" --skip-tags "install"
 
 ollama:
-  {{ task_prelude }} ansible-playbook ollama.yml
+  {{ task_prelude }} ansible-playbook --ask-become-pass ollama.yml
 
