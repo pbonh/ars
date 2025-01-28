@@ -35,3 +35,32 @@
     path: "{{ ollama_installer_download_path }}"
     state: absent
 
+- name: Ollama | Create Ollama System User | user
+  user:
+    name: ollama
+    system: yes
+    create_home: yes
+    home: /usr/share/ollama
+    shell: /bin/false
+    state: present
+
+- name: Ollama | Add Current User to Ollama Group | user
+  user:
+    name: "{{ ansible_env.USER }}"
+    groups: ollama
+    append: yes
+
+- name: Ollama | Install SystemD Service File | template
+  ansible.builtin.template:
+    src: "{{ ollama_service_filename }}.j2"
+    dest: "{{ ollama_service_install_location }}"
+
+- name: Ollama | Reload Systemd Daemon | systemd
+  systemd:
+    daemon_reload: yes
+
+- name: Ollama | Enable ollama service | systemd
+  systemd:
+    name: ollama
+    state: started
+    enabled: yes

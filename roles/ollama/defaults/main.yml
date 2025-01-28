@@ -11,4 +11,7 @@ ollama_macos_app_name: "Ollama.app"
 ollama_macos_app: "{{ ollama_macos_installer_download_path }}/{{ ollama_macos_app_name }}"
 ollama_macos_app_exe: "/Applications/{{ ollama_macos_app_name }}"
 ollama_cmd: "ollama"
+ollama_exe: "/usr/local/bin/{{ ollama_cmd }}"
+ollama_service_filename: "ollama.service"
+ollama_service_install_location: "/etc/systemd/system/{{ ollama_service_filename }}"
 rocm_support: false
