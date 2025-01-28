@@ -202,6 +202,22 @@ nvim_plugin_groups_all:
   notes: "{{ nvim_neorg_legacy }}"
   motion: "{{ nvim_motion }}"
   ai: "{{ nvim_ai_avante }}"
+nvim_plugin_groups_ollama:
+  ui: "{{ nvim_ui }}"
+  telescope: "{{ nvim_fzf_lua }}"
+  project: "{{ nvim_project }}"
+  hydra: "{{ nvim_hydra }}"
+  treesitter: "{{ nvim_treesitter }}"
+  git: "{{ nvim_git }}"
+  terminal: "{{ nvim_terminal }}"
+  colorscheme: "{{ nvim_colorscheme_nightfox }}"
+  intellisense: "{{ nvim_lspconfig_cmp_navbuddy }}"
+  debugger: "{{ nvim_debugger }}"
+  tasks: "{{ nvim_tasks }}"
+  test: "{{ nvim_test }}"
+  notes: "{{ nvim_neorg_legacy }}"
+  motion: "{{ nvim_motion }}"
+  ai: "{{ nvim_ai_companion }}"
 nvim_plugin_groups_bone:
   telescope: "{{ nvim_fzf_lua }}"
   project: "{{ nvim_project }}"
@@ -220,6 +236,13 @@ nvim_xdg_modular_profiles:
       options: "{{ nvim_default_editor_options }}"
       keymaps: "{{ nvim_default_keymap_options }}"
       plugin_groups: "{{ nvim_plugin_groups_all | ansible.builtin.combine(nvim_extra_plugins) }}"
+  ollama:
+    name: ollama
+    appname: nvim-ollama
+    config:
+      options: "{{ nvim_default_editor_options }}"
+      keymaps: "{{ nvim_default_keymap_options }}"
+      plugin_groups: "{{ nvim_plugin_groups_ollama | ansible.builtin.combine(nvim_extra_plugins) }}"
   bone:
     name: bone
     appname: nvim-bone
