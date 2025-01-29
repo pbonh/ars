@@ -355,7 +355,7 @@ nvim_ui:
       'nvim-lualine/lualine.nvim',
       dependencies = {
         'nvim-tree/nvim-web-devicons',
-        'b0o/incline.nvim',
+        -- 'b0o/incline.nvim',
       },
       config = function()
         local function maximize_status()
@@ -376,7 +376,15 @@ nvim_ui:
             }
           },
         })
-        require('incline').setup()
+        -- require('incline').setup()
+      end,
+    },
+    {
+      'nanozuki/tabby.nvim',
+      dependencies = 'nvim-tree/nvim-web-devicons',
+      config = function()
+        vim.o.showtabline = 2
+        vim.opt.sessionoptions = 'curdir,folds,globals,help,tabpages,terminal,winsize'
       end,
     },
     {
@@ -500,7 +508,8 @@ nvim_ui:
     --     })
     --   end,
     -- },
-  config: ""
+  config: |
+    require('tabby').setup({}) 
   keymaps: |
     { 'n', { n = '<Cmd>execute(\'normal! \' . v:count1 . \'n\')<CR><Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Next Search Result', },
     { 'N', { n = '<Cmd>execute(\'normal! \' . v:count1 . \'N\')<CR><Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Previous Search Result', },
@@ -510,3 +519,4 @@ nvim_ui:
     { 'g#', { n = 'g#<Cmd>lua require(\'hlslens\').start()<CR>', }, description =  'HLSLens: Search Nearest Cursorword In Reverse', },
     { '-', { n = ':Oil --float<CR>', }, description = 'Oil: Open Parent Directory', },
     -- { '<leader>z', { n = '<cmd>NeoZoomToggle<CR>', }, description = 'Neo-Zoom: Toggle Float/Zoom Window', },
+    { '<leader>p', { n = '<cmd>Tabby jump_to_tab<CR>', }, description = 'Tabby: Jump to Tab', },
