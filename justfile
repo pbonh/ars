@@ -26,6 +26,9 @@ homebrew:
 nonroot:
   {{ task_prelude }} ansible-playbook nonroot.yml
 
+dot tag='env':
+  {{ task_prelude }} ansible-playbook dotfiles.yml --tags "{{ tag }}" --skip-tags "install"
+
 shell:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "env,scripts" --skip-tags "install"
 
