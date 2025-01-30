@@ -187,6 +187,7 @@ nvim_xdg_modular_lua_hierarchy:
   - lua
   - lua/plugins
 nvim_plugin_groups_all:
+  colorscheme: "{{ nvim_colorscheme_nightfox }}"
   ui: "{{ nvim_ui }}"
   telescope: "{{ nvim_fzf_lua }}"
   project: "{{ nvim_project }}"
@@ -194,7 +195,6 @@ nvim_plugin_groups_all:
   treesitter: "{{ nvim_treesitter }}"
   git: "{{ nvim_git }}"
   terminal: "{{ nvim_terminal }}"
-  colorscheme: "{{ nvim_colorscheme_nightfox }}"
   intellisense: "{{ nvim_lspconfig_cmp_navbuddy }}"
   debugger: "{{ nvim_debugger }}"
   tasks: "{{ nvim_tasks }}"
@@ -203,6 +203,7 @@ nvim_plugin_groups_all:
   motion: "{{ nvim_motion }}"
   ai: "{{ nvim_ai_avante }}"
 nvim_plugin_groups_ollama:
+  colorscheme: "{{ nvim_colorscheme_nightfox }}"
   ui: "{{ nvim_ui }}"
   telescope: "{{ nvim_fzf_lua }}"
   project: "{{ nvim_project }}"
@@ -210,7 +211,6 @@ nvim_plugin_groups_ollama:
   treesitter: "{{ nvim_treesitter }}"
   git: "{{ nvim_git }}"
   terminal: "{{ nvim_terminal }}"
-  colorscheme: "{{ nvim_colorscheme_nightfox }}"
   intellisense: "{{ nvim_lspconfig_cmp_navbuddy }}"
   debugger: "{{ nvim_debugger }}"
   tasks: "{{ nvim_tasks }}"

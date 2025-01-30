@@ -385,8 +385,71 @@ nvim_ui:
       config = function()
         vim.o.showtabline = 2
         vim.opt.sessionoptions = 'curdir,folds,globals,help,tabpages,terminal,winsize'
+        require('tabby').setup({
+          line = function(line)
+            local theme = {
+              fill = 'TabLineFill',
+              head = 'TabLine',
+              current_tab = 'TabLineSel',
+              tab = 'TabLine',
+              win = 'TabLine',
+              tail = 'TabLine',
+            }
+            return {
+              {
+                { '  ', hl = theme.head },
+                line.sep('', theme.head, theme.fill),
+              },
+              line.tabs().foreach(function(tab)
+                local hl = tab.is_current() and theme.current_tab or theme.tab
+                return {
+                  line.sep('', hl, theme.fill),
+                  tab.is_current() and '' or '󰆣',
+                  tab.in_jump_mode() and tab.jump_key() or tab.number(),
+                  tab.name(),
+                  tab.close_btn(''),
+                  line.sep('', hl, theme.fill),
+                  hl = hl,
+                  margin = ' ',
+                }
+              end),
+              line.spacer(),
+              line.wins_in_tab(line.api.get_current_tab()).foreach(function(win)
+                return {
+                  line.sep('', theme.win, theme.fill),
+                  win.is_current() and '' or '',
+                  win.buf_name(),
+                  line.sep('', theme.win, theme.fill),
+                  hl = theme.win,
+                  margin = ' ',
+                }
+              end),
+              {
+                line.sep('', theme.tail, theme.fill),
+                { '  ', hl = theme.tail },
+              },
+              hl = theme.fill,
+            }
+          end,
+        })
       end,
     },
+    -- {
+    --   'romgrk/barbar.nvim',
+    --   dependencies = {
+    --     'lewis6991/gitsigns.nvim',
+    --     'nvim-tree/nvim-web-devicons',
+    --   },
+    --   init = function()
+    --     vim.g.barbar_auto_setup = false
+    --   end,
+    --   opts = {
+    --     icons = {
+    --       preset = 'powerline',
+    --     },
+    --   },
+    --   version = '^1.0.0', -- optional: only update when a new 1.x version is released
+    -- },
     {
       'mawkler/modicator.nvim',
       dependencies = 'sainnhe/gruvbox-material',
@@ -508,8 +571,7 @@ nvim_ui:
     --     })
     --   end,
     -- },
-  config: |
-    require('tabby').setup({}) 
+  config: ""
   keymaps: |
     { 'n', { n = '<Cmd>execute(\'normal! \' . v:count1 . \'n\')<CR><Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Next Search Result', },
     { 'N', { n = '<Cmd>execute(\'normal! \' . v:count1 . \'N\')<CR><Cmd>lua require(\'hlslens\').start()<CR>', }, description = 'HLSLens: Previous Search Result', },
