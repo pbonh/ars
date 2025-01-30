@@ -14,3 +14,17 @@
 #   community.general.pipx:
 #     name: code2prompt
 #     state: latest
+
+- name: Code2Prompt | Setup Code2Prompt Templates Directory | file
+  file:
+    path: "{{ code2prompt_template_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Code2Prompt | Copies Code2Prompt Config | template
+  vars:
+    code2prompt_template: "{{ item.value.template }}"
+  template:
+    src: code2prompt.j2
+    dest: "{{ code2prompt_template_dir }}/{{ item.value.name }}"
+  loop: "{{ code2prompt_templates | dict2items }}"
