@@ -554,7 +554,10 @@ nvim_lspconfig_cmp_navbuddy:
           }),
           sources = cmp.config.sources({
             { name = 'nvim_lsp' },
-            { name = 'vsnip' }, -- For vsnip users.
+            {% if nvim_codecompanion == true %}
+            { name = 'codecompanion' },
+            {% endif %}
+            { name = 'vsnip' },
           }, {
             { name = 'buffer' },
           })

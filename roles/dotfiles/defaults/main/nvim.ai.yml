@@ -1,8 +1,11 @@
 ---
+nvim_codecompanion: true
 ai_adapter_avante: "claude"
 ai_adapter_chat: "ollama"
 ai_adapter_inline: "{{ ai_adapter_chat }}"
 ai_adapter_cmd: "{{ ai_adapter_chat }}"
+anthropic_api_key: "{{ lookup('env', 'ANTHROPIC_API_KEY') }}"
+openai_api_key: "{{ lookup('env', 'OPENAI_API_KEY') }}"
 ollama_port: "11434"
 ollama_address: "http://localhost:{{ ollama_port }}"
 nvim_codecompanion_adapter_config_ollama: |
@@ -13,25 +16,6 @@ nvim_codecompanion_adapter_config_ollama: |
             },
           })
         end,
-nvim_codecompanion_adapter_config_llama3: |
-        llama3 = function()
-          return require("codecompanion.adapters").extend("ollama", {
-            name = "llama3", -- Give this adapter a different name to differentiate it from the default ollama adapter
-            schema = {
-              model = {
-                default = "llama3:latest",
-              },
-              num_ctx = {
-                default = 16384,
-              },
-              num_predict = {
-                default = -1,
-              },
-            },
-          })
-        end,
-anthropic_api_key: "{{ lookup('env', 'ANTHROPIC_API_KEY') }}"
-openai_api_key: "{{ lookup('env', 'OPENAI_API_KEY') }}"
 nvim_codecompanion_adapter_config_openai: |
         openai = function()
           return require("codecompanion.adapters").extend("openai", {
@@ -40,11 +24,43 @@ nvim_codecompanion_adapter_config_openai: |
             },
           })
         end,
+default_ctx_size: 16384
+user_llama_model_info:
+  llama3_model_info:
+    name: "llama3"
+    model_name: "llama3"
+    model_tag: "latest"
+    model_ctx: "{{ default_ctx_size }}"
+  deepseek_r1_model_info:
+    name: "deepseek_r1"
+    model_name: "deepseek-r1"
+    model_tag: "32b"
+    model_ctx: "{{ default_ctx_size }}"
+nvim_codecompanion_adapter_config_user: |
+        {% for model_name in user_llama_model_info -%}
+        {% set llama_model_info = user_llama_model_info[model_name] %}
+        {{ llama_model_info['name'] }} = function()
+          return require("codecompanion.adapters").extend("ollama", {
+            name = "{{ llama_model_info['name'] }}",
+            schema = {
+              model = {
+                default = "{{ llama_model_info['model_name'] }}:{{ llama_model_info['model_tag'] }}",
+              },
+              num_ctx = {
+                default = {{ llama_model_info['model_ctx'] }},
+              },
+              num_predict = {
+                default = -1,
+              },
+            },
+          })
+        end,
+        {% endfor %}
 nvim_codecompanion_adapter_config: |
       adapters = {
         {{ nvim_codecompanion_adapter_config_ollama }}
-        {{ nvim_codecompanion_adapter_config_llama3 }}
         {{ nvim_codecompanion_adapter_config_openai }}
+        {{ nvim_codecompanion_adapter_config_user }}
       },
 nvim_codecompanion_prompt_library_docusaurus: |
         ["Docusaurus"] = {
@@ -111,10 +127,10 @@ nvim_ai_companion:
     -- Expand 'cc' into 'CodeCompanion' in the command line
     -- vim.cmd([[cab cc CodeCompanion]])
   keymaps: |
-    { '<leader>Cc', {
-      n = '<cmd>CodeCompanion ',
-      v = '<cmd>CodeCompanion ',
-    }, description = 'CodeCompanion: Chat', },
+    -- { '<leader>Cc', {
+    --   n = '<cmd>CodeCompanion ',
+    --   v = '<cmd>CodeCompanion ',
+    -- }, description = 'CodeCompanion: Chat', },
     { '<leader>Ct', { n = '<cmd>CodeCompanionChat Toggle<CR>', }, description = 'CodeCompanion: Toggle Chat Window', },
     { '<leader>Ca', { n = '<cmd>CodeCompanionActions<CR>', }, description = 'CodeCompanion: Actions', },
     { '<leader>Ce', { n = '<cmd>lua require("codecompanion").prompt("explain")<CR>', }, description = 'CodeCompanion: Explain', },

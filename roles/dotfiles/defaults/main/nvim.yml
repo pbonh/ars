@@ -30,7 +30,12 @@ nvim_exe_bone_bash_cmd:
   - "NVIM_APPNAME=nvim-bone-modular"
   - "bash"
   - "-c"
-  - "'{{ nvim_exe }}' 'vars/term-dev.yml'"
+  - "'{{ nvim_exe }}'"
+nvim_exe_ollama_bash_cmd:
+  - "NVIM_APPNAME=nvim-ollama-modular"
+  - "bash"
+  - "-c"
+  - "'{{ nvim_exe }}'"
 nvim_exe_bone: "{{ nvim_exe_bone_bash }}"
 nvim_extra_plugins:
   cpp: "{{ nvim_extra_plugins_cpp }}"
