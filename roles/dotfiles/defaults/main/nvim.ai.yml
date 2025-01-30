@@ -1,7 +1,7 @@
 ---
 nvim_codecompanion: true
 ai_adapter_avante: "claude"
-ai_adapter_chat: "ollama"
+ai_adapter_chat: "deepseek_r1"
 ai_adapter_inline: "{{ ai_adapter_chat }}"
 ai_adapter_cmd: "{{ ai_adapter_chat }}"
 anthropic_api_key: "{{ lookup('env', 'ANTHROPIC_API_KEY') }}"
@@ -34,7 +34,7 @@ user_llama_model_info:
   deepseek_r1_model_info:
     name: "deepseek_r1"
     model_name: "deepseek-r1"
-    model_tag: "32b"
+    model_tag: "8b"
     model_ctx: "{{ default_ctx_size }}"
 nvim_codecompanion_adapter_config_user: |
         {% for model_name in user_llama_model_info -%}
