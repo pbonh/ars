@@ -112,6 +112,47 @@ nushell_config_dir: "{{ macos_config_dir }}/nushell"
 xdg_config_dir_navi: "{{ macos_config_dir }}/navi"
 ```
 
+Example(Devbox,AMD-ROCM):
+```yaml
+---
+tool_provider: "devbox"
+rocm_support: true
+ars_name: "pbonh/ars"
+projects:
+  ars:
+    name: "{{ ars_name }}"
+    url: "{{ github_ssh_url }}/{{ ars_name }}.git"
+    path: "{{ code_checkout_path_github }}/{{ ars_name }}"
+codelldb_install_path: "{{ codelldb_install_devbox_path }}"
+nushell_extra_aliases: |
+  alias zdot = {{ zellij_exe }} --layout dotfiles
+bash_extra_aliases: |
+  alias zdot='{{ zellij_exe }} --layout dotfiles'
+extra_zsh_aliases: |
+  alias zdot='{{ zellij_exe }} --layout dotfiles'
+zellij_kdl_layouts:
+  dotfiles:
+    name: dotfiles
+    cwd: "{{ ansible_env.HOME }}"
+    template_info: "{{ zellij_kdl_template_info_default }}"
+    layout_info: |
+      tab name="Neovim(Ollama): Lazy-Config" split_direction="vertical" cwd="{{ nvim_config_dir }}-lazy-modular" {
+          pane {
+              command "env"
+              args {% set bash_arg_list = nvim_exe_ollama_bash_cmd %}
+                   {% set bash_arg_string = bash_arg_list | map('string') | map('regex_replace', '^(.*)$', '"\\1"') | join(' ') %}
+                   {{ bash_arg_string }}
+              start_suspended true
+          }
+      }
+      tab name="CPU/MEM" split_direction="vertical" {
+          pane {
+              command "btm"
+              start_suspended true
+          }
+      }
+```
+
 Run playbook with configuration file:
 ```bash
 ansible-pull -U https://github.com/pbonh/ars.git playbook.yml --tags "install,env" -e "@macos.yml"
