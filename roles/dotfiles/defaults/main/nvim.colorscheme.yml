@@ -51,7 +51,7 @@ nvim_colorscheme_nightfox:
       lazy = false,
       init = function()
         vim.o.background = 'dark'
-        vim.cmd([[colorscheme carbonfox]])
+        vim.cmd([[colorscheme nightfox]])
       end,
     },
     {
