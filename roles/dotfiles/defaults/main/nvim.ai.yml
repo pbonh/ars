@@ -24,18 +24,19 @@ nvim_codecompanion_adapter_config_openai: |
             },
           })
         end,
-default_ctx_size: 16384
+ctx_size: 16384
+deepseek_param_count: "8b"
 user_llama_model_info:
   llama3_model_info:
     name: "llama3"
     model_name: "llama3"
     model_tag: "latest"
-    model_ctx: "{{ default_ctx_size }}"
+    model_ctx: "{{ ctx_size }}"
   deepseek_r1_model_info:
     name: "deepseek_r1"
     model_name: "deepseek-r1"
-    model_tag: "8b"
-    model_ctx: "{{ default_ctx_size }}"
+    model_tag: "{{ deepseek_param_count }}"
+    model_ctx: "{{ ctx_size }}"
 nvim_codecompanion_adapter_config_user: |
         {% for model_name in user_llama_model_info -%}
         {% set llama_model_info = user_llama_model_info[model_name] %}
