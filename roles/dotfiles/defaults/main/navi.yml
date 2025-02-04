@@ -154,21 +154,15 @@ navi_cheats:
       args:
         - "--template"
         - "<code2prompt_template>"
-        # - "--path"
         - "<project_files>"
         - " | "
         - "ollama"
         - "run"
         - "<ollama_models>"
-        # - "\"$(fzf --multi | paste -sd, -)\""
-        # - "<project_files>"
-        # - "<project_files:join,separator=,>"
 navi_cmd_variables:
   files:
     cwd_files:
       description: "Get $CWD Files"
-      # cmd: "find . -type f -not -path '*/.*' --- --multi"
-      # cmd: "find . -type f -not -path '*/.*' | sed 's/^/--path /' | xargs --- --multi"
       cmd: "find . -type f -not -path '*/.*' --- --multi"
   git:
     branch:
@@ -185,6 +179,3 @@ navi_cmd_variables:
     project_files:
       description: "Get Project Files"
       cmd: "echo \"<cwd_files>\" | sed 's/^/--path /' | xargs"
-      # cmd: "echo \"<cwd_files>\" | sed 's/^/--path /' | xargs --- --filter=*"
-      # cmd: "echo \"<cwd_files>\" | paste -sd ',' -"
-    
