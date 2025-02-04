@@ -150,11 +150,20 @@ navi_cheats:
   ai:
     code2prompt_run:
       description: "Run Code2Prompt w/ Selected Template On Selected Files w/ Selected Model"
-      cmd: "code2prompt"
+      cmd: "script"
       args:
+        - "-q"
+        - "/dev/null"
+        - "-c"
+        - "\""
+        - "code2prompt"
         - "--template"
         - "<code2prompt_template>"
         - "<project_files>"
+        - "\""
+        - "2>/dev/null"
+        - " <<< "
+        - "\"<user_prompt>\""
         - " | "
         - "ollama"
         - "run"

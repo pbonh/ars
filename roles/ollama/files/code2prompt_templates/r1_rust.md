@@ -7,7 +7,7 @@ Type of Response :
   Code snippet with comments explaining the logic, followed by unit tests.
 
 Goal Statement :
-  "Write idiomatic Rust code for a function that performs {{ user_task }}, ensuring it handles all expected inputs correctly. Follow this by writing unit tests covering base cases, common scenarios, and edge cases."
+  "Write idiomatic Rust code for a function that performs {{ input:prompt }}, ensuring it handles all expected inputs correctly. Follow this by writing unit tests covering base cases, common scenarios, and edge cases."
 
 2. Return Format
 Code Presentation :
