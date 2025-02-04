@@ -147,7 +147,29 @@ navi_cheats:
       args:
         - "-C"
         - "display"
+  ai:
+    code2prompt_run:
+      description: "Run Code2Prompt w/ Selected Template On Selected Files w/ Selected Model"
+      cmd: "code2prompt"
+      args:
+        - "--template"
+        - "<code2prompt_template>"
+        # - "--path"
+        - "<project_files>"
+        - " | "
+        - "ollama"
+        - "run"
+        - "<ollama_models>"
+        # - "\"$(fzf --multi | paste -sd, -)\""
+        # - "<project_files>"
+        # - "<project_files:join,separator=,>"
 navi_cmd_variables:
+  files:
+    cwd_files:
+      description: "Get $CWD Files"
+      # cmd: "find . -type f -not -path '*/.*' --- --multi"
+      # cmd: "find . -type f -not -path '*/.*' | sed 's/^/--path /' | xargs --- --multi"
+      cmd: "find . -type f -not -path '*/.*' --- --multi"
   git:
     branch:
       description: "Grep Branch Names of Git Repo"
@@ -156,3 +178,13 @@ navi_cmd_variables:
     image_id:
       description: "Get Docker Image Info"
       cmd: "docker images --- --column 3 --header-lines 1 --delimiter '\\s\\s+'"
+  code2prompt:
+    code2prompt_template:
+      description: "Get Code2Prompt Templates"
+      cmd: "readlink -f {{ code2prompt_template_dir }}/*"
+    project_files:
+      description: "Get Project Files"
+      cmd: "echo \"<cwd_files>\" | sed 's/^/--path /' | xargs"
+      # cmd: "echo \"<cwd_files>\" | sed 's/^/--path /' | xargs --- --filter=*"
+      # cmd: "echo \"<cwd_files>\" | paste -sd ',' -"
+    
