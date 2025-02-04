@@ -8,7 +8,6 @@ tool_system_path: "{{ tool_install_bin }}/"
 bin_directory: "{{ tool_install_bin }}/"
 interactive_shell_cmd: "nu"
 interactive_shell: "{{ nu_exe }}"
-command_shell: "/bin/bash"
 gcc_exe: /usr/bin/gcc
 gpp_exe: /usr/bin/g++
 make_exe: "make"
