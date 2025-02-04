@@ -10,6 +10,11 @@
   when: pipx_installed.rc == 0
   changed_when: false
 
+- name: Code2Prompt | Install LLM | command
+  command: pipx install llm
+  when: pipx_installed.rc == 0
+  changed_when: false
+
 # - name: Code2Prompt | Install Code2Prompt | pipx
 #   community.general.pipx:
 #     name: code2prompt
@@ -28,3 +33,10 @@
     src: code2prompt.j2
     dest: "{{ code2prompt_template_dir }}/{{ item.value.name }}"
   loop: "{{ code2prompt_templates | dict2items }}"
+
+- name: Code2Prompt | Copies Code2Prompt Config | file
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ code2prompt_template_dir }}/{{ item.path  | regex_replace('\\.md$', '') }}"
+  with_filetree: '../files/code2prompt_templates'
+  when: item.state == 'file'

@@ -1,15 +1,23 @@
 ---
 - name: Shell | Setup | task
   import_tasks: tasks/setup_tools.yml
+  tags:
+    - install
 
 - name: Ollama | Install Ollama | task
   become: true
   when: ansible_facts['system'] == "Linux"
   import_tasks: tasks/install_ollama_linux.yml
+  tags:
+    - install
 
 - name: Ollama | Install Ollama | task
   when: ansible_facts['os_family'] == "Darwin"
   import_tasks: tasks/install_ollama_macos.yml
+  tags:
+    - install
 
 - name: Code2Prompt | Install Code2Prompt | task
   import_tasks: tasks/install_code2prompt.yml
+  tags:
+    - code2prompt

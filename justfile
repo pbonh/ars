@@ -44,3 +44,5 @@ navi:
 ollama:
   {{ task_prelude }} ansible-playbook --ask-become-pass ollama.yml
 
+code2prompt:
+  {{ task_prelude }} ansible-playbook ollama.yml --tags "code2prompt" --skip-tags "install"
