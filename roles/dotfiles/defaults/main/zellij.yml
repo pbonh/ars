@@ -10,7 +10,7 @@ zellij_themes_dir: "{{ zellij_config_dir }}/themes"
 zellij_layout_dir: "{{ zellij_config_dir }}/layouts"
 zellij_env_variables:
   nvim_appname: "{{ zellij_nvim_app }}"
-  shell: "{{ zellij_shell }}"
+  # shell: "{{ zellij_shell }}"
   anthropic_api_key: "{{ anthropic_api_key }}"
   openai_api_key: "{{ openai_api_key }}"
 zellij_env_variables_file: |
