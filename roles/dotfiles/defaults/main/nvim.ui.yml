@@ -418,9 +418,9 @@ nvim_ui:
                 return {
                   line.sep('', theme.win, theme.fill),
                   win.is_current() and '' or '',
+                  win.buf().is_changed() and '‼' or '',
                   win.buf_name(),
                   win.file_icon(),
-                  win.buf().is_changed() and '●' or '',
                   line.sep('⠀', theme.fill, theme.win),
                   hl = theme.win,
                   margin = ' ',
