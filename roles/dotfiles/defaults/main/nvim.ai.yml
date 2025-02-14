@@ -39,7 +39,7 @@ default_distilled_param_count:
   14b: "14b"
   32b: "32b"
   70b: "70"
-distilled_param_count: "{{ default_distilled_param_count['8b'] }}"
+distilled_param_count: "{{ default_distilled_param_count['7b'] }}"
 distilled_ctx_size: "{{ ctx_sizes['4k'] }}"
 user_llama_model_info:
   llama3_model_info:
