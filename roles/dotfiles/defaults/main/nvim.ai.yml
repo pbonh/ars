@@ -24,19 +24,39 @@ nvim_codecompanion_adapter_config_openai: |
             },
           })
         end,
-ctx_size: 16384
-deepseek_param_count: "8b"
+ctx_sizes:
+  2k: 2048
+  4k: 4096
+  8k: 8196
+  16k: 16384
+  32k: 32768
+  64k: 65536
+  128k: 131072
+  256k: 262144
+default_distilled_param_count:
+  7b: "7b"
+  8b: "8b"
+  14b: "14b"
+  32b: "32b"
+  70b: "70"
+distilled_param_count: "{{ default_distilled_param_count['8b'] }}"
+distilled_ctx_size: "{{ ctx_sizes['4k'] }}"
 user_llama_model_info:
   llama3_model_info:
     name: "llama3"
     model_name: "llama3"
     model_tag: "latest"
-    model_ctx: "{{ ctx_size }}"
+    model_ctx: "{{ distilled_ctx_size }}"
   deepseek_r1_model_info:
     name: "deepseek_r1"
     model_name: "deepseek-r1"
-    model_tag: "{{ deepseek_param_count }}"
-    model_ctx: "{{ ctx_size }}"
+    model_tag: "{{ distilled_param_count }}"
+    model_ctx: "{{ distilled_ctx_size }}"
+  qwen25_coder_model_info:
+    name: "qwen25_coder"
+    model_name: "qwen2.5-coder"
+    model_tag: "{{ distilled_param_count }}"
+    model_ctx: "{{ distilled_ctx_size }}"
 nvim_codecompanion_adapter_config_user: |
         {% for model_name in user_llama_model_info -%}
         {% set llama_model_info = user_llama_model_info[model_name] %}
