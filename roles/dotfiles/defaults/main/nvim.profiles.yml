@@ -233,6 +233,22 @@ nvim_plugin_groups_ollama:
   notes: "{{ nvim_neorg_legacy }}"
   motion: "{{ nvim_motion }}"
   ai: "{{ nvim_ai_companion }}"
+nvim_plugin_groups_chatgpt:
+  colorscheme: "{{ nvim_colorscheme_nightfox }}"
+  ui: "{{ nvim_ui }}"
+  telescope: "{{ nvim_fzf_lua }}"
+  project: "{{ nvim_project }}"
+  hydra: "{{ nvim_hydra }}"
+  treesitter: "{{ nvim_treesitter }}"
+  git: "{{ nvim_git }}"
+  terminal: "{{ nvim_terminal }}"
+  intellisense: "{{ nvim_lspconfig_cmp_navbuddy }}"
+  debugger: "{{ nvim_debugger }}"
+  tasks: "{{ nvim_tasks }}"
+  test: "{{ nvim_test }}"
+  notes: "{{ nvim_neorg_legacy }}"
+  motion: "{{ nvim_motion }}"
+  ai: "{{ nvim_ai_companion_chatgpt }}"
 nvim_plugin_groups_bone:
   telescope: "{{ nvim_fzf_lua }}"
   project: "{{ nvim_project }}"
@@ -251,13 +267,6 @@ nvim_xdg_modular_profiles:
       options: "{{ nvim_default_editor_options }}"
       keymaps: "{{ nvim_default_keymap_options }}"
       plugin_groups: "{{ nvim_plugin_groups_lazy | ansible.builtin.combine(nvim_extra_plugins) }}"
-  avante:
-    name: avante
-    appname: nvim-avante
-    config:
-      options: "{{ nvim_default_editor_options }}"
-      keymaps: "{{ nvim_default_keymap_options }}"
-      plugin_groups: "{{ nvim_plugin_groups_avante | ansible.builtin.combine(nvim_extra_plugins) }}"
   ollama:
     name: ollama
     appname: nvim-ollama
@@ -265,6 +274,13 @@ nvim_xdg_modular_profiles:
       options: "{{ nvim_default_editor_options }}"
       keymaps: "{{ nvim_default_keymap_options }}"
       plugin_groups: "{{ nvim_plugin_groups_ollama | ansible.builtin.combine(nvim_extra_plugins) }}"
+  chatgpt:
+    name: chatgpt
+    appname: nvim-chatgpt
+    config:
+      options: "{{ nvim_default_editor_options }}"
+      keymaps: "{{ nvim_default_keymap_options }}"
+      plugin_groups: "{{ nvim_plugin_groups_chatgpt | ansible.builtin.combine(nvim_extra_plugins) }}"
   bone:
     name: bone
     appname: nvim-bone

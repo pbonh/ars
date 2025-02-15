@@ -1,9 +1,12 @@
 ---
 nvim_codecompanion: true
 ai_adapter_avante: "claude"
-ai_adapter_chat: "deepseek_r1"
+ai_adapter_chat: "qwen25_coder"
 ai_adapter_inline: "{{ ai_adapter_chat }}"
 ai_adapter_cmd: "{{ ai_adapter_chat }}"
+chatgpt_ai_adapter_chat: "openai"
+chatgpt_ai_adapter_inline: "{{ chatgpt_ai_adapter_chat }}"
+chatgpt_ai_adapter_cmd: "{{ chatgpt_ai_adapter_chat }}"
 anthropic_api_key: "{{ lookup('env', 'ANTHROPIC_API_KEY') }}"
 openai_api_key: "{{ lookup('env', 'OPENAI_API_KEY') }}"
 openai_model: "o1-mini"
@@ -161,6 +164,27 @@ nvim_ai_companion:
     { '<leader>Ct', { n = '<cmd>CodeCompanionChat Toggle<CR>', }, description = 'CodeCompanion: Toggle Chat Window', },
     { '<leader>Ca', { n = '<cmd>CodeCompanionActions<CR>', }, description = 'CodeCompanion: Actions', },
     { '<leader>Ce', { n = '<cmd>lua require("codecompanion").prompt("explain")<CR>', }, description = 'CodeCompanion: Explain', },
+nvim_ai_companion_chatgpt:
+  lazy: "{{ nvim_ai_companion['lazy'] }}"
+  config: |
+    require("codecompanion").setup({
+      strategies = {
+        chat = {
+          adapter = "{{ chatgpt_ai_adapter_chat }}",
+        },
+        inline = {
+          adapter = "{{ chatgpt_ai_adapter_inline }}",
+        },
+        cmd = {
+          adapter = "{{ chatgpt_ai_adapter_cmd }}",
+        },
+      },
+      {{ nvim_codecompanion_adapter_config }}
+      {{ nvim_codecompanion_prompt_library }}
+    })
+    -- Expand 'cc' into 'CodeCompanion' in the command line
+    -- vim.cmd([[cab cc CodeCompanion]])
+  keymaps: "{{ nvim_ai_companion['keymaps'] }}"
 nvim_ai_avante:
   lazy: |
     {
