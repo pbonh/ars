@@ -147,6 +147,15 @@ navi_cheats:
       args:
         - "-C"
         - "display"
+    rsync_ssh:
+      description: "RSync to Server(ssh)"
+      cmd: "rsync"
+      args:
+        - "-r"
+        - "--info=progress2"
+        - "--info=name0"
+        - "<source_path>"
+        - "<user>@<remote_host>:<destination_path>"
   ai:
     code2prompt_run:
       description: "Run Code2Prompt w/ Selected Template On Selected Files w/ Selected Model"
