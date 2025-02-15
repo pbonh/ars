@@ -10,10 +10,8 @@
 
 {% endfor %}
 
-{% endfor %}
-
 # -----------------------------------------------------------------------------
-# Navi Variables
+# Navi Variables: {{ category | upper }}
 # -----------------------------------------------------------------------------
 {% for category, commands in navi_cmd_variables.items() %}
 {% for variable_name, variable_info in commands.items() %}
@@ -22,27 +20,4 @@ $ {{ variable_name }}: {{ variable_info.cmd }}
 
 {% endfor %}
 {% endfor %}
-
-# # -----------------------------------------------------------------------------
-# # Navi Examples
-# # -----------------------------------------------------------------------------
-# # If you select "hello" for <x>, the possible values of <y> will be "hello foo" and "hello bar"
-# echo <x> <y>
-# 
-# # If you want to ignore the contents of <x> and only print <y>
-# : <x>; echo <y>
-# 
-# $ x: echo "hello hi" | tr ' ' '\n'
-# $ y: echo "$x foo;$x bar" | tr ';' '\n'
-# 
-# # This will output "foo\nyes"
-# echo foo
-# true \
-#    && echo yes \
-#    || echo no
-# 
-# # This will result into: cat "file1.json" "file2.json"
-# cat <jsons>
-# 
-# $ jsons: find . -iname '*.json' -type f -print --- --multi --map "navi fn map::expand"
-
+{% endfor %}

@@ -154,7 +154,7 @@ navi_cheats:
         - "-r"
         - "--info=progress2"
         - "--info=name0"
-        - "<source_path>"
+        - "<project_all>"
         - "<user>@<remote_host>:<destination_path>"
   ai:
     code2prompt_run:
@@ -182,6 +182,9 @@ navi_cmd_variables:
     cwd_files:
       description: "Get $CWD Files"
       cmd: "find . -type f -not -path '*/.*' --- --multi"
+    cwd_all:
+      description: "Get $CWD All"
+      cmd: "find . -type f -or -type d -not -path '*/.*' --- --multi"
   git:
     branch:
       description: "Grep Branch Names of Git Repo"
@@ -197,3 +200,30 @@ navi_cmd_variables:
     project_files:
       description: "Get Project Files"
       cmd: "echo \"<cwd_files>\" | sed 's/^/--path /' | xargs"
+    project_all:
+      description: "Get Project Files"
+      cmd: "echo \"<cwd_all>\" | xargs"
+
+# # -----------------------------------------------------------------------------
+# # Navi Examples
+# # -----------------------------------------------------------------------------
+# # If you select "hello" for <x>, the possible values of <y> will be "hello foo" and "hello bar"
+# echo <x> <y>
+# 
+# # If you want to ignore the contents of <x> and only print <y>
+# : <x>; echo <y>
+# 
+# $ x: echo "hello hi" | tr ' ' '\n'
+# $ y: echo "$x foo;$x bar" | tr ';' '\n'
+# 
+# # This will output "foo\nyes"
+# echo foo
+# true \
+#    && echo yes \
+#    || echo no
+# 
+# # This will result into: cat "file1.json" "file2.json"
+# cat <jsons>
+# 
+# $ jsons: find . -iname '*.json' -type f -print --- --multi --map "navi fn map::expand"
+
