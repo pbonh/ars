@@ -6,6 +6,7 @@ ai_adapter_inline: "{{ ai_adapter_chat }}"
 ai_adapter_cmd: "{{ ai_adapter_chat }}"
 anthropic_api_key: "{{ lookup('env', 'ANTHROPIC_API_KEY') }}"
 openai_api_key: "{{ lookup('env', 'OPENAI_API_KEY') }}"
+openai_model: "o1-mini"
 ollama_port: "11434"
 ollama_address: "http://localhost:{{ ollama_port }}"
 nvim_codecompanion_adapter_config_ollama: |
@@ -21,6 +22,11 @@ nvim_codecompanion_adapter_config_openai: |
           return require("codecompanion.adapters").extend("openai", {
             env = {
               api_key = "{{ openai_api_key }}"
+            },
+            schema = {
+              model = {
+                default = "{{ openai_model }}",
+              },
             },
           })
         end,
