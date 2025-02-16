@@ -144,6 +144,12 @@ zsh_yazi_setup: |
     rm -f -- "$tmp"
   }
 zsh_navi_setup: |
+  {% for category, commands in navi_cheats.items() %}
+  {% for cmd_name, cmd_info in commands.items() %}
+  alias nr-{{ cmd_name }}='navi --fzf-overrides "--exact --with-nth 1,2" --query "{{ cmd_name }} ::" --best-match'
+  {% endfor %}
+  {% endfor %}
+
   # eval "$({{ navi_exe }} widget zsh)"
   _navi_call() {
      local result="$({{ navi_exe }} "$@" </dev/tty)"

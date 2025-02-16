@@ -111,6 +111,12 @@ bash_nvim_setup: |
   {{ "alias vim-" + nvim_xdg_modular_profiles[nvim_profile_name]['name'] + "='NVIM_APPNAME=" + nvim_xdg_modular_profiles[nvim_profile_name]['appname'] + "-modular " + nvim_exe + "'" }}
   {% endfor %}
 bash_navi_setup: |
+  {% for category, commands in navi_cheats.items() %}
+  {% for cmd_name, cmd_info in commands.items() %}
+  alias nr-{{ cmd_name }}='navi --fzf-overrides "--exact --with-nth 1,2" --query "{{ cmd_name }} ::" --best-match'
+  {% endfor %}
+  {% endfor %}
+
   # eval "$({{ navi_exe }} widget bash)"
   _navi_call() {
      local result="$({{ navi_exe }} "$@" </dev/tty)"

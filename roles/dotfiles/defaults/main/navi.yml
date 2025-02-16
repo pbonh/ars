@@ -158,7 +158,7 @@ navi_cheats:
         - "<user>@<remote_host>:<destination_path>"
   ai:
     code2prompt_run:
-      description: "Run Code2Prompt w/ Selected Template On Selected Files w/ Selected Model"
+      description: "Run Code2Prompt with Selected Template On Selected Files with Selected Model"
       cmd: "script"
       args:
         - "-q"

@@ -4,7 +4,7 @@
 % {{ category }}
 
 {% for cmd_name, cmd_info in commands.items() %}
-# {{ cmd_info.description }} :: {{ cmd_name }}
+# {{ cmd_name }} :: {{ cmd_info.description }}
 {{ cmd_info.cmd }}{% if cmd_info.args %} {{ cmd_info.args | join(' ') }}{% endif %}
 
 {% endfor %}
