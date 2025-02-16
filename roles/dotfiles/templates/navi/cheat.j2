@@ -1,7 +1,6 @@
 # -----------------------------------------------------------------------------
-# Navi Commands
+# Navi Commands: {{ category | upper }}
 # -----------------------------------------------------------------------------
-{% for category, commands in navi_cheats.items() %}
 % {{ category }}
 
 {% for cmd_name, cmd_info in commands.items() %}
@@ -18,6 +17,5 @@
 # {{ variable_info.description }}
 $ {{ variable_name }}: {{ variable_info.cmd }}
 
-{% endfor %}
 {% endfor %}
 {% endfor %}
