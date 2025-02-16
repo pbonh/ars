@@ -32,6 +32,9 @@ dot tag='env':
 shell:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "env,scripts" --skip-tags "install"
 
+bash:
+  {{ task_prelude }} ansible-playbook dotfiles.yml --tags "bash" --skip-tags "install"
+
 neovim:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "neovim-config" --skip-tags "install"
 
