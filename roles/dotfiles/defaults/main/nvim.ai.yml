@@ -86,6 +86,15 @@ nvim_codecompanion_adapter_config_user: |
           })
         end,
         {% endfor %}
+nvim_codecompanion_display_config: |
+      display = {
+        chat = {
+          -- Options to customize the UI of the chat buffer
+          window = {
+            layout = "float", -- float|vertical|horizontal|buffer
+          },
+        },
+      },
 nvim_codecompanion_adapter_config: |
       adapters = {
         {{ nvim_codecompanion_adapter_config_ollama }}
@@ -151,6 +160,7 @@ nvim_ai_companion:
           adapter = "{{ ai_adapter_cmd }}",
         },
       },
+      {{ nvim_codecompanion_display_config }}
       {{ nvim_codecompanion_adapter_config }}
       {{ nvim_codecompanion_prompt_library }}
     })
@@ -179,6 +189,7 @@ nvim_ai_companion_chatgpt:
           adapter = "{{ chatgpt_ai_adapter_cmd }}",
         },
       },
+      {{ nvim_codecompanion_display_config }}
       {{ nvim_codecompanion_adapter_config }}
       {{ nvim_codecompanion_prompt_library }}
     })
