@@ -48,6 +48,13 @@ zellij_kdl_layouts:
               start_suspended true
           }
       }
+      tab name="Devbox Project" split_direction="vertical" cwd="/path/to/devbox_project" {
+          pane {
+              command "env"
+              args "NVIM_APPNAME=nvim-chatgpt-modular" "bash" "-c" "devbox run -- {{ nvim_exe }} README.md"
+              start_suspended true
+          }
+      }
 nushell_config_dir: "{{ macos_config_dir }}/nushell"
 xdg_config_dir_navi: "{{ macos_config_dir }}/navi"
 ```
