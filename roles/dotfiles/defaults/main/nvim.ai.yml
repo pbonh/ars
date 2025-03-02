@@ -141,6 +141,21 @@ nvim_codecompanion_prompt_library: |
       prompt_library = {
         {{ nvim_codecompanion_prompt_library_docusaurus }}
       },
+nvim_codecompanion_chat_select_ui: |
+          slash_commands = {
+            ["file"] = {
+              opts = {
+                provider = "fzf_lua", -- Other options include 'default', 'mini_pick', 'fzf_lua', snacks
+                contains_code = true,
+              },
+            },
+            ["buffer"] = {
+              opts = {
+                provider = "fzf_lua", -- Other options include 'default', 'mini_pick', 'fzf_lua', snacks
+                contains_code = true,
+              },
+            },
+          },
 nvim_ai_companion:
   lazy: |
     {
@@ -156,6 +171,7 @@ nvim_ai_companion:
       strategies = {
         chat = {
           adapter = "{{ ai_adapter_chat }}",
+          {{ nvim_codecompanion_chat_select_ui }}
         },
         inline = {
           adapter = "{{ ai_adapter_inline }}",
@@ -185,6 +201,7 @@ nvim_ai_companion_chatgpt:
       strategies = {
         chat = {
           adapter = "{{ chatgpt_ai_adapter_chat }}",
+          {{ nvim_codecompanion_chat_select_ui }}
         },
         inline = {
           adapter = "{{ chatgpt_ai_adapter_inline }}",
