@@ -146,7 +146,7 @@ zsh_yazi_setup: |
 zsh_navi_setup: |
   {% for category, commands in navi_cheats.items() %}
   {% for cmd_name, cmd_info in commands.items() %}
-  alias nr-{{ cmd_name }}='navi --fzf-overrides "--exact --with-nth 1,2" --query "{{ cmd_name }} ::" --best-match'
+  alias nr-{{ cmd_name }}='{{ navi_exe }} --fzf-overrides "--exact --with-nth 1,2" --query "{{ cmd_name }} ::" --best-match'
   {% endfor %}
   {% endfor %}
 

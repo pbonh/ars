@@ -28,7 +28,12 @@ tcsh_fzf_setup: |
   {% endfor %}
   setenv SKIM_DEFAULT_COMMAND '{{ fd_exe }} --type f || git ls-tree -r --name-only HEAD || {{ rg_exe }} --files || find .'
 tcsh_yazi_setup: ""
-tcsh_navi_setup: ""
+tcsh_navi_setup: |
+  {% for category, commands in navi_cheats.items() %}
+  {% for cmd_name, cmd_info in commands.items() %}
+  alias nr-{{ cmd_name }} '{{ navi_exe }} --fzf-overrides "--exact --with-nth 1,2" --query "{{ cmd_name }} ::" --best-match'
+  {% endfor %}
+  {% endfor %}
 tcsh_default_aliases: |
   alias mkcd 'mkdir \!:1 && cd \!:1'
   alias cat {{ bat_exe }}
