@@ -1,5 +1,5 @@
 ---
-fzf_install_dir: "{{ dotfiles_user_home }}/.fzf"
+fzf_install_dir: "{{ default_home_local }}/.fzf"
 fzf_exe: "{{ fzf_install_dir }}/bin/fzf"
 fzf_share_exe: "{{ fzf_install_dir }}/bin/fzf-share"
 fzf_env:
