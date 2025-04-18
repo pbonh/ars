@@ -35,6 +35,9 @@ shell:
 bash:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "bash" --skip-tags "install"
 
+tcsh:
+  {{ task_prelude }} ansible-playbook dotfiles.yml --tags "tcsh" --skip-tags "install"
+
 neovim:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "neovim-config" --skip-tags "install"
 

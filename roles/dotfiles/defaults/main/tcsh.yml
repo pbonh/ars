@@ -28,6 +28,10 @@ tcsh_fzf_setup: |
   {% endfor %}
   setenv SKIM_DEFAULT_COMMAND '{{ fd_exe }} --type f || git ls-tree -r --name-only HEAD || {{ rg_exe }} --files || find .'
 tcsh_yazi_setup: ""
+tcsh_nvim_setup: |
+  {% for nvim_profile_name in nvim_xdg_modular_profiles -%}
+  {{ "alias vim-" + nvim_xdg_modular_profiles[nvim_profile_name]['name'] + " 'setenv NVIM_APPNAME " + nvim_xdg_modular_profiles[nvim_profile_name]['appname'] + "-modular && " + nvim_exe + "'" }}
+  {% endfor %}
 tcsh_navi_setup: |
   {% for category, commands in navi_cheats.items() %}
   {% for cmd_name, cmd_info in commands.items() %}
