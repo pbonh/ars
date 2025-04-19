@@ -1,5 +1,5 @@
 ---
-- name: Vars | Set Rust Baremetal Variables | set_fact
+- name: Vars | Set Rust Non-Root Variables | set_fact
   ansible.builtin.set_fact:
     cargo_path: "{{ cargo_home }}/bin/"
     rust_analyzer_exe: "{{ rustup_path }}rust-analyzer"
