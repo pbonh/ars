@@ -30,6 +30,10 @@ cargo_packages:
   cargo-update:
     name: cargo-update
     path: "{{ cargo_path }}cargo-install-update"
+cargo_install_packages:
+  yazi_cli:
+    name: yazi-cli
+    path: "{{ cargo_path }}ya"
 cargo_binstall_packages:
   atuin:
     name: atuin
@@ -148,9 +152,6 @@ cargo_binstall_packages:
   yazi:
     name: yazi-fm
     path: "{{ cargo_path }}yazi"
-  yazi_cli:
-    name: yazi-cli
-    path: "{{ cargo_path }}ya"
   zellij:
     name: zellij
     path: "{{ cargo_path }}zellij"

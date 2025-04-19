@@ -43,13 +43,21 @@
     creates: "{{ cargo_path }}cargo-install-update"
   environment: "{{ rust_tools_env }}"
 
-- name: Install Cargo/Rust Dev Tools
+- name: Install Cargo/Rust Dev Tools(Binstall)
   ignore_errors: true
   shell: "{{ rustc_env_variables }} {{ cargo_binstall_exe }} {{ cargo_binstall_args }} --no-confirm {{ item.value.name }}"
   args:
     creates: "{{ item.value.path }}"
   environment: "{{ rust_tools_env }}"
   loop: "{{ cargo_binstall_packages | dict2items }}"
+
+- name: Install Cargo/Rust Dev Tools
+  ignore_errors: true
+  shell: "{{ rustc_env_variables }} {{ cargo_bin }} install {{ item.value.name }}"
+  args:
+    creates: "{{ item.value.path }}"
+  environment: "{{ rust_tools_env }}"
+  loop: "{{ cargo_install_packages | dict2items }}"
 
 # - name: Rust | Update Installed Rust Packages | shell
 #   changed_when: false
