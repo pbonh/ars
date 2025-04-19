@@ -9,6 +9,14 @@ nvim_cache_dir: "{{ xdg_cache_dir }}/nvim"
 default_nvim_config_dir: "{{ nvim_xdg_config_dir }}/nvim"
 default_nvim_share_dir: "{{ nvim_xdg_data_dir }}/nvim"
 default_nvim_cache_dir: "{{ nvim_xdg_cache_dir }}/nvim"
+nvim_system_path: |
+  {% for path_info in path_directories -%}
+  {% if path_directories[path_info]['prepend'] == false %}
+  vim.env.PATH = vim.env.PATH .. '{{ path_directories[path_info]['path'] }}'
+  {% else %}
+  vim.env.PATH = '{{ path_directories[path_info]['path'] }}' .. vim.env.PATH
+  {% endif %}
+  {% endfor %}
 nvim_python_exe: "{{ tool_system_path }}nvim-python3"
 nvim_make_exe: "{{ make_exe }}"
 nvim_fterm_cmds:

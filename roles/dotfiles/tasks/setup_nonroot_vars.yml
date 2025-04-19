@@ -5,6 +5,22 @@
     rust_analyzer_exe: "{{ rustup_path }}rust-analyzer"
     clippy_exe: "{{ rustup_path }}cargo-clippy"
 
+- name: Vars | Set PATH Variables | set_fact
+  ansible.builtin.set_fact:
+    path_directories:
+      local:
+        name: local
+        prepend: false
+        path: "/usr/local/bin"
+      scripts:
+        name: scripts
+        prepend: false
+        path: "{{ tool_install_bin }}"
+      cargo:
+        name: cargo
+        prepend: false
+        path: "{{ cargo_path }}"
+
 - name: Vars | Set Tool Exe Variables | set_fact
   ansible.builtin.set_fact:
     bash_nonroot_env: |
