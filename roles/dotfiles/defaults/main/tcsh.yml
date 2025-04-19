@@ -22,7 +22,9 @@ tcsh_plugins_source:
     name: devbox
     script: |
       set path = ($path {{ devbox_nix_root_path }})
+tcsh_fzf_path: "set path = ($path {{ fzf_path }})"
 tcsh_fzf_setup: |
+  {{ tcsh_fzf_path }}
   {% for fzf_env_var in fzf_env -%}
   {{ "setenv " + fzf_env[fzf_env_var]['name'] + " '" + fzf_env[fzf_env_var]['env'] + "'" }}
   {% endfor %}

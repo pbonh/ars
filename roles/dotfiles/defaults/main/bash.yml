@@ -55,9 +55,11 @@ bash_plugins_source:
       if [ -d {{ homebrew_path }} ]; then
         eval "$({{ homebrew_path }}/brew shellenv)"
       fi
+bash_fzf_path: "export PATH=$PATH:{{ fzf_path }}"
 bash_fzf_setup: |
   eval "$({{ fzf_exe }} --bash)"
   export PATH="$PATH:{{ bash_git_fuzzy }}/bin"
+  {{ bash_fzf_path }}
   fzf_find_edit() {
     local file=$(
       {{ fzf_exe }} --query="$1" --no-multi --select-1 --exit-0 \

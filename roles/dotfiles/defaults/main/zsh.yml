@@ -40,8 +40,8 @@ zsh_default_plugins: |
   eval "$({{ direnv_exe }} hook zsh)"
   eval "$({{ starship_exe }} init zsh)"
   eval "$({{ zoxide_exe }} init zsh)"
+zsh_fzf_path: "export PATH=$PATH:{{ fzf_path }}"
 zsh_fzf_setup: |
-  # export PATH=$PATH:{{ fzf_install_dir }}/bin
   if [ -n "${commands[fzf-share]}" ]; then
     source "$(fzf-share)/key-bindings.zsh"
     source "$(fzf-share)/completion.zsh"
@@ -51,6 +51,7 @@ zsh_fzf_setup: |
   fi
   source {{ zsh_fzf_tab }}/fzf-tab.plugin.zsh
   # source {{ fzf_install_dir }}/shell/key-bindings.zsh
+  {{ zsh_fzf_path }}
   export PATH=$PATH:{{ zsh_git_fuzzy }}/bin
   export GF_BASE_REMOTE={{ zsh_git_fuzzy_upstream }}
   export GF_BASE_BRANCH={{ zsh_git_fuzzy_branch }}

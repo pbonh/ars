@@ -11,4 +11,8 @@
       fi
     nu_homebrew_env: |
       $env.PATH = ($env.PATH | split row (char esep) | append '{{ homebrew_path }}')
+    bash_fzf_path: ""
+    zsh_fzf_path: ""
+    tcsh_fzf_path: ""
+    nushell_fzf_path: ""
     direnv_exe: "direnv"

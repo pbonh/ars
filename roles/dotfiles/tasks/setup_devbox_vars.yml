@@ -23,5 +23,9 @@
       fi
     nu_devbox_env: |
       $env.PATH = ($env.PATH | split row (char esep) | append '{{ devbox_nix_root_path }}')
+    bash_fzf_path: ""
+    zsh_fzf_path: ""
+    tcsh_fzf_path: ""
+    nushell_fzf_path: ""
     direnv_exe: "direnv"
     just_exe: "just"
