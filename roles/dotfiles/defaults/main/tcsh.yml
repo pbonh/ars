@@ -32,6 +32,8 @@ tcsh_fzf_setup: |
   {{ "setenv " + fzf_env[fzf_env_var]['name'] + " '" + fzf_env[fzf_env_var]['env'] + "'" }}
   {% endfor %}
   setenv SKIM_DEFAULT_COMMAND '{{ fd_exe }} --type f || git ls-tree -r --name-only HEAD || {{ rg_exe }} --files || find .'
+  alias fcd 'set dest_dir=`{{ fd_exe }} --type d | {{ skim_exe }} --reverse --bind ctrl-f:page-down,ctrl-b:page-up` && cd "$dest_dir"'
+  alias ffe '{{ nvim_exe }} `{{ skim_exe }} --reverse --bind ctrl-f:page-down,ctrl-b:page-up`'
 tcsh_yazi_setup: ""
 tcsh_nvim_setup: |
   {% for nvim_profile_name in nvim_xdg_modular_profiles -%}
@@ -44,11 +46,7 @@ tcsh_navi_setup: |
   {% endfor %}
   {% endfor %}
 tcsh_default_aliases: |
-  alias mkcd 'mkdir \!:1 && cd \!:1'
-  alias cat {{ bat_exe }}
-  alias ls '{{ lsd_exe }} --group-dirs first'
-  alias cdg 'set dest_dir=`{{ bin_directory }}cdscuts_glob_echo | {{ skim_exe }} --reverse --bind ctrl-f:page-down,ctrl-b:page-up` && cd "$dest_dir"'
-  alias fcd 'set dest_dir=`{{ fd_exe }} --type d | {{ skim_exe }} --reverse --bind ctrl-f:page-down,ctrl-b:page-up` && cd "$dest_dir"'
-  alias ffe '{{ nvim_exe }} `{{ skim_exe }} --reverse --bind ctrl-f:page-down,ctrl-b:page-up`'
-  alias jchoose '{{ just_exe }} --choose'
+  {% for shell_alias in shell_aliases | dict2items -%}
+  alias {{ shell_alias.key }} '{{ shell_alias.value.csh }}'
+  {% endfor %}
 tcsh_extra_aliases: ""
