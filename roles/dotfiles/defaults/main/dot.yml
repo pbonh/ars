@@ -48,5 +48,21 @@ path_directories:
 env_variables:
   git_ssh: "{{ git_ssh }}"
   editor: "{{ nvim_exe }}"
-  visual: "{{ nvim_exe }} --cmd 'let g:flatten_wait=1'"
+  visual: "{{ nvim_exe }} --cmd 'let g:flatten_wait:<cr>1'"
+shell_aliases:
+  cat:
+    sh: "{{ bat_exe }}"
+  ls:
+    sh: "{{ lsd_exe }} --group-dirs first"
+  ll:
+    sh: "{{ lsd_exe }} --group-dirs first -l"
+  jchoose:
+    sh: "{{ just_exe }} --choose"
+  vim:
+    sh: "{{ nvim_exe_bone_bash }}"
+  cdg:
+    sh: "cd $(cdscuts_glob_echo | {{ fzf_exe }})"
+  nvi:
+    sh: "{{ navi_shell_cmd }}"
+extra_shell_aliases: {}
 lang_tools_nix: "{{ cpp_tools_nix + python_tools_nix }}"

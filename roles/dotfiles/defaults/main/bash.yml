@@ -147,14 +147,13 @@ bash_navi_setup: |
      bind -x '"\C-a": _navi_widget'
   fi
 bash_default_aliases: |
-  alias cat={{ bat_exe }}
-  alias ls='{{ lsd_exe }} --group-dirs first'
-  alias ll='{{ lsd_exe }} --group-dirs first -l'
-  alias jchoose='{{ just_exe }} --choose'
-  alias vim='{{ nvim_exe_bone_bash }}'
-  alias cdg='cd $(cdscuts_glob_echo | {{ fzf_exe }})'
-  alias nvi='{{ navi_shell_cmd }}'
-bash_extra_aliases: ""
+  {% for shell_alias in shell_aliases | dict2items -%}
+  alias {{ shell_alias.key }}='{{ shell_alias.value.sh }}'
+  {% endfor %}
+bash_extra_aliases: |
+  {% for shell_alias in extra_shell_aliases | dict2items -%}
+  alias {{ shell_alias.key }}='{{ shell_alias.value.sh }}'
+  {% endfor %}
 bash_ssh_setup: |
   env={{ dotfiles_user_home }}/.ssh/agent.env
   agent_load_env () { test -f "$env" && . "$env" >| /dev/null ; }

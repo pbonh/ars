@@ -35,6 +35,9 @@ shell:
 bash:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "bash" --skip-tags "install"
 
+zsh:
+  {{ task_prelude }} ansible-playbook dotfiles.yml --tags "zsh" --skip-tags "install"
+
 tcsh:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "tcsh" --skip-tags "install"
 

@@ -186,11 +186,9 @@ zsh_nvim_setup: |
   {{ "alias vim-" + nvim_xdg_modular_profiles[nvim_profile_name]['name'] + "='NVIM_APPNAME=" + nvim_xdg_modular_profiles[nvim_profile_name]['appname'] + "-modular " + nvim_exe + "'" }}
   {% endfor %}
 zsh_default_aliases: |
-  alias cat={{ bat_exe }}
-  alias ls='{{ lsd_exe }} --group-dirs first'
-  alias ll='{{ lsd_exe }} --group-dirs first -l'
-  alias jchoose='{{ just_exe }} --choose'
-  alias vim='{{ nvim_exe_bone_bash }}'
+  {% for shell_alias in shell_aliases | dict2items -%}
+  alias {{ shell_alias.key }}='{{ shell_alias.value.sh }}'
+  {% endfor %}
 zsh_ssh_setup: |
   env={{ dotfiles_user_home }}/.ssh/agent.env
   agent_load_env () { test -f "$env" && . "$env" >| /dev/null ; }
@@ -207,4 +205,7 @@ zsh_ssh_setup: |
       ssh-add
   fi
   unset env
-extra_zsh_aliases: ""
+extra_zsh_aliases: |
+  {% for shell_alias in extra_shell_aliases | dict2items -%}
+  alias {{ shell_alias.key }}='{{ shell_alias.value.sh }}'
+  {% endfor %}
