@@ -45,4 +45,8 @@ path_directories:
     name: scripts
     prepend: false
     path: "{{ tool_install_bin }}"
+env_variables:
+  git_ssh: "{{ git_ssh }}"
+  editor: "{{ nvim_exe }}"
+  visual: "{{ nvim_exe }} --cmd 'let g:flatten_wait=1'"
 lang_tools_nix: "{{ cpp_tools_nix + python_tools_nix }}"

@@ -12,6 +12,9 @@ tcsh_default_env: |
   {{ "set path = (" + path_directories[path_info]['path'] + " $path)" }}
   {% endif %}
   {% endfor %}
+  {% for env_var in env_variables | dict2items -%}
+  setenv {{ env_var.key | upper }} '{{ env_var.value }}'
+  {% endfor %}
 tcsh_extra_env: ""
 tcsh_default_plugins: |
   foreach cshrc_file ( `ls {{ tcsh_config_dir }}` )
