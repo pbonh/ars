@@ -47,6 +47,13 @@ tcsh_navi_setup: |
   {% endfor %}
 tcsh_default_aliases: |
   {% for shell_alias in shell_aliases | dict2items -%}
+  {% if shell_alias.value.csh is defined %}
   alias {{ shell_alias.key }} '{{ shell_alias.value.csh }}'
+  {% endif %}
   {% endfor %}
-tcsh_extra_aliases: ""
+tcsh_extra_aliases: |
+  {% for shell_alias in extra_shell_aliases | dict2items -%}
+  {% if shell_alias.value.csh is defined %}
+  alias {{ shell_alias.key }} '{{ shell_alias.value.csh }}'
+  {% endif %}
+  {% endfor %}
