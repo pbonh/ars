@@ -11,6 +11,10 @@ nushell_path_env: |
   {{ "$env.PATH = ($env.PATH | split row (char esep) | prepend '" + path_directories[path_info]['path'] + "')" }}
   {% endif %}
   {% endfor %}
+nushell_env: |
+  {% for env_var in env_variables | dict2items -%}
+  $env.{{ env_var.key | upper }} = "{{ env_var.value }}"
+  {% endfor %}
 nushell_fzf_path: "$env.PATH = ($env.PATH | split row (char esep) | append '{{ fzf_path }}')"
 nushell_fzf_env: |
   {{ nushell_fzf_path }}
