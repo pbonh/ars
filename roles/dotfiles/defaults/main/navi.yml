@@ -156,6 +156,13 @@ navi_cheats:
         - "--info=name0"
         - "<project_all>"
         - "<user>@<remote_host>:<destination_path>"
+  devbox:
+    update_global:
+      description: "Update All Globally Installed Packages"
+      cmd: "devbox"
+      args:
+        - "global"
+        - "update"
   ai:
     code2prompt_run:
       description: "Run Code2Prompt with Selected Template On Selected Files with Selected Model"
