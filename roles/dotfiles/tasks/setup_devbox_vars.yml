@@ -2,6 +2,9 @@
 - name: Vars | Set Devbox Variables | set_fact
   ansible.builtin.set_fact:
     bash_devbox_env: |
+      export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
+      export LANG=C.UTF-8
+      export LC_CTYPE=C.UTF-8
       if  command -v devbox &> /dev/null
       then
         eval "$(devbox global shellenv --init-hook)"
@@ -13,8 +16,8 @@
       # export LANG=C.UTF-8
       # export LC_CTYPE=en_US.UTF-8
       # export LC_ALL=en_US.UTF-8
-      export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
       # export LANG=en_US.UTF-8
+      export LOCALE_ARCHIVE=/usr/lib/locale/locale-archive
       export LANG=C.UTF-8
       export LC_CTYPE=C.UTF-8
       if  command -v devbox &> /dev/null
@@ -23,6 +26,9 @@
       fi
     nu_devbox_env: |
       $env.PATH = ($env.PATH | split row (char esep) | append '{{ devbox_nix_root_path }}')
+      $env.LOCALE_ARCHIVE = "/usr/lib/locale/locale-archive"
+      $env.LANG = "C.UTF-8"
+      $env.LC_CTYPE = "C.UTF-8"
     bash_fzf_path: ""
     zsh_fzf_path: ""
     tcsh_fzf_path: ""
