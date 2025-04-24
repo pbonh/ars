@@ -20,6 +20,11 @@ projects:
     name: "{{ term_dev_name }}"
     url: "{{ github_ssh_url }}:{{ term_dev_name }}.git"
     path: "{{ code_checkout_path_github }}/{{ term_dev_name }}"
+other_projects: "{{ projects | dict2items | 
+             map(attribute='key', 
+                 attribute2='value', 
+                 transform=lambda k, v: [k, {'name': v.name, 'path': v.path}]) | 
+             items2dict }}"
 nushell_extra_aliases: |
   alias zdot = {{ zellij_exe }} --layout dotfiles
 bash_extra_aliases: |
@@ -70,6 +75,11 @@ projects:
     name: "{{ ars_name }}"
     url: "{{ github_ssh_url }}/{{ ars_name }}.git"
     path: "{{ code_checkout_path_github }}/{{ ars_name }}"
+other_projects: "{{ projects | dict2items | 
+             map(attribute='key', 
+                 attribute2='value', 
+                 transform=lambda k, v: [k, {'name': v.name, 'path': v.path}]) | 
+             items2dict }}"
 codelldb_install_path: "{{ codelldb_install_devbox_path }}"
 nushell_extra_aliases: |
   alias zdot = {{ zellij_exe }} --layout dotfiles
