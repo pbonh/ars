@@ -57,7 +57,7 @@ nushell_custom_config: |
     ]
   }
 nushell_fzf_config: |
-  alias cdg = cd ({{ bin_directory }}cdscuts_glob_echo | {{ fzf_exe }} | decode utf-8 | str trim)
+  # alias cdg = cd ({{ bin_directory }}cdscuts_glob_echo | {{ fzf_exe }} | decode utf-8 | str trim)
   # alias fcd = cd (ls | where type == dir | each { |it| $it.name} | str join (char nl) | {{ fzf_exe }} | decode utf-8 | str trim)
   alias fcd = cd ({{ fd_exe }} -H -t d -E .git | {{ fzf_exe }} | decode utf-8 | str trim)
   alias ffe = {{ nvim_exe }} ({{ fzf_exe }} --layout=reverse)
@@ -87,11 +87,20 @@ nushell_nvim_config: |
   {{ "}" }}
   {% endfor %}
 nushell_aliases: |
-  alias mkcd = mkdir $env.1 and cd $env.1
-  alias cat = {{ bat_exe }}
-  # alias ls = {{ lsd_exe }} --group-dirs first
-  alias ll = {{ lsd_exe }} --group-dirs first -l
-nushell_extra_aliases: ""
+  {% for shell_alias in shell_aliases | dict2items -%}
+  {% if shell_alias.value.nu is defined %}
+  alias {{ shell_alias.key }} = {{ shell_alias.value.nu }}
+  {% endif %}
+  {% endfor %}
+  {% for zellij_layout in zellij_kdl_layouts -%}
+  alias z{{ zellij_layout }} = {{ zellij_exe }} --layout {{ zellij_kdl_layouts[zellij_layout]['name'] }}
+  {% endfor %}
+nushell_extra_aliases: |
+  {% for shell_alias in extra_shell_aliases | dict2items -%}
+  {% if shell_alias.value.nu is defined %}
+  alias {{ shell_alias.key }} = {{ shell_alias.value.nu }}
+  {% endif %}
+  {% endfor %}
 nushell_starship_dir: "{{ xdg_cache_dir }}/starship"
 nushell_starship_source: "{{ nushell_starship_dir }}/init.nu"
 nushell_starship_config: |

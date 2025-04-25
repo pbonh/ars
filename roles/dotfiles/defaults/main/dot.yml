@@ -53,24 +53,30 @@ shell_aliases:
   mkcd:
     sh: "mkdir -p $1 && cd $1"
     csh: "mkdir -p \\!:1 && cd \\!:1"
+    nu: "mkdir $env.1 and cd $env.1"
   cat:
     sh: "{{ bat_exe }}"
     csh: "{{ bat_exe }}"
+    nu: "{{ bat_exe }}"
   ls:
     sh: "{{ lsd_exe }} --group-dirs first"
     csh: "{{ lsd_exe }} --group-dirs first"
+    nu: "{{ lsd_exe }} --group-dirs first"
   ll:
     sh: "{{ lsd_exe }} --group-dirs first -l"
     csh: "{{ lsd_exe }} --group-dirs first -l"
+    nu: "{{ lsd_exe }} --group-dirs first -l"
   jchoose:
     sh: "{{ just_exe }} --choose"
     csh: "{{ just_exe }} --choose"
+    nu: "{{ just_exe }} --choose"
   vim:
     sh: "{{ nvim_exe_bone_bash }}"
     csh: "setenv NVIM_APPNAME nvim-bone-modular && {{ nvim_exe }}"
   cdg:
     sh: "cd $(cdscuts_glob_echo | {{ fzf_exe }})"
     csh: "set dest_dir=`{{ bin_directory }}cdscuts_glob_echo | {{ skim_exe }} --reverse --bind ctrl-f:page-down,ctrl-b:page-up` && cd \"$dest_dir\""
+    nu: "cd ({{ bin_directory }}cdscuts_glob_echo | {{ fzf_exe }} | decode utf-8 | str trim)"
   nvi:
     sh: "{{ navi_shell_cmd }}"
     csh: "`navi --print`"

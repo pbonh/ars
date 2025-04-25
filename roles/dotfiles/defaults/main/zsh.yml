@@ -189,6 +189,9 @@ zsh_default_aliases: |
   {% for shell_alias in shell_aliases | dict2items -%}
   alias {{ shell_alias.key }}='{{ shell_alias.value.sh }}'
   {% endfor %}
+  {% for zellij_layout in zellij_kdl_layouts -%}
+  alias z{{ zellij_layout }}='{{ zellij_exe }} --layout {{ zellij_kdl_layouts[zellij_layout]['name'] }}'
+  {% endfor %}
 zsh_ssh_setup: |
   env={{ dotfiles_user_home }}/.ssh/agent.env
   agent_load_env () { test -f "$env" && . "$env" >| /dev/null ; }
