@@ -80,6 +80,15 @@ other_projects: "{{ projects | dict2items |
                  attribute2='value', 
                  transform=lambda k, v: [k, {'name': v.name, 'path': v.path}]) | 
              items2dict }}"
+# {{
+#   {
+#     key: {
+#       'name': value.name,
+#       'path': value.path
+#     }
+#     for key, value in projects.items()
+#   }
+# }}
 codelldb_install_path: "{{ codelldb_install_devbox_path }}"
 nushell_extra_aliases: |
   alias zdot = {{ zellij_exe }} --layout dotfiles
