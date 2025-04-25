@@ -150,12 +150,13 @@ bash_default_aliases: |
   {% for shell_alias in shell_aliases -%}
   alias {{ shell_alias }}='{{ shell_aliases[shell_alias]['sh'] }}'
   {% endfor %}
-  {% for zellij_layout in zellij_kdl_layouts -%}
-  alias z{{ zellij_layout }}='{{ zellij_exe }} --layout {{ zellij_kdl_layouts[zellij_layout]['name'] }}'
-  {% endfor %}
 bash_extra_aliases: |
   {% for shell_alias in extra_shell_aliases | dict2items -%}
   alias {{ shell_alias.key }}='{{ shell_alias.value.sh }}'
+  {% endfor %}
+bash_zellij_aliases: |
+  {% for zellij_layout in zellij_kdl_layouts -%}
+  alias z{{ zellij_layout }}='{{ zellij_exe }} --layout {{ zellij_kdl_layouts[zellij_layout]['name'] }}'
   {% endfor %}
 bash_ssh_setup: |
   env={{ dotfiles_user_home }}/.ssh/agent.env

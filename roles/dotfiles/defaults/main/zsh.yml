@@ -189,6 +189,11 @@ zsh_default_aliases: |
   {% for shell_alias in shell_aliases | dict2items -%}
   alias {{ shell_alias.key }}='{{ shell_alias.value.sh }}'
   {% endfor %}
+zsh_extra_aliases: |
+  {% for shell_alias in extra_shell_aliases | dict2items -%}
+  alias {{ shell_alias.key }}='{{ shell_alias.value.sh }}'
+  {% endfor %}
+zsh_zellij_aliases: |
   {% for zellij_layout in zellij_kdl_layouts -%}
   alias z{{ zellij_layout }}='{{ zellij_exe }} --layout {{ zellij_kdl_layouts[zellij_layout]['name'] }}'
   {% endfor %}
@@ -208,7 +213,3 @@ zsh_ssh_setup: |
       ssh-add
   fi
   unset env
-extra_zsh_aliases: |
-  {% for shell_alias in extra_shell_aliases | dict2items -%}
-  alias {{ shell_alias.key }}='{{ shell_alias.value.sh }}'
-  {% endfor %}

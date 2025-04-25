@@ -51,12 +51,13 @@ tcsh_default_aliases: |
   alias {{ shell_alias.key }} '{{ shell_alias.value.csh }}'
   {% endif %}
   {% endfor %}
-  {% for zellij_layout in zellij_kdl_layouts -%}
-  alias z{{ zellij_layout }} '{{ zellij_exe }} --layout {{ zellij_kdl_layouts[zellij_layout]['name'] }}'
-  {% endfor %}
 tcsh_extra_aliases: |
   {% for shell_alias in extra_shell_aliases | dict2items -%}
   {% if shell_alias.value.csh is defined %}
   alias {{ shell_alias.key }} '{{ shell_alias.value.csh }}'
   {% endif %}
+  {% endfor %}
+tcsh_zellij_aliases: |
+  {% for zellij_layout in zellij_kdl_layouts -%}
+  alias z{{ zellij_layout }} '{{ zellij_exe }} --layout {{ zellij_kdl_layouts[zellij_layout]['name'] }}'
   {% endfor %}

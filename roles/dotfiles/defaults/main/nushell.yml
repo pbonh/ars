@@ -92,14 +92,15 @@ nushell_aliases: |
   alias {{ shell_alias.key }} = {{ shell_alias.value.nu }}
   {% endif %}
   {% endfor %}
-  {% for zellij_layout in zellij_kdl_layouts -%}
-  alias z{{ zellij_layout }} = {{ zellij_exe }} --layout {{ zellij_kdl_layouts[zellij_layout]['name'] }}
-  {% endfor %}
 nushell_extra_aliases: |
   {% for shell_alias in extra_shell_aliases | dict2items -%}
   {% if shell_alias.value.nu is defined %}
   alias {{ shell_alias.key }} = {{ shell_alias.value.nu }}
   {% endif %}
+  {% endfor %}
+nushell_zellij_aliases: |
+  {% for zellij_layout in zellij_kdl_layouts -%}
+  alias z{{ zellij_layout }} = {{ zellij_exe }} --layout {{ zellij_kdl_layouts[zellij_layout]['name'] }}
   {% endfor %}
 nushell_starship_dir: "{{ xdg_cache_dir }}/starship"
 nushell_starship_source: "{{ nushell_starship_dir }}/init.nu"
