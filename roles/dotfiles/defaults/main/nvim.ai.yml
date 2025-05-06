@@ -42,7 +42,7 @@ user_llama_model_info:
     model_name: "qwen2.5-coder"
     model_tag: "{{ distilled_param_count }}"
     model_ctx: "{{ distilled_ctx_size }}"
-openai_model: "o1-mini"
+openai_model: "o3-mini"
 openai_ctx_size: "{{ ctx_sizes['128k'] }}"
 ollama_port: "11434"
 ollama_address: "http://localhost:{{ ollama_port }}"
