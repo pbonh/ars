@@ -45,6 +45,27 @@ path_directories:
     name: scripts
     prepend: false
     path: "{{ tool_install_bin }}"
+nonroot_path_directories:
+  local:
+    name: local
+    prepend: false
+    path: "/usr/local/bin"
+  home_local:
+    name: home_local
+    prepend: false
+    path: "{{ default_home_local }}/bin"
+  cargo:
+    name: cargo
+    prepend: false
+    path: "{{ cargo_path }}"
+  scripts:
+    name: scripts
+    prepend: false
+    path: "{{ tool_install_bin }}"
+  fzf:
+    name: fzf
+    prepend: false
+    path: "{{ fzf_path }}"
 env_variables:
   git_ssh: "{{ git_ssh }}"
   editor: "{{ nvim_exe }}"
