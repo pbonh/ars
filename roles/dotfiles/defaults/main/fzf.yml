@@ -20,4 +20,4 @@ fzf_env:
     env: "{{ fd_exe }} --type d . --color=never"
   default_opts:
     name: FZF_DEFAULT_OPTS
-    env: "--height 75% --multi --reverse --bind ctrl-f:page-down,ctrl-b:page-up"
+    env: "--height 75% --multi --reverse --bind ctrl-f:page-down,ctrl-b:page-up --bind ctrl-a:select-all,ctrl-d:deselect-all,ctrl-t:toggle-all"
