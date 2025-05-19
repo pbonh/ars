@@ -90,6 +90,10 @@ nushell_aliases: |
   {% for shell_alias in shell_aliases | dict2items -%}
   {% if shell_alias.value.nu is defined %}
   alias {{ shell_alias.key }} = {{ shell_alias.value.nu }}
+  {% elif shell_alias.value.nu_def is defined %}
+  def {{ shell_alias.value.nu_def.flags }} {{ shell_alias.key }} [{{ shell_alias.value.nu_def.args }}] {
+    {{ shell_alias.value.nu_def.body }}
+  }
   {% endif %}
   {% endfor %}
 nushell_extra_aliases: |

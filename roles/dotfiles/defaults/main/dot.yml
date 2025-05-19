@@ -74,7 +74,12 @@ shell_aliases:
   mkcd:
     sh: "mkdir -p $1 && cd $1"
     csh: "mkdir -p \\!:1 && cd \\!:1"
-    nu: "mkdir $env.1 and cd $env.1"
+    nu_def:
+      flags: "--env"
+      args: "dirname"
+      body: |
+        mkdir $dirname;
+        cd $dirname
   cat:
     sh: "{{ bat_exe }}"
     csh: "{{ bat_exe }}"
