@@ -71,6 +71,8 @@ devbox global add \
     screenfetch \
     macchina \
     mprocs \
+    mask \
+    fselect \
     jq \
     yq \
     fx \

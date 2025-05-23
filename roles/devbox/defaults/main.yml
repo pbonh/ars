@@ -98,6 +98,8 @@ devbox_dev_all_tools:
   - screenfetch
   - macchina
   - mprocs
+  - mask
+  - fselect
   - fx
   - nnn
   - fff
