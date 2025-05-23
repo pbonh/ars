@@ -1,0 +1,7 @@
+---
+- name: Latte-Dock | Install Latte-Dock | dnf
+  become: true
+  when: ansible_distribution == 'Fedora'
+  dnf:
+    name: latte-dock
+    state: latest

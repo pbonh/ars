@@ -1,0 +1,19 @@
+---
+- name: Enable Bismuth COPR Repo
+  become: true
+  when:
+    - ansible_facts['distribution'] == "Fedora"
+    - ansible_facts['distribution_major_version'] >= "32"
+  community.general.copr:
+    host: copr.fedorainfracloud.org
+    state: enabled
+    name: capucho/bismuth
+
+- name: Install Bismuth
+  become: true
+  when:
+    - ansible_facts['distribution'] == "Fedora"
+    - ansible_facts['distribution_major_version'] >= "32"
+  dnf:
+    name: bismuth
+    state: present

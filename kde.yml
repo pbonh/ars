@@ -1,0 +1,10 @@
+---
+- name: KDE Workstation Install/Setup
+  vars_files:
+    - vars/local.yml
+  tasks:
+    - import_role:
+        name: kde
+      when: desktop_environment == 'kde'
+      tags:
+        - install

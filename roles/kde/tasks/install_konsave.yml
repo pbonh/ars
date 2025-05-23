@@ -1,0 +1,5 @@
+---
+- name: Konsave | Install Konsave | pipx
+  community.general.pipx:
+    name: konsave
+    executable: "{{ pipx_exe }}"
