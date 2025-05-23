@@ -18,7 +18,7 @@ xdg_config_dirs:
 macos_config_dir: "{{ dotfiles_user_home }}/Library/Application\ Support"
 dot_download_dir: "{{ tool_install_dir }}/downloads"
 github_url: "https://github.com"
-github_ssh_url: "ssh://git@github.com"
+github_ssh_url: "git@github.com"
 codeberg_url: "https://codeberg.org"
 gcc_exe: /usr/bin/gcc
 gpp_exe: /usr/bin/g++
