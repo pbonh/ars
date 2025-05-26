@@ -15,25 +15,40 @@
     backup: true
   loop: "{{ kwin_activities | dict2items }}"
 
+# - name: KWin | Apply KWin Window Rules | kdeconfig
+#   community.general.kdeconfig:
+#     path: "{{ kwin_rules_config_file }}"
+#     # values:
+#     #   - group: "{{ item.value.group }}"
+#     #     key: "{{ item.value.uuid }}"
+#     #     value: "{{ item.value.name }}"
+#     values: >
+#       {{
+#         kwin_rules | dict2items |
+#         map('dict', {'group': item.value.group,
+#                      'key': item2.key,
+#                      'value': item2.value}) |
+#         selectattr('key', 'ne', 'group') |
+#         map('json_query', '[].{group: group, key: key, value: value}') |
+#         flatten(1)
+#       }}
+#     backup: true
+#   # loop: "{{ kwin_rules | dict2items }}"
+
 - name: KWin | Apply KWin Window Rules | kdeconfig
   community.general.kdeconfig:
     path: "{{ kwin_rules_config_file }}"
-    # values:
-    #   - group: "{{ item.value.group }}"
-    #     key: "{{ item.value.uuid }}"
-    #     value: "{{ item.value.name }}"
     values: >
       {{
         kwin_rules | dict2items |
-        map('dict', {'group': item.value.group,
-                     'key': item2.key,
-                     'value': item2.value}) |
+        map('combine', {'group': item.value.group,
+                       'key': item.key,
+                       'value': item.value}) |
         selectattr('key', 'ne', 'group') |
         map('json_query', '[].{group: group, key: key, value: value}') |
         flatten(1)
       }}
     backup: true
-  # loop: "{{ kwin_rules | dict2items }}"
 
 - name: KWin | Apply KWin Window Rules(General Section) | kdeconfig
   community.general.kdeconfig:
