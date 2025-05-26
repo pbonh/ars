@@ -7,6 +7,7 @@ Ars is the repository for generating my developer dotfiles, powered by Ansible.
 - [Installation Examples](docs/installation_examples.md)
 - [Installation(Optional)](docs/optional.md)
 - [Configuration](docs/configuration.md)
+- [Configuration(KDE)](docs/configuration-kde.md)
 - [License](#license)
 - [Author Information](#author-information)
 
