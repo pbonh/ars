@@ -1,6 +1,3 @@
-set dotenv-load := true
-set shell := ["/bin/bash", "-cu"]
-
 workstation-kde:
   ansible-playbook --ask-become-pass kde.yml
 
