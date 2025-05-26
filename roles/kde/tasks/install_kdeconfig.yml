@@ -1,23 +1,20 @@
-# - name: Ensure "Homepage=https://www.ansible.com/" in group "Branding"
-#   community.general.kdeconfig:
-#     path: /etc/xdg/kickoffrc
-#     values:
-#       - group: Branding
-#         key: Homepage
-#         value: https://www.ansible.com/
-#     mode: '0644'
-#
-# - name: Ensure "KEY=true" in groups "Group" and "Subgroup", and "KEY=VALUE" in Group2
-#   community.general.kdeconfig:
-#     path: /etc/xdg/someconfigrc
-#     values:
-#       - groups: [Group, Subgroup]
-#         key: KEY
-#         bool_value: true
-#       - group: Group2
-#         key: KEY
-#         value: VALUE
-#     backup: true
+---
+- name: KWin | Apply KWin Activity Definitions | kdeconfig
+  community.general.kdeconfig:
+    path: "{{ kwin_activity_config_file }}"
+    values:
+      - group: "{{ kwin_activity_group }}"
+        key: "{{ item.value.uuid }}"
+        value: "{{ item.value.name }}"
+      - groups: "{{ kwin_activity_description_subgroup }}"
+        key: "{{ item.value.uuid }}"
+        value: "{{ item.value.description }}"
+      - groups: "{{ kwin_activity_icon_subgroup }}"
+        key: "{{ item.value.uuid }}"
+        value: "{{ item.value.icon }}"
+    backup: true
+  loop: "{{ kwin_activities | dict2items }}"
+
 - name: KWin | Apply KWin Window Rules | kdeconfig
   community.general.kdeconfig:
     path: "{{ kwin_rules_config_file }}"
@@ -30,3 +27,15 @@
         {%- endfor -%}
       {%- endfor -%}
       {{ rules_list }}
+
+- name: KWin | Apply KWin Window Rules(General Section) | kdeconfig
+  community.general.kdeconfig:
+    path: "{{ kwin_rules_config_file }}"
+    values:
+      - group: General
+        key: count
+        value: "{{ kwin_rules | length }}"
+      - group: General
+        key: rules
+        value: "{{ kwin_rules | dict2items | map(attribute='value.group') | join(',') }}"
+    backup: true
