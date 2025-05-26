@@ -7,3 +7,5 @@ backup-kde-config:
 restore-kde-config:
   konsave --import-profile roles/kde/files/current_profile.knsv
 
+generate-uuid:
+  uuidgen

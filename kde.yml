@@ -1,5 +1,6 @@
 ---
 - name: KDE Workstation Install/Setup
+  hosts: localhost
   vars_files:
     - vars/local.yml
   tasks:
