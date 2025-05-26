@@ -4,3 +4,10 @@
   command:
     cmd: "{{ devbox_exe }} global add {{ item }}"
   loop: "{{ devbox_dev_tools }}"
+
+- name: Devbox | Install Devbox KDE Tools | command
+  when: desktop_environment == 'kde'
+  ignore_errors: true
+  command:
+    cmd: "{{ devbox_exe }} global add {{ item }}"
+  loop: "{{ devbox_kde_tools }}"
