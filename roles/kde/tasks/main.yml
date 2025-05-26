@@ -1,6 +1,6 @@
 ---
 - name: KDE | Install KWin Settings | import_tasks
-  import_tasks: tasks/install_kwin_config.yml
+  import_tasks: tasks/install_kdeconfig.yml
   tags:
     - kwin
 

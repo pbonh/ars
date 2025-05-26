@@ -1,0 +1,32 @@
+# - name: Ensure "Homepage=https://www.ansible.com/" in group "Branding"
+#   community.general.kdeconfig:
+#     path: /etc/xdg/kickoffrc
+#     values:
+#       - group: Branding
+#         key: Homepage
+#         value: https://www.ansible.com/
+#     mode: '0644'
+#
+# - name: Ensure "KEY=true" in groups "Group" and "Subgroup", and "KEY=VALUE" in Group2
+#   community.general.kdeconfig:
+#     path: /etc/xdg/someconfigrc
+#     values:
+#       - groups: [Group, Subgroup]
+#         key: KEY
+#         bool_value: true
+#       - group: Group2
+#         key: KEY
+#         value: VALUE
+#     backup: true
+- name: KWin | Apply KWin Window Rules | kdeconfig
+  community.general.kdeconfig:
+    path: "{{ kwin_rules_config_file }}"
+    values: >
+      {%- set rules_list = [] -%}
+      {%- for rule in kwin_rules.values() -%}
+        {%- set grp = rule.group -%}
+        {%- for key, val in rule.items() if key != 'group' -%}
+          {%- set _ = rules_list.append({'group': grp, 'key': key, 'value': val}) -%}
+        {%- endfor -%}
+      {%- endfor -%}
+      {{ rules_list }}
