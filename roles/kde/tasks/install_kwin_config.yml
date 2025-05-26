@@ -21,12 +21,12 @@
     values: >
       {{
         kwin_rules | dict2items |
-        map('combine', {'group': item.value.group,
-                       'key': item.key,
-                       'value': item.value}) |
+        map('combine', {'group': value.group,
+                       'key': key,
+                       'value': value}) |
         selectattr('key', 'ne', 'group') |
         map('json_query', '[].{group: group, key: key, value: value}') |
-        flatten(1)
+        list
       }}
     backup: true
 
