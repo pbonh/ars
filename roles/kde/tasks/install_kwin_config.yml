@@ -18,10 +18,10 @@
 - name: KWin | Apply KWin Window Rules | kdeconfig
   community.general.kdeconfig:
     path: "{{ kwin_rules_config_file }}"
-    values:
-      - group: "{{ item.value.group }}"
-        key: "{{ item.value.uuid }}"
-        value: "{{ item.value.name }}"
+    # values:
+    #   - group: "{{ item.value.group }}"
+    #     key: "{{ item.value.uuid }}"
+    #     value: "{{ item.value.name }}"
     values: >
       {{
         kwin_rules | dict2items |
