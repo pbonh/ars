@@ -33,7 +33,7 @@
         flatten(1)
       }}
     backup: true
-  loop: "{{ kwin_rules | dict2items }}"
+  # loop: "{{ kwin_rules | dict2items }}"
 
 - name: KWin | Apply KWin Window Rules(General Section) | kdeconfig
   community.general.kdeconfig:
