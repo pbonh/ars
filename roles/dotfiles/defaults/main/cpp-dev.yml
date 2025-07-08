@@ -148,13 +148,14 @@ treesitter_extra_config_cpp: |
   },
 extra_nvim_plugins_cpp_lazy: |
   { 'p00f/clangd_extensions.nvim' },
-  { 'Shatur/neovim-cmake',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      'mfussenegger/nvim-dap',
-      'stevearc/dressing.nvim'
-    }
-  },
+  { 'Civitasv/cmake-tools.nvim' },
+  -- { 'Shatur/neovim-cmake',
+  --   dependencies = {
+  --     'nvim-lua/plenary.nvim',
+  --     'mfussenegger/nvim-dap',
+  --     'stevearc/dressing.nvim'
+  --   }
+  -- },
   { 'Badhi/nvim-treesitter-cpp-tools',
     dependencies = {
       'nvim-treesitter/nvim-treesitter'
@@ -193,39 +194,47 @@ extra_nvim_config_cpp: |
     {{ lldb_vscode_runner | indent(width=2) }}
   }
   dap.configurations.c = dap.configurations.cpp
-  local Path = require('plenary.path')
-  require('cmake').setup({
-    cmake_executable = '{{ cmake_bin }}', -- CMake executable to run.
-    save_before_build = true, -- Save all buffers before building.
-    parameters_file = 'neovim.json', -- JSON file to store information about selected target, run arguments and build type.
-    build_dir = tostring(Path:new('{cwd}', 'build', '{os}-{build_type}')), -- Build directory. The expressions `{cwd}`, `{os}` and `{build_type}` will be expanded with the corresponding text values. Could be a function that return the path to the build directory.
-    default_projects_path = tostring(Path:new(vim.loop.os_homedir(), '{{ code_checkout_path_github }}')), -- Default folder for creating project.
-    configure_args = {
-      '-G',
-      'Ninja',
-      '-D',
-      'CMAKE_EXPORT_COMPILE_COMMANDS=1',
-      '-D',
-      'CMAKE_C_COMPILER={{ gcc_bin }}',
-      '-D',
-      'CMAKE_CXX_COMPILER={{ gpp_bin }}',
-    }, -- Default arguments that will be always passed at cmake configure step. By default tells cmake to generate `compile_commands.json`.
-    build_args = {}, -- Default arguments that will be always passed at cmake build step.
-    on_build_output = nil, -- Callback that will be called each time data is received by the current process. Accepts the received data as an argument.
-    quickfix = {
-      pos = 'botright', -- Where to open quickfix
-      height = 10, -- Height of the opened quickfix.
-      only_on_error = false, -- Open quickfix window only if target build failed.
+  require("cmake-tools").setup({
+    cmake_executor = {
+      name = "toggleterm",
     },
-    copy_compile_commands = true, -- Copy compile_commands.json to current working directory.
-    dap_configuration = {
-      type = 'lldb',
-      request = 'launch',
-      stopOnEntry = false,
-      runInTerminal = false,
+    cmake_runner = {
+      name = "toggleterm",
     },
-    dap_open_command = require('dapui').open,
   })
+  -- local Path = require('plenary.path')
+  -- require('cmake').setup({
+  --   cmake_executable = '{{ cmake_bin }}', -- CMake executable to run.
+  --   save_before_build = true, -- Save all buffers before building.
+  --   parameters_file = 'neovim.json', -- JSON file to store information about selected target, run arguments and build type.
+  --   build_dir = tostring(Path:new('{cwd}', 'build', '{os}-{build_type}')), -- Build directory. The expressions `{cwd}`, `{os}` and `{build_type}` will be expanded with the corresponding text values. Could be a function that return the path to the build directory.
+  --   default_projects_path = tostring(Path:new(vim.loop.os_homedir(), '{{ code_checkout_path_github }}')), -- Default folder for creating project.
+  --   configure_args = {
+  --     '-G',
+  --     'Ninja',
+  --     '-D',
+  --     'CMAKE_EXPORT_COMPILE_COMMANDS=1',
+  --     '-D',
+  --     'CMAKE_C_COMPILER={{ gcc_bin }}',
+  --     '-D',
+  --     'CMAKE_CXX_COMPILER={{ gpp_bin }}',
+  --   }, -- Default arguments that will be always passed at cmake configure step. By default tells cmake to generate `compile_commands.json`.
+  --   build_args = {}, -- Default arguments that will be always passed at cmake build step.
+  --   on_build_output = nil, -- Callback that will be called each time data is received by the current process. Accepts the received data as an argument.
+  --   quickfix = {
+  --     pos = 'botright', -- Where to open quickfix
+  --     height = 10, -- Height of the opened quickfix.
+  --     only_on_error = false, -- Open quickfix window only if target build failed.
+  --   },
+  --   copy_compile_commands = true, -- Copy compile_commands.json to current working directory.
+  --   dap_configuration = {
+  --     type = 'lldb',
+  --     request = 'launch',
+  --     stopOnEntry = false,
+  --     runInTerminal = false,
+  --   },
+  --   dap_open_command = require('dapui').open,
+  -- })
 extra_nvim_keymap_cpp: |
   -- { '<leader>c', description = 'CMake', filters = { ft = 'cpp' } },
   -- { '<leader>cc', {
@@ -281,17 +290,22 @@ nvim_keymap_cpp: |
         "h",
       },
       callback = function(ev)
-          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cc', '<cmd>CMake configure<CR>', { noremap = true, silent = true })
-          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ct', '<cmd>CMake select_target<CR>', { noremap = true, silent = true })
-          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cb', '<cmd>CMake build<CR>', { noremap = true, silent = true })
-          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ca', '<cmd>CMake build_all<CR>', { noremap = true, silent = true })
-          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cr', '<cmd>CMake run<CR>', { noremap = true, silent = true })
-          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cd', '<cmd>CMake debug<CR>', { noremap = true, silent = true })
-          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cl', '<cmd>CMake clean<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cc', '<cmd>CMakeGenerate<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cb', '<cmd>CMakeBuild<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cr', '<cmd>CMakeRun<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cd', '<cmd>CMakeDebug<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cs', '<cmd>CMakeSelectLaunchTarget<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ct', '<cmd>CMakeRunTest<CR>', { noremap = true, silent = true })
+          -- vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cc', '<cmd>CMake configure<CR>', { noremap = true, silent = true })
+          -- vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ct', '<cmd>CMake select_target<CR>', { noremap = true, silent = true })
+          -- vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cb', '<cmd>CMake build<CR>', { noremap = true, silent = true })
+          -- vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ca', '<cmd>CMake build_all<CR>', { noremap = true, silent = true })
+          -- vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cr', '<cmd>CMake run<CR>', { noremap = true, silent = true })
+          -- vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cd', '<cmd>CMake debug<CR>', { noremap = true, silent = true })
+          -- vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cl', '<cmd>CMake clean<CR>', { noremap = true, silent = true })
       end,
-      group = group 
+      group = group
   })
-
 nvim_completion_config_cpp: ""
 # nvim_completion_config_cpp: |
 #   sorting = {
