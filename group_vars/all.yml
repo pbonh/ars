@@ -34,3 +34,581 @@ interactive_shell: "{{ nu_exe }}"
 command_shell: "/bin/bash"
 code2prompt_config: "{{ xdg_config_dir }}/code2prompt"
 code2prompt_template_dir: "{{ code2prompt_config }}/templates"
+dev_packages:
+  ansible:
+    brew:
+      - "ansible"
+    devbox:
+      - "ansible"
+  gcc:
+    brew:
+      - "gcc"
+    devbox:
+      - "gcc"
+  gnumake:
+    brew:
+      - "make"
+    devbox:
+      - "gnumake"
+  cmake:
+    brew:
+      - "cmake"
+    devbox:
+      - "cmake"
+  zellij:
+    brew:
+      - "zellij"
+    devbox:
+      - "zellij"
+    nonroot:
+      - "zellij"
+  fzf:
+    brew:
+      - "fzf"
+    devbox:
+      - "fzf"
+  fd:
+    brew:
+      - "fd"
+    devbox:
+      - "fd"
+    nonroot:
+      - "fd"
+  ripgrep:
+    brew:
+      - "ripgrep"
+    devbox:
+      - "ripgrep"
+    nonroot:
+      - "ripgrep"
+  bat:
+    brew:
+      - "bat"
+    devbox:
+      - "bat"
+    nonroot:
+      - "bat"
+  exa:
+    brew:
+      - "exa"
+    devbox:
+      - "exa"
+    nonroot:
+      - "exa"
+  lsd:
+    brew:
+      - "lsd"
+    devbox:
+      - "lsd"
+    nonroot:
+      - "lsd"
+  navi:
+    brew:
+      - "navi"
+    devbox:
+      - "navi"
+    nonroot:
+      - "navi"
+  skim:
+    brew:
+      - "skim"
+    devbox:
+      - "skim"
+    nonroot:
+      - "skim"
+  starship:
+    brew:
+      - "starship"
+    devbox:
+      - "starship"
+    nonroot:
+      - "starship"
+  carapace:
+    brew:
+      - "carapace"
+    devbox:
+      - "carapace"
+    nonroot:
+      - "carapace"
+  nushell:
+    brew:
+      - "nushell"
+    devbox:
+      - "nushell"
+    nonroot:
+      - "nushell"
+  zsh:
+    brew:
+      - "zsh"
+    devbox:
+      - "zsh"
+  just:
+    brew:
+      - "just"
+    devbox:
+      - "just"
+    nonroot:
+      - "just"
+  direnv:
+    brew:
+      - "direnv"
+    devbox:
+      - "direnv"
+  nix-direnv:
+    devbox:
+      - "nix-direnv"
+  curl:
+    brew:
+      - "curl"
+    devbox:
+      - "curl"
+  delta:
+    brew:
+      - "delta"
+    devbox:
+      - "delta"
+    nonroot:
+      - "delta"
+  git:
+    brew:
+      - "git"
+    devbox:
+      - "git"
+  act:
+    brew:
+      - "act"
+    devbox:
+      - "act"
+  gitui:
+    brew:
+      - "gitui"
+    devbox:
+      - "gitui"
+    nonroot:
+      - "gitui"
+  gitoxide:
+    brew:
+      - "gitoxide"
+    devbox:
+      - "gitoxide"
+    nonroot:
+      - "gitoxide"
+  diffr:
+    brew:
+      - "diffr"
+    devbox:
+      - "diffr"
+    nonroot:
+      - "diffr"
+  difftastic:
+    brew:
+      - "difftastic"
+    devbox:
+      - "difftastic"
+    nonroot:
+      - "difftastic"
+  yazi:
+    brew:
+      - "yazi"
+    devbox:
+      - "yazi"
+    nonroot:
+      - "yazi"
+  jq:
+    brew:
+      - "jq"
+    devbox:
+      - "jq"
+    nonroot:
+      - "jq"
+  yq:
+    brew:
+      - "yq"
+    devbox:
+      - "yq"
+    nonroot:
+      - "yq"
+  ghq:
+    brew:
+      - "ghq"
+    devbox:
+      - "ghq"
+  gdb:
+    brew:
+      - "gdb"
+    devbox:
+      - "gdb"
+  emscripten:
+    brew:
+      - "emscripten"
+    devbox:
+      - "emscripten"
+  cookiecutter:
+    brew:
+      - "cookiecutter"
+    devbox:
+      - "cookiecutter"
+  helix:
+    brew:
+      - "helix"
+    devbox:
+      - "helix"
+    nonroot:
+      - "helix"
+  neovim:
+    brew:
+      - "neovim"
+    devbox:
+      - "neovim"
+    nonroot:
+      - "neovim"
+  neovim-remote:
+    brew:
+      - "neovim-remote"
+    devbox:
+      - "neovim-remote"
+  tree-sitter:
+    brew:
+      - "tree-sitter"
+    devbox:
+      - "tree-sitter"
+  python39Packages.pynvim:
+    brew:
+      - "pynvim"
+    devbox:
+      - "pynvim"
+  nodejs:
+    brew:
+      - "nodejs"
+    devbox:
+      - "nodejs"
+  yarn:
+    brew:
+      - "yarn"
+    devbox:
+      - "yarn"
+  ctags:
+    brew:
+      - "ctags"
+    devbox:
+      - "ctags"
+  nodePackages.prettier:
+    brew:
+      - "prettier"
+    devbox:
+      - "prettier"
+  ansible-language-server:
+    brew:
+      - "ansible-language-server"
+    devbox:
+      - "ansible-language-server"
+  nodePackages.bash-language-server:
+    brew:
+      - "bash-language-server"
+    devbox:
+      - "bash-language-server"
+  nodePackages.yaml-language-server:
+    brew:
+      - "yaml-language-server"
+    devbox:
+      - "yaml-language-server"
+  lua:
+    brew:
+      - "lua"
+    devbox:
+      - "lua"
+  luarocks:
+    brew:
+      - "luarocks"
+    devbox:
+      - "luarocks"
+  luajit:
+    brew:
+      - "luajit"
+    devbox:
+      - "luajit"
+  sumneko-lua-language-server:
+    brew:
+      - "sumneko-lua-language-server"
+    devbox:
+      - "sumneko-lua-language-server"
+  shfmt:
+    brew:
+      - "shfmt"
+    devbox:
+      - "shfmt"
+  joplin:
+    brew:
+      - "joplin"
+    devbox:
+      - "joplin"
+  tmux:
+    brew:
+      - "tmux"
+    devbox:
+      - "tmux"
+  oil:
+    brew:
+      - "oil"
+    devbox:
+      - "oil"
+  tcsh:
+    brew:
+      - "tcsh"
+    devbox:
+      - "tcsh"
+  zoxide:
+    brew:
+      - "zoxide"
+    devbox:
+      - "zoxide"
+  zsh-powerlevel10k:
+    brew:
+      - "zsh-powerlevel10k"
+    devbox:
+      - "zsh-powerlevel10k"
+  atuin:
+    brew:
+      - "atuin"
+    devbox:
+      - "atuin"
+  xcp:
+    brew:
+      - "xcp"
+    devbox:
+      - "xcp"
+  gum:
+    brew:
+      - "gum"
+    devbox:
+      - "gum"
+  glow:
+    brew:
+      - "glow"
+    devbox:
+      - "glow"
+  rargs:
+    brew:
+      - "rargs"
+    devbox:
+      - "rargs"
+  tree:
+    brew:
+      - "tree"
+    devbox:
+      - "tree"
+  ugrep:
+    brew:
+      - "ugrep"
+    devbox:
+      - "ugrep"
+  kmon:
+    brew:
+      - "kmon"
+    devbox:
+      - "kmon"
+  hyperfine:
+    brew:
+      - "hyperfine"
+    devbox:
+      - "hyperfine"
+  procs:
+    brew:
+      - "procs"
+    devbox:
+      - "procs"
+  ouch:
+    brew:
+      - "ouch"
+    devbox:
+      - "ouch"
+  sd:
+    brew:
+      - "sd"
+    devbox:
+      - "sd"
+  rnr:
+    brew:
+      - "rnr"
+    devbox:
+      - "rnr"
+  diskonaut:
+    brew:
+      - "diskonaut"
+    devbox:
+      - "diskonaut"
+  du-dust:
+    brew:
+      - "du-dust"
+    devbox:
+      - "du-dust"
+  tokei:
+    brew:
+      - "tokei"
+    devbox:
+      - "tokei"
+  bottom:
+    brew:
+      - "bottom"
+    devbox:
+      - "bottom"
+  choose:
+    brew:
+      - "choose"
+    devbox:
+      - "choose"
+  grex:
+    brew:
+      - "grex"
+    devbox:
+      - "grex"
+  gitAndTools.gh:
+    brew:
+      - "gitAndTools.gh"
+    devbox:
+      - "gitAndTools.gh"
+  lazygit:
+    brew:
+      - "lazygit"
+    devbox:
+      - "lazygit"
+  gitflow:
+    brew:
+      - "gitflow"
+    devbox:
+      - "gitflow"
+  soft-serve:
+    brew:
+      - "soft-serve"
+    devbox:
+      - "soft-serve"
+  python39Packages.pipx:
+    brew:
+      - "python39Packages.pipx"
+    devbox:
+      - "python39Packages.pipx"
+  btop:
+    brew:
+      - "btop"
+    devbox:
+      - "btop"
+  clifm:
+    brew:
+      - "clifm"
+    devbox:
+      - "clifm"
+  ranger:
+    brew:
+      - "ranger"
+    devbox:
+      - "ranger"
+  xplr:
+    brew:
+      - "xplr"
+    devbox:
+      - "xplr"
+  joshuto:
+    brew:
+      - "joshuto"
+    devbox:
+      - "joshuto"
+  eva:
+    brew:
+      - "eva"
+    devbox:
+      - "eva"
+  erdtree:
+    brew:
+      - "erdtree"
+    devbox:
+      - "erdtree"
+  felix:
+    brew:
+      - "felix"
+    devbox:
+      - "felix"
+  fend:
+    brew:
+      - "fend"
+    devbox:
+      - "fend"
+  gotop:
+    brew:
+      - "gotop"
+    devbox:
+      - "gotop"
+  screenfetch:
+    brew:
+      - "screenfetch"
+    devbox:
+      - "screenfetch"
+  macchina:
+    brew:
+      - "macchina"
+    devbox:
+      - "macchina"
+  mprocs:
+    brew:
+      - "mprocs"
+    devbox:
+      - "mprocs"
+  mask:
+    brew:
+      - "mask"
+    devbox:
+      - "mask"
+  fselect:
+    brew:
+      - "fselect"
+    devbox:
+      - "fselect"
+  fx:
+    brew:
+      - "fx"
+    devbox:
+      - "fx"
+  nnn:
+    brew:
+      - "nnn"
+    devbox:
+      - "nnn"
+  fff:
+    brew:
+      - "fff"
+    devbox:
+      - "fff"
+  broot:
+    brew:
+      - "broot"
+    devbox:
+      - "broot"
+  lf:
+    brew:
+      - "lf"
+    devbox:
+      - "lf"
+  superfile:
+    brew:
+      - "superfile"
+    devbox:
+      - "superfile"
+  watchman:
+    brew:
+      - "watchman"
+    devbox:
+      - "watchman"
+  aspell:
+    brew:
+      - "aspell"
+    devbox:
+      - "aspell"
+  bc:
+    brew:
+      - "bc"
+    devbox:
+      - "bc"
+  nox:
+    brew:
+      - "nox"
+    devbox:
+      - "nox"

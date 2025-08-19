@@ -108,6 +108,7 @@ devbox_dev_all_tools:
   - fff
   - broot
   - lf
+  - superfile
   - watchman
   - aspell
   - bc

@@ -4,3 +4,9 @@
   shell: "{{ homebrew_install_cmd }}"
   args:
     creates: "{{ homebrew_install_path }}"
+
+- name: Homebrew | Install Homebrew Packages | homebrew
+  community.general.homebrew:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ dev_packages | dict2items | selectattr('value.brew', 'defined') | list }}"
