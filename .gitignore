@@ -139,3 +139,6 @@ vars/term-dev.yml
 # Dotenv Files
 .env
 .envrc
+
+# Markdown Book(mdbook)
+book/
