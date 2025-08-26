@@ -1,6 +1,7 @@
 import 'scripts/just/dotfiles.just'
 import 'scripts/just/distrobox.just'
 import 'scripts/just/kde.just'
+import 'scripts/just/mdbook.just'
 
 set dotenv-load := true
 set shell := ["/bin/bash", "-cu"]
