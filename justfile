@@ -1,6 +1,6 @@
-import 'dotfiles.just'
-import 'distrobox.just'
-import 'kde.just'
+import 'scripts/just/dotfiles.just'
+import 'scripts/just/distrobox.just'
+import 'scripts/just/kde.just'
 
 set dotenv-load := true
 set shell := ["/bin/bash", "-cu"]

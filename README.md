@@ -1,10 +1,10 @@
 # Ars
 
-Ars is the repository for generating my developer dotfiles, powered by Ansible.
+Ars is the repository for generating my developer environment, powered by Ansible.
 
 ## Table of Contents
 
-- [Installation Examples](docs/installation_examples.md)
+- [Installation](docs/installation.md)
 - [Installation(Optional)](docs/optional.md)
 - [Configuration](docs/configuration.md)
 - [Configuration(KDE)](docs/configuration-kde.md)

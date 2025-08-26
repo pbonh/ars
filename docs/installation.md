@@ -1,4 +1,4 @@
-## Installation Examples
+# Installation
 
 Install Ansible
 ```bash
