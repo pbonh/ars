@@ -2,22 +2,16 @@
 
 Ars is the repository for generating my developer environment, powered by Ansible.
 
-## Table of Contents
+Copyright 2025 Phillip Bonhomme
 
-- [Installation](docs/installation.md)
-- [Installation(Optional)](docs/optional.md)
-- [Configuration](docs/configuration.md)
-- [Configuration(KDE)](docs/configuration-kde.md)
-- [License](#license)
-- [Author Information](#author-information)
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-License
--------
+    http://www.apache.org/licenses/LICENSE-2.0
 
-Apache 2.0
-
-Author Information
-------------------
-
-Phillip Bonhomme
-
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

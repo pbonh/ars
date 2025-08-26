@@ -1,4 +1,4 @@
-## Configuration
+# Configuration(KDE)
 
 Example KDE Workstation configuration file.
 

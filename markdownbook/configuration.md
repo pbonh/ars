@@ -1,4 +1,4 @@
-## Configuration
+# Configuration
 
 EITHER
 Create a file to specify your configuration.

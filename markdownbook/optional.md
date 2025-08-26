@@ -1,4 +1,4 @@
-## Optional Installations
+# Installation(Optional)
 
 Ollama(w/ ROCM)
 ```bash
