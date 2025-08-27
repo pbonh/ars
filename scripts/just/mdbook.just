@@ -19,7 +19,7 @@ mdbook-serve-all:
 #   push: mdbook-rsync
 #   push: mdbook-gh-pages
 
-mdbook-push:
+mdbook-push: mdbook-gh-pages
 
 ########################################
 # IF you're going to publish the generated book to a web server, and you're
