@@ -51,13 +51,13 @@ setup_bashrc() {
     # Define the directory and file path
     bashrc_d_dir="$HOME/.bashrc.d"
     bluefin_file="$bashrc_d_dir/bluefin"
-    
+
     # Create the ~/.bashrc.d directory if it does not exist
     if [[ ! -d "$bashrc_d_dir" ]]; then
         mkdir -p "$bashrc_d_dir"
         echo "Created directory: $bashrc_d_dir"
     fi
-    
+
     # Create and populate the bluefin file if it does not exist
     if [[ ! -f "$bluefin_file" ]]; then
         cat <<-EOF > "$bluefin_file"

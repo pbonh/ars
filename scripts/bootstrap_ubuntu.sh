@@ -15,4 +15,5 @@ if ! [ -x "$(command -v ansible-galaxy)" ]; then
   exit 1
 fi
 
-ansible-galaxy install -r requirements.yml
+# ansible-galaxy install -r requirements.yml
+# ansible-galaxy collection install -r requirements.yml

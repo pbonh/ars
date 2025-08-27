@@ -1,6 +1,9 @@
 # Ars
 
-Ars is the repository for generating my developer environment, powered by Ansible.
+Ars is the repository for generating my developer environment. It is powered by Ansible for
+installation and configuration of the desktop environment & developer tools. The primary use-case is
+for terminal development in Linux, but there is support for macOS via homebrew. The docs can be
+found in `markdownbook`.
 
 Copyright 2025 Phillip Bonhomme
 
