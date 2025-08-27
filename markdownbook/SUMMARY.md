@@ -13,4 +13,5 @@
 - [Configuration](configuration.md)
     - [GUI](configuration/gui.md)
     - [Dotfiles](configuration/dotfiles.md)
+    - [Examples](configuration/examples.md)
 - [License](../LICENSE)

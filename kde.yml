@@ -6,6 +6,3 @@
   tasks:
     - import_role:
         name: kde
-      when: desktop_environment == 'kde'
-      tags:
-        - install

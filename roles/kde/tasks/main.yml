@@ -1,4 +1,9 @@
 ---
+- name: KDE | Install Konsave | import_tasks
+  import_tasks: tasks/install_konsave.yml
+  tags:
+    - install
+
 - name: KDE | Install KWin Settings | import_tasks
   import_tasks: tasks/install_kdeconfig.yml
   tags:
@@ -8,11 +13,6 @@
 #   import_tasks: tasks/install_bismuth.yml
 #   tags:
 #     - bismuth
-#
-# - name: Install Konsave
-#   import_tasks: tasks/install_konsave.yml
-#   tags:
-#     - konsave
 #
 # - name: Install Latte Dock
 #   import_tasks: tasks/install_latte_dock.yml

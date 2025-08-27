@@ -1,5 +1,20 @@
 ---
+- name: Homebrew | Install Homebrew Packages | homebrew
+  when: tool_provider == 'homebrew'
+  community.general.homebrew:
+    name: "pipx"
+    state: present
+
 - name: Konsave | Install Konsave | pipx
+  when: tool_provider == 'nonroot' or
+        tool_provider == 'homebrew'
   community.general.pipx:
     name: konsave
     executable: "{{ pipx_exe }}"
+
+- name: Devbox | Install Devbox KDE Tools | command
+  when: tool_provider == 'devbox'
+  ignore_errors: true
+  command:
+    cmd: "{{ devbox_exe }} global add {{ item }}"
+  loop: "{{ devbox_kde_tools }}"

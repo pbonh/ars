@@ -2,6 +2,10 @@
 bin_directory: "{{ ansible_env.HOME }}/.local/bin"
 nix_bin: "{{ ansible_env.HOME }}/.nix-profile/bin"
 pipx_exe: "{{ nix_bin }}/pipx"
+devbox_exe: "/usr/local/bin/devbox"
+devbox_kde_tools:
+  - konsave
+  - kde-cli-tools
 xdg_config_dir: "{{ ansible_env.HOME }}/.config"
 kwin_activity_config_file: "{{ xdg_config_dir }}/kactivitymanagerdrc"
 kwin_activity_group: "activities"
