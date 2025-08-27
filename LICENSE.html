@@ -3,8 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Ars: pbonh</title>
-        <meta name="robots" content="noindex">
+        <title>License - Ars: pbonh</title>
 
 
         <!-- Custom HTML head -->
@@ -176,360 +175,7 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="ars"><a class="header" href="#ars">Ars</a></h1>
-<p>Ars is the repository for generating my developer environment. It is powered by Ansible for
-installation and configuration of the desktop environment &amp; developer tools. The primary use-case is
-for terminal development in Linux, but there is support for macOS via homebrew. The docs can be
-found on <a href="https://pbonh.github.io/ars">github</a>.</p>
-<h1 id="license"><a class="header" href="#license">License</a></h1>
-<p>Copyright 2025 Phillip Bonhomme</p>
-<p>Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at</p>
-<pre><code>http://www.apache.org/licenses/LICENSE-2.0
-</code></pre>
-<p>Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
-<p>There are different starting points for installing <code>pbonh/ars</code> on your system, and they will depend
-on your OS. If you are on Linux, pick a <code>bootstrap_*</code> script that closely matches the system. There
-is also a portable version of ansible available(<code>scripts/bootstrap_ansible</code>).</p>
-<h2 id="bootstrap-examples"><a class="header" href="#bootstrap-examples">Bootstrap Examples</a></h2>
-<ul>
-<li>Install Ansible(Portable)</li>
-</ul>
-<pre><code class="language-bash">wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_ansible.sh | bash
-</code></pre>
-<ul>
-<li>Bootstrap Bluefin</li>
-</ul>
-<pre><code class="language-bash">wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_bluefin.sh | bash
-</code></pre>
-<ul>
-<li>Bootstrap Ubuntu</li>
-</ul>
-<pre><code class="language-bash">wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_ubuntu.sh | bash
-</code></pre>
-<ul>
-<li>Bootstrap Fedora</li>
-</ul>
-<pre><code class="language-bash">wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_fedora.sh | bash
-</code></pre>
-<h2 id="gitsshoptional"><a class="header" href="#gitsshoptional">Git/SSH(Optional)</a></h2>
-<p>Optionally, <code>git</code> &amp; <code>ssh</code> can be configured via a prompt:</p>
-<ul>
-<li>Configure Git/SSH</li>
-</ul>
-<pre><code class="language-bash">wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_gitssh.sh | bash
-</code></pre>
-<h2 id="workstation-gui"><a class="header" href="#workstation-gui">Workstation GUI</a></h2>
-<p>If GUI support is desired, the following desktop environments are available:</p>
-<ul>
-<li>KDE</li>
-</ul>
-<h2 id="developer-tools"><a class="header" href="#developer-tools">Developer Tools</a></h2>
-<p>There are 3 installation options to choose from for the developer tools:</p>
-<ol>
-<li>Devbox</li>
-<li>Homebrew</li>
-<li>Non-Root</li>
-</ol>
-<p>Devbox uses <code>nix</code>, and supports custom shell environments. Homebrew is widely supported and contains
-many macOS programs. Non-Root is useful when you don't have root permissions, but still need to
-install the developer tools. All 3 are compatible with Linux &amp; macOS.</p>
-<p>EITHER
-Checkout repository and create <code>.envrc</code> File(Example)</p>
-<pre><code class="language-bash">touch .envrc
-ln -s .envrc .env
-cat &lt;&lt; EOF &gt;&gt; .envrc
-DOTFILES_TASK_PRELUDE=python
-DOTFILES_BOOTSTRAP_GIT_NAME="Your Name"
-DOTFILES_BOOTSTRAP_GIT_EMAIL="your_name@address.com"
-DOTFILES_BOOTSTRAP_GITHUB_USERNAME="username"
-OPENAI_API_KEY="MY_OPENAI_API_KEY"
-ANTHROPIC_API_KEY="MY_ANTHROPIC_API_KEY"
-EOF
-</code></pre>
-<p>OR
-Ansible Pull</p>
-<pre><code class="language-bash"># (Non-Root, Shell Tools Only)
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "env" -e "{tool_provider: \"nonroot\"}"
-
-# (Install Non-Root, Shell Tools Only)
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install,env" -e "{tool_provider: \"nonroot\"}"
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="workstation-gui-1"><a class="header" href="#workstation-gui-1">Workstation GUI</a></h1>
-<p>The following Desktop Environements are supported, but this repository does not currently include
-installation of the environments themselves:</p>
-<ul>
-<li>KDE</li>
-</ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="kde"><a class="header" href="#kde">KDE</a></h1>
-<p>This will install KDE tools necessary for managing a KDE config, and enables config backup &amp; restore
-functionality.</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git kde.yml --tags "install" --skip-tags "kwin"
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="developer-tools-1"><a class="header" href="#developer-tools-1">Developer Tools</a></h1>
-<p>This repo supports installing terminal developer tools &amp; packages via devbox, homebrew, and
-cargo(Non-Root).</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="devbox"><a class="header" href="#devbox">Devbox</a></h1>
-<p>Run the bootstrap script, which will install:</p>
-<ol>
-<li>Nix(via Determinate Systems)</li>
-<li>Devbox</li>
-<li>Bootstrap <code>.bashrc</code> Config</li>
-</ol>
-<pre><code class="language-bash">wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_devbox.sh | bash
-</code></pre>
-<p>To install the Devbox packages, ensure <code>ansible</code> is installed and create a file to apply your
-customizations. The variable <code>tool_provider</code> MUST be specified as <code>devbox</code>. The remaining variables
-are optional, but keep in mind that they will overwrite any customizations that you have made to
-git, ssh, neovim, tmux, etc.</p>
-<p>Example Yaml Config(example.yml):</p>
-<pre><code class="language-yaml">---
-tool_provider: "devbox"
-git_name: "Your Name"
-git_email: "your_name@address.com"
-github_username: "username"
-anthropic_api_key: "MY_ANTHROPIC_API_KEY"
-openai_api_key: "MY_OPENAI_API_KEY"
-</code></pre>
-<p>Now use <code>ansible-pull</code> to install the Devbox packages:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@example.yml"
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="homebrew"><a class="header" href="#homebrew">Homebrew</a></h1>
-<p>The following command will install homebrew for Linux or macOS systems:</p>
-<pre><code class="language-bash">/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-</code></pre>
-<p>To install the Homebrew packages, ensure <code>ansible</code> is installed and create a file to apply your
-customizations. The variable <code>tool_provider</code> MUST be specified as <code>homebrew</code>. The remaining variables
-are optional, but keep in mind that they will overwrite any customizations that you have made to
-git, ssh, neovim, tmux, etc.</p>
-<p>Example Yaml Config(example.yml):</p>
-<pre><code class="language-yaml">---
-tool_provider: "homebrew"
-git_name: "Your Name"
-git_email: "your_name@address.com"
-github_username: "username"
-anthropic_api_key: "MY_ANTHROPIC_API_KEY"
-openai_api_key: "MY_OPENAI_API_KEY"
-</code></pre>
-<p>Now use <code>ansible-pull</code> to install the Homebrew packages:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@example.yml"
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="non-root"><a class="header" href="#non-root">Non-Root</a></h1>
-<p>To install the Non-Root packages, ensure <code>ansible</code> is installed and create a file to apply your
-customizations. The variable <code>tool_provider</code> MUST be specified as <code>nonroot</code>. The remaining variables
-are optional, but keep in mind that they will overwrite any customizations that you have made to
-git, ssh, neovim, tmux, etc.</p>
-<p>Example Yaml Config(example.yml):</p>
-<pre><code class="language-yaml">---
-tool_provider: "nonroot"
-git_name: "Your Name"
-git_email: "your_name@address.com"
-github_username: "username"
-anthropic_api_key: "MY_ANTHROPIC_API_KEY"
-openai_api_key: "MY_OPENAI_API_KEY"
-</code></pre>
-<p>Now use <code>ansible-pull</code> to install the Non-Root packages:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@example.yml"
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="optional-tools"><a class="header" href="#optional-tools">Optional Tools</a></h1>
-<p>Ansible is also setup to install Ollama as a system package. This will require root access and does
-not use the same devbox/homebrew/nonroot scripting.</p>
-<p>Ollama(w/ ROCM)</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git --ask-become-pass ollama.yml -e "{rocm_support: true}"
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
-<p>This repo offers configuration of the developer environment in the both the desktop and terminal.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="gui"><a class="header" href="#gui">GUI</a></h1>
-<p>This will configure KDE Workspaces and Activities as specified by the user. Defaults are available.</p>
-<p>Example Yaml Config(user_kde.yml):</p>
-<pre><code class="language-yaml">---
-kwin_rules_web_right_23:
-  position: "1035,4"
-  size: "2376,1432"
-kwin_activities:
-  browse:
-    name: "Browse"
-    description: "Web Browse &amp; Research"
-    icon: "com.brave.Browser"
-    uuid: "240d6a84-dda7-4e1f-9e0c-ab1a9585d939"
-kwin_rules:
-  brave:
-    group: "207e083a-eb97-47f1-81ef-172cc820c3c2"
-    Description: "Brave: Browser"
-    activity: "{{ kwin_activities['browse']['uuid'] }}"
-    activityrule: "3"
-    position: "{{ kwin_rules_web_right_23['position'] }}"
-    positionrule: "3"
-    size: "{{ kwin_rules_web_right_23['size'] }}"
-    sizerule: "3"
-    windowrole: "browser"
-    windowrolematch: "1"
-    wmclass: "Brave-browser"
-    wmclassmatch: "2"
-</code></pre>
-<p>Run this command to apply the workspace &amp; activity settings specified above:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git kde.yml --tags "kwin" --skip-tags "install" -e "@user_kde.yml"
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="dotfiles"><a class="header" href="#dotfiles">Dotfiles</a></h1>
-<p>This will apply settings(dotfiles) for a large variety of programs. There are filters in place to
-selectivly apply them. Users are strongly encouraged to set their own project, layouts, aliases,
-etc.</p>
-<p>The bare minimum would be:</p>
-<p>Example:</p>
-<pre><code class="language-yaml"># example.yml
----
-tool_provider: "devbox"
-projects:
-  ars:
-    name: "pbonh/ars"
-    url: "{{ github_ssh_url }}:pbonh/ars.git"
-    path: "{{ code_checkout_path_github }}/pbonh/ars"
-zellij_kdl_layouts:
-  dotfiles:
-    name: dotfiles
-    cwd: "{{ ansible_env.HOME }}"
-    template_info: "{{ zellij_kdl_template_info_default }}"
-    layout_info: |
-      tab name="Ars" split_direction="vertical" cwd="{{ projects['ars']['path'] }}" focus=true {
-          pane {
-              command "{{ nvim_exe }}"
-              args "README.md"
-              start_suspended true
-          }
-      }
-nushell_extra_aliases: |
-  alias zdot = {{ zellij_exe }} --layout dotfiles
-bash_extra_aliases: |
-  alias zdot='{{ zellij_exe }} --layout dotfiles'
-extra_zsh_aliases: |
-  alias zdot='{{ zellij_exe }} --layout dotfiles'
-</code></pre>
-<p>The above settings can be applied by running:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --skip-tags "install" -e "@example.yml"
-</code></pre>
-<p>If checking out the <code>ars</code> repo directly, then create <code>vars/local.yml</code>, and add configuration there, no <code>-e</code> option necessary.</p>
-<pre><code class="language-bash">ansible-playbook playbook.yml --skip-tags "install"
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
-<p>Example(MacOS):</p>
-<pre><code class="language-yaml"># macos.yml
----
-tool_provider: "devbox"
-homebrew_path: "{{ homebrew_path_macos }}"
-ars_name: "pbonh/ars"
-term_dev_name: "pbonh/term-dev.nix"
-projects:
-  ars:
-    name: "{{ ars_name }}"
-    url: "{{ github_ssh_url }}:{{ ars_name }}.git"
-    path: "{{ code_checkout_path_github }}/{{ ars_name }}"
-  term_dev:
-    name: "{{ term_dev_name }}"
-    url: "{{ github_ssh_url }}:{{ term_dev_name }}.git"
-    path: "{{ code_checkout_path_github }}/{{ term_dev_name }}"
-other_projects: "{{ projects | dict2items | 
-             map(attribute='key', 
-                 attribute2='value', 
-                 transform=lambda k, v: [k, {'name': v.name, 'path': v.path}]) | 
-             items2dict }}"
-nushell_extra_aliases: |
-  alias zdot = {{ zellij_exe }} --layout dotfiles
-bash_extra_aliases: |
-  alias zdot='{{ zellij_exe }} --layout dotfiles'
-extra_zsh_aliases: |
-  alias zdot='{{ zellij_exe }} --layout dotfiles'
-zellij_kdl_layouts:
-  dotfiles:
-    name: dotfiles
-    cwd: "{{ ansible_env.HOME }}"
-    template_info: "{{ zellij_kdl_template_info_default }}"
-    layout_info: |
-      tab name="Ars" split_direction="vertical" cwd="{{ projects['ars']['path'] }}" focus=true {
-          pane {
-              command "{{ nvim_exe }}"
-              args "README.md"
-              start_suspended true
-          }
-      }
-      tab name="Dotfiles" split_direction="vertical" cwd="{{ dotfiles_checkout_dir }}" {
-          pane {
-              command "env"
-              args {% set bash_arg_list = nvim_exe_bone_bash_cmd %}
-                   {% set bash_arg_string = bash_arg_list | map('string') | map('regex_replace', '^(.*)$', '"\\1"') | join(' ') %}
-                   {{ bash_arg_string }}
-              start_suspended true
-          }
-      }
-      tab name="Devbox Project" split_direction="vertical" cwd="/path/to/devbox_project" {
-          pane {
-              command "env"
-              args "NVIM_APPNAME=nvim-chatgpt-modular" "bash" "-c" "devbox run -- {{ nvim_exe }} README.md"
-              start_suspended true
-          }
-      }
-nushell_config_dir: "{{ macos_config_dir }}/nushell"
-xdg_config_dir_navi: "{{ macos_config_dir }}/navi"
-</code></pre>
-<p>Example(Devbox,AMD-ROCM):</p>
-<pre><code class="language-yaml">---
-tool_provider: "devbox"
-rocm_support: true
-ars_name: "pbonh/ars"
-projects:
-  ars:
-    name: "{{ ars_name }}"
-    url: "{{ github_ssh_url }}/{{ ars_name }}.git"
-    path: "{{ code_checkout_path_github }}/{{ ars_name }}"
-other_projects: "{{ projects | dict2items | 
-             map(attribute='key', 
-                 attribute2='value', 
-                 transform=lambda k, v: [k, {'name': v.name, 'path': v.path}]) | 
-             items2dict }}"
-# {{
-#   {
-#     key: {
-#       'name': value.name,
-#       'path': value.path
-#     }
-#     for key, value in projects.items()
-#   }
-# }}
-codelldb_install_path: "{{ codelldb_install_devbox_path }}"
-nushell_extra_aliases: |
-  alias zdot = {{ zellij_exe }} --layout dotfiles
-bash_extra_aliases: |
-  alias zdot='{{ zellij_exe }} --layout dotfiles'
-extra_zsh_aliases: |
-  alias zdot='{{ zellij_exe }} --layout dotfiles'
-zellij_kdl_layouts:
-  dotfiles:
-    name: dotfiles
-    cwd: "{{ ansible_env.HOME }}"
-    template_info: "{{ zellij_kdl_template_info_default }}"
-    layout_info: |
-      tab name="Neovim(Ollama): Lazy-Config" split_direction="vertical" cwd="{{ nvim_config_dir }}-lazy-modular" {
-          pane {
-              command "env"
-              args {% set bash_arg_list = nvim_exe_ollama_bash_cmd %}
-                   {% set bash_arg_string = bash_arg_list | map('string') | map('regex_replace', '^(.*)$', '"\\1"') | join(' ') %}
-                   {{ bash_arg_string }}
-              start_suspended true
-          }
-      }
-      tab name="CPU/MEM" split_direction="vertical" {
-          pane {
-              command "btm"
-              start_suspended true
-          }
-      }
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><pre><code>                             Apache License
+                        <pre><code>                             Apache License
                        Version 2.0, January 2004
                     http://www.apache.org/licenses/
 </code></pre>
@@ -726,6 +372,9 @@ limitations under the License.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="configuration/examples.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
 
                         <div style="clear: both"></div>
@@ -734,6 +383,9 @@ limitations under the License.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="configuration/examples.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
             </nav>
 
@@ -757,11 +409,6 @@ limitations under the License.</p>
 
         <!-- Custom JS scripts -->
 
-        <script>
-        window.addEventListener('load', function() {
-            window.setTimeout(window.print, 100);
-        });
-        </script>
 
 
     </div>
