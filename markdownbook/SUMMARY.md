@@ -1,6 +1,6 @@
 # Summary
 
-[Introduction](../README.md)
+[Introduction](README.md)
 
 - [Installation](installation.md)
     - [Workstation GUI](installation/gui.md)
@@ -14,4 +14,4 @@
     - [GUI](configuration/gui.md)
     - [Dotfiles](configuration/dotfiles.md)
     - [Examples](configuration/examples.md)
-- [License](../LICENSE)
+- [License](LICENSE)
