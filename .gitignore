@@ -143,3 +143,4 @@ vars/term-dev.yml
 # Markdown Book(mdbook)
 book/
 theme/
+*WORK/

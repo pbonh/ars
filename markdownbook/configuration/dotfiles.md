@@ -8,7 +8,7 @@ The bare minimum would be:
 
 Example:
 ```yaml
-# example.yml
+# devbox.yml
 ---
 tool_provider: "devbox"
 projects:
@@ -40,7 +40,7 @@ extra_zsh_aliases: |
 The above settings can be applied by running:
 
 ```bash
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --skip-tags "install" -e "@example.yml"
+ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --skip-tags "install" -e "@devbox.yml"
 ```
 
 If checking out the `ars` repo directly, then create `vars/local.yml`, and add configuration there, no `-e` option necessary.

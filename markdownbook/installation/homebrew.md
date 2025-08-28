@@ -11,7 +11,7 @@ customizations. The variable `tool_provider` MUST be specified as `homebrew`. Th
 are optional, but keep in mind that they will overwrite any customizations that you have made to
 git, ssh, neovim, tmux, etc.
 
-Example Yaml Config(example.yml):
+Example Yaml Config(brew.yml):
 ```yaml
 ---
 tool_provider: "homebrew"
@@ -25,5 +25,5 @@ openai_api_key: "MY_OPENAI_API_KEY"
 Now use `ansible-pull` to install the Homebrew packages:
 
 ```bash
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@example.yml"
+ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@brew.yml"
 ```
