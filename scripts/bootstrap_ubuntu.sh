@@ -4,7 +4,7 @@ wget -qO - 'https://proget.makedeb.org/debian-feeds/prebuilt-mpr.pub' | gpg --de
 echo "deb [arch=all,$(dpkg --print-architecture) signed-by=/usr/share/keyrings/prebuilt-mpr-archive-keyring.gpg] https://proget.makedeb.org prebuilt-mpr $(lsb_release -cs)" | sudo tee /etc/apt/sources.list.d/prebuilt-mpr.list
 sudo apt update -y
 sudo apt upgrade -y
-sudo apt install -y ansible make python3-psutil just zsh build-essential
+sudo apt install -y ansible make python3-psutil just zsh build-essential git
 
 if ! [ -x "$(command -v ansible)" ]; then
   echo 'Error: ansible is not installed.' >&2
