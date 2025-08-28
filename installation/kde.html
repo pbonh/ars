@@ -177,8 +177,8 @@
                     <main>
                         <h1 id="kde"><a class="header" href="#kde">KDE</a></h1>
 <p>This will install KDE tools necessary for managing a KDE config, and enables config backup &amp; restore
-functionality.</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git kde.yml --tags "install" --skip-tags "kwin"
+functionality. Make sure to specify your chosen <code>tool_provider</code>(<code>devbox</code> in this example).</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git kde.yml --tags "install" --skip-tags "kwin" -e "{tool_provider: \"devbox\"}"
 </code></pre>
 
                     </main>
@@ -189,7 +189,7 @@ functionality.</p>
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../installation/dev-tools.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../installation/optional.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -203,7 +203,7 @@ functionality.</p>
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../installation/dev-tools.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../installation/optional.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

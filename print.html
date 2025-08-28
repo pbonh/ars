@@ -261,17 +261,6 @@ ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "env" -e "{
 # (Install Non-Root, Shell Tools Only)
 ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install,env" -e "{tool_provider: \"nonroot\"}"
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="workstation-gui-1"><a class="header" href="#workstation-gui-1">Workstation GUI</a></h1>
-<p>The following Desktop Environements are supported, but this repository does not currently include
-installation of the environments themselves:</p>
-<ul>
-<li>KDE</li>
-</ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="kde"><a class="header" href="#kde">KDE</a></h1>
-<p>This will install KDE tools necessary for managing a KDE config, and enables config backup &amp; restore
-functionality.</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git kde.yml --tags "install" --skip-tags "kwin"
-</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="developer-tools-1"><a class="header" href="#developer-tools-1">Developer Tools</a></h1>
 <p>This repo supports installing terminal developer tools &amp; packages via devbox, homebrew, and
 cargo(Non-Root).</p>
@@ -336,6 +325,17 @@ openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Non-Root packages:</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@example.yml"
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="workstation-gui-1"><a class="header" href="#workstation-gui-1">Workstation GUI</a></h1>
+<p>The following Desktop Environements are supported, but this repository does not currently include
+installation of the environments themselves:</p>
+<ul>
+<li>KDE</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="kde"><a class="header" href="#kde">KDE</a></h1>
+<p>This will install KDE tools necessary for managing a KDE config, and enables config backup &amp; restore
+functionality. Make sure to specify your chosen <code>tool_provider</code>(<code>devbox</code> in this example).</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git kde.yml --tags "install" --skip-tags "kwin" -e "{tool_provider: \"devbox\"}"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="optional-tools"><a class="header" href="#optional-tools">Optional Tools</a></h1>
 <p>Ansible is also setup to install Ollama as a system package. This will require root access and does
