@@ -277,7 +277,7 @@ cargo(Non-Root).</p>
 customizations. The variable <code>tool_provider</code> MUST be specified as <code>devbox</code>. The remaining variables
 are optional, but keep in mind that they will overwrite any customizations that you have made to
 git, ssh, neovim, tmux, etc.</p>
-<p>Example Yaml Config(example.yml):</p>
+<p>Example Yaml Config(devbox.yml):</p>
 <pre><code class="language-yaml">---
 tool_provider: "devbox"
 git_name: "Your Name"
@@ -287,7 +287,7 @@ anthropic_api_key: "MY_ANTHROPIC_API_KEY"
 openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Devbox packages:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@example.yml"
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@devbox.yml"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="homebrew"><a class="header" href="#homebrew">Homebrew</a></h1>
 <p>The following command will install homebrew for Linux or macOS systems:</p>
@@ -297,7 +297,7 @@ openai_api_key: "MY_OPENAI_API_KEY"
 customizations. The variable <code>tool_provider</code> MUST be specified as <code>homebrew</code>. The remaining variables
 are optional, but keep in mind that they will overwrite any customizations that you have made to
 git, ssh, neovim, tmux, etc.</p>
-<p>Example Yaml Config(example.yml):</p>
+<p>Example Yaml Config(brew.yml):</p>
 <pre><code class="language-yaml">---
 tool_provider: "homebrew"
 git_name: "Your Name"
@@ -307,14 +307,14 @@ anthropic_api_key: "MY_ANTHROPIC_API_KEY"
 openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Homebrew packages:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@example.yml"
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@brew.yml"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="non-root"><a class="header" href="#non-root">Non-Root</a></h1>
 <p>To install the Non-Root packages, ensure <code>ansible</code> is installed and create a file to apply your
 customizations. The variable <code>tool_provider</code> MUST be specified as <code>nonroot</code>. The remaining variables
 are optional, but keep in mind that they will overwrite any customizations that you have made to
 git, ssh, neovim, tmux, etc.</p>
-<p>Example Yaml Config(example.yml):</p>
+<p>Example Yaml Config(nonroot.yml):</p>
 <pre><code class="language-yaml">---
 tool_provider: "nonroot"
 git_name: "Your Name"
@@ -324,7 +324,7 @@ anthropic_api_key: "MY_ANTHROPIC_API_KEY"
 openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Non-Root packages:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@example.yml"
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@nonroot.yml"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="workstation-gui-1"><a class="header" href="#workstation-gui-1">Workstation GUI</a></h1>
 <p>The following Desktop Environements are supported, but this repository does not currently include
@@ -382,7 +382,7 @@ selectivly apply them. Users are strongly encouraged to set their own project, l
 etc.</p>
 <p>The bare minimum would be:</p>
 <p>Example:</p>
-<pre><code class="language-yaml"># example.yml
+<pre><code class="language-yaml"># devbox.yml
 ---
 tool_provider: "devbox"
 projects:
@@ -411,7 +411,7 @@ extra_zsh_aliases: |
   alias zdot='{{ zellij_exe }} --layout dotfiles'
 </code></pre>
 <p>The above settings can be applied by running:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --skip-tags "install" -e "@example.yml"
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --skip-tags "install" -e "@devbox.yml"
 </code></pre>
 <p>If checking out the <code>ars</code> repo directly, then create <code>vars/local.yml</code>, and add configuration there, no <code>-e</code> option necessary.</p>
 <pre><code class="language-bash">ansible-playbook playbook.yml --skip-tags "install"

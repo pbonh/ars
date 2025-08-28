@@ -181,7 +181,7 @@ selectivly apply them. Users are strongly encouraged to set their own project, l
 etc.</p>
 <p>The bare minimum would be:</p>
 <p>Example:</p>
-<pre><code class="language-yaml"># example.yml
+<pre><code class="language-yaml"># devbox.yml
 ---
 tool_provider: "devbox"
 projects:
@@ -210,7 +210,7 @@ extra_zsh_aliases: |
   alias zdot='{{ zellij_exe }} --layout dotfiles'
 </code></pre>
 <p>The above settings can be applied by running:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --skip-tags "install" -e "@example.yml"
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --skip-tags "install" -e "@devbox.yml"
 </code></pre>
 <p>If checking out the <code>ars</code> repo directly, then create <code>vars/local.yml</code>, and add configuration there, no <code>-e</code> option necessary.</p>
 <pre><code class="language-bash">ansible-playbook playbook.yml --skip-tags "install"

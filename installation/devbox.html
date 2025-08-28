@@ -188,7 +188,7 @@
 customizations. The variable <code>tool_provider</code> MUST be specified as <code>devbox</code>. The remaining variables
 are optional, but keep in mind that they will overwrite any customizations that you have made to
 git, ssh, neovim, tmux, etc.</p>
-<p>Example Yaml Config(example.yml):</p>
+<p>Example Yaml Config(devbox.yml):</p>
 <pre><code class="language-yaml">---
 tool_provider: "devbox"
 git_name: "Your Name"
@@ -198,7 +198,7 @@ anthropic_api_key: "MY_ANTHROPIC_API_KEY"
 openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Devbox packages:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@example.yml"
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@devbox.yml"
 </code></pre>
 
                     </main>
