@@ -27,6 +27,7 @@
         {%- endfor -%}
       {%- endfor -%}
       {{ rules_list }}
+    backup: true
 
 - name: KWin | Apply KWin Window Rules(General Section) | kdeconfig
   community.general.kdeconfig:
