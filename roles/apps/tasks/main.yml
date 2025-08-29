@@ -1,0 +1,6 @@
+---
+- name: Apps | Install Flatpak Apps | flatpak
+  community.general.flatpak:
+    name: "{{ item.value }}"
+    state: present
+  loop: "{{ flatpak_apps | dict2items }}"

@@ -1,0 +1,11 @@
+---
+flatpak_apps:
+  # brave: "com.brave.Browser"
+  opera: "com.opera.Opera"
+  thunderbird: "org.mozilla.Thunderbird"
+  bitwarden: "com.bitwarden.desktop"
+  kontainer: "io.github.DenysMb.Kontainer"
+  onlyoffice: "org.onlyoffice.desktopeditors"
+  obsidian: "md.obsidian.Obsidian"
+  cantor: "org.kde.cantor"
+  kalgebra: "org.kde.kalgebra"
