@@ -176,6 +176,12 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="apps"><a class="header" href="#apps">Apps</a></h1>
+<p>Application install support includes the ProtonMail Bridge and Flatpak</p>
+<h2 id="protonmail-bridge"><a class="header" href="#protonmail-bridge">ProtonMail Bridge</a></h2>
+<p>Use this script to install the ProtonMail Bridge *.rpm(Fedora/Bluefin only):</p>
+<pre><code class="language-bash">wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/install_protonmail_bridge.sh | bash
+</code></pre>
+<h2 id="flatpak"><a class="header" href="#flatpak">Flatpak</a></h2>
 <p>This role will install Desktop applications via <a href="https://flathub.org">flathub</a>.</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git apps.yml
 </code></pre>
