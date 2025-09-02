@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>GUI - Ars: pbonh</title>
+        <title>Applications - Ars: pbonh</title>
 
 
         <!-- Custom HTML head -->
@@ -175,63 +175,20 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="gui"><a class="header" href="#gui">GUI</a></h1>
-<p>This will configure KDE Workspaces and Activities as specified by the user. Defaults are available.</p>
-<p>Example Yaml Config(user_kde.yml):</p>
-<pre><code class="language-yaml">---
-kwin_rules_web_left_23: 
-  position: "48,4"
-  size: "983,1432"
-kwin_rules_web_right_23:
-  position: "1035,4"
-  size: "2376,1432"
-kwin_activities:
-  browse:
-    name: "Browse"
-    description: "Web Browse &amp; Research"
-    icon: "com.opera.Opera"
-    uuid: "240d6a84-dda7-4e1f-9e0c-ab1a9585d939"
-kwin_rules:
-  opera:
-    group: "3c93494e-08c5-4fba-a3b8-1dacfa6d1d36"
-    Description: "Opera: Browser"
-    activity: "{{ kwin_activities['browse']['uuid'] }}"
-    position: "{{ kwin_rules_web_right_23['position'] }}"
-    size: "{{ kwin_rules_web_right_23['size'] }}"
-    activityrule: "3"
-    positionrule: "3"
-    sizerule: "3"
-    wmclass: "Opera"
-    wmclassmatch: "2"
-    ignoregeometry: "true"
-    ignoregeometryrule: "3"
-  thunderbird:
-    group: "6d7f8fa9-b0ef-4ed7-9832-2c223e2a78df"
-    Description: "Thunderbird: Email"
-    activity: "{{ kwin_activities['browse']['uuid'] }}"
-    position: "{{ kwin_rules_web_left_23['position'] }}"
-    size: "{{ kwin_rules_web_left_23['size'] }}"
-    activityrule: "3"
-    positionrule: "3"
-    sizerule: "3"
-    wmclass: "org.mozilla.Thunderbird"
-    wmclassmatch: "2"
-    ignoregeometry: "true"
-    ignoregeometryrule: "3"
-</code></pre>
-<p>Run this command to apply the workspace &amp; activity settings specified above:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git kde.yml --tags "kwin" --skip-tags "install" -e "@user_kde.yml"
+                        <h1 id="apps"><a class="header" href="#apps">Apps</a></h1>
+<p>This role will install Desktop applications via <a href="https://flathub.org">flathub</a>.</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git apps.yml
 </code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../configuration.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../installation/kde.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../configuration/dotfiles.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../installation/optional.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -241,11 +198,11 @@ kwin_rules:
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../configuration.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../installation/kde.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../configuration/dotfiles.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../installation/optional.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -337,6 +337,10 @@ installation of the environments themselves:</p>
 functionality. Make sure to specify your chosen <code>tool_provider</code>(<code>devbox</code> in this example).</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git kde.yml --tags "install" --skip-tags "kwin" -e "{tool_provider: \"devbox\"}"
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="apps"><a class="header" href="#apps">Apps</a></h1>
+<p>This role will install Desktop applications via <a href="https://flathub.org">flathub</a>.</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git apps.yml
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="optional-tools"><a class="header" href="#optional-tools">Optional Tools</a></h1>
 <p>Ansible is also setup to install Ollama as a system package. This will require root access and does
 not use the same devbox/homebrew/nonroot scripting.</p>
@@ -349,6 +353,9 @@ not use the same devbox/homebrew/nonroot scripting.</p>
 <p>This will configure KDE Workspaces and Activities as specified by the user. Defaults are available.</p>
 <p>Example Yaml Config(user_kde.yml):</p>
 <pre><code class="language-yaml">---
+kwin_rules_web_left_23: 
+  position: "48,4"
+  size: "983,1432"
 kwin_rules_web_right_23:
   position: "1035,4"
   size: "2376,1432"
@@ -356,22 +363,35 @@ kwin_activities:
   browse:
     name: "Browse"
     description: "Web Browse &amp; Research"
-    icon: "com.brave.Browser"
+    icon: "com.opera.Opera"
     uuid: "240d6a84-dda7-4e1f-9e0c-ab1a9585d939"
 kwin_rules:
-  brave:
-    group: "207e083a-eb97-47f1-81ef-172cc820c3c2"
-    Description: "Brave: Browser"
+  opera:
+    group: "3c93494e-08c5-4fba-a3b8-1dacfa6d1d36"
+    Description: "Opera: Browser"
     activity: "{{ kwin_activities['browse']['uuid'] }}"
-    activityrule: "3"
     position: "{{ kwin_rules_web_right_23['position'] }}"
-    positionrule: "3"
     size: "{{ kwin_rules_web_right_23['size'] }}"
+    activityrule: "3"
+    positionrule: "3"
     sizerule: "3"
-    windowrole: "browser"
-    windowrolematch: "1"
-    wmclass: "Brave-browser"
+    wmclass: "Opera"
     wmclassmatch: "2"
+    ignoregeometry: "true"
+    ignoregeometryrule: "3"
+  thunderbird:
+    group: "6d7f8fa9-b0ef-4ed7-9832-2c223e2a78df"
+    Description: "Thunderbird: Email"
+    activity: "{{ kwin_activities['browse']['uuid'] }}"
+    position: "{{ kwin_rules_web_left_23['position'] }}"
+    size: "{{ kwin_rules_web_left_23['size'] }}"
+    activityrule: "3"
+    positionrule: "3"
+    sizerule: "3"
+    wmclass: "org.mozilla.Thunderbird"
+    wmclassmatch: "2"
+    ignoregeometry: "true"
+    ignoregeometryrule: "3"
 </code></pre>
 <p>Run this command to apply the workspace &amp; activity settings specified above:</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git kde.yml --tags "kwin" --skip-tags "install" -e "@user_kde.yml"
