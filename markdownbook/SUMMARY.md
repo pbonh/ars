@@ -9,6 +9,7 @@
         - [Non-Root](installation/nonroot.md)
     - [Workstation GUI](installation/gui.md)
         - [KDE](installation/kde.md)
+    - [Applications](installation/apps.md)
     - [Optional](installation/optional.md)
 - [Configuration](configuration.md)
     - [GUI](configuration/gui.md)
