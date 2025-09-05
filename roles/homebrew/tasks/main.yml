@@ -7,6 +7,6 @@
 
 - name: Homebrew | Install Homebrew Packages | homebrew
   community.general.homebrew:
-    name: "{{ item }}"
+    name: "{{ item.value.brew }}"
     state: present
-  loop: "{{ dev_packages | dict2items | selectattr('value.brew', 'defined') }}"
+  loop: "{{ dev_packages | dict2items | selectattr('value.brew', 'defined') | list }}"
