@@ -6,10 +6,18 @@
     state: present
 
 - name: Konsave | Install Konsave | pipx
-  when: tool_provider == 'nonroot' or
-        tool_provider == 'homebrew'
+  when: tool_provider == 'homebrew'
+  vars:
+    pipx_exe: "{{ brew_pipx_exe }}"
   community.general.pipx:
     name: konsave
+    executable: "{{ pipx_exe }}"
+
+- name: Konsave | Install Konsave | pipx
+  when: tool_provider == 'nonroot'
+  community.general.pipx:
+    name: konsave
+    executable: "{{ pipx_exe }}"
 
 - name: Devbox | Install Devbox KDE Tools | command
   when: tool_provider == 'devbox'

@@ -1,6 +1,10 @@
 ---
 bin_directory: "{{ ansible_env.HOME }}/.local/bin"
 nix_bin: "{{ ansible_env.HOME }}/.nix-profile/bin"
+homebrew_install_path: "/home/linuxbrew/.linuxbrew"
+homebrew_path: "{{ homebrew_install_path }}/bin"
+pipx_exe: "{{ bin_directory }}/pipx"
+brew_pipx_exe: "{{ homebrew_path }}/pipx"
 devbox_exe: "/usr/local/bin/devbox"
 devbox_kde_tools:
   - konsave
