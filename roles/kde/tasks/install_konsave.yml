@@ -10,7 +10,6 @@
         tool_provider == 'homebrew'
   community.general.pipx:
     name: konsave
-    executable: "{{ pipx_exe }}"
 
 - name: Devbox | Install Devbox KDE Tools | command
   when: tool_provider == 'devbox'

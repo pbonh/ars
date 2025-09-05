@@ -1,7 +1,6 @@
 ---
 bin_directory: "{{ ansible_env.HOME }}/.local/bin"
 nix_bin: "{{ ansible_env.HOME }}/.nix-profile/bin"
-pipx_exe: "{{ nix_bin }}/pipx"
 devbox_exe: "/usr/local/bin/devbox"
 devbox_kde_tools:
   - konsave
