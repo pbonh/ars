@@ -9,4 +9,4 @@
   community.general.homebrew:
     name: "{{ item }}"
     state: present
-  loop: "{{ dev_packages | dict2items | selectattr('value.brew', 'defined') | list }}"
+  loop: "{{ dev_packages | dict2items | selectattr('value.brew', 'defined') }}"
