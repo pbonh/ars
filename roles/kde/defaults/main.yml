@@ -19,7 +19,7 @@ kwin_activities:
   browse:
     name: "Browse"
     description: "Web Browse & Research"
-    icon: "com.brave.Browser"
+    icon: "com.opera.Opera"
     uuid: "240d6a84-dda7-4e1f-9e0c-ab1a9585d939"
   code:
     name: "Code"
@@ -34,7 +34,7 @@ kwin_activities:
   vault:
     name: "Vault"
     description: "The Vault"
-    icon: "bitwarden"
+    icon: "com.bitwarden.desktop"
     uuid: "2397e318-eec7-4c4b-b114-6c2dec42961a"
   system:
     name: "System"
