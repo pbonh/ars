@@ -1,4 +1,5 @@
 ---
+git_email: "{{ lookup('env', 'DOTFILES_BOOTSTRAP_GIT_EMAIL') }}"
 distrobox_dir: "{{ ansible_env.HOME }}/VMs"
 distrobox_config: "{{ distrobox_dir }}/Config"
 distrobox_home: "{{ distrobox_dir }}/Homes"
@@ -13,6 +14,34 @@ distrobox_vm_images:
     name: "almalinux"
     tag: "9"
 distrobox_vms:
+  RockyBase:
+    additional_packages: "\"epel-release git vim curl\""
+    image: "{{ distrobox_vm_images['rockylinux'].name }}:{{ distrobox_vm_images['rockylinux'].tag }}"
+    init: "false"
+    nvidia: "false"
+    pull: "true"
+    root: "false"
+    replace: "true"
+    start_now: "true"
+    init_hooks:
+      - "sudo dnf install -y ansible"
+      - "rm -rf ~/.ssh"
+      - "mkdir -p ~/.ssh"
+      - "chmod 700 ~/.ssh"
+      - "chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh"
+      - "ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\""
+  RockyBrew:
+    clone: "RockyBase"
+    init: "false"
+    nvidia: "false"
+    pull: "false"
+    root: "false"
+    replace: "true"
+    start_now: "true"
+    init_hooks:
+      - "NONINTERACTIVE=1 /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} /home/linuxbrew"
+      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cache"
   ubuntu:
     additional_packages: "\"git vim tmux\""
     image: "{{ distrobox_vm_images['ubuntu'].name }}:{{ distrobox_vm_images['ubuntu'].tag }}"
