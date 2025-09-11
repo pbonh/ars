@@ -11,6 +11,7 @@
         - [KDE](installation/kde.md)
     - [Applications](installation/apps.md)
     - [Optional](installation/optional.md)
+- [Distrobox](distrobox.md)
 - [Configuration](configuration.md)
     - [GUI](configuration/gui.md)
     - [Dotfiles](configuration/dotfiles.md)
