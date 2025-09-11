@@ -353,6 +353,10 @@ not use the same devbox/homebrew/nonroot scripting.</p>
 <p>Ollama(w/ ROCM)</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git --ask-become-pass ollama.yml -e "{rocm_support: true}"
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="distrobox-developer-environments"><a class="header" href="#distrobox-developer-environments">Distrobox Developer Environments</a></h1>
+<p>I use distrobox to isolate my developer environments from the host system: <a href="https://distrobox.it/">Distrobox</a>.</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git distrobox.yml
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
 <p>This repo offers configuration of the developer environment in the both the desktop and terminal.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="gui"><a class="header" href="#gui">GUI</a></h1>
