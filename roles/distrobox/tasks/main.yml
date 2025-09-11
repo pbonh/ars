@@ -1,0 +1,18 @@
+---
+- name: Distrobox | Setup VM Directory | directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ distrobox_dir }}"
+    - "{{ distrobox_config }}"
+    - "{{ distrobox_home }}"
+
+- name: Distrobox | Copies Distrobox INI Files | template
+  vars:
+    vm_name: "{{ item.key }}"
+    distrobox_vm_opts: "{{ item.value }}"
+  template:
+    src: "distrobox.ini.j2"
+    dest: "{{ distrobox_config }}/{{ item.key }}.ini"
+  loop: "{{ distrobox_vms | dict2items }}"

@@ -1,0 +1,44 @@
+---
+distrobox_dir: "{{ ansible_env.HOME }}/VMs"
+distrobox_config: "{{ distrobox_dir }}/Config"
+distrobox_home: "{{ distrobox_dir }}/Homes"
+distrobox_vm_images:
+  ubuntu:
+    name: "ubuntu"
+    tag: "latest"
+  rockylinux:
+    name: "rockylinux"
+    tag: "9"
+  almalinux:
+    name: "almalinux"
+    tag: "9"
+distrobox_vms:
+  ubuntu:
+    additional_packages: "\"git vim tmux\""
+    image: "{{ distrobox_vm_images['ubuntu'].name }}:{{ distrobox_vm_images['ubuntu'].tag }}"
+    init: "false"
+    nvidia: "false"
+    pull: "true"
+    root: "false"
+    replace: "true"
+    start_now: "true"
+  deno_ubuntu:
+    clone: "ubuntu"
+    init: "false"
+    nvidia: "false"
+    pull: "true"
+    root: "false"
+    replace: "true"
+    start_now: "true"
+    pre_init_hooks:
+      - "curl -fsSL https://deno.land/install.sh | sh;"
+  bun_ubuntu:
+    clone: "ubuntu"
+    init: "false"
+    nvidia: "false"
+    pull: "true"
+    root: "false"
+    replace: "true"
+    start_now: "true"
+    pre_init_hooks:
+      - "curl -fsSL https://bun.sh/install | bash;"
