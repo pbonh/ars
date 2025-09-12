@@ -4,6 +4,9 @@ distrobox_dir: "{{ ansible_env.HOME }}/VMs"
 distrobox_config: "{{ distrobox_dir }}/Config"
 distrobox_home: "{{ distrobox_dir }}/Homes"
 distrobox_vm_images:
+  debian:
+    name: "debian"
+    tag: "12"
   ubuntu:
     name: "ubuntu"
     tag: "latest"
@@ -13,6 +16,11 @@ distrobox_vm_images:
   almalinux:
     name: "almalinux"
     tag: "9"
+  centos:
+    name: "centos"
+    tag: "stream9"
+distrobox_ssh_bootstrap_cmd: "rm -rf ~/.ssh && mkdir -p ~/.ssh && chmod 700 ~/.ssh && chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh && sudo -u {{ ansible_env.USER }} ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\""
+# distrobox_ssh_bootstrap_cmd: "if [ ! -f ~/.ssh/id_ed25519 ] || [ ! -f ~/.ssh/id_ed25519.pub ]; then mkdir -p ~/.ssh && chmod 700 ~/.ssh && chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh && sudo -u {{ ansible_env.USER }} ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\"; fi"
 distrobox_vms:
   RockyBase:
     additional_packages: "\"epel-release git vim curl\""
@@ -29,7 +37,7 @@ distrobox_vms:
       - "mkdir -p ~/.ssh"
       - "chmod 700 ~/.ssh"
       - "chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh"
-      - "ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\""
+      - "sudo -u {{ ansible_env.USER }} ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\""
   RockyBrew:
     clone: "RockyBase"
     init: "false"
@@ -39,35 +47,94 @@ distrobox_vms:
     replace: "true"
     start_now: "true"
     init_hooks:
-      - "NONINTERACTIVE=1 /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+      - "NONINTERACTIVE=1 sudo -u {{ ansible_env.USER }} /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+      - "sudo -u {{ ansible_env.USER }} /home/linuxbrew/.linuxbrew/bin/brew shellenv && sudo -u {{ ansible_env.USER }} /home/linuxbrew/.linuxbrew/bin/brew install gcc ansible-language-server bash-language-server lua-language-server yaml-language-server"
       - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} /home/linuxbrew"
       - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cache"
-  ubuntu:
-    additional_packages: "\"git vim tmux\""
-    image: "{{ distrobox_vm_images['ubuntu'].name }}:{{ distrobox_vm_images['ubuntu'].tag }}"
+  RustDev:
+    clone: "RockyBrew"
     init: "false"
+    nvidia: "false"
+    pull: "false"
+    root: "false"
+    replace: "true"
+    start_now: "true"
+    entry: "true"
+    init_hooks:
+      - "{{ distrobox_ssh_bootstrap_cmd }}"
+      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cache"
+      - "sudo -u {{ ansible_env.USER }} /home/linuxbrew/.linuxbrew/bin/brew install rustup"
+      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cargo"
+      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.profile"
+      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.rustup"
+  DotDev:
+    clone: "RockyBrew"
+    init: "false"
+    nvidia: "false"
+    pull: "false"
+    root: "false"
+    replace: "true"
+    start_now: "true"
+    entry: "true"
+    init_hooks:
+      - "{{ distrobox_ssh_bootstrap_cmd }}"
+# echo >> /var/home/phillip/VMs/Homes/RockyBrew/.bashrc
+# echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /var/home/phillip/VMs/Homes/RockyBrew/.bashrc
+# eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+  AlmaBase:
+    additional_packages: "\"epel-release git vim curl\""
+    image: "{{ distrobox_vm_images['almalinux'].name }}:{{ distrobox_vm_images['almalinux'].tag }}"
+    init: "true"
     nvidia: "false"
     pull: "true"
     root: "false"
     replace: "true"
     start_now: "true"
-  deno_ubuntu:
-    clone: "ubuntu"
-    init: "false"
+    init_hooks:
+      - "sudo dnf install -y ansible"
+      - "rm -rf ~/.ssh"
+      - "mkdir -p ~/.ssh"
+      - "chmod 700 ~/.ssh"
+      - "chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh"
+      - "ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\""
+  AlmaDevbox:
+    clone: "AlmaBase"
+    init: "true"
     nvidia: "false"
     pull: "false"
     root: "false"
     replace: "true"
     start_now: "true"
-    pre_init_hooks:
-      - "curl -fsSL https://deno.land/install.sh | sh;"
-  bun_ubuntu:
-    clone: "ubuntu"
-    init: "false"
+    init_hooks:
+      # - "sudo -u {{ ansible_env.USER }} curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm"
+      # - "sudo -u {{ ansible_env.USER }} . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh && sudo -u {{ ansible_env.USER }} curl -fsSL https://get.jetpack.io/devbox | bash -s -- -f"
+      - "sudo -u {{ ansible_env.USER }} wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_devbox_ci.sh | bash"
+      - "chmod 755 /usr/local/bin/devbox"
+      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.local"
+      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} /nix"
+  Devbox:
+    clone: "AlmaDevbox"
+    init: "true"
     nvidia: "false"
     pull: "false"
     root: "false"
     replace: "true"
     start_now: "true"
-    pre_init_hooks:
-      - "curl -fsSL https://bun.sh/install | bash;"
+    entry: "true"
+    volume: "{{ distrobox_home }}/AlmaBase/.ssh:$HOME/.ssh"
+  DebianBase:
+    additional_packages: "\"systemd git vim curl ansible\""
+    image: "{{ distrobox_vm_images['debian'].name }}:{{ distrobox_vm_images['debian'].tag }}"
+    init: "true"
+    nvidia: "false"
+    pull: "true"
+    root: "false"
+    replace: "true"
+    start_now: "true"
+    init_hooks:
+      # - "sudo apt install -y ansible"
+      - "rm -rf ~/.ssh"
+      - "mkdir -p ~/.ssh"
+      - "chmod 700 ~/.ssh"
+      - "chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh"
+      - "ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\""
