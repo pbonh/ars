@@ -17,3 +17,4 @@
     nushell_fzf_path: ""
     direnv_exe: "direnv"
     just_exe: "just"
+    joplin_exe: "joplin"
