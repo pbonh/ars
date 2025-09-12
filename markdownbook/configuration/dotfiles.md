@@ -29,12 +29,6 @@ zellij_kdl_layouts:
               start_suspended true
           }
       }
-nushell_extra_aliases: |
-  alias zdot = {{ zellij_exe }} --layout dotfiles
-bash_extra_aliases: |
-  alias zdot='{{ zellij_exe }} --layout dotfiles'
-extra_zsh_aliases: |
-  alias zdot='{{ zellij_exe }} --layout dotfiles'
 ```
 
 The above settings can be applied by running:
