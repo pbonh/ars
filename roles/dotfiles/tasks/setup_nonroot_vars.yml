@@ -36,7 +36,7 @@
     dust_exe: "{{ cargo_path }}dust"
     eva_exe: "{{ cargo_path }}eva"
     erdtree_exe: "{{ cargo_path }}erd"
-    exa_exe: "{{ cargo_path }}exa"
+    eza_exe: "{{ cargo_path }}exa"
     fd_exe: "{{ cargo_path }}fd"
     felix_exe: "{{ cargo_path }}fx"
     fend_exe: "{{ cargo_path }}fend"

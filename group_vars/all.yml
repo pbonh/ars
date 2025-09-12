@@ -88,13 +88,13 @@ dev_packages:
       - "bat"
     nonroot:
       - "bat"
-  exa:
+  eza:
     brew:
-      - "exa"
+      - "eza"
     devbox:
-      - "exa"
+      - "eza"
     nonroot:
-      - "exa"
+      - "eza"
   lsd:
     brew:
       - "lsd"
@@ -484,7 +484,7 @@ dev_packages:
       - "soft-serve"
   python39Packages.pipx:
     brew:
-      - "python39Packages.pipx"
+      - "pipx"
     devbox:
       - "python39Packages.pipx"
   btop:

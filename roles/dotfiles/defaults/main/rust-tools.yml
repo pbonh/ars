@@ -66,9 +66,9 @@ cargo_binstall_packages:
   eva:
     name: eva
     path: "{{ cargo_path }}eva"
-  exa:
-    name: exa
-    path: "{{ cargo_path }}exa"
+  eza:
+    name: eza
+    path: "{{ cargo_path }}eza"
   fd-find:
     name: fd-find
     path: "{{ cargo_path }}fd"
@@ -160,7 +160,7 @@ diffr_exe: "{{ cargo_binstall_packages['diffr']['path'] }}"
 dust_exe: "{{ cargo_binstall_packages['du-dust']['path'] }}"
 eva_exe: "{{ cargo_binstall_packages['eva']['path'] }}"
 erdtree_exe: "{{ cargo_binstall_packages['erdtree']['path'] }}"
-exa_exe: "{{ cargo_binstall_packages['exa']['path'] }}"
+eza_exe: "{{ cargo_binstall_packages['eza']['path'] }}"
 fd_exe: "{{ cargo_binstall_packages['fd-find']['path'] }}"
 felix_exe: "{{ cargo_binstall_packages['felix']['path'] }}"
 fend_exe: "{{ cargo_binstall_packages['fend']['path'] }}"
