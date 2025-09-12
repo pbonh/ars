@@ -32,6 +32,7 @@ distrobox_vms:
     start_now: "true"
     init_hooks:
       - "sudo dnf install -y ansible"
+      - "sudo dnf groupinstall -y \"Development Tools\""
       - "rm -rf ~/.ssh"
       - "mkdir -p ~/.ssh"
       - "chmod 700 ~/.ssh"
