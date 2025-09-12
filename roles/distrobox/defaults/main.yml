@@ -19,8 +19,7 @@ distrobox_vm_images:
   centos:
     name: "centos"
     tag: "stream9"
-distrobox_ssh_bootstrap_cmd: "rm -rf ~/.ssh && mkdir -p ~/.ssh && chmod 700 ~/.ssh && chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh && sudo -u {{ ansible_env.USER }} ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\""
-# distrobox_ssh_bootstrap_cmd: "if [ ! -f ~/.ssh/id_ed25519 ] || [ ! -f ~/.ssh/id_ed25519.pub ]; then mkdir -p ~/.ssh && chmod 700 ~/.ssh && chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh && sudo -u {{ ansible_env.USER }} ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\"; fi"
+distrobox_ssh_bootstrap_cmd: "if [ ! -f ~/.ssh/id_ed25519 ] || [ ! -f ~/.ssh/id_ed25519.pub ]; then mkdir -p ~/.ssh && chmod 700 ~/.ssh && chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh && sudo -u {{ ansible_env.USER }} ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\"; fi"
 distrobox_vms:
   RockyBase:
     additional_packages: "\"epel-release git vim curl\""
