@@ -18,3 +18,4 @@
     direnv_exe: "direnv"
     just_exe: "just"
     joplin_exe: "joplin"
+    treesitter_compiler_exe: "{{ gcc_exe }}"
