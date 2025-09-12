@@ -270,6 +270,7 @@ dev_packages:
   tree-sitter:
     brew:
       - "tree-sitter"
+      - "tree-sitter-cli"
     devbox:
       - "tree-sitter"
   python39Packages.pynvim:
