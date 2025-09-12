@@ -111,7 +111,7 @@ dev_packages:
       - "navi"
   skim:
     brew:
-      - "skim"
+      - "sk"
     devbox:
       - "skim"
     nonroot:
@@ -273,8 +273,6 @@ dev_packages:
     devbox:
       - "tree-sitter"
   python39Packages.pynvim:
-    brew:
-      - "pynvim"
     devbox:
       - "pynvim"
   nodejs:
@@ -329,7 +327,7 @@ dev_packages:
       - "luajit"
   sumneko-lua-language-server:
     brew:
-      - "sumneko-lua-language-server"
+      - "lua-language-server"
     devbox:
       - "sumneko-lua-language-server"
   shfmt:
@@ -339,7 +337,7 @@ dev_packages:
       - "shfmt"
   joplin:
     brew:
-      - "joplin"
+      - "joplin-cli"
     devbox:
       - "joplin"
   tmux:
@@ -364,7 +362,7 @@ dev_packages:
       - "zoxide"
   zsh-powerlevel10k:
     brew:
-      - "zsh-powerlevel10k"
+      - "powerlevel10k"
     devbox:
       - "zsh-powerlevel10k"
   atuin:
@@ -373,8 +371,6 @@ dev_packages:
     devbox:
       - "atuin"
   xcp:
-    brew:
-      - "xcp"
     devbox:
       - "xcp"
   gum:
@@ -403,8 +399,6 @@ dev_packages:
     devbox:
       - "ugrep"
   kmon:
-    brew:
-      - "kmon"
     devbox:
       - "kmon"
   hyperfine:
@@ -439,7 +433,7 @@ dev_packages:
       - "diskonaut"
   du-dust:
     brew:
-      - "du-dust"
+      - "dust"
     devbox:
       - "du-dust"
   tokei:
@@ -464,7 +458,7 @@ dev_packages:
       - "grex"
   gitAndTools.gh:
     brew:
-      - "gitAndTools.gh"
+      - "gh"
     devbox:
       - "gitAndTools.gh"
   lazygit:
@@ -474,7 +468,7 @@ dev_packages:
       - "lazygit"
   gitflow:
     brew:
-      - "gitflow"
+      - "git-flow"
     devbox:
       - "gitflow"
   soft-serve:
@@ -523,8 +517,6 @@ dev_packages:
     devbox:
       - "erdtree"
   felix:
-    brew:
-      - "felix"
     devbox:
       - "felix"
   fend:
