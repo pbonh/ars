@@ -326,6 +326,11 @@ dev_packages:
       - "luajit"
     devbox:
       - "luajit"
+  mdbook:
+    brew:
+      - "mdbook"
+    devbox:
+      - "mdbook"
   sumneko-lua-language-server:
     brew:
       - "lua-language-server"
