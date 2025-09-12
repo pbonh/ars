@@ -1,6 +1,6 @@
 ---
 git_email: "{{ lookup('env', 'DOTFILES_BOOTSTRAP_GIT_EMAIL') }}"
-distrobox_dir: "{{ ansible_env.HOME }}/VMs"
+distrobox_dir: "{{ ansible_env.HOME }}/Boxes"
 distrobox_config: "{{ distrobox_dir }}/Config"
 distrobox_home: "{{ distrobox_dir }}/Homes"
 distrobox_vm_images:
