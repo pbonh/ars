@@ -62,7 +62,7 @@ distrobox_vms:
     entry: "true"
     init_hooks:
       - "{{ distrobox_ssh_bootstrap_cmd }}"
-      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cache"
+      # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cache"
       - "sudo -u {{ ansible_env.USER }} /home/linuxbrew/.linuxbrew/bin/brew install rustup"
       - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cargo"
       - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.profile"
