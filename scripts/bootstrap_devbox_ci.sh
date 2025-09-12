@@ -62,20 +62,20 @@ EOF
 }
 
 # Install Tools(Devbox)
-install_prereq() {
-    devbox global add ansible just
-    eval "$(devbox global shellenv --preserve-path-stack -r)" && hash -r
-    cp ./vars/example.yml ./vars/term-dev.yml
-    just devbox
-    eval "$(devbox global shellenv --preserve-path-stack -r)" && hash -r
-}
+# install_prereq() {
+#     devbox global add ansible just
+#     eval "$(devbox global shellenv --preserve-path-stack -r)" && hash -r
+#     cp ./vars/example.yml ./vars/term-dev.yml
+#     just devbox
+#     eval "$(devbox global shellenv --preserve-path-stack -r)" && hash -r
+# }
 
 # Install Dotfiles(Devbox)
-install_dotfiles() {
-    just dot-all
-}
+# install_dotfiles() {
+#     just dot-all
+# }
 
 ensure_commands
 setup_bashrc
-install_prereq
-install_dotfiles
+# install_prereq
+# install_dotfiles
