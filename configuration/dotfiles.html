@@ -202,12 +202,6 @@ zellij_kdl_layouts:
               start_suspended true
           }
       }
-nushell_extra_aliases: |
-  alias zdot = {{ zellij_exe }} --layout dotfiles
-bash_extra_aliases: |
-  alias zdot='{{ zellij_exe }} --layout dotfiles'
-extra_zsh_aliases: |
-  alias zdot='{{ zellij_exe }} --layout dotfiles'
 </code></pre>
 <p>The above settings can be applied by running:</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --skip-tags "install" -e "@devbox.yml"
