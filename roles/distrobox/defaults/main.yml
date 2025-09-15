@@ -64,6 +64,7 @@ distrobox_vms:
       - "{{ distrobox_ssh_bootstrap_cmd }}"
       # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cache"
       - "sudo -u {{ ansible_env.USER }} /home/linuxbrew/.linuxbrew/bin/brew install rustup"
+      # - "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
       # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cargo"
       # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.profile"
       # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.rustup"
