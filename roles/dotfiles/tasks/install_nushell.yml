@@ -18,6 +18,12 @@
     state: directory
     mode: '0755'
 
+- name: nushell | Setup Atuin Directory | file
+  file:
+    path: "{{ atuin_dir }}"
+    state: directory
+    mode: '0755'
+
 - name: nushell | Setup Carapace Directory | file
   file:
     path: "{{ carapace_dir }}"

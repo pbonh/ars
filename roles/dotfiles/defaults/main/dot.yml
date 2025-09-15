@@ -36,6 +36,7 @@ homebrew_path: "{{ homebrew_install_path }}/bin"
 homebrew_install_path_macos: "/opt/homebrew"
 homebrew_path_macos: "{{ homebrew_install_path_macos }}/bin"
 carapace_dir: "{{ xdg_cache_dir }}/carapace"
+atuin_dir: "{{ xdg_share_dir }}/atuin"
 path_directories:
   local:
     name: local
