@@ -48,16 +48,16 @@ kwin_activities:
     uuid: "1d5d08f2-bbf1-4993-9cc4-6b49e775858b"
 kwin_rules_web_5k_left_23:
   position: "48,4"
-  size: "983,1432"
+  size: "798,1481"
 kwin_rules_web_5k_right_23:
-  position: "1035,4"
-  size: "2376,1432"
+  position: "1045,4"
+  size: "2484,1481"
 kwin_rules_code_5k_left_23:
   position: "48,4"
-  size: "803,1432"
+  size: "799,1481"
 kwin_rules_code_5k_right_23:
-  position: "855,4"
-  size: "2554,1432"
+  position: "850,4"
+  size: "2679,1481"
 kwin_rules_singlefloat_5k:
   position: "843,177"
   size: "1700,1047"
