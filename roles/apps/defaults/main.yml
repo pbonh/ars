@@ -10,3 +10,4 @@ flatpak_apps:
   obsidian: "md.obsidian.Obsidian"
   cantor: "org.kde.cantor"
   kalgebra: "org.kde.kalgebra"
+  qalculate: "io.github.Qalculate"
