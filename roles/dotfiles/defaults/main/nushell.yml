@@ -27,7 +27,7 @@ nushell_carapace_config_file: "{{ carapace_dir }}/init.nu"
 nushell_atuin_config: |
   source {{ nushell_atuin_config_file }}
 nushell_atuin_env: |
-  {{ atuin_exe }} init nu | save {{ nushell_atuin_config_file }}
+  {{ atuin_exe }} init nu | save --force {{ nushell_atuin_config_file }}
 nushell_carapace_config: |
   source {{ nushell_carapace_config_file }}
 nushell_carapace_env: |
