@@ -429,8 +429,8 @@ nvim_fzf_lua:
       },
     },
     { '_', { n = '<cmd>FzfLua grep_cword<CR>', }, description = 'Fzf-Lua: Grep String(Cursor Word)', },
-    { '<leader>q', { n = '<cmd>FzfLua live_grep_glob<CR>', }, description = 'Fzf-Lua: Grep Project(Glob)', },
-    { '<leader>Q', { n = '<cmd>FzfLua live_grep<CR>', }, description = 'Fzf-Lua: Grep Project', },
+    { '<leader>q', { n = '<cmd>FzfLua live_grep<CR>', }, description = 'Fzf-Lua: Grep Project', },
+    -- { '<leader>Q', { n = '<cmd>FzfLua live_grep<CR>', }, description = 'Fzf-Lua: Grep Project', },
     { '<leader>fd', { n = '<cmd>lua tcd_into_directory()<CR>', }, description = 'Telescope: TCD Into Directory', },
     { '<leader>u', { n = '<cmd>Telescope undo<CR>', }, description = 'Telescope: Undo History', },
 nvim_fzf_lua_ui:

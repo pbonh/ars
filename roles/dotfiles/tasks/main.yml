@@ -93,12 +93,14 @@
     - env
 
 - name: Cleanup Neovim Config
+  no_log: true
   import_tasks: tasks/install_neovim_configs_cleanup.yml
   tags:
     - neovim-config-clean
     - editor
 
 - name: Install Neovim Config
+  no_log: true
   import_tasks: tasks/install_neovim_configs.yml
   tags:
     - neovim-config
