@@ -42,8 +42,8 @@ user_llama_model_info:
     model_name: "qwen2.5-coder"
     model_tag: "{{ distilled_param_count }}"
     model_ctx: "{{ distilled_ctx_size }}"
-openai_model: "o3-mini"
-openai_ctx_size: "{{ ctx_sizes['128k'] }}"
+openai_model: "gpt-5-mini"
+openai_ctx_size: "{{ ctx_sizes['256k'] }}"
 ollama_port: "11434"
 ollama_address: "http://localhost:{{ ollama_port }}"
 nvim_codecompanion_adapter_config_ollama: |
