@@ -46,34 +46,11 @@ nvim_legendary:
     },
   config: ""
   keymaps: |
-    { '<CR>', {
-        n = ':',
-        v = ':',
-      },
-      description = 'Vim: Enter Ex Commands',
-    },
-    { ':', {
-        n = ',',
-        v = ',',
-      },
-      description = 'Vim: Remap Repeat',
-    },
-    { '<leader>l', {
-        n = ':Legendary<CR>',
-      },
-      description = 'Legendary: List Commands',
-    },
-    { '<leader>L', {
-        n = ':Lazy<CR>',
-      },
-      description = 'Lazy: Launch UI',
-    },
-    {
-      '<C-]>', {
-        n = ':noh<CR>',
-      },
-      description = 'Vim: Clear Search Result',
-    },
+    { '<CR>', ':', mode = { 'n', 'v' }, desc = 'Vim: Enter Ex Commands', },
+    { ':', ',', mode = { 'n', 'v' }, desc = 'Vim: Remap Repeat', },
+    { '<leader>l', ':Legendary<CR>', mode = 'n', desc = 'Legendary: List Commands', },
+    { '<leader>L', ':Lazy<CR>', mode = 'n', desc = 'Lazy: Launch UI', },
+    { '<C-]>', ':noh<CR>', mode = 'n', desc = 'Vim: Clear Search Result', },
 nvim_legendary_config: |
   local wk = require("which-key")
   wk.add({
