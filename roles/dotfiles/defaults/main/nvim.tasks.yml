@@ -43,8 +43,12 @@ nvim_tasks:
     },
   config: ""
   keymaps: |
-    { '<leader>O', description = 'Overseer', },
-    { '<leader>Or', { n = '<cmd>OverseerRun<CR>', }, description = 'Overseer: Select Task', },
+    {
+      icon = '',
+      mode = 'n',
+      { '<leader>O', group = 'Overseer', },
+      { '<leader>Or', '<cmd>OverseerRun<CR>', desc = 'Overseer: Select Task', },
+    },
 nvim_tasks_nodap:
   lazy: |
     {

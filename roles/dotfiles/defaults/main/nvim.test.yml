@@ -25,6 +25,10 @@ nvim_test:
       {% raw %}}{% endraw %},
     })
   keymaps: |
-    { '<leader>t', description = 'NeoTest', },
-    { '<leader>tt', { n = '<cmd>lua require("neotest").run.run()<CR>', }, description = 'NeoTest: Run Nearest Test', },
-    { '<leader>td', { n = '<cmd>lua require("neotest").run.run({strategy = "dap"})<CR>', }, description = 'NeoTest: Debug Nearest Test', },
+    {
+      icon = '',
+      mode = 'n',
+      { '<leader>t', group = 'NeoTest', },
+      { '<leader>tt', '<cmd>lua require("neotest").run.run()<CR>', desc = 'NeoTest: Run Nearest Test', },
+      { '<leader>td', '<cmd>lua require("neotest").run.run({strategy = "dap"})<CR>', desc = 'NeoTest: Debug Nearest Test', },
+    },
