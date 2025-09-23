@@ -210,5 +210,8 @@ nvim_motion:
     },
   config: ""
   keymaps: |
-    { '<C-o>', { n = '<cmd>Portal jumplist backward<CR>', }, description = 'Portal: Jump Backward', },
-    { '<C-i>', { n = '<cmd>Portal jumplist forward<CR>', }, description = 'Portal: Jump Forward', },
+    {
+      mode = 'n',
+      { '<C-o>', '<cmd>Portal jumplist backward<CR>', desc = 'Portal: Jump Backward', },
+      { '<C-i>', '<cmd>Portal jumplist forward<CR>', desc = 'Portal: Jump Forward', },
+    },
