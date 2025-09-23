@@ -351,5 +351,8 @@ nvim_treesitter:
     },
   config: ""
   keymaps: |
-    { 'zR', { n = '<Cmd>lua require(\'ufo\').openAllFolds<CR>', }, description = 'UFO: Open All Folds', },
-    { 'zM', { n = '<Cmd>lua require(\'ufo\').closeAllFolds<CR>', }, description = 'UFO: Close All Folds', },
+    {
+      mode = 'n',
+      { 'zR', '<Cmd>lua require(\'ufo\').openAllFolds<CR>', desc = 'UFO: Open All Folds', },
+      { 'zM', '<Cmd>lua require(\'ufo\').closeAllFolds<CR>', desc = 'UFO: Close All Folds', },
+    },

@@ -165,9 +165,12 @@ nvim_terminal:
     },
   config: ""
   keymaps: |
-    { '<leader>j', { n = '<cmd>lua just_terminal_runner()<CR>', }, description = 'ToggleTerm: Justfile Chooser', },
-    { '<leader>n', { n = '<cmd>lua navi_terminal_runner()<CR>', }, description = 'ToggleTerm: Navi Runner', },
-    -- { '<leader>x', { n = '<cmd>lua require("tfm").open()<CR>', }, description = 'FM-Nvim: Yazi(Current File)', },
-    -- { '<leader>X', { n = '<cmd>lua require("tfm").open(vim.fn.getcwd())<CR>', }, description = 'FM-Nvim: Yazi(Project Root)', },
-     { '<leader>x', { n = '<cmd>Yazi<CR>', }, description = 'Yazi-Nvim: Yazi(Current File)', },
-     { '<leader>X', { n = '<cmd>Yazi cwd<CR>', }, description = 'Yazi-Nvim: Yazi(Project Root)', },
+    {
+      mode = 'n',
+      { '<leader>j', '<cmd>lua just_terminal_runner()<CR>', desc = 'ToggleTerm: Justfile Chooser', },
+      { '<leader>n', '<cmd>lua navi_terminal_runner()<CR>', desc = 'ToggleTerm: Navi Runner', },
+      -- { '<leader>x', '<cmd>lua require("tfm").open()<CR>', desc = 'FM-Nvim: Yazi(Current File)', },
+      -- { '<leader>X', '<cmd>lua require("tfm").open(vim.fn.getcwd())<CR>', desc = 'FM-Nvim: Yazi(Project Root)', },
+       { '<leader>x', '<cmd>Yazi<CR>', desc = 'Yazi-Nvim: Yazi(Current File)', },
+       { '<leader>X', '<cmd>Yazi cwd<CR>', desc = 'Yazi-Nvim: Yazi(Project Root)', },
+    },
