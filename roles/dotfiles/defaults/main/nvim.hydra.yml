@@ -528,4 +528,4 @@ nvim_hydra:
     { '<C-h>', '<cmd>lua require(\'smart-splits\').move_cursor_left()<CR>', desc = 'Split/Window: Move Left', },
     { '<C-j>', '<cmd>lua require(\'smart-splits\').move_cursor_down()<CR>', desc = 'Split/Window: Move Down', },
     { '<C-k>', '<cmd>lua require(\'smart-splits\').move_cursor_up()<CR>', desc = 'Split/Window: Move Up', },
-    { '<C-l>', '<cmd>lua require(\'smart-splits\').move_cursor_right()<CR>' desc = 'Split/Window: Move Right', },
+    { '<C-l>', '<cmd>lua require(\'smart-splits\').move_cursor_right()<CR>', desc = 'Split/Window: Move Right', },
