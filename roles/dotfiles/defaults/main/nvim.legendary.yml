@@ -30,11 +30,6 @@ nvim_legendary_default:
       },
       description = 'Remap Repeat',
     },
-    { '<leader>l', {
-        n = ':Legendary<CR>',
-      },
-      description = 'List Legendary Commands',
-    },
 nvim_legendary:
   lazy: |
     {
@@ -48,7 +43,6 @@ nvim_legendary:
   keymaps: |
     { '<CR>', ':', mode = { 'n', 'v' }, desc = 'Vim: Enter Ex Commands', },
     { ':', ',', mode = { 'n', 'v' }, desc = 'Vim: Remap Repeat', },
-    { '<leader>l', ':Legendary<CR>', mode = 'n', desc = 'Legendary: List Commands', },
     { '<leader>L', ':Lazy<CR>', mode = 'n', desc = 'Lazy: Launch UI', },
     { '<C-]>', ':noh<CR>', mode = 'n', desc = 'Vim: Clear Search Result', },
 nvim_legendary_config: |

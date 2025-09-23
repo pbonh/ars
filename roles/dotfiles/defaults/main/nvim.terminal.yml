@@ -167,6 +167,7 @@ nvim_terminal:
   keymaps: |
     {
       mode = 'n',
+      icon = '',
       { '<leader>j', '<cmd>lua just_terminal_runner()<CR>', desc = 'ToggleTerm: Justfile Chooser', },
       { '<leader>n', '<cmd>lua navi_terminal_runner()<CR>', desc = 'ToggleTerm: Navi Runner', },
       -- { '<leader>x', '<cmd>lua require("tfm").open()<CR>', desc = 'FM-Nvim: Yazi(Current File)', },

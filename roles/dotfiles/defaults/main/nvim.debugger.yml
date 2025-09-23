@@ -124,6 +124,7 @@ nvim_debugger:
   keymaps: |
     {
       mode = 'n',
+      icon = ''
       { '<leader>d', group = 'DAP', },
       { '<leader>db', '<cmd>lua require(\'dap\').toggle_breakpoint()<CR>', desc = 'DAP: Toggle Breakpoint', },
       { '<leader>dc', '<cmd>lua require(\'dap\').continue()<CR>', desc = 'DAP: Continue', },
