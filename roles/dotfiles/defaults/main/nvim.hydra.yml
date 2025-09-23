@@ -525,7 +525,7 @@ nvim_hydra:
     },
   config: ""
   keymaps: |
-    { '<C-h>', { n = '<cmd>lua require(\'smart-splits\').move_cursor_left()<CR>', }, description = 'Split/Window: Move Left', },
-    { '<C-j>', { n = '<cmd>lua require(\'smart-splits\').move_cursor_down()<CR>', }, description = 'Split/Window: Move Down', },
-    { '<C-k>', { n = '<cmd>lua require(\'smart-splits\').move_cursor_up()<CR>', }, description = 'Split/Window: Move Up', },
-    { '<C-l>', { n = '<cmd>lua require(\'smart-splits\').move_cursor_right()<CR>', }, description = 'Split/Window: Move Right', },
+    { '<C-h>', '<cmd>lua require(\'smart-splits\').move_cursor_left()<CR>', desc = 'Split/Window: Move Left', },
+    { '<C-j>', '<cmd>lua require(\'smart-splits\').move_cursor_down()<CR>', desc = 'Split/Window: Move Down', },
+    { '<C-k>', '<cmd>lua require(\'smart-splits\').move_cursor_up()<CR>', desc = 'Split/Window: Move Up', },
+    { '<C-l>', '<cmd>lua require(\'smart-splits\').move_cursor_right()<CR>' desc = 'Split/Window: Move Right', },
