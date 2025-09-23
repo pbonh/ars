@@ -17,11 +17,15 @@ nvim_legendary_config: |
   --   },
   -- })
   local wk = require("which-key")
-  wk.add({
-    {% for extra_nvim_language in extra_nvim_language_keymaps -%}
-    {{ extra_nvim_language_keymaps[extra_nvim_language]['mappings'] }}
+    {{ nvim_legendary['keymaps'] | indent(2) }}
+    {% for nvim_lazy_plugin_group in nvim_lazy_plugin_groups -%}
+    {{ nvim_lazy_plugin_groups[nvim_lazy_plugin_group]['keymaps'] | indent(4) }}
     {% endfor %}
+  wk.add({
   })
+  {% for extra_nvim_language in extra_nvim_language_keymaps -%}
+  {{ extra_nvim_language_keymaps[extra_nvim_language]['mappings'] }}
+  {% endfor %}
 nvim_legendary_default:
   lazy: |
     {
