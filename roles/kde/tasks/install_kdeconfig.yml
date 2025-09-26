@@ -40,3 +40,37 @@
         key: rules
         value: "{{ kwin_rules | dict2items | map(attribute='value.group') | join(',') }}"
     backup: true
+
+# Example: plasma-org.kde.plasma.desktop-appletsrc
+# [Containments][2][Applets][5][Configuration][General]
+# launchers=[3d98f125-ee0a-4368-8150-9cbed439f27a]
+#           applications:io.github.Qalculate.desktop,
+#           [3d98f125-ee0a-4368-8150-9cbed439f27a]
+#           applications:org.kde.cantor.desktop,
+#           [3d98f125-ee0a-4368-8150-9cbed439f27a]
+#           applications:org.kde.kalgebra.desktop,
+#           [1d5d08f2-bbf1-4993-9cc4-6b49e775858b]
+#           applications:systemsettings.desktop,
+#           [1d5d08f2-bbf1-4993-9cc4-6b49e775858b]
+#           applications:org.gnome.Ptyxis.desktop,
+#           [4156f55c-e8dc-4f82-b46f-d91bb348073f]
+#           applications:md.obsidian.Obsidian.desktop,
+#           [240d6a84-dda7-4e1f-9e0c-ab1a9585d939]
+#           applications:com.opera.Opera.desktop,
+#           [240d6a84-dda7-4e1f-9e0c-ab1a9585d939]
+#           applications:org.mozilla.Thunderbird.desktop,
+#           [2397e318-eec7-4c4b-b114-6c2dec42961a]
+#           applications:com.bitwarden.desktop.desktop,
+#           [daeb040e-07f4-46fe-9266-69fc8f3f6cbb]
+#           applications:io.github.dvlv.boxbuddyrs.desktop,
+#           [daeb040e-07f4-46fe-9266-69fc8f3f6cbb]
+#           applications:org.kde.konsole.desktop
+
+# - name: KWin | Apply KWin Plasma Settings | kdeconfig
+#   community.general.kdeconfig:
+#     path: "{{ kde_plasma_config_file }}"
+#     values:
+#       - group: General
+#         key: count
+#         value: "{{ kwin_rules | length }}"
+#     backup: true
