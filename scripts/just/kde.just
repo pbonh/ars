@@ -1,5 +1,4 @@
 workstation-kde:
-  # ansible-playbook --ask-become-pass kde.yml
   ansible-playbook kde.yml
 
 backup-kde-config:
