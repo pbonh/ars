@@ -61,6 +61,9 @@ kwin_rules_code_5k_right_23:
 kwin_rules_singlefloat_5k:
   position: "843,177"
   size: "1700,1047"
+kwin_rules_fw13_full:
+  position: "0,0"
+  size: "1128,708"
 kwin_rules_web_left_23: "{{ kwin_rules_web_5k_left_23 }}"
 kwin_rules_web_right_23: "{{ kwin_rules_web_5k_right_23 }}"
 kwin_rules_code_left_23: "{{ kwin_rules_code_5k_left_23 }}"
