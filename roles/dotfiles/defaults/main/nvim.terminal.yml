@@ -163,6 +163,9 @@ nvim_terminal:
       lazy = false,
       priority = 1001,
     },
+    {
+      "anaypurohit0907/Superfile.nvim"
+    },
   config: ""
   keymaps: |
     {
