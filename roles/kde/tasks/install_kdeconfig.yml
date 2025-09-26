@@ -20,7 +20,8 @@
     path: "{{ kwin_rules_config_file }}"
     values: >
       {%- set rules_list = [] -%}
-      {%- for rule in kwin_rules.values() -%}
+      {%- for entry in kwin_rules.values() -%}
+        {%- set rule = entry.kwin_rule -%}
         {%- set grp = rule.group -%}
         {%- for key, val in rule.items() if key != 'group' -%}
           {%- set _ = rules_list.append({'group': grp, 'key': key, 'value': val}) -%}
@@ -38,33 +39,35 @@
         value: "{{ kwin_rules | length }}"
       - group: General
         key: rules
-        value: "{{ kwin_rules | dict2items | map(attribute='value.group') | join(',') }}"
+        value: "{{ kwin_rules | dict2items | map(attribute='value.kwin_rule.group') | join(',') }}"
     backup: true
 
 - name: Plasma | Panel favorites per activity | kdeconfig
   community.general.kdeconfig:
     path: "{{ kde_plasma_config_file }}"
     values: >
-      {# Target Task Manager applet General groups as nested tokens.
-         Override with a list of token-lists in `kde_panel_fav_groups`
-         e.g. [['Containments','2','Applets','5','Configuration','General']] #}
+      {# Target Task Manager applet General groups as nested tokens. #}
       {%- set groups_tokens = kde_panel_fav_groups
             | default([['Containments','2','Applets','5','Configuration','General']]) -%}
 
-      {# Build activity -> [desktop ids] map from kwin_rules. #}
+      {# Build activity -> [desktop ids] map from kwin_rules using icon. #}
       {%- set favs = {} -%}
-      {%- for _name, rule in kwin_rules.items() -%}
-        {%- set parts = rule.wmclass.split(' ') -%}
-        {%- set base = rule.desktop
-                      | default(parts[1] if (parts|length > 1 and ('.' in parts[1])) else parts[0]) -%}
-        {%- set desktop = base if base.endswith('.desktop') else base ~ '.desktop' -%}
-        {%- set act = rule.activity -%}
-        {%- if act in favs -%}
-          {%- if desktop not in favs[act] -%}
-            {%- set _ = favs[act].append(desktop) -%}
+      {%- for _name, entry in kwin_rules.items() -%}
+        {%- set icon = entry.icon | default('') -%}
+        {%- if icon|length > 0 -%}
+          {%- set rule = entry.kwin_rule -%}
+          {%- set parts = icon.split(' ') -%}
+          {%- set base = rule.desktop
+                        | default(parts[1] if (parts|length > 1 and ('.' in parts[1])) else parts[0]) -%}
+          {%- set desktop = base ~ '.desktop' -%}
+          {%- set act = rule.activity -%}
+          {%- if act in favs -%}
+            {%- if desktop not in favs[act] -%}
+              {%- set _ = favs[act].append(desktop) -%}
+            {%- endif -%}
+          {%- else -%}
+            {%- set _ = favs.update({ (act): [desktop] }) -%}
           {%- endif -%}
-        {%- else -%}
-          {%- set _ = favs.update({ (act): [desktop] }) -%}
         {%- endif -%}
       {%- endfor -%}
 

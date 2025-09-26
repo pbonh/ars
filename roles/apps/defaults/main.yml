@@ -11,3 +11,4 @@ flatpak_apps:
   cantor: "org.kde.cantor"
   kalgebra: "org.kde.kalgebra"
   qalculate: "io.github.Qalculate"
+  ptyxis: "app.devsuite.Ptyxis"
