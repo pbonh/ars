@@ -253,7 +253,7 @@ kwin_rules:
     kwin_rule:
       group: "d0abaa24-fb76-4567-a738-da70bc4c85e3"
       Description: "PlasmaTube"
-      wmclass: "plasmatube plasmatube"
+      wmclass: "org.kde.plasmatube"
       activity: "{{ kwin_activities['media']['uuid'] }}"
       position: "{{ kwin_rules_singlefloat['position'] }}"
       size: "{{ kwin_rules_singlefloat['size'] }}"
