@@ -12,3 +12,4 @@ flatpak_apps:
   kalgebra: "org.kde.kalgebra"
   qalculate: "io.github.Qalculate"
   ptyxis: "app.devsuite.Ptyxis"
+  yakuake: "org.kde.yakuake"
