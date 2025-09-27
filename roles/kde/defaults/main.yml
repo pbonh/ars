@@ -41,6 +41,11 @@ kwin_activities:
     description: "Calculator"
     icon: "org.kde.kalgebra"
     uuid: "3d98f125-ee0a-4368-8150-9cbed439f27a"
+  media:
+    name: "Media"
+    description: "Media Playback/Editing"
+    icon: "org.kde.plasmatube"
+    uuid: "4b0f6a94-e187-4caf-8732-0ca3446fe085"
   vault:
     name: "Vault"
     description: "The Vault"
@@ -235,6 +240,21 @@ kwin_rules:
       Description: "Qalculate"
       wmclass: "io.github.Qalculate"
       activity: "{{ kwin_activities['calc']['uuid'] }}"
+      position: "{{ kwin_rules_singlefloat['position'] }}"
+      size: "{{ kwin_rules_singlefloat['size'] }}"
+      activityrule: "3"
+      positionrule: "3"
+      sizerule: "3"
+      wmclassmatch: "2"
+      ignoregeometry: "true"
+      ignoregeometryrule: "3"
+  plasmatube:
+    icon: "org.kde.plasmatube"
+    kwin_rule:
+      group: "d0abaa24-fb76-4567-a738-da70bc4c85e3"
+      Description: "PlasmaTube"
+      wmclass: "plasmatube plasmatube"
+      activity: "{{ kwin_activities['media']['uuid'] }}"
       position: "{{ kwin_rules_singlefloat['position'] }}"
       size: "{{ kwin_rules_singlefloat['size'] }}"
       activityrule: "3"

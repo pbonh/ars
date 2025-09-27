@@ -13,3 +13,4 @@ flatpak_apps:
   qalculate: "io.github.Qalculate"
   ptyxis: "app.devsuite.Ptyxis"
   yakuake: "org.kde.yakuake"
+  plasmatube: "org.kde.plasmatube"
