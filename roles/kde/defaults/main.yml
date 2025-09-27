@@ -34,7 +34,7 @@ kwin_activities:
   code:
     name: "Code"
     description: "Developer Environment"
-    icon: "com.visualstudio.code.oss"
+    icon: "org.kde.kate"
     uuid: "daeb040e-07f4-46fe-9266-69fc8f3f6cbb"
   calc:
     name: "Calculator"
