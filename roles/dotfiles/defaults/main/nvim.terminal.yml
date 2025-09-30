@@ -1,5 +1,6 @@
 ---
 nvim_toggleterm_shell: "{{ interactive_shell }}"
+nvim_toggleterm_keybinding: "<C-s>"
 nvim_terminal_default:
   lazy: |
     { 'akinsho/toggleterm.nvim',
@@ -23,7 +24,7 @@ nvim_terminal_default:
           return vim.o.columns * 0.4
         end
       end,
-      open_mapping = [[<c-s>]],
+      open_mapping = [[{{ nvim_toggleterm_keybinding }}]],
       direction = 'float',
       close_on_exit = false,
       shell = "{{ nvim_toggleterm_shell }}",
@@ -108,7 +109,7 @@ nvim_terminal:
               return vim.o.columns * 0.4
             end
           end,
-          open_mapping = [[<c-s>]],
+          open_mapping = [[{{ nvim_toggleterm_keybinding }}]],
           direction = 'float',
           close_on_exit = false,
           shell = "{{ nvim_toggleterm_shell }}",
@@ -164,7 +165,18 @@ nvim_terminal:
       priority = 1001,
     },
     {
-      "anaypurohit0907/Superfile.nvim"
+      "anaypurohit0907/superfile.nvim",
+      main = "superfile",
+      opts = { key = false },
+      keys = {
+        {
+          "{{ nvim_toggleterm_keybinding }}",
+          function() require("superfile").open() end,
+          mode = { "n", "t" },
+          desc = "Open/Focus Superfile",
+          silent = true,
+        },
+      },
     },
   config: ""
   keymaps: |
