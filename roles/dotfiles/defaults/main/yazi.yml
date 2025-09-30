@@ -10,3 +10,15 @@ yazi_plugins:
     pack: "Rolv-Apneseth/starship"
     config: |
       require("starship"):setup()
+  easyjump:
+    name: easyjump
+    url: "https://github.com/mikavilpas/easyjump.yazi"
+    dest_name: "easyjump.yazi"
+    pack: "mikavilpas/easyjump.yazi:easyjump"
+    config: |
+      require("easyjump"):setup()
+    keymap: |
+      [[manager.prepend_keymap]]
+      on   = [ "i" ]
+      run  = "plugin easyjump"
+      desc = "easyjump"

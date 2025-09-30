@@ -2,3 +2,10 @@
 on   = [ "<C-s>" ]
 run  = 'shell "$SHELL" --block --confirm'
 desc = "Launch Shell"
+
+{% for _name, plugin in yazi_plugins.items() %}
+{{ plugin.keymap | default('') }}
+{% if not loop.last %}
+
+{% endif %}
+{% endfor %}
