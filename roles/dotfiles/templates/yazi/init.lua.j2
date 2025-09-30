@@ -1,0 +1,6 @@
+{% for _name, plugin in yazi_plugins.items() %}
+{{ plugin.config | default('') }}
+{% if not loop.last %}
+
+{% endif %}
+{% endfor %}

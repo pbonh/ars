@@ -8,3 +8,5 @@ yazi_plugins:
     url: "https://github.com/Rolv-Apneseth/starship.yazi"
     dest_name: "starship.yazi"
     pack: "Rolv-Apneseth/starship"
+    config: |
+      require("starship"):setup()

@@ -26,6 +26,11 @@
     src: "yazi/theme.toml.j2"
     dest: "{{ yazi_config }}/theme.toml"
 
+- name: Yazi | Copies Yazi Lua Config | template
+  template:
+    src: "yazi/init.lua.j2"
+    dest: "{{ yazi_config }}/init.lua"
+
 - name: Yazi | Download Yazi Plugins | get_url
   git:
     repo: "{{ item.value.url }}"
