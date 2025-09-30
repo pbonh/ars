@@ -15,6 +15,11 @@ curl --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/nektos/ac
 # Install System Prerequisites
 rpm-ostree install ansible
 
+# Install Brave
+curl -LsS https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo | sudo tee /etc/yum.repos.d/brave-browser.repo
+curl -LsS https://brave-browser-rpm-release.s3.brave.com/brave-core.asc | sudo tee /etc/pki/rpm-gpg/brave-core.asc
+rpm-ostree install brave-browser
+
 # Function to check if a command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
