@@ -10,6 +10,12 @@ devbox_kde_tools:
   - konsave
   - kde-cli-tools
 xdg_config_dir: "{{ ansible_env.HOME }}/.config"
+autostart_config_dir: "{{ ansible_env.HOME }}/.autostart"
+yakuake_default_desktop: "org.kde.yakuake.desktop"
+kde_autostart_apps:
+  yakuake:
+    default: "{{ applications_desktop_dir }}/{{ yakuake_default_desktop }}"
+    flatpak_default: "{{ applications_desktop_dir_flatpak }}/{{ yakuake_default_desktop }}"
 kde_plasma_config_file: "{{ xdg_config_dir }}/plasma-org.kde.plasma.desktop-appletsrc"
 kwin_activity_config_file: "{{ xdg_config_dir }}/kactivitymanagerdrc"
 kwin_activity_group: "activities"

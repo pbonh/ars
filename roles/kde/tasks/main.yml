@@ -9,6 +9,11 @@
   tags:
     - kwin
 
+- name: KDE | Configure Autostart | import_tasks
+  import_tasks: tasks/install_autostart_config.yml
+  tags:
+    - kwin
+
 # - name: Install Bismuth
 #   import_tasks: tasks/install_bismuth.yml
 #   tags:
