@@ -2,6 +2,11 @@
 yazi_config: "{{ xdg_config_dir }}/yazi"
 yazi_config_file: "{{ yazi_config }}/yazi.toml"
 yazi_plugin_dir: "{{ yazi_config }}/plugins"
+yazi_flavors_dir: "{{ yazi_config }}/flavors"
+yazi_dirs:
+  - "{{ yazi_config }}"
+  - "{{ yazi_plugin_dir }}"
+  - "{{ yazi_flavors_dir }}"
 yazi_plugins:
   starship:
     name: starship
@@ -23,7 +28,19 @@ yazi_plugins:
       run  = "plugin easyjump"
       desc = "easyjump"
 yazi_themes:
-  ayu-dark: "ayu-dark"
-  flexoki-light: "flexoki-light"
-  flexoki-dark: "flexoki-dark"
-  gruvbox-dark: "gruvbox-dark"
+  ayu-dark:
+    pack: "ayu-dark"
+    url: "https://github.com/kmlupreti/ayu-dark.yazi"
+    dest_name: "ayu-dark.yazi"
+  flexoki-light:
+    pack: "flexoki-light"
+    url: "https://github.com/gosxrgxx/flexoki-light.yazi"
+    dest_name: "flexoki-light.yazi"
+  flexoki-dark:
+    pack: "flexoki-dark"
+    url: "https://github.com/gosxrgxx/flexoki-dark.yazi"
+    dest_name: "flexoki-dark.yazi"
+  gruvbox-dark:
+    pack: "gruvbox-dark"
+    url: "https://github.com/bennyyip/gruvbox-dark.yazi"
+    dest_name: "gruvbox-dark.yazi"

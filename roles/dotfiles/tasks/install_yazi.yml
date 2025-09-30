@@ -1,11 +1,12 @@
 ---
-- name: Setup Yazi Config Directory
+- name: Yazi | Setup Yazi Config Directories | file
   file:
-    path: "{{ yazi_config }}"
+    path: "{{ item }}"
     state: directory
     mode: "0755"
+  loop: "{{ yazi_dirs }}"
 
-- name: Setup Yazi Sidebar Config Directory
+- name: Yazi | Setup Yazi Sidebar Config Directory | file
   file:
     path: "{{ zellij_config_dir }}/yazi/sidebar"
     state: directory
@@ -33,15 +34,23 @@
 
 - name: Yazi | Install Plugins | command
   changed_when: false
+  ignore_errors: true
   command:
     cmd: "ya pkg add {{ item.value.pack }}"
   loop: "{{ yazi_plugins | dict2items }}"
 
-- name: Yazi | Install Themes | command
-  changed_when: false
-  command:
-    cmd: "ya pkg add yazi-rs/flavors:{{ item.value }}"
+- name: Yazi | Download Yazi Themes | get_url
+  git:
+    repo: "{{ item.value.url }}"
+    dest: "{{ yazi_flavors_dir }}/{{  item.value.dest_name }}"
   loop: "{{ yazi_themes | dict2items }}"
+
+# - name: Yazi | Install Themes | command
+#   changed_when: false
+#   ignore_errors: true
+#   command:
+#     cmd: "ya pkg add yazi-rs/flavors:{{ item.value.pack }}"
+#   loop: "{{ yazi_themes | dict2items }}"
 
 # - name: Yazi | Download Yazi Plugins | get_url
 #   git:
