@@ -1,6 +1,7 @@
 ---
 nvim_toggleterm_shell: "{{ interactive_shell }}"
 nvim_toggleterm_keybinding: "<C-s>"
+nvim_superfile_keybinding: "<leader>z"
 nvim_terminal_default:
   lazy: |
     { 'akinsho/toggleterm.nvim',
@@ -170,7 +171,7 @@ nvim_terminal:
       opts = { key = false },
       keys = {
         {
-          "{{ nvim_toggleterm_keybinding }}",
+          "{{ nvim_superfile_keybinding }}",
           function() require("superfile").open() end,
           mode = { "n", "t" },
           desc = "Open/Focus Superfile",
@@ -189,4 +190,5 @@ nvim_terminal:
       -- { '<leader>X', '<cmd>lua require("tfm").open(vim.fn.getcwd())<CR>', desc = 'FM-Nvim: Yazi(Project Root)', },
        { '<leader>x', '<cmd>Yazi<CR>', desc = 'Yazi-Nvim: Yazi(Current File)', },
        { '<leader>X', '<cmd>Yazi cwd<CR>', desc = 'Yazi-Nvim: Yazi(Project Root)', },
+       { '<leader>z', '<cmd>lua require("superfile").open()<CR>', desc = 'Superfile-Nvim: Launch', },
     },
