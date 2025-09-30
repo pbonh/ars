@@ -22,23 +22,8 @@ yazi_plugins:
       on   = [ "i" ]
       run  = "plugin easyjump"
       desc = "easyjump"
-  ayu-dark:
-    name: ayu-dark
-    url: "https://github.com/yazi-rs/flavors.git"
-    dest_name: "ayu-dark.yazi"
-    pack: "yazi-rs/flavors:ayu-dark"
-  flexoki-light:
-    name: flexoki-light
-    url: "https://github.com/yazi-rs/flavors.git"
-    dest_name: "flexoki-light.yazi"
-    pack: "yazi-rs/flavors:flexoki-light"
-  flexoki-dark:
-    name: flexoki-dark
-    url: "https://github.com/yazi-rs/flavors.git"
-    dest_name: "flexoki-dark.yazi"
-    pack: "yazi-rs/flavors:flexoki-dark"
-  gruvbox-dark:
-    name: gruvbox-dark
-    url: "https://github.com/yazi-rs/flavors.git"
-    dest_name: "gruvbox-dark.yazi"
-    pack: "yazi-rs/flavors:gruvbox-dark"
+yazi_themes:
+  ayu-dark: "ayu-dark"
+  flexoki-light: "flexoki-light"
+  flexoki-dark: "flexoki-dark"
+  gruvbox-dark: "gruvbox-dark"

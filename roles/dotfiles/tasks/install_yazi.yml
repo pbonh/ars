@@ -37,6 +37,12 @@
     cmd: "ya pkg add {{ item.value.pack }}"
   loop: "{{ yazi_plugins | dict2items }}"
 
+- name: Yazi | Install Themes | command
+  changed_when: false
+  command:
+    cmd: "ya pkg add yazi-rs/flavors:{{ item.value }}"
+  loop: "{{ yazi_themes | dict2items }}"
+
 # - name: Yazi | Download Yazi Plugins | get_url
 #   git:
 #     repo: "{{ item.value.url }}"
