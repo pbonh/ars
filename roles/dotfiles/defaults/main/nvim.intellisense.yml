@@ -607,22 +607,25 @@ nvim_lspconfig_cmp_navbuddy:
         }
         for _, lsp in ipairs(servers) do
           if lsp == 'markdown_oxide' then
-            capabilities = vim.tbl_deep_extend(
-                'force',
-                capabilities,
-                {
-                    workspace = {
-                        didChangeWatchedFiles = {
-                            dynamicRegistration = true,
-                        },
-                    },
-                }
-            ),
-            on_attach = on_attach -- configure your on attach config
+            lspconfig[lsp].setup {
+              capabilities = vim.tbl_deep_extend(
+                  'force',
+                  capabilities,
+                  {
+                      workspace = {
+                          didChangeWatchedFiles = {
+                              dynamicRegistration = true,
+                          },
+                      },
+                  }
+              ),
+              on_attach = on_attach -- configure your on attach config
+            }
+          else
+            lspconfig[lsp].setup {
+              capabilities = capabilities,
+            }
           end
-          lspconfig[lsp].setup {
-            capabilities = capabilities,
-          }
         end
       end,
     },
