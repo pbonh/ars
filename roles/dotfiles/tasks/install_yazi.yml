@@ -31,11 +31,17 @@
     src: "yazi/init.lua.j2"
     dest: "{{ yazi_config }}/init.lua"
 
-- name: Yazi | Download Yazi Plugins | get_url
-  git:
-    repo: "{{ item.value.url }}"
-    dest: "{{ yazi_plugin_dir }}/{{  item.value.dest_name }}"
+- name: Yazi | Install Plugins | command
+  changed_when: false
+  command:
+    cmd: "ya pkg add {{ item.value.pack }}"
   loop: "{{ yazi_plugins | dict2items }}"
+
+# - name: Yazi | Download Yazi Plugins | get_url
+#   git:
+#     repo: "{{ item.value.url }}"
+#     dest: "{{ yazi_plugin_dir }}/{{  item.value.dest_name }}"
+#   loop: "{{ yazi_plugins | dict2items }}"
 
 - name: Yazi | Copies Yazi Sidebar Lua Config | template
   template:
