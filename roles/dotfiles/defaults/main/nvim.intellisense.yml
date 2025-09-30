@@ -4,6 +4,7 @@ lsp_providers_devbox:
   - bashls
   - lua_ls
   - yamlls
+  - markdown_oxide
 lsp_providers_extra: "{{ lsp_providers_cpp + lsp_providers_python }}"
 lsp_providers: "{{ lsp_providers_devbox + lsp_providers_extra }}"
 lsp_providers_luafile: "{{ \"'\" + lsp_providers | join(\"', '\") + \"'\" }}"
@@ -553,7 +554,14 @@ nvim_lspconfig_cmp_navbuddy:
             ['<C-Space>'] = cmp.mapping.complete(),
           }),
           sources = cmp.config.sources({
-            { name = 'nvim_lsp' },
+            {
+              name = 'nvim_lsp',
+              option = {
+                markdown_oxide = {
+                    keyword_pattern = [[\(\k\| \|\/\|#\)\+]]
+                },
+              },
+            },
             {% if nvim_codecompanion == true %}
             { name = 'codecompanion' },
             {% endif %}
@@ -598,6 +606,20 @@ nvim_lspconfig_cmp_navbuddy:
           {{ lsp_providers_luafile | indent(2) or '-- No Additional Servers Preconfigured' }}
         }
         for _, lsp in ipairs(servers) do
+          if lsp == 'markdown_oxide' then
+            capabilities = vim.tbl_deep_extend(
+                'force',
+                capabilities,
+                {
+                    workspace = {
+                        didChangeWatchedFiles = {
+                            dynamicRegistration = true,
+                        },
+                    },
+                }
+            ),
+            on_attach = on_attach -- configure your on attach config
+          end
           lspconfig[lsp].setup {
             capabilities = capabilities,
           }
