@@ -5,7 +5,7 @@
     state: directory
 
 - name: KDE | Install Autostart Configs | template
-  ansible.builtin.file:
+  ansible.builtin.copy:
     src: "{{ item.value.flatpak_default }}"
     dest: "{{ autostart_config_dir }}/"
   loop: "{{ kde_autostart_apps | dict2items }}"
