@@ -338,6 +338,11 @@ dev_packages:
       - "lua-language-server"
     devbox:
       - "sumneko-lua-language-server"
+  markdown-oxide:
+    brew:
+      - "markdown-oxide"
+    devbox:
+      - "markdown-oxide"
   shfmt:
     brew:
       - "shfmt"
