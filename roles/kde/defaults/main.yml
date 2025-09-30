@@ -10,7 +10,7 @@ devbox_kde_tools:
   - konsave
   - kde-cli-tools
 xdg_config_dir: "{{ ansible_env.HOME }}/.config"
-autostart_config_dir: "{{ ansible_env.HOME }}/.autostart"
+autostart_config_dir: "{{ xdg_config_dir }}/autostart"
 yakuake_default_desktop: "org.kde.yakuake.desktop"
 kde_autostart_apps:
   yakuake:
