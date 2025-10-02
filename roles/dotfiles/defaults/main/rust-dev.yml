@@ -187,6 +187,7 @@ nvim_keymap_rust: |
           vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ch', '<cmd>RustLsp hover actions<CR><cmd>RustLsp hover actions<CR>', { noremap = true, silent = true })
           vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ca', '<cmd>lua vim.cmd.RustLsp("codeAction")<CR>', { noremap = true, silent = true })
           vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cd', '<cmd>RustLsp debuggables<CR>', { noremap = true, silent = true })
+          vim.api.nvim_buf_set_keymap(0, 'n', '<leader>ct', '<cmd>RustLsp testables<CR>', { noremap = true, silent = true })
           vim.api.nvim_buf_set_keymap(0, 'n', '<leader>cw', '<cmd>lua bacon_watch_terminal_runner()<CR>', { noremap = true, silent = true })
       end,
       group = group
