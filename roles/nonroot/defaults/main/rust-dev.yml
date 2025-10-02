@@ -111,7 +111,7 @@ extra_nvim_config_rust: |
     },
   }
   require('rust-tools').setup(opts)
-  local bacon_watch = Terminal:new({ cmd = '{{ cargo_path }}bacon', close_on_exit = true, hidden = true })
+  local bacon_watch = Terminal:new({ cmd = '{{ cargo_path }}bacon', shell = '{{ interactive_shell }}', close_on_exit = true, hidden = true })
   function bacon_watch_terminal_runner()
     bacon_watch:toggle()
   end
