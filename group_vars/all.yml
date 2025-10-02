@@ -577,6 +577,11 @@ dev_packages:
       - "nnn"
     devbox:
       - "nnn"
+  xan:
+    brew:
+      - "xan"
+    devbox:
+      - "xan"
   fff:
     brew:
       - "fff"
