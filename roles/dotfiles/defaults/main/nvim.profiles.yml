@@ -4,6 +4,8 @@ nvim_xdg_profile_dir:
   config: "{{ xdg_config_dir }}/{{ nvim_profile_dir_name }}"
   share: "{{ xdg_share_dir }}/{{ nvim_profile_dir_name }}"
   cache: "{{ xdg_cache_dir }}/{{ nvim_profile_dir_name }}"
+nvim_leader_key: " "
+nvim_localleader_key: ","
 nvim_default_editor_options: |
   vim.g.loaded_netrw = 1
   vim.g.loaded_netrwPlugin = 1
@@ -129,8 +131,6 @@ nvim_kickstart_editor_options: |
   -- Minimal number of screen lines to keep above and below the cursor.
   vim.opt.scrolloff = 10
 nvim_default_keymap_options: |
-  vim.g.mapleader = ' '
-  vim.g.maplocalleader = ','
   vim.keymap.set('', '<Space>', '<Nop>', { noremap = true, silent = true })
   vim.keymap.set('t', '<C-]>', '<C-\\><C-n> ', { noremap = true, silent = true })
   vim.keymap.set('t', '<C-h>', '<C-\\><C-n><C-W>h ', { noremap = true, silent = true })

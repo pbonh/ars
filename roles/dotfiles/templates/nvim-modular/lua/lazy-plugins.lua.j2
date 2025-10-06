@@ -10,10 +10,8 @@
 --
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
-
   -- Legendary Keymap Plugin
   {{ nvim_legendary['lazy'] | indent(2) }}
-
   {% for plugin_group_name in nvim_lazy_plugin_groups.keys() -%}
   {{ "require " + "'plugins/" + plugin_group_name + "'," | indent(2) }}
   {% endfor %}
