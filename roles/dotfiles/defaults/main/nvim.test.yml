@@ -2,9 +2,9 @@
 neotest_adapters:
   - "{{ neotest_adapters_rust }}"
 neotest_adapters_luafile: |
-  {% for neotest_adapter in neotest_adapters -%}
+  {%- for neotest_adapter in neotest_adapters -%}
   {{ neotest_adapter }}
-  {% endfor %}
+  {%- endfor -%}
 nvim_test:
   lazy: |
     {
@@ -20,7 +20,7 @@ nvim_test:
     require("neotest").setup({
       adapters = {% raw %}{{% endraw %}
         -- Language Adapters
-        {{ neotest_adapters_luafile }}
+        {{ neotest_adapters_luafile | indent(2) }}
         -- Language Adapters(End)
       {% raw %}}{% endraw %},
     })

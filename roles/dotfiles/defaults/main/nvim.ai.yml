@@ -71,9 +71,9 @@ nvim_codecompanion_adapter_config_openai: |
           })
         end,
 nvim_codecompanion_adapter_config_user: |
-        {% for model_name in user_llama_model_info -%}
+        {%- for model_name in user_llama_model_info -%}
         {% set llama_model_info = user_llama_model_info[model_name] %}
-        {{ llama_model_info['name'] }} = function()
+        {{ llama_model_info['name'] |indent (2) }} = function()
           return require("codecompanion.adapters").extend("ollama", {
             name = "{{ llama_model_info['name'] }}",
             schema = {
@@ -101,9 +101,9 @@ nvim_codecompanion_display_config: |
       },
 nvim_codecompanion_adapter_config: |
       adapters = {
-        {{ nvim_codecompanion_adapter_config_ollama }}
-        {{ nvim_codecompanion_adapter_config_openai }}
-        {{ nvim_codecompanion_adapter_config_user }}
+        {{ nvim_codecompanion_adapter_config_ollama | indent(2) }}
+        {{ nvim_codecompanion_adapter_config_openai | indent(2) }}
+        {{ nvim_codecompanion_adapter_config_user | indent(2) }}
       },
 nvim_codecompanion_prompt_library_docusaurus: |
         ["Docusaurus"] = {
@@ -171,7 +171,7 @@ nvim_ai_companion:
       strategies = {
         chat = {
           adapter = "{{ ai_adapter_chat }}",
-          {{ nvim_codecompanion_chat_select_ui }}
+          {{ nvim_codecompanion_chat_select_ui | indent(6) }}
         },
         inline = {
           adapter = "{{ ai_adapter_inline }}",
@@ -180,9 +180,9 @@ nvim_ai_companion:
           adapter = "{{ ai_adapter_cmd }}",
         },
       },
-      {{ nvim_codecompanion_display_config }}
-      {{ nvim_codecompanion_adapter_config }}
-      {{ nvim_codecompanion_prompt_library }}
+      {{ nvim_codecompanion_display_config | indent(2) }}
+      {{ nvim_codecompanion_adapter_config | indent(2) }}
+      {{ nvim_codecompanion_prompt_library | indent(2) }}
     })
     -- Expand 'cc' into 'CodeCompanion' in the command line
     -- vim.cmd([[cab cc CodeCompanion]])
@@ -200,7 +200,7 @@ nvim_ai_companion_chatgpt:
       strategies = {
         chat = {
           adapter = "{{ chatgpt_ai_adapter_chat }}",
-          {{ nvim_codecompanion_chat_select_ui }}
+          {{ nvim_codecompanion_chat_select_ui | indent(6) }}
         },
         inline = {
           adapter = "{{ chatgpt_ai_adapter_inline }}",
@@ -209,9 +209,9 @@ nvim_ai_companion_chatgpt:
           adapter = "{{ chatgpt_ai_adapter_cmd }}",
         },
       },
-      {{ nvim_codecompanion_display_config }}
-      {{ nvim_codecompanion_adapter_config }}
-      {{ nvim_codecompanion_prompt_library }}
+      {{ nvim_codecompanion_display_config | indent(2) }}
+      {{ nvim_codecompanion_adapter_config | indent(2) }}
+      {{ nvim_codecompanion_prompt_library | indent(2) }}
     })
     -- Expand 'cc' into 'CodeCompanion' in the command line
     -- vim.cmd([[cab cc CodeCompanion]])
