@@ -349,7 +349,7 @@ nvim_hydra:
               { 'b', gitsigns.blame_line, { desc = 'blame' } },
               { 'B', function() gitsigns.blame_line{ full = true } end, { desc = 'blame show full' } },
               { '/', gitsigns.show, { exit = true, desc = 'show base file' } }, -- show the base of the file
-              { 'g', '<Cmd>Neogit<CR>', { exit = true, desc = '' } },
+              { 'g', '<Cmd>Neogit kind=floating<CR>', { exit = true, desc = '' } },
               -- { 'g', '<Cmd>Gitui<CR>', { exit = true, desc = 'Gitui' } },
               { 'q', nil, { exit = true, nowait = true, desc = 'exit' } },
               { '<Esc>', nil,  { exit = true, desc = false }}
