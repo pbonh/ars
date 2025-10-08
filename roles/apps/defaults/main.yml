@@ -6,6 +6,7 @@ flatpak_apps:
   bitwarden: "com.bitwarden.desktop"
   kontainer: "io.github.DenysMb.Kontainer"
   boxbuddy: "io.github.dvlv.boxbuddyrs"
+  libreoffice: "org.libreoffice.LibreOffice"
   onlyoffice: "org.onlyoffice.desktopeditors"
   obsidian: "md.obsidian.Obsidian"
   cantor: "org.kde.cantor"
