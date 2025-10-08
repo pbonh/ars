@@ -600,32 +600,36 @@ nvim_lspconfig_cmp_navbuddy:
         })
 
         -- Set up lspconfig.
-        local lspconfig = require('lspconfig')
         local capabilities = require('cmp_nvim_lsp').default_capabilities()
         local servers = {
           {{ lsp_providers_luafile | indent(2) or '-- No Additional Servers Preconfigured' }}
         }
         for _, lsp in ipairs(servers) do
           if lsp == 'markdown_oxide' then
-            lspconfig[lsp].setup {
-              capabilities = vim.tbl_deep_extend(
-                  'force',
-                  capabilities,
-                  {
-                      workspace = {
-                          didChangeWatchedFiles = {
-                              dynamicRegistration = true,
-                          },
-                      },
-                  }
-              ),
-              on_attach = on_attach -- configure your on attach config
-            }
+            vim.lsp.config(lsp,
+              {
+                capabilities = vim.tbl_deep_extend(
+                    'force',
+                    capabilities,
+                    {
+                        workspace = {
+                            didChangeWatchedFiles = {
+                                dynamicRegistration = true,
+                            },
+                        },
+                    }
+                ),
+                on_attach = on_attach -- configure your on attach config
+              }
+            )
           else
-            lspconfig[lsp].setup {
-              capabilities = capabilities,
-            }
+            vim.lsp.config(lsp,
+              {
+                capabilities = capabilities,
+              }
+            )
           end
+          vim.lsp.enable(lsp)
         end
       end,
     },
@@ -671,3 +675,140 @@ nvim_lspconfig_cmp_navbuddy:
       { ']d', '<cmd>vim.diagnostic.goto_next()<CR>', desc = 'Diagnostic: Next', },
       { '[d', '<cmd>vim.diagnostic.goto_prev()<CR>', desc = 'Diagnostic: Previous', },
     },
+nvim_lspconfig_cmp_navbuddy_mini:
+  lazy: |
+    {
+      'neovim/nvim-lspconfig',
+      dependencies = {
+        'hrsh7th/cmp-nvim-lsp',
+        'hrsh7th/cmp-buffer',
+        'hrsh7th/cmp-path',
+        'hrsh7th/cmp-cmdline',
+        'hrsh7th/nvim-cmp',
+        'hrsh7th/cmp-vsnip',
+        'hrsh7th/vim-vsnip',
+        {
+          "SmiteshP/nvim-navic",
+          dependencies = {
+            "MunifTanjim/nui.nvim"
+          },
+          opts = { lsp = { auto_attach = true } }
+        },
+        {
+          "SmiteshP/nvim-navbuddy",
+          dependencies = {
+            "SmiteshP/nvim-navic",
+            "MunifTanjim/nui.nvim"
+          },
+          opts = { lsp = { auto_attach = true } }
+        },
+      },
+      config = function()
+        -- Set up nvim-cmp.
+        local cmp = require('cmp')
+        local cmp_select = {behavior = cmp.SelectBehavior.Select}
+
+        cmp.setup({
+          snippet = {
+            -- REQUIRED - you must specify a snippet engine
+            expand = function(args)
+              vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+            end,
+          },
+          window = {
+            completion = cmp.config.window.bordered(),
+            documentation = cmp.config.window.bordered(),
+          },
+          mapping = cmp.mapping.preset.insert({
+            ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+            ['<C-f>'] = cmp.mapping.scroll_docs(4),
+            ['<C-Space>'] = cmp.mapping.complete(),
+            ['<C-e>'] = cmp.mapping.abort(),
+            ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+            ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
+            ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
+            ['<C-y>'] = cmp.mapping.confirm({ select = true }),
+            ['<C-Space>'] = cmp.mapping.complete(),
+          }),
+          sources = cmp.config.sources({
+            {
+              name = 'nvim_lsp',
+              option = {
+                markdown_oxide = {
+                    keyword_pattern = [[\(\k\| \|\/\|#\)\+]]
+                },
+              },
+            },
+            {% if nvim_codecompanion == true %}
+            { name = 'codecompanion' },
+            {% endif %}
+            { name = 'vsnip' },
+          }, {
+            { name = 'buffer' },
+          })
+        })
+
+        -- Set configuration for specific filetype.
+        cmp.setup.filetype('gitcommit', {
+          sources = cmp.config.sources({
+            { name = 'git' }, -- You can specify the `git` source if [you were installed it](https://github.com/petertriho/cmp-git).
+          }, {
+            { name = 'buffer' },
+          })
+        })
+
+        -- Use buffer source for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+        cmp.setup.cmdline({ '/', '?' }, {
+          mapping = cmp.mapping.preset.cmdline(),
+          sources = {
+            { name = 'buffer' }
+          }
+        })
+
+        -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+        cmp.setup.cmdline(':', {
+          mapping = cmp.mapping.preset.cmdline(),
+          sources = cmp.config.sources({
+            { name = 'path' }
+          }, {
+            { name = 'cmdline' }
+          }),
+          matching = { disallow_symbol_nonprefix_matching = false }
+        })
+
+        -- Set up lspconfig.
+        local capabilities = require('cmp_nvim_lsp').default_capabilities()
+        local servers = {
+          {{ lsp_providers_luafile | indent(2) or '-- No Additional Servers Preconfigured' }}
+        }
+        for _, lsp in ipairs(servers) do
+          if lsp == 'markdown_oxide' then
+            vim.lsp.config(lsp,
+              {
+                capabilities = vim.tbl_deep_extend(
+                    'force',
+                    capabilities,
+                    {
+                        workspace = {
+                            didChangeWatchedFiles = {
+                                dynamicRegistration = true,
+                            },
+                        },
+                    }
+                ),
+                on_attach = on_attach -- configure your on attach config
+              }
+            )
+          else
+            vim.lsp.config(lsp,
+              {
+                capabilities = capabilities,
+              }
+            )
+          end
+          vim.lsp.enable(lsp)
+        end
+      end,
+    },
+  config: ""
+  keymaps: "{{ nvim_lspconfig_cmp_navbuddy['keymaps'] }}"

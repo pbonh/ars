@@ -163,22 +163,25 @@ extra_nvim_plugins_cpp_lazy: |
   },
 extra_nvim_config_cpp: |
   require('clangd_extensions').setup()
-  local configs = require('lspconfig.configs')
-  local nvim_lsp = require('lspconfig')
-  if not configs.neocmake then
-      configs.neocmake = {
-          default_config = {
-              cmd = { 'neocmakelsp' },
-              filetypes = { 'cmake' },
-              root_dir = function(fname)
-                  return nvim_lsp.util.find_git_ancestor(fname)
-              end,
-              single_file_support = true,-- suggested
-              on_attach = on_attach
-          }
-      }
-      nvim_lsp.neocmake.setup({})
-  end
+  -- local configs = require('lspconfig.configs')
+  -- local nvim_lsp = require('lspconfig')
+  -- if not configs.neocmake then
+  --     configs.neocmake = {
+  --         default_config = {
+  --             cmd = { 'neocmakelsp' },
+  --             filetypes = { 'cmake' },
+  --             root_dir = function(fname)
+  --                 return nvim_lsp.util.find_git_ancestor(fname)
+  --             end,
+  --             single_file_support = true,-- suggested
+  --             on_attach = on_attach
+  --         }
+  --     }
+  --     nvim_lsp.neocmake.setup({})
+  -- end
+  -- vim.lsp.config("neocmake", {
+  -- })
+  vim.lsp.enable("neocmake")
   dap.adapters.cppdbg = {
     id = 'cppdbg',
     type = 'executable',

@@ -1,0 +1,134 @@
+nvim_mini_editing:
+  lazy: |
+    {
+      'nvim-mini/mini.ai',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.surround',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.pairs',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.comment',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.align',
+      version = '*'
+    },
+  config: |
+    require('mini.ai').setup()
+    require('mini.surround').setup()
+    require('mini.pairs').setup()
+    require('mini.comment').setup()
+    require('mini.align').setup()
+  keymaps: ""
+nvim_mini_workflow:
+  lazy: |
+    {
+      'nvim-mini/mini.basics',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.bracketed',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.files',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.diff',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.extra',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini-git',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.jump',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.jump2d',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.misc',
+      version = '*'
+    },
+  config: |
+    require('mini.basics').setup()
+    require('mini.bracketed').setup()
+    require('mini.files').setup()
+    require('mini.diff').setup()
+    require('mini.extra').setup()
+    require('mini.git').setup()
+    require('mini.jump').setup()
+    require('mini.jump2d').setup({
+      mappings = {
+        start_jumping = 'S',
+      },
+    })
+    require('mini.misc').setup()
+  keymaps: |
+    { '-', '<Cmd>lua MiniFiles.open()<CR>', desc = 'Mini-Files: Open Browser', },
+nvim_mini_ui:
+  lazy: |
+    {
+      'nvim-mini/mini.animate',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.cursorword',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.hipatterns',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.icons',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.indentscope',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.notify',
+      version = '*'
+    },
+    {
+      'nvim-mini/mini.trailspace',
+      version = '*'
+    },
+  config: |
+    require('mini.animate').setup()
+    require('mini.cursorword').setup()
+    local hipatterns = require('mini.hipatterns')
+    require('mini.hipatterns').setup({
+      highlighters = {
+        -- Highlight standalone 'FIXME', 'HACK', 'TODO', 'NOTE'
+        fixme = { pattern = '%f[%w]()FIXME()%f[%W]', group = 'MiniHipatternsFixme' },
+        hack  = { pattern = '%f[%w]()HACK()%f[%W]',  group = 'MiniHipatternsHack'  },
+        todo  = { pattern = '%f[%w]()TODO()%f[%W]',  group = 'MiniHipatternsTodo'  },
+        note  = { pattern = '%f[%w]()NOTE()%f[%W]',  group = 'MiniHipatternsNote'  },
+
+        -- Highlight hex color strings (`#rrggbb`) using that color
+        hex_color = hipatterns.gen_highlighter.hex_color(),
+      },
+    })
+    require('mini.icons').setup()
+    require('mini.indentscope').setup()
+    require('mini.notify').setup()
+    require('mini.trailspace').setup()
+  keymaps: ""

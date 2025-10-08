@@ -101,9 +101,11 @@ nvim_codecompanion_display_config: |
       },
 nvim_codecompanion_adapter_config: |
       adapters = {
-        {{ nvim_codecompanion_adapter_config_ollama | indent(2) }}
-        {{ nvim_codecompanion_adapter_config_openai | indent(2) }}
-        {{ nvim_codecompanion_adapter_config_user | indent(2) }}
+        http = {
+          {{ nvim_codecompanion_adapter_config_ollama | indent(2) }}
+          {{ nvim_codecompanion_adapter_config_openai | indent(2) }}
+          {{ nvim_codecompanion_adapter_config_user | indent(2) }}
+        },
       },
 nvim_codecompanion_prompt_library_docusaurus: |
         ["Docusaurus"] = {

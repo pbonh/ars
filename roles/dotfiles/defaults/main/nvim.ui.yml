@@ -587,3 +587,128 @@ nvim_ui:
       -- { '<leader>z', '<cmd>NeoZoomToggle<CR>', desc = 'Neo-Zoom: Toggle Float/Zoom Window', },
       { '<leader>p', '<cmd>Tabby jump_to_tab<CR>', desc = 'Tabby: Jump to Tab', },
     },
+nvim_ui_statusline_tabline:
+  lazy: |
+    {
+      'nvim-lualine/lualine.nvim',
+      dependencies = {
+        'nvim-tree/nvim-web-devicons',
+        -- 'b0o/incline.nvim',
+      },
+      config = function()
+        local function maximize_status()
+          return vim.t.maximized and '   ' or ''
+        end
+
+        require('lualine').setup({
+          options = {
+            -- theme  = gruvbox,
+            section_separators = { left = '', right = '' },
+            component_separators = { left = '', right = '' },
+            globalstatus = true,
+            disabled_filetypes = {
+                'packer', 'NVimTree'
+            },
+            sections = {
+              lualine_c = { maximize_status }
+            }
+          },
+        })
+        -- require('incline').setup()
+      end,
+    },
+    {
+      'nanozuki/tabby.nvim',
+      dependencies = 'nvim-tree/nvim-web-devicons',
+      config = function()
+        vim.o.showtabline = 2
+        vim.opt.sessionoptions = 'curdir,folds,globals,help,tabpages,terminal,winsize'
+        require('tabby').setup({
+          line = function(line)
+            local theme = {
+              fill = 'TabLineFill',
+              head = 'TabLine',
+              current_tab = 'TabLineSel',
+              tab = 'TabLine',
+              win = 'TabLine',
+              tail = 'TabLine',
+            }
+            return {
+              {
+                { '  ', hl = theme.head },
+                line.sep('', theme.head, theme.fill),
+              },
+              line.tabs().foreach(function(tab)
+                local hl = tab.is_current() and theme.current_tab or theme.tab
+                return {
+                  line.sep('⠀', theme.fill, hl),
+                  tab.is_current() and '' or '󰆣',
+                  tab.in_jump_mode() and tab.jump_key() or tab.number(),
+                  tab.name(),
+                  tab.close_btn(''),
+                  line.sep('', hl, theme.fill),
+                  hl = hl,
+                  margin = ' ',
+                }
+              end),
+              line.spacer(),
+              line.wins_in_tab(line.api.get_current_tab()).foreach(function(win)
+                return {
+                  line.sep('', theme.win, theme.fill),
+                  win.is_current() and '' or '',
+                  win.buf().is_changed() and '‼' or '',
+                  win.buf_name(),
+                  win.file_icon(),
+                  line.sep('⠀', theme.fill, theme.win),
+                  hl = theme.win,
+                  margin = ' ',
+                }
+              end),
+              {
+                line.sep('', theme.tail, theme.fill),
+                { '  ', hl = theme.tail },
+              },
+              hl = theme.fill,
+            }
+          end,
+        })
+      end,
+    },
+    {
+      'mawkler/modicator.nvim',
+      dependencies = 'sainnhe/gruvbox-material',
+      init = function()
+        -- These are required for Modicator to work
+        vim.o.cursorline = true
+        vim.o.number = true
+        vim.o.termguicolors = true
+      end,
+      config = function()
+        require('modicator').setup()
+      end,
+      opts = {},
+    },
+    {
+      'goolord/alpha-nvim',
+      dependencies = {
+        'nvim-tree/nvim-web-devicons'
+      },
+      config = function ()
+          local alpha = require("alpha")
+          local dashboard = require("alpha.themes.dashboard")
+          dashboard.section.buttons.val = {
+            dashboard.button("e", "  New file", "<cmd>ene <CR>"),
+            dashboard.button("SPC f f", "  Find file", "<cmd>FzfLua files<CR>"),
+            dashboard.button("SPC f ?", "  Recently opened files", "<cmd>FzfLua oldfiles<CR>"),
+            dashboard.button("SPC f Q", "  Find word",  "<cmd>FzfLua live_grep<CR>"),
+            dashboard.button("SPC f p", "  Jump to bookmarks",  "<cmd>CdProject<CR>"),
+            -- dashboard.button("SPC f r", "  Frecency/MRU"),
+            -- dashboard.button("SPC s l", "  Open last session", "<cmd>SessionManager load_last_session<CR>"),
+          }
+          alpha.setup(dashboard.config)
+
+          require'alpha'.setup(require'alpha.themes.dashboard'.config)
+      end,
+    },
+  config: ""
+  keymaps: ""

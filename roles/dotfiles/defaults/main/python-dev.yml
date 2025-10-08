@@ -42,9 +42,13 @@ extra_nvim_plugins_python_lazy: |
     lazy = true,
   },
 extra_nvim_config_python: |
-  require('lspconfig').pylsp.setup({
-    cmd = { '{{ pls_exe }}' }
+  -- require('lspconfig').pylsp.setup({
+  --   cmd = { '{{ pls_exe }}' }
+  -- })
+  vim.lsp.config('pylsp', {
+    cmd = { '{{ pls_exe }}' },
   })
+  vim.lsp.enable('pylsp')
   require('dap-python').setup('{{ debugpy_python_exe }}')
 extra_nvim_keymap_python: |
   -- { '<leader>cd', {
