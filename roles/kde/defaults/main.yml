@@ -35,7 +35,7 @@ kwin_activities:
   office:
     name: "Office"
     description: "Office Applications"
-    icon: "org.onlyoffice.desktopeditors"
+    icon: "org.libreoffice.LibreOffice"
     uuid: "5a0e58a4-8df1-4f16-a081-a6a1e28da7da"
   code:
     name: "Code"
@@ -141,6 +141,21 @@ kwin_rules:
       Description: "Obsidian"
       wmclass: "obsidian obsidian"
       activity: "{{ kwin_activities['obsidian']['uuid'] }}"
+      position: "{{ kwin_rules_singlefloat['position'] }}"
+      size: "{{ kwin_rules_singlefloat['size'] }}"
+      activityrule: "3"
+      positionrule: "3"
+      sizerule: "3"
+      wmclassmatch: "2"
+      ignoregeometry: "true"
+      ignoregeometryrule: "3"
+  libreoffice:
+    icon: "org.libreoffice.LibreOffice"
+    kwin_rule:
+      group: "566f7cef-3670-4356-a2dd-905d5992ff85"
+      Description: "LibreOffice"
+      wmclass: "libreoffice-startcenter"
+      activity: "{{ kwin_activities['office']['uuid'] }}"
       position: "{{ kwin_rules_singlefloat['position'] }}"
       size: "{{ kwin_rules_singlefloat['size'] }}"
       activityrule: "3"
