@@ -257,10 +257,10 @@ nvim_plugin_groups_chatgpt:
   ai: "{{ nvim_ai_companion_chatgpt }}"
 nvim_plugin_groups_mini:
   colorscheme: "{{ nvim_colorscheme_nightfox }}"
-  telescope: "{{ nvim_fzf_lua }}"
   mini_editing: "{{ nvim_mini_editing }}"
   mini_workflow: "{{ nvim_mini_workflow }}"
   mini_ui: "{{ nvim_mini_ui }}"
+  telescope: "{{ nvim_fzf_lua }}"
   ui: "{{ nvim_ui_statusline_tabline }}"
   project: "{{ nvim_project }}"
   hydra: "{{ nvim_hydra }}"
