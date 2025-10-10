@@ -71,7 +71,7 @@ nvim_project:
               end,
             },
           },
-          projects_picker = "telescope", -- optional, you can switch to `telescope`
+          projects_picker = "vim-ui", -- optional, you can switch to `telescope`
         })
       end,
     },

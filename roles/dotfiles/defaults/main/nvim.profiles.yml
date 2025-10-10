@@ -261,6 +261,21 @@ nvim_plugin_groups_mini:
   mini_workflow: "{{ nvim_mini_workflow }}"
   mini_ui: "{{ nvim_mini_ui }}"
   telescope: "{{ nvim_fzf_lua }}"
+  ui: "{{ nvim_ui_statusline_tabline_alpha_focus }}"
+  project: "{{ nvim_project }}"
+  hydra: "{{ nvim_hydra }}"
+  treesitter: "{{ nvim_treesitter }}"
+  git: "{{ nvim_git }}"
+  terminal: "{{ nvim_terminal }}"
+  intellisense: "{{ nvim_lspconfig_cmp_navbuddy_mini }}"
+  debugger: "{{ nvim_debugger }}"
+  tasks: "{{ nvim_tasks }}"
+  test: "{{ nvim_test }}"
+  notes: "{{ nvim_neorg_legacy }}"
+  ai: "{{ nvim_ai_companion_chatgpt }}"
+nvim_plugin_groups_snacks:
+  colorscheme: "{{ nvim_colorscheme_nightfox }}"
+  snacks: "{{ nvim_snacks }}"
   ui: "{{ nvim_ui_statusline_tabline }}"
   project: "{{ nvim_project }}"
   hydra: "{{ nvim_hydra }}"
@@ -272,6 +287,7 @@ nvim_plugin_groups_mini:
   tasks: "{{ nvim_tasks }}"
   test: "{{ nvim_test }}"
   notes: "{{ nvim_neorg_legacy }}"
+  motion: "{{ nvim_motion }}"
   ai: "{{ nvim_ai_companion_chatgpt }}"
 nvim_plugin_groups_bone:
   telescope: "{{ nvim_fzf_lua }}"
@@ -312,6 +328,13 @@ nvim_xdg_modular_profiles:
       options: "{{ nvim_default_editor_options }}"
       keymaps: "{{ nvim_default_keymap_options }}"
       plugin_groups: "{{ nvim_plugin_groups_mini | ansible.builtin.combine(nvim_extra_plugins) }}"
+  snacks:
+    name: snacks
+    appname: nvim-snacks
+    config:
+      options: "{{ nvim_default_editor_options }}"
+      keymaps: "{{ nvim_default_keymap_options }}"
+      plugin_groups: "{{ nvim_plugin_groups_snacks | ansible.builtin.combine(nvim_extra_plugins) }}"
   bone:
     name: bone
     appname: nvim-bone
