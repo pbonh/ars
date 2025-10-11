@@ -264,6 +264,11 @@ dev_packages:
       - "neovim"
     nonroot:
       - "neovim"
+  inotify:
+    brew:
+      - "inotify-tools"
+    devbox:
+      - "inotify-tools"
   neovim-remote:
     brew:
       - "neovim-remote"
