@@ -62,9 +62,8 @@ distrobox_vms:
     entry: "true"
     init_hooks:
       - "{{ distrobox_ssh_bootstrap_cmd }}"
+      - "sudo -u \"$USER\" sh -c 'curl -fsSL \"https://static.rust-lang.org/rustup/rustup-init.sh\" | sh -s -- -y --no-modify-path --default-toolchain stable'"
       # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cache"
-      - "sudo -u {{ ansible_env.USER }} /home/linuxbrew/.linuxbrew/bin/brew install rustup"
-      # - "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
       # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cargo"
       # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.profile"
       # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.rustup"
