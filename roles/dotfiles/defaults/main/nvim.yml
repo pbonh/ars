@@ -31,7 +31,7 @@ nvim_checkhealth_log:
   - "\"+w\\! health.log\""
   - "+qa"
 nvim_checkhealth_log_cmd: "{{ 'nvim ' + nvim_checkhealth_log | join(' ') }}"
-nvim_default_profile: "nvim-mini-modular"
+nvim_default_profile: "nvim-snacks-modular"
 nvim_exe_default: "{{ bin_directory }}nvim"
 nvim_exe: "nvim"
 nvim_exe_bone_bash: "NVIM_APPNAME=nvim-bone-modular {{ nvim_exe }}"
