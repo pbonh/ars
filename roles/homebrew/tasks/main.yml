@@ -5,6 +5,12 @@
 #   args:
 #     creates: "{{ homebrew_install_path }}"
 
+- name: Homebrew | Install Homebrew Taps | homebrew
+  community.general.homebrew_tap:
+    name: "{{ item.value.brew_tap }}"
+    state: present
+  loop: "{{ homebrew_taps | dict2items | selectattr('value.brew_tap', 'defined') | list }}"
+
 - name: Homebrew | Install Homebrew Packages | homebrew
   community.general.homebrew:
     name: "{{ item.value.brew }}"
