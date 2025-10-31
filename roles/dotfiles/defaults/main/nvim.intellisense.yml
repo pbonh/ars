@@ -657,10 +657,9 @@ nvim_lspconfig_cmp_navbuddy:
     -- { ']d', { n = '<cmd>vim.diagnostic.goto_next()<CR>', }, description = 'Diagnostic: Next', },
     -- { '[d', { n = '<cmd>vim.diagnostic.goto_prev()<CR>', }, description = 'Diagnostic: Previous', },
     {
-      mode = 'n',
+      mode = {'n', 'o', 'x'},
       { 'gd', '<cmd>FzfLua lsp_definitions jump1=true<CR>', desc = 'Fzf-Lua: Definition Finder', },
       { 'gy', '<cmd>FzfLua lsp_typedefs jump1=true<cr>', desc = 'Fzf-Lua: Type Definition', },
-      { 'gr', '<cmd>FzfLua lsp_references<CR>', desc = 'Fzf-Lua: Reference Finder', },
       { 'gi', '<cmd>FzfLua lsp_implementations jump1=true<cr>', desc = 'Fzf-Lua: Implementation', },
       { 'gD', '<cmd>FzfLua lsp_declarations jump1=true<cr>', desc = 'Fzf-Lua: Declaration', },
       { '<leader>k', '<cmd>lua vim.lsp.buf.hover()<cr>', desc = 'LSP: Hover', },
@@ -673,6 +672,10 @@ nvim_lspconfig_cmp_navbuddy:
       { '<leader>;', '<cmd>Navbuddy<CR>', desc = 'Navbuddy: Outline Toggle', },
       { ']d', '<cmd>vim.diagnostic.goto_next()<CR>', desc = 'Diagnostic: Next', },
       { '[d', '<cmd>vim.diagnostic.goto_prev()<CR>', desc = 'Diagnostic: Previous', },
+    },
+    {
+      mode = {'n', 'o'},
+      { 'gr', '<cmd>FzfLua lsp_references<CR>', desc = 'Fzf-Lua: Reference Finder', },
     },
 nvim_lspconfig_cmp_navbuddy_codecompanion:
   lazy: |
