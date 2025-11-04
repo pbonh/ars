@@ -7,6 +7,9 @@ yazi_dirs:
   - "{{ yazi_config }}"
   - "{{ yazi_plugin_dir }}"
   - "{{ yazi_flavors_dir }}"
+yazi_exe: "yazi"
+ya_exe: "ya"
+yazi_package_cmd: "{{ ya_exe }} pack"
 yazi_plugins:
   starship:
     name: starship
@@ -15,18 +18,18 @@ yazi_plugins:
     pack: "Rolv-Apneseth/starship"
     config: |
       require("starship"):setup()
-  easyjump:
-    name: easyjump
-    url: "https://github.com/mikavilpas/easyjump.yazi"
-    dest_name: "easyjump.yazi"
-    pack: "mikavilpas/easyjump.yazi:easyjump"
-    config: |
-      require("easyjump"):setup()
-    keymap: |
-      [[manager.prepend_keymap]]
-      on   = [ "i" ]
-      run  = "plugin easyjump"
-      desc = "easyjump"
+  # easyjump:
+  #   name: easyjump
+  #   url: "https://github.com/mikavilpas/easyjump.yazi"
+  #   dest_name: "easyjump.yazi"
+  #   pack: "mikavilpas/easyjump.yazi:easyjump"
+  #   config: |
+  #     require("easyjump"):setup()
+  #   keymap: |
+  #     [[manager.prepend_keymap]]
+  #     on   = [ "i" ]
+  #     run  = "plugin easyjump"
+  #     desc = "easyjump"
 # Pulled from: https://github.com/yazi-rs/flavors
 yazi_themes:
   ayu-dark:

@@ -36,7 +36,7 @@
   changed_when: false
   ignore_errors: true
   command:
-    cmd: "ya pkg add {{ item.value.pack }}"
+    cmd: "{{ yazi_package_cmd}} --add {{ item.value.pack }}"
   loop: "{{ yazi_plugins | dict2items }}"
 
 - name: Yazi | Download Yazi Themes | get_url
