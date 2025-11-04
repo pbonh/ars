@@ -11,5 +11,18 @@
         ]
       }
     ]
+  },
+  "storage": {
+    "files": [
+      {
+        "overwrite": true,
+        "path": "/etc/hostname",
+        "contents": {
+          "compression": "",
+          "source": "data:,ucore_test"
+        },
+        "mode": 420
+      }
+    ]
   }
 }
