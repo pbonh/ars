@@ -19,7 +19,7 @@
         "path": "/etc/hostname",
         "contents": {
           "compression": "",
-          "source": "data:,ucore_test"
+          "source": "data:,ucoretest"
         },
         "mode": 420
       }
