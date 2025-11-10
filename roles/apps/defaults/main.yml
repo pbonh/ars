@@ -18,6 +18,9 @@ podman_quadlets:
       - "22000:22000/udp"
       - "21027:21027/udp"
     user_ns: "{{ podman_quadlets_keep_id_setting }}"
+    environment:
+      - "PUID={{ podman_quadlets_user_uid }}"
+      - "PGID={{ podman_quadlets_user_uid }}"
     volume:
       - "{{ syncthing_config_directory }}:/config:Z,U"
       - "{{ syncthing_data_directory }}:/data:Z,U"
