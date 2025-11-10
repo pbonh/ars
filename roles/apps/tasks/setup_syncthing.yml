@@ -1,0 +1,57 @@
+---
+- name: SystemD | Add subuid range for container user namespaces | lineinfile
+  become: true
+  become_method: sudo
+  become_user: root
+  ansible.builtin.lineinfile:
+    path: /etc/subuid
+    regexp: "^{{ podman_quadlets_user }}:"
+    line: "{{ podman_quadlets_user }}:{{ podman_quadlets_user_mapping['begin'] }}:{{ podman_quadlets_user_mapping['end'] }}"
+    create: true
+  notify: "{{ podman_quadlets_handler_migrate_name }}"
+
+- name: Execute id command to get UID
+  ansible.builtin.command: "id -u {{ ansible_env.USER }}"
+  register: user_uid_output
+
+- name: Set UID as a fact
+  ansible.builtin.set_fact:
+    podman_quadlets_user_uid: "{{ user_uid_output.stdout | trim }}"
+
+- name: Apps | Ensure Podman Quadlets directory exists | file
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ syncthing_directory }}"
+    - "{{ syncthing_config_directory }}"
+    - "{{ syncthing_data_directory }}"
+
+- name: Apps | Ensure Podman Quadlets directory exists | file
+  ansible.builtin.file:
+    path: "{{ podman_quadlets_directory }}"
+    state: directory
+    mode: '0755'
+  when: podman_quadlets | length > 0
+
+- name: Apps | Generate Podman Quadlets | template
+  ansible.builtin.template:
+    src: quadlet.container.j2
+    dest: "{{ podman_quadlets_directory }}/{{ item.container_name }}.container"
+    mode: '0644'
+  loop: "{{ podman_quadlets }}"
+
+- name: Apps | Reload systemd daemon (user scope) | systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+  when: podman_quadlets | length > 0
+
+- name: Apps | Enable and start Podman Quadlet services (user scope) | systemd
+  ansible.builtin.systemd:
+    name: "{{ item.container_name }}.service"
+    enabled: true
+    state: started
+    scope: user
+  loop: "{{ podman_quadlets }}"

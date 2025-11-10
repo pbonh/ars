@@ -3,7 +3,11 @@ syncthing_directory: "{{ ansible_env.HOME }}/Syncthing"
 syncthing_config_directory: "{{ syncthing_directory }}/Config"
 syncthing_data_directory: "{{ syncthing_directory }}/Data"
 podman_quadlets_directory: "{{ xdg_config_dir }}/containers/systemd"
+podman_quadlets_user: "{{ ansible_env.USER }}"
 podman_quadlets_user_uid: "1000"
+podman_quadlets_user_mapping:
+  begin: "100000"
+  end: "70000"
 podman_quadlets_keep_id_setting: "keep-id:uid={{ podman_quadlets_user_uid }},gid={{ podman_quadlets_user_uid }}"
 podman_quadlets:
   - description: "Syncthing Service"
@@ -40,3 +44,4 @@ flatpak_apps:
   ptyxis: "app.devsuite.Ptyxis"
   yakuake: "org.kde.yakuake"
   plasmatube: "org.kde.plasmatube"
+podman_quadlets_handler_migrate_name: "Migrate Podman System"
