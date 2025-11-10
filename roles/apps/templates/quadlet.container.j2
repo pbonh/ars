@@ -4,6 +4,9 @@ Description={{ item.description }}
 [Container]
 ContainerName={{ item.container_name }}
 Image={{ item.image }}
+{% if item.hostname is defined %}
+hostname={{ item.hostname }}
+{% endif %}
 {% if item.entrypoint is defined %}
 Entrypoint={{ item.entrypoint }}
 {% endif %}
