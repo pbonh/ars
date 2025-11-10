@@ -5,6 +5,24 @@
     state: present
   loop: "{{ flatpak_apps | dict2items }}"
 
+- name: Execute id command to get UID
+  ansible.builtin.command: "id -u {{ podman_quadlets_user }}"
+  register: user_uid_output
+
+- name: Set UID as a fact
+  ansible.builtin.set_fact:
+    podman_quadlets_user_uid: "{{ user_uid_output.stdout | trim }}"
+
+- name: Apps | Ensure Podman Quadlets directory exists | file
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ syncthing_directory }}"
+    - "{{ syncthing_config_directory }}"
+    - "{{ syncthing_data_directory }}"
+
 - name: Apps | Ensure Podman Quadlets directory exists | file
   ansible.builtin.file:
     path: "{{ podman_quadlets_directory }}"

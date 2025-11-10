@@ -1,4 +1,7 @@
 ---
+syncthing_directory: "{{ ansible_env.HOME }}/Syncthing"
+syncthing_config_directory: "{{ syncthing_directory }}/Config"
+syncthing_data_directory: "{{ syncthing_directory }}/Data"
 podman_quadlets_directory: "{{ xdg_config_dir }}/containers/systemd"
 podman_quadlets_user_uid: "1000"
 podman_quadlets_keep_id_setting: "keep-id:uid={{ podman_quadlets_user_uid }},gid={{ podman_quadlets_user_uid }}"
@@ -11,6 +14,9 @@ podman_quadlets:
     publish_ports:
       - "127.0.0.1:8384:8384"
     user_ns: "{{ podman_quadlets_keep_id_setting }}"
+    volume:
+      - "{{ syncthing_config_directory }}:/config:Z,U"
+      - "{{ syncthing_data_directory }}:/data:Z,U"
 flatpak_apps:
   # brave: "com.brave.Browser"
   opera: "com.opera.Opera"
