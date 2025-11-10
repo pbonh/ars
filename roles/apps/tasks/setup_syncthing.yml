@@ -10,6 +10,17 @@
     create: true
   notify: "{{ podman_quadlets_handler_migrate_name }}"
 
+- name: SystemD | Add subgid range for container user namespaces | lineinfile
+  become: true
+  become_method: sudo
+  become_user: root
+  ansible.builtin.lineinfile:
+    path: /etc/subgid
+    regexp: "^{{ podman_quadlets_user }}:"
+    line: "{{ podman_quadlets_user }}:{{ podman_quadlets_user_mapping['begin'] }}:{{ podman_quadlets_user_mapping['end'] }}"
+    create: true
+  notify: "{{ podman_quadlets_handler_migrate_name }}"
+
 - name: Execute id command to get UID
   ansible.builtin.command: "id -u {{ ansible_env.USER }}"
   register: user_uid_output
