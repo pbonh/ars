@@ -17,7 +17,7 @@ podman_quadlets:
       - "22000:22000/tcp"
       - "22000:22000/udp"
       - "21027:21027/udp"
-    user_ns: "{{ podman_quadlets_keep_id_setting }}"
+    # user_ns: "{{ podman_quadlets_keep_id_setting }}"
     environment:
       - "PUID={{ podman_quadlets_user_uid }}"
       - "PGID={{ podman_quadlets_user_uid }}"
