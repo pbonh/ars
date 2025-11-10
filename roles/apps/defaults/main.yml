@@ -1,4 +1,14 @@
 ---
+podman_quadlets_directory: "{{ xdg_config_dir }}/containers/systemd"
+podman_quadlets:
+  - description: "Syncthing Service"
+    container_name: syncthing
+    image: docker.io/syncthing/syncthing
+    entrypoint: /bin/syncthing
+    network: host
+    publish_ports:
+      - "127.0.0.1:8384:8384"
+    user_ns: keep-id
 flatpak_apps:
   # brave: "com.brave.Browser"
   opera: "com.opera.Opera"

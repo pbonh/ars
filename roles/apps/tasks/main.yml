@@ -4,3 +4,31 @@
     name: "{{ item.value }}"
     state: present
   loop: "{{ flatpak_apps | dict2items }}"
+
+- name: Apps | Ensure Podman Quadlets directory exists | file
+  ansible.builtin.file:
+    path: "{{ podman_quadlets_directory }}"
+    state: directory
+    mode: '0755'
+  when: podman_quadlets | length > 0
+
+- name: Apps | Generate Podman Quadlets | template
+  ansible.builtin.template:
+    src: quadlet.container.j2
+    dest: "{{ podman_quadlets_directory }}/{{ item.container_name }}.container"
+    mode: '0644'
+  loop: "{{ podman_quadlets }}"
+
+- name: Apps | Reload systemd daemon (user scope) | systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+  when: podman_quadlets | length > 0
+
+- name: Apps | Enable and start Podman Quadlet services (user scope) | systemd
+  ansible.builtin.systemd:
+    name: "{{ item.container_name }}.service"
+    enabled: true
+    state: started
+    scope: user
+  loop: "{{ podman_quadlets }}"

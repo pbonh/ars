@@ -1,0 +1,44 @@
+[Unit]
+Description={{ item.description }}
+
+[Container]
+ContainerName={{ item.container_name }}
+Image={{ item.image }}
+{% if item.entrypoint is defined %}
+Entrypoint={{ item.entrypoint }}
+{% endif %}
+{% if item.network is defined %}
+Network={{ item.network }}
+{% endif %}
+{% if item.publish_ports is defined %}
+{% for port in item.publish_ports %}
+PublishPort={{ port }}
+{% endfor %}
+{% endif %}
+{% if item.user_ns is defined %}
+UserNS={{ item.user_ns }}
+{% endif %}
+{% if item.environment is defined %}
+{% for env in item.environment %}
+Environment={{ env }}
+{% endfor %}
+{% endif %}
+{% if item.volume is defined %}
+{% for vol in item.volume %}
+Volume={{ vol }}
+{% endfor %}
+{% endif %}
+
+[Service]
+{% if item.restart is defined %}
+Restart={{ item.restart }}
+{% else %}
+Restart=always
+{% endif %}
+
+[Install]
+{% if item.wanted_by is defined %}
+WantedBy={{ item.wanted_by }}
+{% else %}
+WantedBy=default.target
+{% endif %}
