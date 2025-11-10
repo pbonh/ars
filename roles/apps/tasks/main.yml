@@ -6,7 +6,7 @@
   loop: "{{ flatpak_apps | dict2items }}"
 
 - name: Execute id command to get UID
-  ansible.builtin.command: "id -u {{ podman_quadlets_user }}"
+  ansible.builtin.command: "id -u {{ ansible_env.USER }}"
   register: user_uid_output
 
 - name: Set UID as a fact
