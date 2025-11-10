@@ -12,11 +12,11 @@ podman_quadlets:
     # entrypoint: /bin/syncthing
     network: host
     publish_ports:
-      - "127.0.0.1:8384:8384"
-      # - "8384:8384"
-      # - "22000:22000/tcp"
-      # - "22000:22000/udp"
-      # - "21027:21027/udp"
+      # - "127.0.0.1:8384:8384"
+      - "8384:8384"
+      - "22000:22000/tcp"
+      - "22000:22000/udp"
+      - "21027:21027/udp"
     user_ns: "{{ podman_quadlets_keep_id_setting }}"
     volume:
       - "{{ syncthing_config_directory }}:/config:Z,U"
