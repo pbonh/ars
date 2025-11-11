@@ -5,5 +5,5 @@
     state: present
   loop: "{{ flatpak_apps | dict2items }}"
 
-- name: Syncthing | Setup | task
-  import_tasks: tasks/setup_syncthing.yml
+# - name: Syncthing | Setup | task
+#   import_tasks: tasks/setup_syncthing.yml

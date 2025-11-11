@@ -44,4 +44,5 @@ flatpak_apps:
   ptyxis: "app.devsuite.Ptyxis"
   yakuake: "org.kde.yakuake"
   plasmatube: "org.kde.plasmatube"
+  syncthingy: "com.github.zocker_160.SyncThingy"
 podman_quadlets_handler_migrate_name: "Migrate Podman System"
