@@ -307,6 +307,16 @@ dev_packages:
       - "prettier"
     devbox:
       - "prettier"
+  yamllint:
+    brew:
+      - "yamllint"
+    devbox:
+      - "yamllint"
+  ansible-lint:
+    brew:
+      - "ansible-lint"
+    devbox:
+      - "ansible-lint"
   ansible-language-server:
     brew:
       - "ansible-language-server"
