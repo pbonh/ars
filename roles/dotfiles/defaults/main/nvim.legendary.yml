@@ -39,6 +39,9 @@ nvim_legendary:
         preset = "modern",
       },
     },
+    {
+      "meznaric/key-analyzer.nvim",
+    },
   config: ""
   keymaps: |
     { '<CR>', ':', mode = { 'n', 'v' }, desc = 'Vim: Enter Ex Commands', },
