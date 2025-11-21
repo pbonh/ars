@@ -41,6 +41,7 @@ nvim_legendary:
     },
     {
       "meznaric/key-analyzer.nvim",
+      opts = {},
     },
   config: ""
   keymaps: |

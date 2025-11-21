@@ -274,11 +274,11 @@ nvim_ai_opencode:
         vim.keymap.set({ "n", "x" }, "<leader>C+", function() require("opencode").prompt("@this") end, { desc = "Add this" })
         vim.keymap.set("n", "<leader>Ct", function() require("opencode").toggle() end, { desc = "Toggle embedded" })
         vim.keymap.set("n", "<leader>Cc", function() require("opencode").command() end, { desc = "Select command" })
-        vim.keymap.set("n", "<leader>Cn", function() require("opencode").command("session_new") end, { desc = "New session" })
-        vim.keymap.set("n", "<leader>Ci", function() require("opencode").command("session_interrupt") end, { desc = "Interrupt session" })
-        vim.keymap.set("n", "<leader>CA", function() require("opencode").command("agent_cycle") end, { desc = "Cycle selected agent" })
-        vim.keymap.set("n", "<S-C-u>",    function() require("opencode").command("messages_half_page_up") end, { desc = "Messages half page up" })
-        vim.keymap.set("n", "<S-C-d>",    function() require("opencode").command("messages_half_page_down") end, { desc = "Messages half page down" })
+        vim.keymap.set("n", "<leader>Cn", function() require("opencode").command("session.new") end, { desc = "New session" })
+        vim.keymap.set("n", "<leader>Ci", function() require("opencode").command("session.interrupt") end, { desc = "Interrupt session" })
+        vim.keymap.set("n", "<leader>CA", function() require("opencode").command("agent.cycle") end, { desc = "Cycle selected agent" })
+        vim.keymap.set("t", "<C-u>",    function() require("opencode").command("session.half.page.up") end, { desc = "Messages half page up" })
+        vim.keymap.set("t", "<C-d>",    function() require("opencode").command("session.half.page.down") end, { desc = "Messages half page down" })
       end,
     },
   config: ""
