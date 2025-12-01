@@ -163,6 +163,27 @@ navi_cheats:
       args:
         - "global"
         - "update"
+  zfs:
+    load_all_keys:
+      description: "Recursively run `load-key` on dataset and it's children."
+      cmd: "zfs"
+      args:
+        - "load-key"
+        - "-a"
+    mount_all_datasets:
+      description: "Mount all zfs datasets."
+      cmd: "zfs"
+      args:
+        - "mount"
+        - "-a"
+    set_child_mountpoints:
+      description: "Set mountpoints recursively for child datasets."
+      cmd: "zfs"
+      args:
+        - "inherit"
+        - "-r"
+        - "mountpoint"
+        - "<parent_dataset_name>"
   ai:
     code2prompt_run:
       description: "Run Code2Prompt with Selected Template On Selected Files with Selected Model"
