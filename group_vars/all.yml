@@ -279,6 +279,8 @@ dev_packages:
     devbox:
       - "neovim-remote"
   tree-sitter:
+    nonroot:
+      - "tree-sitter-cli"
     brew:
       - "tree-sitter"
       - "tree-sitter-cli"
