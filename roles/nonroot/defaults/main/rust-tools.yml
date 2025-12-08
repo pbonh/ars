@@ -137,6 +137,9 @@ cargo_binstall_packages:
   starship:
     name: starship
     path: "{{ cargo_path }}starship"
+  treesitter:
+    name: "tree-sitter-cli"
+    path: "{{ cargo_path }}tree-sitter-cli"
   carapace:
     name: carapace
     path: "{{ cargo_path }}carapace"
