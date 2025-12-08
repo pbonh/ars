@@ -1,5 +1,5 @@
 ---
-nvim_version: "v0.11.0"
+nvim_version: "v0.11.5"
 nvim_appimage_version: "{{ nvim_version }}"
 nvim_appimage_url: "https://github.com/neovim/neovim/releases/download/{{ nvim_appimage_version }}/nvim.appimage"
 nvim_appimage_exe: "{{ tool_install_bin }}/nvim.appimage"
