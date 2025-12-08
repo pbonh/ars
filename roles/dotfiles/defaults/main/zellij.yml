@@ -1,6 +1,6 @@
 ---
 zellij_version: "0.39.1"
-zellij_plugin_dir: "{{ dotfiles_user_home }}/.zellij-plugins"
+zellij_plugin_dir: "{{ tool_install_dir }}/.zellij-plugins"
 zellij_shell: "{{ interactive_shell }}"
 zellij_shell_cmd: "{{ interactive_shell_cmd }}"
 zellij_nvim_app: "{{ nvim_default_profile }}"

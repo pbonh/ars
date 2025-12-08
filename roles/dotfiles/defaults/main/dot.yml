@@ -29,7 +29,7 @@ codeberg_url: "https://codeberg.org"
 gcc_exe: /usr/bin/gcc
 gpp_exe: /usr/bin/g++
 make_exe: "make"
-cargo_home: "{{ dotfiles_user_home }}/.cargo"
+cargo_home: "{{ tool_install_dir }}/.cargo"
 cargo_path: "{{ cargo_home }}/bin/"
 homebrew_install_path: "/home/linuxbrew/.linuxbrew"
 homebrew_path: "{{ homebrew_install_path }}/bin"

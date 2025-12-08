@@ -1,12 +1,12 @@
 ---
-python_dev_virtualenv_home: "{{ dotfiles_user_home }}/.virtualenvs"
+python_dev_virtualenv_home: "{{ tool_install_dir }}/.virtualenvs"
 homebrew_packages_python:
   - openssl
   - readline
   - sqlite3
   - xz
   - zlib
-pyenv_home: "{{ dotfiles_user_home }}/.pyenv"
+pyenv_home: "{{ tool_install_dir }}/.pyenv"
 pyenv_home_bin: "{{ pyenv_home }}/bin/pyenv"
 pyenv_exe: "{{ bin_directory }}pyenv"
 pyenv_python_version: "3.10.9"

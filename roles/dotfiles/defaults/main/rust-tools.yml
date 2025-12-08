@@ -4,11 +4,11 @@ rustup_os: linux-gnu
 rustup_macos_arch: aarch64
 rustup_macos_os: apple-darwin
 rustup_url: https://static.rust-lang.org/rustup/rustup-init.sh
-rustup_script_path: "{{ dotfiles_user_home }}/rustup-init.sh"
+rustup_script_path: "{{ tool_install_dir }}/rustup-init.sh"
 rustup_toolchain: "stable"
 rustup_musl_target: "{{ rustup_arch }}-unknown-linux-musl"
-rustup_path: "{{ dotfiles_user_home }}/.rustup/toolchains/{{ rustup_toolchain }}-{{ rustup_arch }}-{{ rustup_os }}/bin/"
-cargo_home: "{{ dotfiles_user_home }}/.cargo"
+rustup_path: "{{ tool_install_dir }}/.rustup/toolchains/{{ rustup_toolchain }}-{{ rustup_arch }}-{{ rustup_os }}/bin/"
+cargo_home: "{{ tool_install_dir }}/.cargo"
 cargo_path: "{{ cargo_home }}/bin/"
 cargo_bin: "{{ cargo_path }}cargo"
 rustup_exe: "{{ cargo_path }}rustup"
