@@ -153,3 +153,9 @@
   tags:
     - joplin
     - notes
+
+- name: Install OpenCode Config
+  import_tasks: tasks/install_opencode.yml
+  tags:
+    - opencode
+    - ai
