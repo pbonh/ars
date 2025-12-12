@@ -43,7 +43,36 @@ nvim_legendary:
       "meznaric/key-analyzer.nvim",
       opts = {},
     },
-  config: ""
+  config: |
+    -- -- Reload Neovim configuration (clean module reload + re-source init.lua)
+    -- local function reload_config()
+    --   -- Clear all cached Lua modules under your config directory
+    --   local config_path = vim.fn.stdpath("config")
+
+    --   for name, _ in pairs(package.loaded) do
+    --     if name:match("^user") then
+    --       -- Optional: if you namespace your modules under "user.*"
+    --       package.loaded[name] = nil
+    --     elseif name:find(config_path, 1, true) then
+    --       package.loaded[name] = nil
+    --     end
+    --   end
+
+    --   -- Re-source init.lua
+    --   vim.cmd("source $MYVIMRC")
+
+    --   -- Tell lazy.nvim to reload its plugin spec and regenerate its cache
+    --   local lazy = require("lazy")
+    --   lazy.reload({
+    --     plugins = lazy.plugins(),
+    --   })
+
+    --   print("Neovim config reloaded.")
+    -- end
+
+    -- vim.keymap.set("n", "<leader>l", reload_config, {
+    --   desc = "Reload Neovim Config",
+    -- })
   keymaps: |
     { '<CR>', ':', mode = { 'n', 'v' }, desc = 'Vim: Enter Ex Commands', },
     { ':', ',', mode = { 'n', 'v' }, desc = 'Vim: Remap Repeat', },

@@ -182,12 +182,24 @@ nvim_default_plugins:
   debugger: "{{ nvim_debugger_default }}"
 nvim_extra_plugins: {}
 nvim_startup_commands: |
-  vim.keymap.del('n', 'gra')
-  vim.keymap.del('v', 'gra')
-  vim.keymap.del('n', 'gri')
-  vim.keymap.del('n', 'grn')
-  vim.keymap.del('n', 'grr')
-  vim.keymap.del('n', 'grt')
+  -- [[ User Global Startup Commands ]]
+  local function del_if_exists(mode, lhs)
+    local m = vim.fn.maparg(lhs, mode, false, true)
+    if m and m.lhs then
+      pcall(vim.keymap.del, mode, lhs)
+    end
+  end
+
+  for _, map in ipairs({
+    { 'n', 'gra' },
+    { 'v', 'gra' },
+    { 'n', 'gri' },
+    { 'n', 'grn' },
+    { 'n', 'grr' },
+    { 'n', 'grt' },
+  }) do
+    del_if_exists(map[1], map[2])
+  end
 nvim_xdg_modular_lua_hierarchy:
   - ""
   - lua
