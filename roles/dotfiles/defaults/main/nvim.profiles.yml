@@ -286,7 +286,7 @@ nvim_plugin_groups_snacks:
   debugger: "{{ nvim_debugger }}"
   tasks: "{{ nvim_tasks }}"
   test: "{{ nvim_test }}"
-  notes: "{{ nvim_neorg_legacy }}"
+  notes: "{{ nvim_neorg }}"
   motion: "{{ nvim_motion }}"
   ai: "{{ nvim_ai_opencode }}"
 nvim_plugin_groups_bone:
