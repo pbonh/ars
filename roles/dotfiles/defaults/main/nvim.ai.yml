@@ -262,7 +262,14 @@ nvim_ai_opencode:
       },
       config = function()
         vim.g.opencode_opts = {
-          -- Your configuration, if any — see `lua/opencode/config.lua`
+          provider = {
+            snacks = {
+              win = {
+                position = "float",
+                enter = true,
+              },
+            },
+          },
         }
 
         -- Required for `vim.g.opencode_opts.auto_reload`
@@ -272,7 +279,7 @@ nvim_ai_opencode:
         vim.keymap.set({ "n", "x" }, "<leader>Ca", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask about this" })
         vim.keymap.set({ "n", "x" }, "<leader>Cs", function() require("opencode").select() end, { desc = "Select prompt" })
         vim.keymap.set({ "n", "x" }, "<leader>C+", function() require("opencode").prompt("@this") end, { desc = "Add this" })
-        vim.keymap.set("n", "<leader>Ct", function() require("opencode").toggle() end, { desc = "Toggle embedded" })
+        vim.keymap.set({ "n", "t" }, "<C-t>", function() require("opencode").toggle() end, { desc = "Toggle embedded" })
         vim.keymap.set("n", "<leader>Cc", function() require("opencode").command() end, { desc = "Select command" })
         vim.keymap.set("n", "<leader>Cn", function() require("opencode").command("session.new") end, { desc = "New session" })
         vim.keymap.set("n", "<leader>Ci", function() require("opencode").command("session.interrupt") end, { desc = "Interrupt session" })
