@@ -11,3 +11,16 @@
     dest: "{{ opencode_config_dir }}/{{ item.path | regex_replace('\\.j2$', '') }}"
   with_community.general.filetree: "../templates/opencode"
   when: item.state == 'file'
+
+- name: opencode | Clone OpenAgents Repository | git
+  ansible.builtin.git:
+    repo: "{{ opencode_agents_repo_url }}"
+    dest: "{{ opencode_agents_repo_dest }}"
+    version: "HEAD"
+
+- name: opencode | Copy OpenAgents Agents | copy
+  ansible.builtin.copy:
+    src: "{{ opencode_agents_repo_dest }}/.opencode/{{ item }}"
+    dest: "{{ opencode_config_dir }}/{{ item }}"
+    remote_src: true
+  loop: "{{ opencode_agents_directories }}"
