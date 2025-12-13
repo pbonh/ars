@@ -156,6 +156,16 @@ navi_cheats:
         - "--info=name0"
         - "<project_all>"
         - "<user>@<remote_host>:<destination_path>"
+    get_firmware_updates:
+      description: "Pull Firmware Updates via fwupd"
+      cmd: "fwupdmgr"
+      args:
+        - "get-updates"
+    update_firmware:
+      description: "Run Firmware Updates via fwupd"
+      cmd: "fwupdmgr"
+      args:
+        - "upgrade"
   devbox:
     update_global:
       description: "Update All Globally Installed Packages"
