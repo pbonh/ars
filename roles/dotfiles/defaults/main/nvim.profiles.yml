@@ -312,34 +312,34 @@ nvim_plugin_groups_bone:
   notes: "{{ nvim_neorg_legacy }}"
   motion: "{{ nvim_motion }}"
 nvim_xdg_modular_profiles:
-  lazy:
-    name: lazy
-    appname: nvim-lazy
-    config:
-      options: "{{ nvim_default_editor_options }}"
-      keymaps: "{{ nvim_default_keymap_options }}"
-      plugin_groups: "{{ nvim_plugin_groups_lazy | ansible.builtin.combine(nvim_extra_plugins) }}"
-  ollama:
-    name: ollama
-    appname: nvim-ollama
-    config:
-      options: "{{ nvim_default_editor_options }}"
-      keymaps: "{{ nvim_default_keymap_options }}"
-      plugin_groups: "{{ nvim_plugin_groups_ollama | ansible.builtin.combine(nvim_extra_plugins) }}"
-  chatgpt:
-    name: chatgpt
-    appname: nvim-chatgpt
-    config:
-      options: "{{ nvim_default_editor_options }}"
-      keymaps: "{{ nvim_default_keymap_options }}"
-      plugin_groups: "{{ nvim_plugin_groups_chatgpt | ansible.builtin.combine(nvim_extra_plugins) }}"
-  mini:
-    name: mini
-    appname: nvim-mini
-    config:
-      options: "{{ nvim_default_editor_options }}"
-      keymaps: "{{ nvim_default_keymap_options }}"
-      plugin_groups: "{{ nvim_plugin_groups_mini | ansible.builtin.combine(nvim_extra_plugins) }}"
+  # lazy:
+  #   name: lazy
+  #   appname: nvim-lazy
+  #   config:
+  #     options: "{{ nvim_default_editor_options }}"
+  #     keymaps: "{{ nvim_default_keymap_options }}"
+  #     plugin_groups: "{{ nvim_plugin_groups_lazy | ansible.builtin.combine(nvim_extra_plugins) }}"
+  # ollama:
+  #   name: ollama
+  #   appname: nvim-ollama
+  #   config:
+  #     options: "{{ nvim_default_editor_options }}"
+  #     keymaps: "{{ nvim_default_keymap_options }}"
+  #     plugin_groups: "{{ nvim_plugin_groups_ollama | ansible.builtin.combine(nvim_extra_plugins) }}"
+  # chatgpt:
+  #   name: chatgpt
+  #   appname: nvim-chatgpt
+  #   config:
+  #     options: "{{ nvim_default_editor_options }}"
+  #     keymaps: "{{ nvim_default_keymap_options }}"
+  #     plugin_groups: "{{ nvim_plugin_groups_chatgpt | ansible.builtin.combine(nvim_extra_plugins) }}"
+  # mini:
+  #   name: mini
+  #   appname: nvim-mini
+  #   config:
+  #     options: "{{ nvim_default_editor_options }}"
+  #     keymaps: "{{ nvim_default_keymap_options }}"
+  #     plugin_groups: "{{ nvim_plugin_groups_mini | ansible.builtin.combine(nvim_extra_plugins) }}"
   snacks:
     name: snacks
     appname: nvim-snacks

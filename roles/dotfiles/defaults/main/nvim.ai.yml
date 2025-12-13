@@ -286,6 +286,13 @@ nvim_ai_opencode:
         vim.keymap.set("n", "<leader>CA", function() require("opencode").command("agent.cycle") end, { desc = "Cycle selected agent" })
         vim.keymap.set("t", "<C-u>",    function() require("opencode").command("session.half.page.up") end, { desc = "Messages half page up" })
         vim.keymap.set("t", "<C-d>",    function() require("opencode").command("session.half.page.down") end, { desc = "Messages half page down" })
+        -- vim.api.nvim_create_user_command("OpenCodePlan",
+        --   function()
+        --     require("opencode").toggle()                    -- launch/attach to  opencode UI
+        --     require("opencode").ask("@plan: ", { submit = false }) -- start with Plan agent selected
+        --   end,
+        -- { desc = "OpenCode: Plan agent" })
+        -- vim.keymap.set({ "n", "t" }, "<C-t>", "<cmd>OpenCodePlan<CR>", { desc = "OpenCode Plan agent" })
       end,
     },
   config: ""
