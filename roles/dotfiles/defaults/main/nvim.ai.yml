@@ -261,7 +261,7 @@ nvim_ai_opencode:
         { "folke/snacks.nvim", opts = { input = {}, picker = {} } },
       },
       config = function()
-        vim.g.opencode_opts = vim.tbl_deep_extend("force", vim.g.opencode_opts or {}, {
+        vim.g.opencode_opts = {
           provider = {
             cmd = "opencode --agent plan",
             snacks = {
@@ -271,7 +271,7 @@ nvim_ai_opencode:
               },
             },
           },
-        })
+        }
 
         -- Required for `vim.g.opencode_opts.auto_reload`
         vim.opt.autoread = true
