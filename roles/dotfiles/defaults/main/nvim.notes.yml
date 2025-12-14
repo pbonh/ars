@@ -99,6 +99,12 @@ nvim_neorg:
 
           -- If we don't have a window yet, or it was closed, or cwd changed, create a new one
           if not neorg_win or not neorg_win:valid() or neorg_win.opts.file ~= filename then
+            -- prevent modeline parsing on first load (e.g., lines with @gateway.yml)
+            local prev_modeline = vim.o.modeline
+            local prev_modelines = vim.o.modelines
+            vim.o.modeline = false
+            vim.o.modelines = 0
+
             neorg_win = Snacks.win({
               file = filename,
               style = "float",
@@ -109,6 +115,7 @@ nvim_neorg:
               bo = {                 -- buffer options: make sure we can edit
                 modifiable = true,
                 readonly = false,
+                modeline = false,
               },
               keys = {
                 q = "close",
@@ -118,6 +125,7 @@ nvim_neorg:
                 -- extra safety: enforce modifiable whenever the buffer is (re)created
                 vim.bo[self.buf].modifiable = true
                 vim.bo[self.buf].readonly = false
+                vim.bo[self.buf].modeline = false
               end,
               on_win = function(self)
                 -- start insert mode whenever the window is shown
@@ -128,6 +136,11 @@ nvim_neorg:
                 end)
               end,
             })
+
+            -- restore global modeline settings after creating the window
+            vim.o.modeline = prev_modeline
+            vim.o.modelines = prev_modelines
+
             return
           end
 
