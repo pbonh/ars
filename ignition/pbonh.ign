@@ -12,7 +12,9 @@
         ],
         "name": "core",
         "sshAuthorizedKeys": [
-          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDyjCuHfsrR6jKdCb6wkXdsw15NUCNd6bPbYut7umVsZ phillip.bonhomme.jr@pm.me"
+          "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDyjCuHfsrR6jKdCb6wkXdsw15NUCNd6bPbYut7umVsZ phillip.bonhomme.jr@pm.me",
+          "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAINMJukbZuqlr/jinw4bcC/YW3DysjxQRK4PIsodjvjetAAAAC3NzaDpob21lbGFi homelab",
+          "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIKM6oFqyEGoF8juSBke4wpjzD/YLvFrVrsbMSQsyX9WXAAAAC3NzaDpob21lbGFi homelab"
         ]
       }
     ]

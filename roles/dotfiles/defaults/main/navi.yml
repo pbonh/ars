@@ -28,6 +28,20 @@ navi_cheats:
         - "! -name \"*.pub\""
         - "-exec chmod 600 {} \\;"
         # - "chmod 755 ~/ && chmod 700 ~/.ssh && find ~/.ssh -type f -name \"*.pub\" -exec chmod 644 {} \; && find ~/.ssh -type f ! -name \"*.pub\" -exec chmod 600 {} \;"
+    yubikey_gen:
+      description: "Generate Resident SSH Key(w/ Label)"
+      cmd: "ssh-keygen"
+      args:
+        - "-t "
+        - "ed25519-sk"
+        - "-O"
+        - "resident"
+        - "-O"
+        - "verify-required"
+        - "-O"
+        - "application=ssh:<label_name>"
+        - "-C"
+        - "\"<label_name>\""
   cargo:
     update_binstall:
       description: "Update Cargo Binary Packages"
