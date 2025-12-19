@@ -104,6 +104,7 @@
   import_tasks: tasks/install_neovim_configs.yml
   tags:
     - neovim-config
+    - neovim-config-clean
     - editor
 
 - name: Install Helix Config

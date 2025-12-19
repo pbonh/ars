@@ -6,7 +6,6 @@ extra_nvim_plugins_devcontainers: |
 extra_nvim_plugins_devcontainers_lazy: |
   {
     'https://codeberg.org/esensar/nvim-dev-container',
-    dependencies = 'nvim-treesitter/nvim-treesitter'
   },
 extra_nvim_config_devcontainers: |
   require("devcontainer").setup({

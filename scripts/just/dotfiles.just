@@ -38,6 +38,9 @@ tcsh:
 neovim:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "neovim-config" --skip-tags "install"
 
+rebuild-neovim:
+  {{ task_prelude }} ansible-playbook dotfiles.yml --tags "neovim-config-clean" --skip-tags "install"
+
 zellij:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "zellij" --skip-tags "install"
 

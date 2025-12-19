@@ -8,12 +8,6 @@ nvim_debugger_default:
           {'nvim-telescope/telescope.nvim'}
       }
     },
-    {  'theHamsta/nvim-dap-virtual-text',
-      dependencies = {
-          {'mfussenegger/nvim-dap'},
-          {'nvim-treesitter/nvim-treesitter'}
-      }
-    },
   config: |
     local dap = require('dap')
     require('dapui').setup()
@@ -97,15 +91,6 @@ nvim_debugger:
           {'mfussenegger/nvim-dap'},
           {'nvim-telescope/telescope.nvim'}
       },
-    },
-    {  'theHamsta/nvim-dap-virtual-text',
-      dependencies = {
-          {'mfussenegger/nvim-dap'},
-          {'nvim-treesitter/nvim-treesitter'}
-      },
-      config = function()
-        require('nvim-dap-virtual-text').setup()
-      end,
     },
   config: |
     local dap, dapui = require("dap"), require("dapui")

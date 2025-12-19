@@ -1,4 +1,9 @@
 ---
+treesitter_lazy_version: |
+  {
+    'nvim-treesitter/nvim-treesitter',
+    version = 'master',
+  },
 treesitter_parsers:
   - vim
   - vimdoc
@@ -196,11 +201,11 @@ nvim_treesitter_default:
     vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
     vim.o.foldlevelstart = 99
     vim.o.foldenable = true
-    require('ufo').setup({
-      provider_selector = function(bufnr, filetype, buftype)
-        return {'treesitter', 'indent'}
-      end
-    })
+    -- require('ufo').setup({
+    --   provider_selector = function(bufnr, filetype, buftype)
+    --     return {'treesitter', 'indent'}
+    --   end
+    -- })
   keymaps: |
     { 'zR', { n = '<Cmd>lua require(\'ufo\').openAllFolds<CR>', }, description = 'UFO: Open All Folds', },
     { 'zM', { n = '<Cmd>lua require(\'ufo\').closeAllFolds<CR>', }, description = 'UFO: Close All Folds', },
@@ -210,8 +215,10 @@ nvim_treesitter:
       'nvim-treesitter/nvim-treesitter-textobjects',
       build = ':TSUpdate',
       dependencies = {
-        'nvim-treesitter/nvim-treesitter',
-        'nvim-treesitter/nvim-treesitter-refactor',
+        {
+          'nvim-treesitter/nvim-treesitter',
+          version = 'master',
+        },
       },
       config = function()
         {{ treesitter_compiler_path_settings }}
@@ -276,83 +283,103 @@ nvim_treesitter:
               },
             },
           },
-          refactor = {
-            highlight_definitions = {
-              enable = true,
-              {{ nvim_treesitter_disable | indent(10) }}
-              -- Set to false if you have an `updatetime` of ~100.
-              clear_on_cursor_move = false,
-            },
-          },
           {{ treesitter_extra_config_cpp | indent(8) or '-- No Extra Treesitter Config' }}
-        })
-        -- vim.o.foldcolumn = '1' -- '0' is not bad
-        vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
-        vim.o.foldlevelstart = 99
-        vim.o.foldenable = true
-        vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-        vim.opt.foldtext = "v:lua.vim.treesitter.foldtext()"
-      end,
-    },
-    { 'nvim-treesitter/nvim-treesitter-context',
-      dependencies = {
-        'nvim-treesitter/nvim-treesitter',
-      },
-      config = function()
-        require('treesitter-context').setup({
-            enable = true, -- Enable this plugin (Can be enabled/disabled later via commands)
-            {{ nvim_treesitter_disable | indent(10) }}
-            max_lines = 0, -- How many lines the window should span. Values <= 0 mean no limit.
-            trim_scope = 'outer', -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
-            patterns = { -- Match patterns for TS nodes. These get wrapped to match at word boundaries.
-                -- For all filetypes
-                -- Note that setting an entry here replaces all other patterns for this entry.
-                -- By setting the 'default' entry below, you can control which nodes you want to
-                -- appear in the context window.
-                default = {
-                    'class',
-                    'function',
-                    'method',
-                    -- 'for', -- These won't appear in the context
-                    -- 'while',
-                    -- 'if',
-                    -- 'switch',
-                    -- 'case',
-                },
-                -- Example for a specific filetype.
-                -- If a pattern is missing, *open a PR* so everyone can benefit.
-                --   rust = {
-                --       'impl_item',
-                --   },
-            },
-            exact_patterns = {
-                -- Example for a specific filetype with Lua patterns
-                -- Treat patterns.rust as a Lua pattern (i.e '^impl_item$' will
-                -- exactly match 'impl_item' only)
-                -- rust = true,
-            },
-            -- [!] The options below are exposed but shouldn't require your attention,
-            --     you can safely ignore them.
-            zindex = 20, -- The Z-index of the context window
-            mode = 'cursor',  -- Line used to calculate context. Choices: 'cursor', 'topline'
-        })
-      end,
-    },
-    {
-      'kevinhwang91/nvim-ufo',
-      dependencies = 'kevinhwang91/promise-async',
-      config = function()
-        require('ufo').setup({
-          provider_selector = function(bufnr, filetype, buftype)
-            return {'treesitter', 'indent'}
-          end
         })
       end,
     },
   config: ""
-  keymaps: |
+  keymaps: ""
+nvim_treesitter_basic:
+  lazy: |
     {
-      mode = 'n',
-      { 'zR', '<Cmd>lua require(\'ufo\').openAllFolds<CR>', desc = 'UFO: Open All Folds', },
-      { 'zM', '<Cmd>lua require(\'ufo\').closeAllFolds<CR>', desc = 'UFO: Close All Folds', },
+      'nvim-treesitter/nvim-treesitter',
+      build = ':TSUpdate',
+      version = 'master',
+      config = function()
+        {{ treesitter_compiler_path_settings }}
+        -- local parser_configs = require('nvim-treesitter.parsers').get_parser_configs()
+        -- {{ treesitter_custom_parsers_info or '-- No Custom Treesitter Parsers Installed' }}
+        require('nvim-treesitter.configs').setup({
+          ensure_installed = {
+            {{ treesitter_parsers_file or '-- No Extra Treesitter Parsers Installed' }}
+          },
+          sync_install = true,
+          auto_install = false,
+          highlight = {
+            enable = true, -- false will disable the whole extension
+            {{ nvim_treesitter_disable | indent(8) }}
+          },
+          indent = {
+            enable = true, -- false will disable the whole extension
+            {{ nvim_treesitter_disable | indent(8) }}
+          },
+          incremental_selection = {
+            enable = true,
+            {{ nvim_treesitter_disable | indent(8) }}
+            keymaps = {
+              init_selection = 'gnn',
+              node_incremental = 'grn',
+              scope_incremental = 'grc',
+              node_decremental = 'grm',
+            },
+          },
+          textobjects = {
+            select = {
+              enable = true,
+              {{ nvim_treesitter_disable | indent(10) }}
+              lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
+              keymaps = {
+                -- You can use the capture groups defined in textobjects.scm
+                ['af'] = '@function.outer',
+                ['if'] = '@function.inner',
+                ['ac'] = '@class.outer',
+                ['ic'] = '@class.inner',
+              },
+            },
+            move = {
+              enable = true,
+              {{ nvim_treesitter_disable | indent(10) }}
+              set_jumps = true, -- whether to set jumps in the jumplist
+              goto_next_start = {
+                [']m'] = '@function.outer',
+                [']]'] = '@class.outer',
+              },
+              goto_next_end = {
+                [']M'] = '@function.outer',
+                [']['] = '@class.outer',
+              },
+              goto_previous_start = {
+                ['[m'] = '@function.outer',
+                ['[['] = '@class.outer',
+              },
+              goto_previous_end = {
+                ['[M'] = '@function.outer',
+                ['[]'] = '@class.outer',
+              },
+            },
+          },
+          {{ treesitter_extra_config_cpp | indent(8) or '-- No Extra Treesitter Config' }}
+        })
+      end,
     },
+  config: ""
+  keymaps: ""
+nvim_treesitter_new:
+  lazy: |
+    {
+      'nvim-treesitter/nvim-treesitter',
+      dependencies = {
+          'nvim-treesitter/nvim-treesitter-context',
+      },
+      branch = 'main',
+      lazy = false,
+      build = ':TSUpdate',
+      config = function()
+          local treesitter = require('nvim-treesitter')
+          treesitter.install({
+            {{ treesitter_parsers_file or '-- No Extra Treesitter Parsers Installed' }}
+          })
+      end,
+    },
+  config: ""
+  keymaps: ""
