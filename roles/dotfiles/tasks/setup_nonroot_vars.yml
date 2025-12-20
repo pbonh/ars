@@ -9,6 +9,10 @@
   ansible.builtin.set_fact:
     path_directories: "{{ nonroot_path_directories }}"
 
+- name: Vars | Append Rust Env Variables | set_fact
+  ansible.builtin.set_fact:
+    env_variables: "{{ env_variables | default({}) | combine(rust_tools_env | default({}), recursive=True) }}"
+
 - name: Vars | Set Tool Exe Variables | set_fact
   ansible.builtin.set_fact:
     bash_nonroot_env: |
