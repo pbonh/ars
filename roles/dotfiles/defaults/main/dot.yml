@@ -67,6 +67,10 @@ nonroot_path_directories:
     name: fzf
     prepend: false
     path: "{{ fzf_path }}"
+  opencode:
+    name: opencode
+    prepend: false
+    path: "{{ opencode_path }}"
 env_variables:
   git_ssh: "{{ git_ssh }}"
   editor: "{{ nvim_exe }}"
