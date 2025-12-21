@@ -18,7 +18,7 @@ xdg_config_dirs:
   cache: "{{ xdg_cache_dir }}"
 rustup_arch: x86_64
 rustup_os: linux-gnu
-rustup_home_dir: "{{ tool_install_dir }}/.rustup"
+rustup_home_dir: "{{ dotfiles_user_home }}/.rustup"
 rustup_toolchain: "stable"
 rustup_musl_target: "{{ rustup_arch }}-unknown-linux-musl"
 rustup_path: "{{ rustup_home_dir }}/toolchains/{{ rustup_toolchain }}-{{ rustup_arch }}-{{ rustup_os }}/bin/"
