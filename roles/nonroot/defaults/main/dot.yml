@@ -39,6 +39,6 @@ nonroot_path_directories:
     prepend: false
     path: "{{ fzf_path }}"
   opencode:
-    name: fzf
+    name: opencode
     prepend: false
     path: "{{ opencode_path }}"
