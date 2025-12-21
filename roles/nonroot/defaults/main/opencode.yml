@@ -1,0 +1,4 @@
+---
+opencode_install_script_path: "{{ ansible_env.HOME }}/opencode-install.sh"
+opencode_install_dir: "{{ ansible_env.HOME }}/.opencode"
+opencode_path: "{{ opencode_install_dir }}/bin"

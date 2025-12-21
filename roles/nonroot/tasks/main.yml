@@ -25,6 +25,9 @@
 - name: Musl | Install Rust Tools | task
   import_tasks: tasks/install_rust_tools.yml
 
+- name: Musl | Install Opencode | task
+  import_tasks: tasks/install_opencode.yml
+
 - name: Boost | Install CppTools | task
   when: ansible_distribution != 'MacOSX' and 'cpp' in install_languages
   import_tasks: install_cpp_tools.yml
