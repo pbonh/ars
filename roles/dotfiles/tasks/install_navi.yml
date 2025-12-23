@@ -12,3 +12,12 @@
     src: "navi/cheat.j2"
     dest: "{{ xdg_config_dir_navi_cheats }}/{{ item.key }}.cheat"
   loop: "{{ navi_cheats | dict2items }}"
+
+- name: Navi | Copies Navi Custom Cheat Files | template
+  template:
+    src: '{{ item.src }}'
+    dest: "{{ xdg_config_dir_navi_cheats }}/{{ item.path  | regex_replace('\\.j2$', '') }}"
+  with_filetree: '../templates/navi/cheats'
+  when:
+    - item.state == 'file'
+    - item.path | basename != '.gitkeep'
