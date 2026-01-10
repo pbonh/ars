@@ -1,9 +1,12 @@
 ---
-- name: Apps | Install Flatpak Apps | flatpak
-  community.general.flatpak:
-    name: "{{ item.value }}"
-    state: present
-  loop: "{{ flatpak_apps | dict2items }}"
+- name: Apps | Report Brew Bundle managed apps
+  ansible.builtin.debug:
+    msg: "Apps mapped to Brew Bundle (cask/formula/flatpak): {{ (flatpak_apps_bundle_map | dict2items | selectattr('value.cask', 'defined') | map(attribute='key') | list) + (flatpak_apps_bundle_map | dict2items | selectattr('value.formula', 'defined') | map(attribute='key') | list) + (flatpak_apps_bundle_map | dict2items | selectattr('value.flatpak', 'defined') | map(attribute='key') | list) }}"
+
+- name: Apps | Report unmapped apps (should be none)
+  ansible.builtin.debug:
+    msg: "Unmapped apps: {{ flatpak_apps_bundle_map | dict2items | rejectattr('value.cask', 'defined') | rejectattr('value.formula', 'defined') | rejectattr('value.flatpak', 'defined') | map(attribute='key') | list }}"
+  when: (flatpak_apps_bundle_map | dict2items | rejectattr('value.cask', 'defined') | rejectattr('value.formula', 'defined') | rejectattr('value.flatpak', 'defined') | list | length) > 0
 
 # - name: Syncthing | Setup | task
 #   import_tasks: tasks/setup_syncthing.yml

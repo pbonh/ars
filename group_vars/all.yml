@@ -52,6 +52,46 @@ homebrew_taps:
   opencode:
     brew_tap:
       - "sst/tap"
+homebrew_brewfile_extra_taps: []
+homebrew_brewfile_extra_formulae: []
+homebrew_brewfile_extra_casks: []
+flatpak_apps_bundle_map:
+  opera:
+    cask: opera
+  thunderbird:
+    cask: thunderbird
+  bitwarden:
+    cask: bitwarden
+  kontainer:
+    flatpak: io.github.DenysMb.Kontainer
+  boxbuddy:
+    flatpak: io.github.dvlv.boxbuddyrs
+    remote: flathub-beta
+  alpaca:
+    flatpak: com.jeffser.Alpaca
+  libreoffice:
+    cask: libreoffice
+  onlyoffice:
+    cask: onlyoffice
+  obsidian:
+    cask: obsidian
+  cantor:
+    flatpak: org.kde.cantor
+  kalgebra:
+    flatpak: org.kde.kalgebra
+  qalculate:
+    formula: qalculate-qt
+  ptyxis:
+    flatpak: app.devsuite.Ptyxis
+  yakuake:
+    flatpak: org.kde.yakuake
+  plasmatube:
+    flatpak: org.kde.plasmatube
+  syncthingy:
+    flatpak: com.github.zocker_160.SyncThingy
+homebrew_cask_packages: "{{ flatpak_apps_bundle_map | dict2items | selectattr('value.cask', 'defined') | map(attribute='value.cask') | list }}"
+homebrew_formula_packages_extra: "{{ flatpak_apps_bundle_map | dict2items | selectattr('value.formula', 'defined') | map(attribute='value.formula') | list }}"
+homebrew_flatpak_packages: "{{ flatpak_apps_bundle_map | dict2items | selectattr('value.flatpak', 'defined') | map(attribute='value') | list }}"
 dev_packages:
   ansible:
     brew:
