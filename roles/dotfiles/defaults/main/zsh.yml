@@ -199,7 +199,12 @@ zsh_zellij_aliases: |
   {% endfor %}
 zsh_ssh_setup: |
   env={{ dotfiles_user_home }}/.ssh/agent.env
-  agent_load_env () { test -f "$env" && . "$env" >| /dev/null ; }
+  agent_load_env () {
+      if [ -f "$env" ] && [ ! -r "$env" ]; then
+          rm -f "$env"
+      fi
+      [ -r "$env" ] && . "$env" >| /dev/null
+  }
   agent_start () {
       (umask 077; ssh-agent >| "$env")
       . "$env" >| /dev/null ; }
