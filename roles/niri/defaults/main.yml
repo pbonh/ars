@@ -1,0 +1,125 @@
+---
+niri_desktop_shell: "dms"
+niri_config_dir: "{{ ansible_env.HOME }}/.config/niri"
+niri_config_filename: "local.kdl"
+niri_global_layout_options: |
+  layout {
+    center-focused-column "on-overflow"
+    always-center-single-column
+  }
+# Named workspaces for niri, keyed by lowercase, hyphen-friendly identifiers.
+# Each entry supports:
+# - name: Display label (defaults to key)
+# - open_on_output: Optional monitor identifier
+# - layout: Optional per-workspace layout overrides (raw KDL snippet)
+niri_named_workspaces:
+  browse:
+    name: "browse"
+  obsidian:
+    name: "obsidian"
+  office:
+    name: "office"
+  code:
+    name: "code"
+  calc:
+    name: "calc"
+  media:
+    name: "media"
+  vault:
+    name: "vault"
+  system:
+    name: "system"
+# Window rules to place apps onto named workspaces.
+# Keys are identifiers; values support:
+# - workspace: target workspace key (required)
+# - app_id: regex string used in match app-id
+# - at_startup: match at-startup=true when true (default: false)
+# - extra_match: optional extra match tokens (raw string, e.g., "wm-class=... ")
+niri_window_rules:
+  brave:
+    workspace: "browse"
+    app_id: '^Brave-browser$'
+    at_startup: true
+  opera:
+    workspace: "browse"
+    app_id: '^Opera$'
+    at_startup: true
+  thunderbird:
+    workspace: "browse"
+    app_id: '^org\.mozilla\.Thunderbird$'
+    at_startup: true
+  obsidian:
+    workspace: "obsidian"
+    app_id: '^obsidian$'
+    at_startup: true
+  libreoffice:
+    workspace: "office"
+    app_id: '^libreoffice-startcenter$'
+    at_startup: true
+  onlyoffice:
+    workspace: "office"
+    app_id: '^ONLYOFFICE$'
+    at_startup: true
+  boxbuddy:
+    workspace: "code"
+    app_id: '^io\.github\.dvlv\.boxbuddyrs$'
+    at_startup: true
+  ptyxis:
+    workspace: "code"
+    app_id: '^app\.devsuite\.Ptyxis$'
+    at_startup: true
+  konsole:
+    workspace: "code"
+    app_id: '^org\.kde\.konsole$'
+    at_startup: true
+  kalgebra:
+    workspace: "calc"
+    app_id: '^org\.kde\.kalgebra$'
+    at_startup: true
+  cantor:
+    workspace: "calc"
+    app_id: '^org\.kde\.cantor$'
+    at_startup: true
+  qalculate:
+    workspace: "calc"
+    app_id: '^io\.github\.Qalculate$'
+    at_startup: true
+  plasmatube:
+    workspace: "media"
+    app_id: '^org\.kde\.plasmatube$'
+    at_startup: true
+  bitwarden:
+    workspace: "vault"
+    app_id: '^(Bitwarden|com\.bitwarden\.desktop)$'
+    at_startup: true
+niri_local_kdl_content: |
+  {{ niri_global_layout_options }}
+
+  {% for ws in niri_named_workspaces | dict2items %}
+  workspace "{{ ws.value.name | default(ws.key) }}" {
+  {% if ws.value.open_on_output | default('') | length > 0 %}
+    open-on-output "{{ ws.value.open_on_output }}"
+  {% endif %}
+  {% if ws.value.layout is defined and ws.value.layout | trim | length > 0 %}
+    layout {
+      {{ ws.value.layout | trim | indent(6, true) }}
+    }
+  {% endif %}
+  }
+
+  {% endfor %}
+
+  {% for rule in niri_window_rules | dict2items %}
+  {% if rule.value.workspace is defined and rule.value.workspace | length > 0 %}
+  {% set match_parts = [] %}
+  {% if rule.value.at_startup | default(false) %}{% set _ = match_parts.append('at-startup=true') %}{% endif %}
+  {% if rule.value.app_id | default('') | length > 0 %}{% set _ = match_parts.append('app-id=r#"' ~ rule.value.app_id ~ '"#') %}{% endif %}
+  {% if rule.value.extra_match is defined and rule.value.extra_match | trim | length > 0 %}{% set _ = match_parts.append(rule.value.extra_match | trim) %}{% endif %}
+  window-rule {
+    match {{ match_parts | join(' ') }}
+    open-on-workspace "{{ rule.value.workspace }}"
+  }
+
+  {% endif %}
+  {% endfor %}
+

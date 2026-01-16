@@ -1,0 +1,13 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Ensure niri config directory exists
+  file:
+    path: "{{ niri_config_dir }}"
+    state: directory
+    mode: "0700"
+
+- name: Render niri config
+  template:
+    src: local.kdl.j2
+    dest: "{{ niri_config_dir }}/{{ niri_config_filename }}"
+    mode: "0644"
