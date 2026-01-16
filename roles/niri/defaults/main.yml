@@ -72,12 +72,15 @@ niri_window_rules:
   cantor:
     workspace: "calc"
     app_id: '^org\.kde\.cantor$'
+    open_floating: true
+    default_column_width: 1920
+    default_window_height: 1080
   qalculate:
     workspace: "calc"
-    app_id: '^io\.github\.Qalculate$'
+    app_id: '^io\.github\.Qalculate\!$'
     open_floating: true
-    default_column_width: 480
-    default_window_height: 270
+    default_column_width: 1920
+    default_window_height: 1080
   plasmatube:
     workspace: "media"
     app_id: '^org\.kde\.plasmatube$'
