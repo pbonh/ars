@@ -39,59 +39,51 @@ niri_window_rules:
   brave:
     workspace: "browse"
     app_id: '^Brave-browser$'
-    at_startup: true
   opera:
     workspace: "browse"
     app_id: '^Opera$'
-    at_startup: true
   thunderbird:
     workspace: "browse"
     app_id: '^org\.mozilla\.Thunderbird$'
-    at_startup: true
   obsidian:
     workspace: "obsidian"
     app_id: '^obsidian$'
-    at_startup: true
   libreoffice:
     workspace: "office"
     app_id: '^libreoffice-startcenter$'
-    at_startup: true
   onlyoffice:
     workspace: "office"
     app_id: '^ONLYOFFICE$'
-    at_startup: true
   boxbuddy:
     workspace: "code"
     app_id: '^io\.github\.dvlv\.boxbuddyrs$'
-    at_startup: true
   ptyxis:
     workspace: "code"
     app_id: '^app\.devsuite\.Ptyxis$'
-    at_startup: true
+  ghostty:
+    workspace: "code"
+    app_id: '^com\.mitchellh\.ghostty$'
   konsole:
     workspace: "code"
     app_id: '^org\.kde\.konsole$'
-    at_startup: true
   kalgebra:
     workspace: "calc"
     app_id: '^org\.kde\.kalgebra$'
-    at_startup: true
   cantor:
     workspace: "calc"
     app_id: '^org\.kde\.cantor$'
-    at_startup: true
   qalculate:
     workspace: "calc"
     app_id: '^io\.github\.Qalculate$'
-    at_startup: true
+    open_floating: true
+    default_column_width: 480
+    default_window_height: 270
   plasmatube:
     workspace: "media"
     app_id: '^org\.kde\.plasmatube$'
-    at_startup: true
   bitwarden:
     workspace: "vault"
     app_id: '^(Bitwarden|com\.bitwarden\.desktop)$'
-    at_startup: true
 niri_local_kdl_content: |
   {{ niri_global_layout_options }}
 
@@ -106,20 +98,44 @@ niri_local_kdl_content: |
     }
   {% endif %}
   }
+  {% if not loop.last %}
 
+  {% endif %}
   {% endfor %}
+
+  {% if niri_window_rules | length > 0 %}
 
   {% for rule in niri_window_rules | dict2items %}
   {% if rule.value.workspace is defined and rule.value.workspace | length > 0 %}
   {% set match_parts = [] %}
   {% if rule.value.at_startup | default(false) %}{% set _ = match_parts.append('at-startup=true') %}{% endif %}
   {% if rule.value.app_id | default('') | length > 0 %}{% set _ = match_parts.append('app-id=r#"' ~ rule.value.app_id ~ '"#') %}{% endif %}
+  {% if rule.value.match is defined and rule.value.match | length > 0 %}
+  {% for match_item in rule.value.match | dict2items %}
+  {% if match_item.value is boolean %}{% set _ = match_parts.append(match_item.key ~ '=' ~ (match_item.value | lower)) %}{% else %}{% set _ = match_parts.append(match_item.key ~ '=' ~ match_item.value) %}{% endif %}
+  {% endfor %}
+  {% endif %}
   {% if rule.value.extra_match is defined and rule.value.extra_match | trim | length > 0 %}{% set _ = match_parts.append(rule.value.extra_match | trim) %}{% endif %}
   window-rule {
+  {% if match_parts | length > 0 %}
     match {{ match_parts | join(' ') }}
+  {% endif %}
     open-on-workspace "{{ rule.value.workspace }}"
+  {% if rule.value.open_floating | default(false) %}
+    open-floating true
+  {% endif %}
+  {% if rule.value.default_column_width is defined %}
+    default-column-width { fixed {{ rule.value.default_column_width }}; }
+  {% endif %}
+  {% if rule.value.default_window_height is defined %}
+    default-window-height { fixed {{ rule.value.default_window_height }}; }
+  {% endif %}
   }
+  {% if not loop.last %}
 
   {% endif %}
+  {% endif %}
+
   {% endfor %}
+  {% endif %}
 
