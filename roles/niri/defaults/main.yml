@@ -2,10 +2,28 @@
 niri_desktop_shell: "dms"
 niri_config_dir: "{{ ansible_env.HOME }}/.config/niri"
 niri_config_filename: "local.kdl"
+niri_layout_profiles:
+  laptop: "default-column-width { proportion 0.75; }"
+  ultrawide: "default-column-width { proportion 0.5; }"
+# niri_preset_column_widths:
+#   - 0.33333
+#   - 0.5
+#   - 0.66666
 niri_global_layout_options: |
+  {% set layout_profile = niri_layout_profiles[display_profile] | default(niri_layout_profiles.laptop) %}
   layout {
     center-focused-column "on-overflow"
     always-center-single-column
+  {% if layout_profile | trim | length > 0 %}
+    {{ layout_profile | trim | indent(4, true) }}
+  {% endif %}
+  {% if niri_preset_column_widths | length > 0 %}
+    preset-column-widths {
+  {% for width in niri_preset_column_widths %}
+      proportion {{ width }}
+  {% endfor %}
+    }
+  {% endif %}
   }
 # Named workspaces for niri, keyed by lowercase, hyphen-friendly identifiers.
 # Each entry supports:
