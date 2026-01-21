@@ -5,6 +5,7 @@ niri_config_filename: "local.kdl"
 niri_layout_profiles:
   laptop: "default-column-width { proportion 0.75; }"
   ultrawide: "default-column-width { proportion 0.5; }"
+niri_preset_column_widths: []
 # niri_preset_column_widths:
 #   - 0.33333
 #   - 0.5
