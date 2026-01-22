@@ -17,6 +17,7 @@ xdg_config_dirs:
   share: "{{ xdg_share_dir }}"
   config: "{{ xdg_config_dir }}"
   cache: "{{ xdg_cache_dir }}"
+autostart_config_dir: "{{ xdg_config_dir }}/autostart"
 rustup_arch: x86_64
 rustup_os: linux-gnu
 rustup_home_dir: "{{ dotfiles_user_home }}/.rustup"

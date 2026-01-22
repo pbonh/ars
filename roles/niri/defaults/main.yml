@@ -36,18 +36,18 @@ niri_named_workspaces:
     name: "browse"
   obsidian:
     name: "obsidian"
-  office:
-    name: "office"
   code:
     name: "code"
   calc:
     name: "calc"
-  media:
-    name: "media"
   vault:
     name: "vault"
-  system:
-    name: "system"
+  office:
+    name: "office"
+  media:
+    name: "media"
+  # system:
+  #   name: "system"
 # Window rules to place apps onto named workspaces.
 # Keys are identifiers; values support:
 # - workspace: target workspace key (required)
@@ -57,7 +57,7 @@ niri_named_workspaces:
 niri_window_rules:
   brave:
     workspace: "browse"
-    app_id: '^Brave-browser$'
+    app_id: '^Brave-Web-Browser$'
   opera:
     workspace: "browse"
     app_id: '^Opera$'
@@ -82,6 +82,12 @@ niri_window_rules:
   ghostty:
     workspace: "code"
     app_id: '^com\.mitchellh\.ghostty$'
+  cursor:
+    workspace: "code"
+    app_id: '^Cursor$'
+  zed:
+    workspace: "code"
+    app_id: '^Zed$'
   konsole:
     workspace: "code"
     app_id: '^org\.kde\.konsole$'

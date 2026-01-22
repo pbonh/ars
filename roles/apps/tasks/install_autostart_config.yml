@@ -1,0 +1,22 @@
+---
+- name: Apps | Create Autostart Directory | template
+  file:
+    path: "{{ autostart_config_dir }}"
+    state: directory
+
+- name: Apps | Check Autostart Desktop Files | template
+  ansible.builtin.stat:
+    path: "{{ applications_desktop_dir }}/{{ item.value }}"
+  loop: "{{ autostart_apps | dict2items }}"
+  register: autostart_desktop_files
+
+- name: Apps | Install Autostart Configs | template
+  ansible.builtin.copy:
+    src: >-
+      {{ (item.stat.exists | default(false))
+      | ternary(
+        applications_desktop_dir ~ '/' ~ item.item.value,
+        applications_desktop_dir_flatpak ~ '/' ~ item.item.value
+      ) }}
+    dest: "{{ autostart_config_dir }}/"
+  loop: "{{ autostart_desktop_files.results }}"

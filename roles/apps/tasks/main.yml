@@ -8,5 +8,8 @@
     msg: "Unmapped apps: {{ flatpak_apps_bundle_map | dict2items | rejectattr('value.cask', 'defined') | rejectattr('value.formula', 'defined') | rejectattr('value.flatpak', 'defined') | map(attribute='key') | list }}"
   when: (flatpak_apps_bundle_map | dict2items | rejectattr('value.cask', 'defined') | rejectattr('value.formula', 'defined') | rejectattr('value.flatpak', 'defined') | list | length) > 0
 
+- name: Apps | Configure Autostart | import_tasks
+  import_tasks: tasks/install_autostart_config.yml
+
 # - name: Syncthing | Setup | task
 #   import_tasks: tasks/setup_syncthing.yml
