@@ -21,18 +21,6 @@
     mise_schema_url_effective: "{{ item.vars.schema_url | default(item.schema_url | default(mise_schema_url_effective)) if item.vars is defined else item.schema_url | default(mise_schema_url_effective) }}"
   when:
     - item.state | default('present') == 'present'
-    - item.content is not defined
-
-- name: Write raw mise config content
-  ansible.builtin.copy:
-    content: "{{ item.content }}"
-    dest: "{{ item.path }}"
-    mode: "{{ item.mode | default('0644') }}"
-    owner: "{{ item.owner | default(omit) }}"
-    group: "{{ item.group | default(omit) }}"
-  when:
-    - item.state | default('present') == 'present'
-    - item.content is defined
 
 - name: Remove mise config file
   ansible.builtin.file:

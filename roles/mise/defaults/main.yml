@@ -11,6 +11,7 @@ mise_env: {}
 mise_tools:
   zellij: "latest"
   nushell: "latest"
+  neovim: "latest"
   zsh: "latest"
   yazi: "latest"
   fzf: "latest"
@@ -23,7 +24,6 @@ mise_tools:
   cmake: "latest"
   opencode: "latest"
   fd-find: "latest"
-  neovim: "latest"
 mise_tasks: {}
 mise_settings: {}
 mise_plugins: {}
