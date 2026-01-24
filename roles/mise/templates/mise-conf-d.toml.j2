@@ -2,17 +2,19 @@
 {%- set _schema = vars.get('schema_url', mise_schema_url_effective) -%}
 {%- if _schema %}
 # yaml-language-server: $schema={{ _schema }}
-{%- endif %}
-{%- if mise_env_effective | length > 0 %}
+
+{% endif %}
+{% if mise_env_effective | length > 0 %}
 [env]
 {%- for k, v in mise_env_effective.items() %}{{ k }} = {{ v | tojson }}
 {%- endfor %}
-{%- endif %}
-{%- if mise_tools_effective | length > 0 %}
+{% endif -%}
+{% if mise_tools_effective | length > 0 %}
 [tools]
-{%- for k, v in mise_tools_effective.items() %}{{ k }} = {{ v | tojson }}
-{%- endfor %}
-{%- endif %}
+{% for k, v in mise_tools_effective.items() %}
+{{ k }} = {{ v | tojson }}
+{% endfor %}
+{% endif %}
 {%- if mise_tasks_effective | length > 0 %}
 [tasks]
 {%- for k, v in mise_tasks_effective.items() %}

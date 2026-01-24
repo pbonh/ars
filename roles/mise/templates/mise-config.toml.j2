@@ -2,7 +2,8 @@
 {%- set _schema = vars.get('schema_url', mise_schema_url_effective) -%}
 {%- if _schema %}
 # yaml-language-server: $schema={{ _schema }}
-{%- endif %}
+
+{% endif %}
 {%- if mise_min_version_hard_effective or mise_min_version_soft_effective %}
 min_version = {%- if mise_min_version_hard_effective %} { hard = '{{ mise_min_version_hard_effective }}' }{%- endif -%}{%- if mise_min_version_hard_effective and mise_min_version_soft_effective %}, {% endif -%}{%- if mise_min_version_soft_effective %} { soft = '{{ mise_min_version_soft_effective }}' }{%- endif %}
 {%- endif %}
@@ -16,8 +17,9 @@ experimental_monorepo_root = true
 {%- endif %}
 {%- if mise_tools_effective | length > 0 %}
 [tools]
-{%- for k, v in mise_tools_effective.items() %}{{ k }} = {{ v | tojson }}
-{%- endfor %}
+{% for k, v in mise_tools_effective.items() %}
+{{ k }} = {{ v | tojson }}
+{% endfor %}
 {%- endif %}
 {%- if mise_tasks_effective | length > 0 %}
 [tasks]
