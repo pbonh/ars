@@ -1,3 +1,61 @@
 #SPDX-License-Identifier: MIT-0
 ---
+mise_config_dir: "{{ xdg_config_dir }}/mise"
+mise_confd_dir: "{{ mise_config_dir }}/conf.d"
 # defaults file for mise
+mise_schema_url: "https://mise.jdx.dev/schema/mise.json"
+mise_task_schema_url: "https://mise.jdx.dev/schema/mise-task.json"
+
+# Core config data used by the default template
+mise_env: {}
+mise_tools:
+  zellij: "latest"
+  nushell: "latest"
+  zsh: "latest"
+  yazi: "latest"
+  fzf: "latest"
+  helix: "latest"
+  ripgrep: "latest"
+  fish: "latest"
+  jq: "latest"
+  yq: "latest"
+  make: "latest"
+  cmake: "latest"
+  opencode: "latest"
+  fd-find: "latest"
+  neovim: "latest"
+mise_tasks: {}
+mise_settings: {}
+mise_plugins: {}
+mise_tool_alias: {}
+mise_shell_alias: {}
+mise_min_version_hard: ""
+mise_min_version_soft: ""
+mise_experimental_monorepo_root: false
+mise_config_raw: ""
+
+# Files to manage (mise.toml, mise.local.toml, ~/.config/mise/config.toml, conf.d files, etc)
+# Each item supports:
+#   path (required): destination path
+#   state: present|absent (default: present)
+#   mode: file mode (default: "0644")
+#   owner/group: optional owner/group
+#   dir_mode: mode for created parent directories (default: "0755")
+#   content: raw file content to write (skips templating)
+#   template: alternative Jinja2 template (default: mise-config.toml.j2)
+#   vars: dict merged into template context to override defaults above
+mise_config_files: []
+
+# Additional config fragments destined for conf.d directories
+# Same schema as mise_config_files
+mise_conf_d_fragments:
+  - path: "{{ mise_confd_dir }}/ars.toml"
+    vars:
+      mise_env:
+        NVIM_APPNAME: nvim
+      mise_tools: "{{ mise_tools }}"
+      mise_tasks:
+        build:
+          run: "npm run build"
+      mise_settings:
+        jobs: 6

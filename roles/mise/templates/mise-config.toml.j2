@@ -1,0 +1,57 @@
+{# SPDX-License-Identifier: MIT-0 #}
+{%- set _schema = vars.get('schema_url', mise_schema_url_effective) -%}
+{%- if _schema %}
+# yaml-language-server: $schema={{ _schema }}
+{%- endif %}
+{%- if mise_min_version_hard_effective or mise_min_version_soft_effective %}
+min_version = {%- if mise_min_version_hard_effective %} { hard = '{{ mise_min_version_hard_effective }}' }{%- endif -%}{%- if mise_min_version_hard_effective and mise_min_version_soft_effective %}, {% endif -%}{%- if mise_min_version_soft_effective %} { soft = '{{ mise_min_version_soft_effective }}' }{%- endif %}
+{%- endif %}
+{%- if mise_experimental_monorepo_root_effective %}
+experimental_monorepo_root = true
+{%- endif %}
+{%- if mise_env_effective | length > 0 %}
+[env]
+{%- for k, v in mise_env_effective.items() %}{{ k }} = {{ v | tojson }}
+{%- endfor %}
+{%- endif %}
+{%- if mise_tools_effective | length > 0 %}
+[tools]
+{%- for k, v in mise_tools_effective.items() %}{{ k }} = {{ v | tojson }}
+{%- endfor %}
+{%- endif %}
+{%- if mise_tasks_effective | length > 0 %}
+[tasks]
+{%- for k, v in mise_tasks_effective.items() %}
+  [tasks.{{ k }}]
+  {%- for tk, tv in v.items() %}
+  {{ tk }} = {{ tv | tojson }}
+  {%- endfor %}
+{%- endfor %}
+{%- endif %}
+{%- if mise_settings_effective | length > 0 %}
+[settings]
+{%- for k, v in mise_settings_effective.items() %}{{ k }} = {{ v | tojson }}
+{%- endfor %}
+{%- endif %}
+{%- if mise_plugins_effective | length > 0 %}
+[plugins]
+{%- for k, v in mise_plugins_effective.items() %}{{ k }} = {{ v | tojson }}
+{%- endfor %}
+{%- endif %}
+{%- if mise_tool_alias_effective | length > 0 %}
+[tool_alias]
+{%- for tool, aliases in mise_tool_alias_effective.items() %}
+  [tool_alias.{{ tool }}.versions]
+  {%- for name, val in aliases.get('versions', {}).items() %}
+  {{ name }} = {{ val | tojson }}
+  {%- endfor %}
+{%- endfor %}
+{%- endif %}
+{%- if mise_shell_alias_effective | length > 0 %}
+[shell_alias]
+{%- for k, v in mise_shell_alias_effective.items() %}{{ k }} = {{ v | tojson }}
+{%- endfor %}
+{%- endif %}
+{%- if mise_config_raw_effective | length > 0 %}
+{{ mise_config_raw_effective }}
+{%- endif %}

@@ -12,6 +12,21 @@
     mise_install_ext_override: "{{ mise_install_ext | default('') }}"
     mise_install_musl_effective: "{{ mise_install_musl | default(false) | bool }}"
     mise_tarball_url_override: "{{ mise_tarball_url | default('') }}"
+    mise_schema_url_effective: "{{ mise_schema_url | default('https://mise.jdx.dev/schema/mise.json') }}"
+    mise_task_schema_url_effective: "{{ mise_task_schema_url | default('https://mise.jdx.dev/schema/mise-task.json') }}"
+    mise_config_files_effective: "{{ mise_config_files | default([]) }}"
+    mise_conf_d_fragments_effective: "{{ mise_conf_d_fragments | default([]) }}"
+    mise_env_effective: "{{ mise_env | default({}) }}"
+    mise_tools_effective: "{{ mise_tools | default({}) }}"
+    mise_tasks_effective: "{{ mise_tasks | default({}) }}"
+    mise_settings_effective: "{{ mise_settings | default({}) }}"
+    mise_plugins_effective: "{{ mise_plugins | default({}) }}"
+    mise_tool_alias_effective: "{{ mise_tool_alias | default({}) }}"
+    mise_shell_alias_effective: "{{ mise_shell_alias | default({}) }}"
+    mise_min_version_hard_effective: "{{ mise_min_version_hard | default('') }}"
+    mise_min_version_soft_effective: "{{ mise_min_version_soft | default('') }}"
+    mise_experimental_monorepo_root_effective: "{{ mise_experimental_monorepo_root | default(false) | bool }}"
+    mise_config_raw_effective: "{{ mise_config_raw | default('') }}"
 
 - name: Determine target OS
   ansible.builtin.set_fact:
@@ -118,12 +133,14 @@
     state: directory
     prefix: mise-download-
   register: mise_temp_dir_result
+  when: mise_install_binary | default(true) | bool
 
 - name: Set temporary paths
   ansible.builtin.set_fact:
     mise_temp_dir: "{{ mise_temp_dir_result.path }}"
     mise_tarball_path: "{{ mise_temp_dir_result.path }}/{{ mise_tarball_url | basename if mise_tarball_url is defined else '' }}"
     mise_extract_dir: "{{ mise_temp_dir_result.path }}/extract"
+  when: mise_install_binary | default(true) | bool
 
 - name: Build tarball URL
   ansible.builtin.set_fact:
@@ -135,33 +152,39 @@
       {% else %}
       https://mise.jdx.dev/v{{ mise_version_no_v }}/mise-v{{ mise_version_no_v }}-{{ mise_os | trim }}-{{ mise_arch | trim }}.{{ mise_ext | trim }}
       {% endif %}
+  when: mise_install_binary | default(true) | bool
 
 - name: Update tarball path with finalized URL
   ansible.builtin.set_fact:
     mise_tarball_path: "{{ (mise_temp_dir + '/' + (mise_tarball_url | basename)) | trim }}"
+  when: mise_install_binary | default(true) | bool
 
 - name: Create extraction directory
   ansible.builtin.file:
     path: "{{ mise_extract_dir }}"
     state: directory
     mode: "0755"
+  when: mise_install_binary | default(true) | bool
 
 - name: Download checksums file
   ansible.builtin.get_url:
     url: "https://github.com/jdx/mise/releases/download/v{{ mise_version_no_v }}/SHASUMS256.txt"
     dest: "{{ mise_temp_dir }}/SHASUMS256.txt"
     mode: "0644"
+  when: mise_install_binary | default(true) | bool
 
 - name: Read checksums file
   ansible.builtin.slurp:
     src: "{{ mise_temp_dir }}/SHASUMS256.txt"
   register: mise_shasums
+  when: mise_install_binary | default(true) | bool
 
 - name: Extract checksum line
   ansible.builtin.set_fact:
     mise_checksum_line: "{{ (mise_shasums.content | b64decode).splitlines() | select('search', mise_checksum_pattern) | list | first | default('') }}"
   vars:
     mise_checksum_pattern: "{{ (mise_os | trim) }}-{{ (mise_arch | trim) }}\\.{{ (mise_ext | trim) }}"
+  when: mise_install_binary | default(true) | bool
 
 - name: Validate checksum presence
   ansible.builtin.assert:
@@ -169,48 +192,59 @@
       - mise_checksum_line | length > 0
       - mise_checksum_line is regex('^([0-9a-f]{32}|[0-9a-f]{64})')
     fail_msg: "No valid checksum found for {{ mise_os }}-{{ mise_arch }}.{{ mise_ext }}"
+  when: mise_install_binary | default(true) | bool
 
 - name: Download mise tarball
   ansible.builtin.get_url:
     url: "{{ mise_tarball_url | trim }}"
     dest: "{{ mise_tarball_path | trim }}"
     mode: "0644"
+  when: mise_install_binary | default(true) | bool
 
 - name: Compute sha256 of downloaded tarball
   ansible.builtin.stat:
     path: "{{ mise_tarball_path }}"
     checksum_algorithm: sha256
   register: mise_tarball_checksum
+  when: mise_install_binary | default(true) | bool
 
 - name: Validate tarball checksum
   ansible.builtin.assert:
     that:
       - mise_tarball_checksum.stat.checksum == (mise_checksum_line.split()[0])
     fail_msg: "Checksum mismatch for downloaded tarball"
+  when: mise_install_binary | default(true) | bool
 
 - name: Extract tarball (tar.gz)
   ansible.builtin.command:
     cmd: "tar -xzf {{ mise_tarball_path | trim }} -C {{ mise_extract_dir }} --strip-components=1"
-  when: (mise_ext | trim) == 'tar.gz'
+  when:
+    - (mise_ext | trim) == 'tar.gz'
+    - mise_install_binary | default(true) | bool
 
 - name: Extract tarball (tar.zst)
   ansible.builtin.shell: "zstd -d -c {{ mise_tarball_path | trim }} | tar -xf - -C {{ mise_extract_dir }} --strip-components=1"
-  when: (mise_ext | trim) == 'tar.zst'
+  when:
+    - (mise_ext | trim) == 'tar.zst'
+    - mise_install_binary | default(true) | bool
 
 - name: Create extraction marker
   ansible.builtin.file:
     path: "{{ mise_extract_dir }}/.extracted"
     state: touch
+  when: mise_install_binary | default(true) | bool
 
 - name: Locate extracted mise binary (bin/mise)
   ansible.builtin.stat:
     path: "{{ mise_extract_dir }}/bin/mise"
   register: mise_extract_bin
+  when: mise_install_binary | default(true) | bool
 
 - name: Locate extracted mise binary (root)
   ansible.builtin.stat:
     path: "{{ mise_extract_dir }}/mise"
   register: mise_extract_root
+  when: mise_install_binary | default(true) | bool
 
 - name: Locate extracted mise binary (any)
   ansible.builtin.find:
@@ -220,21 +254,24 @@
     recurse: true
     use_regex: false
   register: mise_extract_find
+  when: mise_install_binary | default(true) | bool
 
 - name: Select extracted mise path
   ansible.builtin.set_fact:
     mise_extracted_binary: >-
       {{ (
-        (mise_extract_dir + '/bin/mise') if mise_extract_bin.stat.exists else
-        ((mise_extract_dir + '/mise') if mise_extract_root.stat.exists else
-         ((mise_extract_find.files[0].path) if (mise_extract_find.files | length) > 0 else ''))
+        (mise_extract_dir + '/bin/mise') if (mise_install_binary | default(true) | bool and mise_extract_bin.stat.exists) else
+        ((mise_extract_dir + '/mise') if (mise_install_binary | default(true) | bool and mise_extract_root.stat.exists) else
+         ((mise_extract_find.files[0].path) if (mise_install_binary | default(true) | bool and (mise_extract_find.files | length) > 0) else ''))
       ) | trim }}
 
 - name: Stat selected mise binary
   ansible.builtin.stat:
     path: "{{ mise_extracted_binary }}"
   register: mise_selected_stat
-  when: mise_extracted_binary | length > 0
+  when:
+    - mise_extracted_binary | length > 0
+    - mise_install_binary | default(true) | bool
 
 - name: Fail with diagnostics if mise binary missing
   ansible.builtin.fail:
@@ -244,19 +281,23 @@
       find_count: {{ mise_extract_find.files | length }}
       find_paths: {{ mise_extract_find.files | map(attribute='path') | list }}
       selected: {{ mise_extracted_binary }}
-  when: (mise_extracted_binary | trim | length == 0) or (mise_selected_stat is defined and not mise_selected_stat.stat.exists)
+  when:
+    - mise_install_binary | default(true) | bool
+    - (mise_extracted_binary | trim | length == 0) or (mise_selected_stat is defined and not mise_selected_stat.stat.exists)
 
 - name: Ensure mise binary was extracted
   ansible.builtin.assert:
     that:
       - mise_extracted_binary | length > 0
     fail_msg: "Extracted tarball does not contain mise binary"
+  when: mise_install_binary | default(true) | bool
 
 - name: Ensure install directory exists
   ansible.builtin.file:
     path: "{{ mise_install_path_effective | dirname }}"
     state: directory
     mode: "0755"
+  when: mise_install_binary | default(true) | bool
 
 - name: Install mise binary
   ansible.builtin.copy:
@@ -264,11 +305,13 @@
     dest: "{{ mise_install_path_effective }}"
     mode: "0755"
     remote_src: true
+  when: mise_install_binary | default(true) | bool
 
 - name: Cleanup temporary directory
   ansible.builtin.file:
     path: "{{ mise_temp_dir }}"
     state: absent
+  when: mise_install_binary | default(true) | bool
 
 - name: Post-install help instructions
   ansible.builtin.debug:
@@ -294,3 +337,7 @@
       mise: run `{{ mise_install_path_effective }} --help` to get started
       {% endif %}
       {% endif %}
+
+- name: Manage mise configuration files
+  ansible.builtin.include_tasks: manage-config.yml
+  when: (mise_config_files_effective | length > 0) or (mise_conf_d_fragments_effective | length > 0)

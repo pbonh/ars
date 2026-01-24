@@ -1,0 +1,41 @@
+---
+- name: Render mise config from template
+  ansible.builtin.template:
+    src: "{{ item.template | default('mise-config.toml.j2') }}"
+    dest: "{{ item.path }}"
+    mode: "{{ item.mode | default('0644') }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+  vars:
+    mise_env_effective: "{{ item.vars.mise_env | default(mise_env_effective) if item.vars is defined else mise_env_effective }}"
+    mise_tools_effective: "{{ item.vars.mise_tools | default(mise_tools_effective) if item.vars is defined else mise_tools_effective }}"
+    mise_tasks_effective: "{{ item.vars.mise_tasks | default(mise_tasks_effective) if item.vars is defined else mise_tasks_effective }}"
+    mise_settings_effective: "{{ item.vars.mise_settings | default(mise_settings_effective) if item.vars is defined else mise_settings_effective }}"
+    mise_plugins_effective: "{{ item.vars.mise_plugins | default(mise_plugins_effective) if item.vars is defined else mise_plugins_effective }}"
+    mise_tool_alias_effective: "{{ item.vars.mise_tool_alias | default(mise_tool_alias_effective) if item.vars is defined else mise_tool_alias_effective }}"
+    mise_shell_alias_effective: "{{ item.vars.mise_shell_alias | default(mise_shell_alias_effective) if item.vars is defined else mise_shell_alias_effective }}"
+    mise_min_version_hard_effective: "{{ item.vars.mise_min_version_hard | default(mise_min_version_hard_effective) if item.vars is defined else mise_min_version_hard_effective }}"
+    mise_min_version_soft_effective: "{{ item.vars.mise_min_version_soft | default(mise_min_version_soft_effective) if item.vars is defined else mise_min_version_soft_effective }}"
+    mise_experimental_monorepo_root_effective: "{{ item.vars.mise_experimental_monorepo_root | default(mise_experimental_monorepo_root_effective) if item.vars is defined else mise_experimental_monorepo_root_effective }}"
+    mise_config_raw_effective: "{{ item.vars.mise_config_raw | default(mise_config_raw_effective) if item.vars is defined else mise_config_raw_effective }}"
+    mise_schema_url_effective: "{{ item.vars.schema_url | default(item.schema_url | default(mise_schema_url_effective)) if item.vars is defined else item.schema_url | default(mise_schema_url_effective) }}"
+  when:
+    - item.state | default('present') == 'present'
+    - item.content is not defined
+
+- name: Write raw mise config content
+  ansible.builtin.copy:
+    content: "{{ item.content }}"
+    dest: "{{ item.path }}"
+    mode: "{{ item.mode | default('0644') }}"
+    owner: "{{ item.owner | default(omit) }}"
+    group: "{{ item.group | default(omit) }}"
+  when:
+    - item.state | default('present') == 'present'
+    - item.content is defined
+
+- name: Remove mise config file
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  when: item.state | default('present') == 'absent'
