@@ -1,15 +1,11 @@
 ---
 - name: Vars | Set Mise Variables | set_fact
   ansible.builtin.set_fact:
-    zsh_mise_env: |
-      eval "$(mise activate zsh)"
-    bash_mise_env: |
-      eval "$(mise activate bash)"
     nu_mise_config: |
-      use ($nu.default-config-dir | path join "mise.nu")
+      use ($nu.default-config-dir | path join mise.nu)
     nu_mise_env: |
-      let mise_path = ($nu.default-config-dir | path join "mise.nu")
-      ^mise activate nu | save --force $mise_path
+      let mise_path = $nu.default-config-dir | path join mise.nu
+      ^mise activate nu | save $mise_path --force
     bash_fzf_path: ""
     zsh_fzf_path: ""
     tcsh_fzf_path: ""
