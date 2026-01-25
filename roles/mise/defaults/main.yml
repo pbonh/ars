@@ -26,7 +26,8 @@ mise_tools:
   cmake: "latest"
   opencode: "latest"
 mise_tasks: {}
-mise_settings: {}
+mise_settings:
+  enable_tools: "{{ mise_tools.keys() | list }}"
 mise_plugins: {}
 mise_tool_alias: {}
 mise_shell_alias: {}
