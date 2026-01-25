@@ -7,10 +7,6 @@ bash_default_options: |
     . /etc/bashrc
   fi
 bash_default_env: |
-  {{ bash_mise_env }}
-  {{ bash_devbox_env }}
-  {{ bash_homebrew_env }}
-  {{ bash_nonroot_env }}
   {% for path_info in path_directories -%}
   {% if path_directories[path_info]['prepend'] == false %}
   {{ "export PATH=$PATH:" + path_directories[path_info]['path'] }}
@@ -18,6 +14,10 @@ bash_default_env: |
   {{ "export PATH=" + path_directories[path_info]['path'] + ":$PATH" }}
   {% endif %}
   {% endfor %}
+  {{ bash_mise_env }}
+  {{ bash_devbox_env }}
+  {{ bash_homebrew_env }}
+  {{ bash_nonroot_env }}
   {% for env_var in env_variables | dict2items -%}
   export {{ env_var.key | upper }}="{{ env_var.value }}"
   {% endfor %}
