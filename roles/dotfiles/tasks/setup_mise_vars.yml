@@ -1,6 +1,7 @@
 ---
 - name: Vars | Set Mise Variables | set_fact
   ansible.builtin.set_fact:
+    bash_plugins_source: {}
     nu_mise_config: |
       use ($nu.default-config-dir | path join mise.nu)
     nu_mise_env: |
