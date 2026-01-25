@@ -8,6 +8,9 @@ setup: install-requirements
 dotfiles tag='devbox':
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "{{ tag }}"
 
+mise:
+  {{ task_prelude }} ansible-playbook mise.yml
+
 devbox:
   {{ task_prelude }} ansible-playbook devbox.yml
 
@@ -22,6 +25,9 @@ dot tag='env':
 
 shell:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "env,scripts" --skip-tags "install"
+
+nushell:
+  {{ task_prelude }} ansible-playbook dotfiles.yml --tags "nushell" --skip-tags "install"
 
 scripts:
   {{ task_prelude }} ansible-playbook dotfiles.yml --tags "scripts" --skip-tags "install"

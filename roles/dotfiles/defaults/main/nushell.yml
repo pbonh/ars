@@ -1,5 +1,7 @@
 ---
 nushell_config_dir: "{{ xdg_config_dir }}/nushell"
+nu_mise_config: ""
+nu_mise_env: ""
 nu_devbox_env: ""
 nu_homebrew_env: ""
 nu_nonroot_env: ""
@@ -33,6 +35,7 @@ nushell_carapace_config: |
 nushell_carapace_env: |
   {{ carapace_exe }} _carapace nushell | save --force {{ nushell_carapace_config_file }}
 nushell_starship_env: |
+  mkdir ($nu.data-dir | path join "vendor/autoload")
   {{ starship_exe }} init nu | save -f {{ nushell_starship_source }}
 nushell_custom_config: |
   $env.config = {
@@ -111,7 +114,7 @@ nushell_zellij_aliases: |
   {% for zellij_layout in zellij_kdl_layouts -%}
   alias z{{ zellij_layout }} = {{ zellij_exe }} --layout {{ zellij_kdl_layouts[zellij_layout]['name'] }}
   {% endfor %}
-nushell_starship_dir: "{{ xdg_cache_dir }}/starship"
-nushell_starship_source: "{{ nushell_starship_dir }}/init.nu"
+nushell_starship_dir: "{{ xdg_data_dir }}/nushell/vendor/autoload"
+nushell_starship_source: "{{ nushell_starship_dir }}/starship.nu"
 nushell_starship_config: |
   use {{ nushell_starship_source }}

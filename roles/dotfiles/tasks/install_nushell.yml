@@ -18,6 +18,12 @@
     state: directory
     mode: '0755'
 
+- name: nushell | Ensure nushell autoload directory exists | file
+  file:
+    path: "{{ xdg_data_dir }}/nushell/vendor/autoload"
+    state: directory
+    mode: '0755'
+
 - name: nushell | Setup Atuin Directory | file
   file:
     path: "{{ atuin_dir }}"

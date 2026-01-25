@@ -1,5 +1,11 @@
 ---
 - name: Ansible Variables | Setup Ansible Variables | task
+  import_tasks: tasks/setup_mise_vars.yml
+  when: tool_provider == 'mise'
+  tags:
+    - always
+
+- name: Ansible Variables | Setup Ansible Variables | task
   import_tasks: tasks/setup_devbox_vars.yml
   when: tool_provider == 'devbox'
   tags:

@@ -3,7 +3,6 @@ import 'scripts/just/dotfiles.just'
 import 'scripts/just/distrobox.just'
 import 'scripts/just/kde.just'
 import 'scripts/just/mdbook.just'
-import 'scripts/just/mise.just'
 import 'scripts/just/niri.just'
 import 'scripts/just/ucore.just'
 

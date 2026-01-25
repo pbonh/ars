@@ -1,4 +1,5 @@
 ---
+tool_provider: "mise"
 system_home: "/home"
 dotfiles_user_home: "{{ ansible_env.HOME }}"
 default_home_local: "{{ dotfiles_user_home }}/.local"
@@ -8,6 +9,7 @@ bin_directory: "{{ tool_install_bin }}/"
 xdg_share_dir: "{{ default_home_local }}/share"
 xdg_config_dir: "{{ dotfiles_user_home }}/.config"
 xdg_cache_dir:  "{{ dotfiles_user_home }}/.cache"
+xdg_data_dir: "{{ xdg_share_dir }}"
 xdg_config_dirs:
   share: "{{ xdg_share_dir }}"
   config: "{{ xdg_config_dir }}"
@@ -46,6 +48,10 @@ path_directories:
     name: scripts
     prepend: false
     path: "{{ tool_install_bin }}"
+  home_local:
+    name: home_local
+    prepend: false
+    path: "{{ default_home_local }}/bin"
 nonroot_path_directories:
   local:
     name: local

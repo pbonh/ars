@@ -13,6 +13,7 @@ bin_directory: "{{ tool_install_bin }}/"
 xdg_share_dir: "{{ default_home_local }}/share"
 xdg_config_dir: "{{ dotfiles_user_home }}/.config"
 xdg_cache_dir:  "{{ dotfiles_user_home }}/.cache"
+xdg_data_dir: "{{ xdg_share_dir }}"
 xdg_config_dirs:
   share: "{{ xdg_share_dir }}"
   config: "{{ xdg_config_dir }}"

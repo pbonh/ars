@@ -1,4 +1,15 @@
 ---
+- name: Install Tools(Mise)
+  hosts: localhost
+  vars_files:
+    - vars/local.yml
+  tasks:
+    - import_role:
+        name: mise
+      when: tool_provider == 'mise'
+      tags:
+        - install
+
 - name: Install Tools(Devbox)
   hosts: localhost
   vars_files:
