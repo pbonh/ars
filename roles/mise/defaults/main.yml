@@ -1,6 +1,7 @@
 #SPDX-License-Identifier: MIT-0
 ---
 mise_config_dir: "{{ xdg_config_dir }}/mise"
+mise_global_config: "{{ mise_config_dir }}/config.toml"
 mise_confd_dir: "{{ mise_config_dir }}/conf.d"
 # defaults file for mise
 mise_schema_url: "https://mise.jdx.dev/schema/mise.json"
@@ -44,7 +45,8 @@ mise_config_raw: ""
 #   content: raw file content to write (skips templating)
 #   template: alternative Jinja2 template (default: mise-config.toml.j2)
 #   vars: dict merged into template context to override defaults above
-mise_config_files: []
+mise_config_files:
+  - path: "{{ mise_global_config }}"
 
 # Additional config fragments destined for conf.d directories
 # Same schema as mise_config_files
