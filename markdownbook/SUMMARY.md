@@ -4,6 +4,7 @@
 
 - [Installation](installation.md)
     - [Developer Tools](installation/dev-tools.md)
+        - [Mise](installation/mise.md)
         - [Devbox](installation/devbox.md)
         - [Homebrew](installation/homebrew.md)
         - [Non-Root](installation/nonroot.md)

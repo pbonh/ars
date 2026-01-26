@@ -59,6 +59,8 @@ mise_tools:
     name: jq
   yq:
     name: yq
+  mdbook:
+    name: mdbook
   opencode:
     name: opencode
 mise_tasks: {}
