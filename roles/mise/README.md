@@ -13,8 +13,8 @@ Role Variables
 
 Core config variables (templated into `mise-config.toml.j2` by default):
 
-- `mise_env`: mapping for `[env]` section.
-- `mise_tools`: mapping for `[tools]` section. Each entry accepts an object with `name` (required, string for the actual package) and optional `version` (defaults to `latest`); legacy string values are still accepted and treated as the version for that key.
+- `mise_env`: mapping for `[env]` section. Default sets `RUSTUP_TOOLCHAIN=nightly`.
+- `mise_tools`: mapping for `[tools]` section. Each entry accepts an object with `name` (required, string for the actual package) and optional `version` (defaults to `latest`); legacy string values are still accepted and treated as the version for that key. Default `rust` is pinned to `nightly`.
 - `mise_tasks`: mapping for `[tasks.*]` entries; each task is a mapping of keys (e.g., `run`, `depends`, `dir`).
 - `mise_settings`: mapping for `[settings]` section.
 - `mise_plugins`: mapping for `[plugins]` section.

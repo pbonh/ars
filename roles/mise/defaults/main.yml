@@ -7,7 +7,8 @@ mise_confd_dir: "{{ mise_config_dir }}/conf.d"
 mise_schema_url: "https://mise.jdx.dev/schema/mise.json"
 mise_task_schema_url: "https://mise.jdx.dev/schema/mise-task.json"
 # Core config data used by the default template
-mise_env: {}
+mise_env:
+  RUSTUP_TOOLCHAIN: nightly
 mise_tools:
   make:
     name: make
@@ -15,6 +16,7 @@ mise_tools:
     name: cmake
   rust:
     name: rust
+    version: nightly
   cargo-binstall:
     name: cargo-binstall
   nushell:
@@ -27,6 +29,8 @@ mise_tools:
     name: yazi
   fzf:
     name: fzf
+  skim:
+    name: "cargo:skim"
   navi:
     name: "cargo:navi"
   ripgrep:
