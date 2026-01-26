@@ -19,23 +19,25 @@
 {% if mise_env_effective | length > 0 %}
 [env]
 {% for k, v in mise_env_effective.items() %}
-{{ k }} = {{ v | tojson }}
+{{ k | tojson }} = {{ v | tojson }}
 {% endfor %}
 
 {% endif %}
 {% if mise_tools_effective | length > 0 %}
 [tools]
 {% for k, v in mise_tools_effective.items() %}
-{{ k }} = {{ v | tojson }}
+{% set tool_name = v.name if (v is mapping and 'name' in v) else k %}
+{% set tool_version = v.version if (v is mapping and 'version' in v) else (v if (v is string) else 'latest') %}
+{{ tool_name | tojson }} = {{ tool_version | default('latest') | tojson }}
 {% endfor %}
 
 {% endif %}
 {% if mise_tasks_effective | length > 0 %}
 [tasks]
 {% for k, v in mise_tasks_effective.items() %}
-[tasks.{{ k }}]
+[tasks.{{ k | tojson }}]
 {% for tk, tv in v.items() %}
-{{ tk }} = {{ tv | tojson }}
+{{ tk | tojson }} = {{ tv | tojson }}
 {% endfor %}
 
 {% endfor %}
@@ -44,23 +46,23 @@
 {% if mise_settings_effective | length > 0 %}
 [settings]
 {% for k, v in mise_settings_effective.items() %}
-{{ k }} = {{ v | tojson }}
+{{ k | tojson }} = {{ v | tojson }}
 {% endfor %}
 
 {% endif %}
 {% if mise_plugins_effective | length > 0 %}
 [plugins]
 {% for k, v in mise_plugins_effective.items() %}
-{{ k }} = {{ v | tojson }}
+{{ k | tojson }} = {{ v | tojson }}
 {% endfor %}
 
 {% endif %}
 {% if mise_tool_alias_effective | length > 0 %}
 [tool_alias]
 {% for tool, aliases in mise_tool_alias_effective.items() %}
-[tool_alias.{{ tool }}.versions]
+[tool_alias.{{ tool | tojson }}.versions]
 {% for name, val in aliases.get('versions', {}).items() %}
-{{ name }} = {{ val | tojson }}
+{{ name | tojson }} = {{ val | tojson }}
 {% endfor %}
 
 {% endfor %}
@@ -69,7 +71,7 @@
 {% if mise_shell_alias_effective | length > 0 %}
 [shell_alias]
 {% for k, v in mise_shell_alias_effective.items() %}
-{{ k }} = {{ v | tojson }}
+{{ k | tojson }} = {{ v | tojson }}
 {% endfor %}
 
 {% endif %}

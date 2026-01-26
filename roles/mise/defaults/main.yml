@@ -6,33 +6,59 @@ mise_confd_dir: "{{ mise_config_dir }}/conf.d"
 # defaults file for mise
 mise_schema_url: "https://mise.jdx.dev/schema/mise.json"
 mise_task_schema_url: "https://mise.jdx.dev/schema/mise-task.json"
-
 # Core config data used by the default template
 mise_env: {}
 mise_tools:
-  zellij: "latest"
-  neovim: "latest"
-  yazi: "latest"
-  fzf: "latest"
-  ripgrep: "latest"
-  bat: "latest"
-  lsd: "latest"
-  just: "latest"
-  atuin: "latest"
-  direnv: "latest"
-  starship: "latest"
-  zoxide: "latest"
-  carapace: "latest"
-  fd: "latest"
-  helix: "latest"
-  jq: "latest"
-  yq: "latest"
-  make: "latest"
-  cmake: "latest"
-  opencode: "latest"
+  make:
+    name: make
+  cmake:
+    name: cmake
+  rust:
+    name: rust
+  cargo-binstall:
+    name: cargo-binstall
+  nushell:
+    name: "cargo:nu"
+  zellij:
+    name: zellij
+  neovim:
+    name: neovim
+  yazi:
+    name: yazi
+  fzf:
+    name: fzf
+  navi:
+    name: "cargo:navi"
+  ripgrep:
+    name: ripgrep
+  bat:
+    name: bat
+  lsd:
+    name: lsd
+  just:
+    name: just
+  atuin:
+    name: atuin
+  direnv:
+    name: direnv
+  starship:
+    name: starship
+  zoxide:
+    name: zoxide
+  carapace:
+    name: carapace
+  fd:
+    name: fd
+  helix:
+    name: helix
+  jq:
+    name: jq
+  yq:
+    name: yq
+  opencode:
+    name: opencode
 mise_tasks: {}
-mise_settings:
-  enable_tools: "{{ mise_tools.keys() | list }}"
+mise_settings: {}
 mise_plugins: {}
 mise_tool_alias: {}
 mise_shell_alias: {}
@@ -56,14 +82,16 @@ mise_config_files:
 
 # Additional config fragments destined for conf.d directories
 # Same schema as mise_config_files
-mise_conf_d_fragments:
-  - path: "{{ mise_confd_dir }}/ars.toml"
-    vars:
-      mise_env:
-        NVIM_APPNAME: nvim
-      mise_tools: "{{ mise_tools }}"
-      mise_tasks:
-        build:
-          run: "npm run build"
-      mise_settings:
-        jobs: 6
+# Example:
+# mise_conf_d_fragments:
+#   - path: "{{ mise_confd_dir }}/ars.toml"
+#     vars:
+#       mise_env:
+#         NVIM_APPNAME: nvim
+#       mise_tools: "{{ mise_tools }}"
+#       mise_tasks:
+#         build:
+#           run: "npm run build"
+#       mise_settings:
+#         jobs: 6
+mise_conf_d_fragments: []

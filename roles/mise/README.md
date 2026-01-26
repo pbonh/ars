@@ -14,7 +14,7 @@ Role Variables
 Core config variables (templated into `mise-config.toml.j2` by default):
 
 - `mise_env`: mapping for `[env]` section.
-- `mise_tools`: mapping for `[tools]` section.
+- `mise_tools`: mapping for `[tools]` section. Each entry accepts an object with `name` (required, string for the actual package) and optional `version` (defaults to `latest`); legacy string values are still accepted and treated as the version for that key.
 - `mise_tasks`: mapping for `[tasks.*]` entries; each task is a mapping of keys (e.g., `run`, `depends`, `dir`).
 - `mise_settings`: mapping for `[settings]` section.
 - `mise_plugins`: mapping for `[plugins]` section.
@@ -41,6 +41,10 @@ Config file management:
 
 - `mise_conf_d_fragments`: list of additional fragments for `conf.d` directories; same schema as `mise_config_files`. Example: `path: ~/.config/mise/conf.d/10-tasks.toml`.
 
+Tool name reuse:
+
+- When `mise_settings.enable_tools` is not provided, the role now derives it from the `name` fields in `mise_tools` (falling back to legacy keys when `name` is absent).
+
 Binary install control:
 
 - `mise_install_binary` (bool, default true): toggle downloading/installing mise. When false, only config management runs.
@@ -66,8 +70,12 @@ Example Playbook
               mise_env:
                 NODE_ENV: production
               mise_tools:
-                node: "22"
-                python: "3.12"
+                node:
+                  name: node
+                  version: "22"
+                python:
+                  name: python
+                  version: "3.12"
               mise_tasks:
                 build:
                   run: "npm run build"

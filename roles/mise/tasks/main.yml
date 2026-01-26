@@ -28,6 +28,39 @@
     mise_experimental_monorepo_root_effective: "{{ mise_experimental_monorepo_root | default(false) | bool }}"
     mise_config_raw_effective: "{{ mise_config_raw | default('') }}"
 
+- name: Mise | Normalize tool definitions
+  ansible.builtin.set_fact:
+    mise_tools_normalized: >-
+      {{
+        mise_tools_normalized | default({}) | combine({ item.key: {
+          'name': (item.value.name if (item.value is mapping and 'name' in item.value) else item.key),
+          'version': (
+            item.value.version if (item.value is mapping and 'version' in item.value)
+            else (item.value if (item.value is string) else 'latest')
+          )
+        } })
+      }}
+  loop: "{{ mise_tools_effective | default({}) | dict2items }}"
+
+- name: Mise | Finalize tool facts
+  ansible.builtin.set_fact:
+    mise_tools_effective: "{{ mise_tools_normalized | default({}) }}"
+    mise_tool_names_effective: "{{ mise_tools_normalized | default({}) | dict2items | map(attribute='value') | map(attribute='name') | list }}"
+
+- name: Mise | Default enable_tools when unset
+  ansible.builtin.set_fact:
+    mise_settings_effective: >-
+      {{
+        (mise_settings_effective | default({})) |
+        combine({
+          'enable_tools': (
+            mise_settings_effective['enable_tools']
+            if (mise_settings_effective is mapping and 'enable_tools' in mise_settings_effective)
+            else mise_tool_names_effective
+          )
+        }, recursive=True)
+      }}
+
 - name: Mise | Install Mise | import_tasks
   ansible.builtin.import_tasks: install_mise.yml
 
