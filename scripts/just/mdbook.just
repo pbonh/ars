@@ -48,15 +48,20 @@ mdbook-gh-pages: mdbook-build
   set -ex ; \
   WORK="$$( mktemp -d )" ; \
   VER="$$( git describe --always --tags --dirty )" ; \
-  git branch -D gh-pages || true ; \
-  git branch gh-pages origin/gh-pages ; \
-  git worktree add --force "$$WORK" gh-pages ; \
+  trap 'git worktree remove --force "$WORK" 2>/dev/null || true' EXIT ; \
+  git worktree prune ; \
+  if git worktree list --porcelain | grep -Eq "^branch (refs/heads/gh-pages|refs/remotes/origin/gh-pages)$$" ; then \
+    echo "gh-pages already checked out in a worktree; aborting." ; \
+    git worktree list ; \
+    exit 1 ; \
+  fi ; \
+  git fetch origin gh-pages ; \
+  git worktree add --force "$$WORK" origin/gh-pages ; \
   rm -rf "$$WORK"/* ; \
   rsync -av book/ "$$WORK"/ ; \
   if [ -f CNAME ] ; then cp CNAME "$$WORK"/ ; fi ; \
   pushd "$$WORK" ; \
   git add -A ; \
-  git commit -m "Updated gh-pages $$VER" ; \
-  popd ; \
-  git worktree remove "$$WORK" ; \
-  git push origin gh-pages
+  if git diff --cached --quiet ; then echo "No changes to commit" ; else git commit -m "Updated gh-pages $$VER" ; fi ; \
+  git push origin HEAD:gh-pages ; \
+  popd
