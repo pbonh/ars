@@ -112,8 +112,24 @@ niri_window_rules:
   bitwarden:
     workspace: "vault"
     app_id: '^(Bitwarden|com\.bitwarden\.desktop)$'
+  # launch with: alacritty --class dropdown
+  dropdown:
+    app_id: '^dropdown$'
+    open_floating: true
+    default_floating_position:
+      x: 0
+      y: 0
+      relative_to: "top"
+    default_window_height:
+      proportion: 0.5
+    default_column_width:
+      proportion: 0.8
 niri_local_kdl_content: |
   {{ niri_global_layout_options }}
+
+  binds {
+    Mod+grave { spawn "alacritty" "--class" "dropdown"; }
+  }
 
   {% for ws in niri_named_workspaces | dict2items %}
   workspace "{{ ws.value.name | default(ws.key) }}" {
@@ -134,29 +150,58 @@ niri_local_kdl_content: |
   {% if niri_window_rules | length > 0 %}
 
   {% for rule in niri_window_rules | dict2items %}
-  {% if rule.value.workspace is defined and rule.value.workspace | length > 0 %}
+  {% set render_rule =
+      (rule.value.workspace is defined and rule.value.workspace | length > 0) or
+      (rule.value.app_id is defined and rule.value.app_id | length > 0) or
+      (rule.value.match is defined and rule.value.match | length > 0) or
+      (rule.value.extra_match is defined and rule.value.extra_match | trim | length > 0)
+  %}
+  {% if render_rule %}
   {% set match_parts = [] %}
   {% if rule.value.at_startup | default(false) %}{% set _ = match_parts.append('at-startup=true') %}{% endif %}
   {% if rule.value.app_id | default('') | length > 0 %}{% set _ = match_parts.append('app-id=r#"' ~ rule.value.app_id ~ '"#') %}{% endif %}
   {% if rule.value.match is defined and rule.value.match | length > 0 %}
   {% for match_item in rule.value.match | dict2items %}
-  {% if match_item.value is boolean %}{% set _ = match_parts.append(match_item.key ~ '=' ~ (match_item.value | lower)) %}{% else %}{% set _ = match_parts.append(match_item.key ~ '=' ~ match_item.value) %}{% endif %}
-  {% endfor %}
-  {% endif %}
+    {% if match_item.value is boolean %}{% set _ = match_parts.append(match_item.key ~ '=' ~ (match_item.value | lower)) %}{% else %}{% set _ = match_parts.append(match_item.key ~ '=' ~ match_item.value) %}{% endif %}
+    {% endfor %}
+    {% endif %}
   {% if rule.value.extra_match is defined and rule.value.extra_match | trim | length > 0 %}{% set _ = match_parts.append(rule.value.extra_match | trim) %}{% endif %}
   window-rule {
   {% if match_parts | length > 0 %}
     match {{ match_parts | join(' ') }}
   {% endif %}
+  {% if rule.value.workspace is defined and rule.value.workspace | length > 0 %}
     open-on-workspace "{{ rule.value.workspace }}"
+  {% endif %}
   {% if rule.value.open_floating | default(false) %}
     open-floating true
   {% endif %}
+  {% if rule.value.default_floating_position is defined %}
+    default-floating-position x={{ rule.value.default_floating_position.x | default(0) }} y={{ rule.value.default_floating_position.y | default(0) }} relative-to="{{ rule.value.default_floating_position.relative_to | default('top') }}"
+  {% endif %}
   {% if rule.value.default_column_width is defined %}
-    default-column-width { fixed {{ rule.value.default_column_width }}; }
+    {% set col_width = rule.value.default_column_width %}
+    default-column-width {
+    {% if col_width is mapping and col_width.proportion is defined %}
+      proportion {{ col_width.proportion }};
+    {% elif col_width is mapping and col_width.fixed is defined %}
+      fixed {{ col_width.fixed }};
+    {% else %}
+      fixed {{ col_width }};
+    {% endif %}
+    }
   {% endif %}
   {% if rule.value.default_window_height is defined %}
-    default-window-height { fixed {{ rule.value.default_window_height }}; }
+    {% set window_height = rule.value.default_window_height %}
+    default-window-height {
+    {% if window_height is mapping and window_height.proportion is defined %}
+      proportion {{ window_height.proportion }};
+    {% elif window_height is mapping and window_height.fixed is defined %}
+      fixed {{ window_height.fixed }};
+    {% else %}
+      fixed {{ window_height }};
+    {% endif %}
+    }
   {% endif %}
   }
   {% if not loop.last %}
@@ -166,4 +211,3 @@ niri_local_kdl_content: |
 
   {% endfor %}
   {% endif %}
-
