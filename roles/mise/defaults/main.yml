@@ -64,7 +64,12 @@ mise_tools:
   opencode:
     name: opencode
 mise_tasks: {}
-mise_settings: {}
+mise_settings:
+  gpg_verify: true
+mise_gpg_keys:
+  - B2508A90102F8AE3B12A0090DEACCAAEDB78137A
+mise_gpg_keyserver_primary: "hkps://keyserver.ubuntu.com"
+mise_gpg_keyserver_fallback: "hkps://keys.openpgp.org"
 mise_plugins: {}
 mise_tool_alias: {}
 mise_shell_alias: {}

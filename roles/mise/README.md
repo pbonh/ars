@@ -16,7 +16,7 @@ Core config variables (templated into `mise-config.toml.j2` by default):
 - `mise_env`: mapping for `[env]` section. Default sets `RUSTUP_TOOLCHAIN=nightly`.
 - `mise_tools`: mapping for `[tools]` section. Each entry accepts an object with `name` (required, string for the actual package) and optional `version` (defaults to `latest`); legacy string values are still accepted and treated as the version for that key. Default `rust` is pinned to `nightly`.
 - `mise_tasks`: mapping for `[tasks.*]` entries; each task is a mapping of keys (e.g., `run`, `depends`, `dir`).
-- `mise_settings`: mapping for `[settings]` section.
+- `mise_settings`: mapping for `[settings]` section (defaults include `gpg_verify=true`).
 - `mise_plugins`: mapping for `[plugins]` section.
 - `mise_tool_alias`: mapping for `[tool_alias.<tool>.versions]`.
 - `mise_shell_alias`: mapping for `[shell_alias]`.
@@ -25,6 +25,12 @@ Core config variables (templated into `mise-config.toml.j2` by default):
 - `mise_config_raw`: raw TOML appended at end of template.
 - `mise_schema_url`: schema URL hint (default `https://mise.jdx.dev/schema/mise.json`).
 - `mise_task_schema_url`: schema URL hint for task fragments (default `https://mise.jdx.dev/schema/mise-task.json`).
+
+GPG verification support:
+
+- `mise_gpg_keys`: list of key IDs to import into the user keyring for tool signature verification (defaults to GNU Make signing key).
+- `mise_gpg_keyserver_primary`: primary keyserver for imports (default `hkps://keyserver.ubuntu.com`).
+- `mise_gpg_keyserver_fallback`: fallback keyserver if the primary fails (default `hkps://keys.openpgp.org`).
 
 Config file management:
 

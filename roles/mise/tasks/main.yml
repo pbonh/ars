@@ -20,6 +20,9 @@
     mise_tools_effective: "{{ mise_tools | default({}) }}"
     mise_tasks_effective: "{{ mise_tasks | default({}) }}"
     mise_settings_effective: "{{ mise_settings | default({}) }}"
+    mise_gpg_keys_effective: "{{ mise_gpg_keys | default([]) }}"
+    mise_gpg_keyserver_primary_effective: "{{ mise_gpg_keyserver_primary | default('hkps://keyserver.ubuntu.com') }}"
+    mise_gpg_keyserver_fallback_effective: "{{ mise_gpg_keyserver_fallback | default('hkps://keys.openpgp.org') }}"
     mise_plugins_effective: "{{ mise_plugins | default({}) }}"
     mise_tool_alias_effective: "{{ mise_tool_alias | default({}) }}"
     mise_shell_alias_effective: "{{ mise_shell_alias | default({}) }}"
@@ -60,6 +63,92 @@
           )
         }, recursive=True)
       }}
+
+- name: Mise | Check for gpg binary
+  ansible.builtin.command: gpg --version
+  register: mise_gpg_version
+  changed_when: false
+  failed_when: false
+  when:
+    - mise_gpg_keys_effective | length > 0
+    - mise_settings_effective.gpg_verify | default(false)
+
+- name: Mise | Ensure gpg available when verifying
+  ansible.builtin.assert:
+    that:
+      - mise_gpg_version.rc == 0
+    fail_msg: "gpg is required to import mise_gpg_keys; install gpg or disable gpg_verify."
+  when:
+    - mise_gpg_keys_effective | length > 0
+    - mise_settings_effective.gpg_verify | default(false)
+
+- name: Mise | Check for required gpg keys
+  ansible.builtin.command: "gpg --list-keys {{ item }}"
+  register: mise_gpg_key_check
+  changed_when: false
+  failed_when: false
+  loop: "{{ mise_gpg_keys_effective }}"
+  loop_control:
+    label: "{{ item }}"
+  when:
+    - mise_gpg_keys_effective | length > 0
+    - mise_gpg_version.rc == 0
+    - mise_settings_effective.gpg_verify | default(false)
+
+- name: Mise | Import missing gpg keys (primary)
+  ansible.builtin.command: "gpg --batch --keyserver {{ mise_gpg_keyserver_primary_effective }} --recv-keys {{ item.item }}"
+  register: mise_gpg_import_primary
+  changed_when: false
+  failed_when: false
+  loop: "{{ (mise_gpg_key_check.results | default([])) | selectattr('rc', 'ne', 0) | list }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - mise_gpg_keys_effective | length > 0
+    - mise_gpg_version.rc == 0
+    - mise_gpg_key_check is defined
+    - mise_settings_effective.gpg_verify | default(false)
+
+- name: Mise | Import missing gpg keys (fallback)
+  ansible.builtin.command: "gpg --batch --keyserver {{ mise_gpg_keyserver_fallback_effective }} --recv-keys {{ item.item }}"
+  register: mise_gpg_import_fallback
+  changed_when: false
+  failed_when: false
+  loop: "{{ (mise_gpg_import_primary.results | default([])) | selectattr('rc', 'ne', 0) | list }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - mise_gpg_keys_effective | length > 0
+    - mise_gpg_version.rc == 0
+    - mise_gpg_import_primary is defined
+    - mise_gpg_keyserver_fallback_effective | length > 0
+    - mise_settings_effective.gpg_verify | default(false)
+
+- name: Mise | Verify gpg keys are present
+  ansible.builtin.command: "gpg --list-keys {{ item }}"
+  register: mise_gpg_key_verify
+  changed_when: false
+  failed_when: false
+  loop: "{{ mise_gpg_keys_effective }}"
+  loop_control:
+    label: "{{ item }}"
+  when:
+    - mise_gpg_keys_effective | length > 0
+    - mise_gpg_version.rc == 0
+    - mise_settings_effective.gpg_verify | default(false)
+
+- name: Mise | Ensure gpg keys imported
+  ansible.builtin.assert:
+    that:
+      - item.rc == 0
+    fail_msg: "Failed to import GPG key {{ item.item }} (keyservers: {{ mise_gpg_keyserver_primary_effective }}, {{ mise_gpg_keyserver_fallback_effective }})"
+  loop: "{{ mise_gpg_key_verify.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - mise_gpg_keys_effective | length > 0
+    - mise_gpg_version.rc == 0
+    - mise_settings_effective.gpg_verify | default(false)
 
 - name: Mise | Install Mise | import_tasks
   ansible.builtin.import_tasks: install_mise.yml
