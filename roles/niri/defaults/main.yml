@@ -128,7 +128,25 @@ niri_local_kdl_content: |
   {{ niri_global_layout_options }}
 
   binds {
-    Mod+grave { spawn "alacritty" "--class" "dropdown"; }
+    Mod+grave {
+      spawn "bash" "-lc" r#"
+        set -euo pipefail
+        json=$(niri msg -j windows)
+        id=$(printf '%s' "$json" | jq -r 'first(.[]? | select((."app-id" // .app_id)=="dropdown")) | .id // ""')
+        if [ -z "$id" ]; then
+          exec foot --app-id dropdown
+        fi
+
+        focused_id=$(niri msg -j focused-window 2>/dev/null | jq -r '.id? // "" | tostring') || focused_id=""
+        if [ "$focused_id" = "$id" ]; then
+          exec niri msg action close-window --id "$id"
+        else
+          niri msg action focus-window --id "$id" || niri msg focus-window "$id"
+          sleep 0.05
+          exec niri msg action focus-window --id "$id" || niri msg focus-window "$id"
+        fi
+      "#;
+    }
   }
 
   {% for ws in niri_named_workspaces | dict2items %}
