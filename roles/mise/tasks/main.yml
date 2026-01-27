@@ -84,7 +84,7 @@
     - install
 
 - name: Mise | Manage Mise Config | include_tasks
-  ansible.builtin.include_tasks: manage-config.yml
+  ansible.builtin.import_tasks: manage-config.yml
   when: (mise_config_files_effective | length > 0) or (mise_conf_d_fragments_effective | length > 0)
   tags:
     - config
