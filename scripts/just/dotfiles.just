@@ -11,6 +11,12 @@ dotfiles tag='devbox':
 mise:
   {{ task_prelude }} ansible-playbook mise.yml
 
+install-mise-gpg:
+  {{ task_prelude }} ansible-playbook mise.yml --tags "gpg"
+
+config-mise:
+  {{ task_prelude }} ansible-playbook mise.yml --tags "config" --skip-tags "install"
+
 devbox:
   {{ task_prelude }} ansible-playbook devbox.yml
 
