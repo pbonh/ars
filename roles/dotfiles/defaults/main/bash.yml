@@ -55,6 +55,7 @@ bash_plugins_source:
 bash_fzf_path: "export PATH=$PATH:{{ fzf_path }}"
 bash_fzf_setup: |
   FZF_CTRL_R_OPTS= eval "$({{ fzf_exe }} --bash)"
+  atuin-bind '\C-r' atuin-search
   export PATH="$PATH:{{ bash_git_fuzzy }}/bin"
   {{ bash_fzf_path }}
   fzf_find_edit() {
@@ -95,6 +96,15 @@ bash_fzf_setup: |
   {% for fzf_env_var in fzf_env -%}
   {{ "export " + fzf_env[fzf_env_var]['name'] + "='" + fzf_env[fzf_env_var]['env'] + "'" }}
   {% endfor %}
+bash_atuin_env: |
+  eval "$({{ atuin_exe }} init bash)"
+bash_carapace_env: |
+  export CARAPACE_BRIDGES='zsh,fish,bash,inshellisense' # optional
+  source <({{ carapace_exe }} _carapace)
+bash_starship_env: |
+  eval "$({{ starship_exe }} init bash)"
+bash_zoxide_env: |
+  eval "$({{ zoxide_exe }} init bash)"
 bash_yazi_setup: |
   yy() {
     local tmp="$(mktemp -t "yazi-cwd.XXXXX")"

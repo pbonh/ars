@@ -45,6 +45,7 @@ zsh_fzf_path: "export PATH=$PATH:{{ fzf_path }}"
 zsh_fzf_setup: |
   # Set up fzf key bindings and fuzzy completion
   FZF_CTRL_R_OPTS= source <({{ fzf_exe }} --zsh)
+  bindkey '^r' atuin-search
   export PATH=$PATH:{{ zsh_git_fuzzy }}/bin
   export GF_BASE_REMOTE={{ zsh_git_fuzzy_upstream }}
   export GF_BASE_BRANCH={{ zsh_git_fuzzy_branch }}
