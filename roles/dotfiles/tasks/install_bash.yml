@@ -1,15 +1,4 @@
 ---
-- name: Bash | Capture mise activation | command
-  command: "{{ mise_exe | default('~/.local/bin/mise') }} activate bash"
-  register: mise_activation
-  changed_when: false
-  when: tool_provider == "mise"
-
-- name: Bash | Set mise activation snippet | set_fact
-  set_fact:
-    bash_mise_env: "{{ mise_activation.stdout }}"
-  when: tool_provider == "mise"
-
 - name: Bash | Copies .bashrc | template
   template:
     src: bash/bashrc.j2

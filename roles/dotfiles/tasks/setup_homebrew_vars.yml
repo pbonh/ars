@@ -1,6 +1,10 @@
 ---
 - name: Vars | Set Homebrew Variables | set_fact
   ansible.builtin.set_fact:
+    bash_mise_env: ""
+    zsh_mise_env: ""
+    nu_mise_env: ""
+    nu_mise_config: ""
     zsh_homebrew_env: |
       if [[ -n {{ homebrew_path }} ]]; then
         eval "$({{ homebrew_path }}/brew shellenv)"

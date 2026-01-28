@@ -24,6 +24,10 @@
     nu_nonroot_env: |
       $env.PATH = ($env.PATH | split row (char esep) | append '{{ cargo_path }}')
       $env.PATH = ($env.PATH | split row (char esep) | append '{{ fzf_path }}')
+    bash_mise_env: ""
+    zsh_mise_env: ""
+    nu_mise_env: ""
+    nu_mise_config: ""
     nushell_carapace_env: ""
     nushell_carapace_config: ""
     treesitter_compiler_exe: "{{ gcc_exe }}"
