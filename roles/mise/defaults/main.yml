@@ -21,14 +21,26 @@ mise_tools:
     name: cargo-binstall
   go:
     name: go
+  node:
+    name: node
+  npm:
+    name: npm
   ghq:
     name: "go:github.com/x-motemen/ghq"
   nushell:
     name: "cargo:nu"
   zellij:
     name: zellij
+  treesitter:
+    name: "cargo:tree-sitter-cli"
+  bashls:
+    name: "npm:bash-language-server"
+  yamlls:
+    name: "npm:yaml-language-server"
   neovim:
     name: neovim
+  helix:
+    name: helix
   yazi:
     name: yazi
   fzf:
@@ -57,12 +69,12 @@ mise_tools:
     name: carapace
   fd:
     name: fd
-  helix:
-    name: helix
   jq:
     name: jq
   yq:
     name: yq
+  shellcheck:
+    name: shellcheck
   mdbook:
     name: mdbook
   opencode:
