@@ -54,7 +54,7 @@ bash_plugins_source:
       fi
 bash_fzf_path: "export PATH=$PATH:{{ fzf_path }}"
 bash_fzf_setup: |
-  eval "$({{ fzf_exe }} --bash)"
+  FZF_CTRL_R_OPTS= eval "$({{ fzf_exe }} --bash)"
   export PATH="$PATH:{{ bash_git_fuzzy }}/bin"
   {{ bash_fzf_path }}
   fzf_find_edit() {
