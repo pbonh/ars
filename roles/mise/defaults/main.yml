@@ -19,6 +19,10 @@ mise_tools:
     version: nightly
   cargo-binstall:
     name: cargo-binstall
+  go:
+    name: go
+  ghq:
+    name: "go:github.com/x-motemen/ghq"
   nushell:
     name: "cargo:nu"
   zellij:
