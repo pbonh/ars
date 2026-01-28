@@ -48,7 +48,7 @@
   vars_files:
     - vars/local.yml
   vars:
-    tool_provider: "{{ lookup('env', 'TOOL_PROVIDER') | default(tool_provider, true) }}"
+    tool_provider: "{{ lookup('env', 'TOOL_PROVIDER') | default(omit, true) }}"
   tasks:
     - import_role:
         name: dotfiles
