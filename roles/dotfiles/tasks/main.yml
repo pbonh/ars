@@ -1,25 +1,25 @@
 ---
 - name: Ansible Variables | Setup Ansible Variables | task
   import_tasks: tasks/setup_mise_vars.yml
-  when: tool_provider == 'mise'
+  when: (tool_provider | default('')) == 'mise'
   tags:
     - always
 
 - name: Ansible Variables | Setup Ansible Variables | task
   import_tasks: tasks/setup_devbox_vars.yml
-  when: tool_provider == 'devbox'
+  when: (tool_provider | default('')) == 'devbox'
   tags:
     - always
 
 - name: Ansible Variables | Setup Ansible Variables | task
   import_tasks: tasks/setup_homebrew_vars.yml
-  when: tool_provider == 'homebrew'
+  when: (tool_provider | default('')) == 'homebrew'
   tags:
     - always
 
 - name: Ansible Variables | Setup Ansible Variables | task
   import_tasks: tasks/setup_nonroot_vars.yml
-  when: tool_provider == 'nonroot'
+  when: (tool_provider | default('')) == 'nonroot'
   tags:
     - always
 
