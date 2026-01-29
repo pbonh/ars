@@ -17,17 +17,20 @@ mise_tools:
     name: make
   cmake:
     name: cmake
+  ninja:
+    name: ninja
+  clang:
+    name: clang
   rust:
     name: rust
     version: nightly
+    # targets: "x86_64-unknown-linux-musl"
   cargo-binstall:
     name: cargo-binstall
   go:
     name: go
   node:
     name: node
-  npm:
-    name: npm
   ghq:
     name: "go:github.com/x-motemen/ghq"
   nushell:
@@ -36,6 +39,7 @@ mise_tools:
     name: zellij
   treesitter:
     name: "cargo:tree-sitter-cli"
+    # targets: "x86_64-unknown-linux-musl"
   bashls:
     name: "npm:bash-language-server"
   yamlls:
