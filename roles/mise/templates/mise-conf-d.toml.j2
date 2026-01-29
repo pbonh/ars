@@ -28,7 +28,12 @@
 {% for k, v in mise_tools_effective.items() %}
 {% set tool_name = v.name if (v is mapping and 'name' in v) else k %}
 {% set tool_version = v.version if (v is mapping and 'version' in v) else (v if (v is string) else 'latest') %}
+{% set extra_keys = (v | dict2items | rejectattr('key', 'in', ['name', 'version']) | list) if (v is mapping) else [] %}
+{% if extra_keys | length > 0 %}
+{{ tool_name | tojson }} = { version = {{ tool_version | default('latest') | tojson }}{% for opt in extra_keys %}, {{ opt.key | tojson }} = {{ opt.value | tojson }}{% endfor %} }
+{% else %}
 {{ tool_name | tojson }} = {{ tool_version | default('latest') | tojson }}
+{% endif %}
 {% endfor %}
 
 {% endif %}

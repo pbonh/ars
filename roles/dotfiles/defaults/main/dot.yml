@@ -1,5 +1,5 @@
 ---
-tool_provider: "mise"
+tool_provider: "homebrew"
 system_home: "/home"
 dotfiles_user_home: "{{ ansible_env.HOME }}"
 default_home_local: "{{ dotfiles_user_home }}/.local"

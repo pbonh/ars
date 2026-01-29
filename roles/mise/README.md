@@ -14,7 +14,7 @@ Role Variables
 Core config variables (templated into `mise-config.toml.j2` by default):
 
 - `mise_env`: mapping for `[env]` section. Default sets `RUSTUP_TOOLCHAIN=nightly`.
-- `mise_tools`: mapping for `[tools]` section. Each entry accepts an object with `name` (required, string for the actual package) and optional `version` (defaults to `latest`); legacy string values are still accepted and treated as the version for that key. Default `rust` is pinned to `nightly`.
+- `mise_tools`: mapping for `[tools]` section. Each entry accepts an object with `name` (required, string for the actual package) and optional `version` (defaults to `latest`); legacy string values are still accepted and treated as the version for that key. Default `rust` is pinned to `nightly`. Additional keys are passed through as tool options (e.g., `targets` for `rust`).
 - `mise_tasks`: mapping for `[tasks.*]` entries; each task is a mapping of keys (e.g., `run`, `depends`, `dir`).
 - `mise_settings`: mapping for `[settings]` section (defaults include `gpg_verify=true`).
 - `mise_plugins`: mapping for `[plugins]` section.
@@ -82,6 +82,10 @@ Example Playbook
                 python:
                   name: python
                   version: "3.12"
+                rust:
+                  name: rust
+                  version: "1.83.0"
+                  targets: "x86_64-unknown-linux-musl"
               mise_tasks:
                 build:
                   run: "npm run build"

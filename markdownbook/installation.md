@@ -41,17 +41,17 @@ If GUI support is desired, the following desktop environments are available:
 
 ## Developer Tools
 
-There are 4 installation options to choose from for the developer tools (mise is the default):
+There are 4 installation options to choose from for the developer tools (homebrew is the default):
 
-1. Mise (default)
-2. Devbox
-3. Homebrew
+1. Homebrew (default)
+2. Mise
+3. Devbox
 4. Non-Root
 
-Mise is the default tool manager for the developer toolset. Devbox uses `nix`, and supports custom
-shell environments. Homebrew is widely supported and contains many macOS programs. Non-Root is
-useful when you don't have root permissions, but still need to install the developer tools. All 4
-are compatible with Linux & macOS.
+Homebrew is the default tool manager for the developer toolset. Mise provides a curated toolchain,
+and Devbox uses `nix` with support for custom shell environments. Non-Root is useful when you don't
+have root permissions, but still need to install the developer tools. All 4 are compatible with
+Linux & macOS.
 
 EITHER
 Checkout repository and create `.envrc` File(Example)

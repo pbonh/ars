@@ -37,13 +37,17 @@
   ansible.builtin.set_fact:
     mise_tools_normalized: >-
       {{
-        mise_tools_normalized | default({}) | combine({ item.key: {
-          'name': (item.value.name if (item.value is mapping and 'name' in item.value) else item.key),
-          'version': (
-            item.value.version if (item.value is mapping and 'version' in item.value)
-            else (item.value if (item.value is string) else 'latest')
-          )
-        } })
+        mise_tools_normalized | default({}) | combine({ item.key: (
+          (item.value | combine({
+            'name': (item.value.name if ('name' in item.value) else item.key),
+            'version': (item.value.version if ('version' in item.value) else 'latest')
+          }, recursive=True))
+          if (item.value is mapping)
+          else {
+            'name': item.key,
+            'version': (item.value if (item.value is string) else 'latest')
+          }
+        ) })
       }}
   loop: "{{ mise_tools_effective | default({}) | dict2items }}"
   tags:

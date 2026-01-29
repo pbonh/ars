@@ -1,7 +1,7 @@
 # Mise
 
-Mise is the default package manager for the developer tools in this repo. The role installs the
-mise binary and applies the tool configuration for you.
+Mise is a package manager for the developer tools in this repo. The role installs the mise binary
+and applies the tool configuration for you.
 
 To install the Mise-managed packages, ensure `ansible` is installed and create a file to apply your
 customizations. The variable `tool_provider` MUST be specified as `mise`. The remaining variables are

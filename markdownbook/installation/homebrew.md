@@ -7,9 +7,9 @@ The following command will install homebrew for Linux or macOS systems:
 ```
 
 To install the Homebrew packages, ensure `ansible` is installed and create a file to apply your
-customizations. The variable `tool_provider` MUST be specified as `homebrew`. The remaining variables
-are optional, but keep in mind that they will overwrite any customizations that you have made to
-git, ssh, neovim, tmux, etc.
+customizations. Homebrew is the default tool provider. The remaining variables are optional, but
+keep in mind that they will overwrite any customizations that you have made to git, ssh, neovim,
+tmux, etc.
 
 Example Yaml Config(brew.yml):
 ```yaml

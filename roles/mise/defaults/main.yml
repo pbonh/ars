@@ -11,6 +11,8 @@ rustup_os_musl: "linux-musl"
 # Core config data used by the default template
 mise_env:
   RUSTUP_TOOLCHAIN: nightly
+  CMAKE_CC_COMPILER: gcc
+  CMAKE_CXX_COMPILER: g++
   # TARGET_CC: "{{ rustup_arch }}-{{ rustup_os_musl }}-gcc"
 mise_tools:
   make:
