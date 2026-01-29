@@ -6,9 +6,12 @@ mise_confd_dir: "{{ mise_config_dir }}/conf.d"
 # defaults file for mise
 mise_schema_url: "https://mise.jdx.dev/schema/mise.json"
 mise_task_schema_url: "https://mise.jdx.dev/schema/mise-task.json"
+rustup_arch: x86_64
+rustup_os_musl: "linux-musl"
 # Core config data used by the default template
 mise_env:
   RUSTUP_TOOLCHAIN: nightly
+  # TARGET_CC: "{{ rustup_arch }}-{{ rustup_os_musl }}-gcc"
 mise_tools:
   make:
     name: make

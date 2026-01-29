@@ -1,6 +1,7 @@
 ---
 rustup_arch: x86_64
 rustup_os: linux-gnu
+rustup_os_musl: "linux-musl"
 rustup_macos_arch: aarch64
 rustup_macos_os: apple-darwin
 rustup_url: https://static.rust-lang.org/rustup/rustup-init.sh
@@ -11,7 +12,7 @@ cargo_binstall_installer_oneliner: "curl -L --proto '=https' --tlsv1.2 -sSf http
 rustup_script_path: "{{ tool_install_dir }}/rustup-init.sh"
 rustup_home_dir: "{{ tool_install_dir }}/.rustup"
 rustup_toolchain: "stable"
-rustup_musl_target: "{{ rustup_arch }}-unknown-linux-musl"
+rustup_musl_target: "{{ rustup_arch }}-unknown-{{ rustup_os_musl }}"
 rustup_path: "{{ rustup_home_dir }}/toolchains/{{ rustup_toolchain }}-{{ rustup_arch }}-{{ rustup_os }}/bin/"
 cargo_home: "{{ tool_install_dir }}/.cargo"
 rust_tools_env:
@@ -22,7 +23,9 @@ cargo_bin: "{{ cargo_path }}cargo"
 rustup_exe: "{{ cargo_path }}rustup"
 cargo_binstall_exe: "{{ cargo_path }}cargo-binstall"
 rustc_env_variables: ""
+rustc_env_variables_musl: "TARGET_CC={{ rustup_arch }}-{{ rustup_os_musl }}-gcc"
 cargo_binstall_args: ""
+cargo_binstall_args_musl: "--target {{ rustup_arch }}-unknown-{{ rustup_os_musl }}"
 cargo_packages:
   binstall:
     name: cargo-binstall
