@@ -5,8 +5,8 @@ install-requirements:
 setup: install-requirements
   git update-index --skip-worktree vars/local.yml 
 
-dotfiles tag='devbox':
-  {{ task_prelude }} ansible-playbook dotfiles.yml --tags "{{ tag }}"
+dotfiles:
+  {{ task_prelude }} ansible-playbook dotfiles.yml --skip-tags "install"
 
 mise:
   {{ task_prelude }} ansible-playbook mise.yml

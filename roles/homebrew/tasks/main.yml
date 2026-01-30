@@ -1,47 +1,18 @@
 ---
-# - name: Homebrew | Install Homebrew Unattended | shell
-#   become: true
-#   shell: "{{ homebrew_install_cmd }}"
-#   args:
-#     creates: "{{ homebrew_install_path }}"
-
-- name: Homebrew | Resolve bundle paths
+- name: Homebrew | Resolve bundle paths | set_fact
   ansible.builtin.set_fact:
     homebrew_bundle_bin_dir_resolved: "{{ homebrew_bundle_bin_dir | default(homebrew_bundle_bin_dir_default) }}"
     homebrew_brew_bin_resolved: "{{ homebrew_brew_bin | default(homebrew_brew_bin_default | default((homebrew_bundle_bin_dir | default(homebrew_bundle_bin_dir_default)) ~ '/brew')) }}"
     homebrew_bundle_env_path_resolved: "{{ homebrew_bundle_env_path | default((homebrew_bundle_bin_dir | default(homebrew_bundle_bin_dir_default)) ~ ':' ~ ansible_env.PATH) }}"
+  tags:
+    - always
 
-- name: Homebrew | Render Brewfile
-  ansible.builtin.template:
-    src: Brewfile.j2
-    dest: "{{ homebrew_brewfile_path }}"
-    mode: "0644"
+- name: Homebrew | Install Homebrew | import_tasks
+  ansible.builtin.import_tasks: install_homebrew.yml
+  tags:
+    - install
 
-- name: Homebrew | Bundle check
-  ansible.builtin.command: >-
-    {{ homebrew_brew_bin_resolved }} bundle check --file {{ homebrew_brewfile_path }}{% if homebrew_bundle_no_lock %} --no-lock{% endif %}
-  environment:
-    PATH: "{{ homebrew_bundle_env_path_resolved }}"
-  register: homebrew_bundle_check_result
-  changed_when: false
-  failed_when: homebrew_bundle_check_result.rc not in [0, 1]
-  when: homebrew_bundle_check | bool
-
-- name: Homebrew | Bundle install
-  ansible.builtin.command: >-
-    {{ homebrew_brew_bin_resolved }} bundle install --file {{ homebrew_brewfile_path }}{% if homebrew_bundle_no_lock %} --no-lock{% endif %}
-  environment:
-    PATH: "{{ homebrew_bundle_env_path_resolved }}"
-  register: homebrew_bundle_install_result
-  changed_when: homebrew_bundle_install_result.rc == 0
-  failed_when: homebrew_bundle_install_result.rc != 0
-
-- name: Homebrew | Bundle cleanup
-  ansible.builtin.command: >-
-    {{ homebrew_brew_bin_resolved }} bundle cleanup --force --file {{ homebrew_brewfile_path }}{% if homebrew_bundle_no_lock %} --no-lock{% endif %}
-  environment:
-    PATH: "{{ homebrew_bundle_env_path_resolved }}"
-  register: homebrew_bundle_cleanup_result
-  changed_when: homebrew_bundle_cleanup_result.rc == 0
-  failed_when: homebrew_bundle_cleanup_result.rc != 0
-  when: homebrew_bundle_cleanup | bool
+- name: Homebrew | Configure Homebrew | import_tasks
+  ansible.builtin.import_tasks: configure_homebrew.yml
+  tags:
+    - config

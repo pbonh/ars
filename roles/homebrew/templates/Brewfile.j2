@@ -8,12 +8,15 @@
 {% set casks = (homebrew_cask_packages | default([])) + (homebrew_brewfile_extra_casks | default([])) %}
 {% set flatpaks = homebrew_flatpak_packages | default([]) %}
 
-{% for tap in taps | unique | sort %}tap "{{ tap }}"
+{% for tap in taps | unique | sort %}
+tap "{{ tap }}"
 {% endfor %}
-{% for formula in formulae | unique | sort %}brew "{{ formula }}"
+{% for formula in formulae | unique | sort %}
+brew "{{ formula }}"
 {% endfor %}
-{% for cask in casks | unique | sort %}cask "{{ cask }}"
+{% for cask in casks | unique | sort %}
+cask "{{ cask }}"
 {% endfor %}
 {% for flatpak in flatpaks | unique(attribute='flatpak') | sort(attribute='flatpak') %}
-flatpak "{{ flatpak.flatpak }}"{% if flatpak.remote is defined %}, remote: "{{ flatpak.remote }}"{% endif %}{% if flatpak.url is defined %}, url: "{{ flatpak.url }}"{% endif %}
+flatpak "{{ flatpak.flatpak }}"{{ ', remote: "' ~ flatpak.remote ~ '"' if flatpak.remote is defined else '' }}{{ ', url: "' ~ flatpak.url ~ '"' if flatpak.url is defined else '' }}
 {% endfor %}

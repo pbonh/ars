@@ -93,9 +93,9 @@ flatpak_apps_bundle_map:
     flatpak: org.kde.plasmatube
   syncthingy:
     flatpak: com.github.zocker_160.SyncThingy
-homebrew_cask_packages: "{{ flatpak_apps_bundle_map | dict2items | selectattr('value.cask', 'defined') | map(attribute='value.cask') | list }}"
+homebrew_cask_packages_raw: "{{ flatpak_apps_bundle_map | dict2items | selectattr('value.cask', 'defined') | map(attribute='value.cask') | list }}"
 homebrew_formula_packages_extra: "{{ flatpak_apps_bundle_map | dict2items | selectattr('value.formula', 'defined') | map(attribute='value.formula') | list }}"
-homebrew_flatpak_packages: "{{ flatpak_apps_bundle_map | dict2items | selectattr('value.flatpak', 'defined') | map(attribute='value') | list }}"
+homebrew_flatpak_packages_raw: "{{ flatpak_apps_bundle_map | dict2items | selectattr('value.flatpak', 'defined') | map(attribute='value') | list }}"
 dev_packages:
   ansible:
     brew:
@@ -370,6 +370,11 @@ dev_packages:
       - "prettier"
     devbox:
       - "prettier"
+  shellcheck:
+    brew:
+      - "shellcheck"
+    devbox:
+      - "shellcheck"
   yamllint:
     brew:
       - "yamllint"

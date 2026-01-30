@@ -1,0 +1,7 @@
+---
+- name: Homebrew | Install Homebrew | shell
+  become: true
+  shell: "{{ homebrew_install_cmd }}"
+  args:
+    creates: "{{ homebrew_brew_bin }}"
+

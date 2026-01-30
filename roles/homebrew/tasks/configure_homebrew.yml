@@ -1,0 +1,35 @@
+---
+- name: Homebrew | Render Brewfile
+  ansible.builtin.template:
+    src: Brewfile.j2
+    dest: "{{ homebrew_brewfile_path }}"
+    mode: "0644"
+
+- name: Homebrew | Bundle check
+  ansible.builtin.command: >-
+    {{ homebrew_brew_bin_resolved }} bundle check --file {{ homebrew_brewfile_path }}
+  environment:
+    PATH: "{{ homebrew_bundle_env_path_resolved }}"
+  register: homebrew_bundle_check_result
+  changed_when: false
+  failed_when: homebrew_bundle_check_result.rc not in [0, 1]
+  when: homebrew_bundle_check | bool
+
+- name: Homebrew | Bundle install
+  ansible.builtin.command: >-
+    {{ homebrew_brew_bin_resolved }} bundle install --file {{ homebrew_brewfile_path }}
+  environment:
+    PATH: "{{ homebrew_bundle_env_path_resolved }}"
+  register: homebrew_bundle_install_result
+  changed_when: homebrew_bundle_install_result.rc == 0
+  failed_when: homebrew_bundle_install_result.rc != 0
+
+- name: Homebrew | Bundle cleanup
+  ansible.builtin.command: >-
+    {{ homebrew_brew_bin_resolved }} bundle cleanup --force --file {{ homebrew_brewfile_path }}
+  environment:
+    PATH: "{{ homebrew_bundle_env_path_resolved }}"
+  register: homebrew_bundle_cleanup_result
+  changed_when: homebrew_bundle_cleanup_result.rc == 0
+  failed_when: homebrew_bundle_cleanup_result.rc != 0
+  when: homebrew_bundle_cleanup | bool
