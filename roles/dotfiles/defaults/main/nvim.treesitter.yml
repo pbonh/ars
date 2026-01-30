@@ -53,7 +53,7 @@ nvim_treesitter_disable: |
       return true
     end
   end,
-treesitter_compiler_exe: "{{ gcc_devbox_exe }}"
+treesitter_compiler_exe: "{{ gcc_devbox_exe if tool_provider == 'devbox' else gcc_exe }}"
 treesitter_compiler_path_settings: |
   require('nvim-treesitter.install').compilers = {
     '{{ treesitter_compiler_exe }}',
@@ -399,6 +399,7 @@ nvim_treesitter_main:
         },
       },
       config = function(_, opts)
+        {{ treesitter_compiler_path_settings }}
         -- install parsers from custom opts.ensure_installed
         if opts.ensure_installed and #opts.ensure_installed > 0 then
           require("nvim-treesitter").install(opts.ensure_installed)
