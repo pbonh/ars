@@ -31,19 +31,8 @@ extra_nvim_language_keymaps_rust:
   ext: "{{ rust_file_extensions }}"
 treesitter_parsers_rust:
   - rust
-treesitter_custom_parsers_rust:
-  - egg
-treesitter_parsers_egg_parser_config: |
-  parser_configs.egg = {
-      install_info = {
-          url = 'https://github.com/segeljakt/tree-sitter-egg',
-          files = {
-            'src/parser.c',
-            'src/tree_sitter/parser.h',
-          },
-          branch = 'master'
-      },
-  }
+treesitter_custom_parsers_rust: []
+treesitter_parsers_egg_parser_config: ""
 neotest_adapters_rust: |
   -- require('rustaceanvim.neotest'),
   require("neotest-rust") {
@@ -78,7 +67,6 @@ extra_nvim_plugins_rust_lazy: |
     ft = { 'rust' },
   },
   { 'rust-lang/rust.vim' },
-  { 'segeljakt/tree-sitter-egg' },
   { 'rouge8/neotest-rust' },
 extra_nvim_config_rust: |
   local extension_path = '{{ codelldb_install_path }}/'
@@ -195,5 +183,6 @@ nvim_keymap_rust: |
   vim.filetype.add({
     pattern = {
       [".*.llhd"] = "llvm",
+      [".*.egg"] = "lisp",
     },
   })
