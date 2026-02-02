@@ -263,7 +263,6 @@ nvim_ai_opencode:
       config = function()
         vim.g.opencode_opts = {
           provider = {
-            cmd = "opencode --agent plan",
             snacks = {
               win = {
                 position = "float",
@@ -284,15 +283,15 @@ nvim_ai_opencode:
         vim.keymap.set("n", "<leader>Cn", function() require("opencode").command("session.new") end, { desc = "New session" })
         vim.keymap.set("n", "<leader>Ci", function() require("opencode").command("session.interrupt") end, { desc = "Interrupt session" })
         vim.keymap.set("n", "<leader>CA", function() require("opencode").command("agent.cycle") end, { desc = "Cycle selected agent" })
-        vim.keymap.set("t", "<C-u>",    function() require("opencode").command("session.half.page.up") end, { desc = "Messages half page up" })
-        vim.keymap.set("t", "<C-d>",    function() require("opencode").command("session.half.page.down") end, { desc = "Messages half page down" })
-        vim.keymap.set({ "n", "t" }, "<C-t>", function() require("opencode").toggle() end, { desc = "Toggle Floating Opencode" })
-     -- vim.api.nvim_create_user_command("OpenCodePlan", function()
-     --   local oc = require("opencode")
-     --   oc.toggle()                       -- launch/attach to opencode UI
-     --   oc.command("agent.select plan")  -- switch to Plan agent
-     -- end, { desc = "OpenCode: Plan agent" })
-     -- vim.keymap.set({ "n", "t" }, "<C-t>", "<cmd>OpenCodePlan<CR>", { desc = "OpenCode Plan Agent" })
+        vim.keymap.set("t", "<C-i>",    function() require("opencode").command("session.half.page.up") end, { desc = "Messages half page up" })
+        vim.keymap.set("t", "<C-u>",    function() require("opencode").command("session.half.page.down") end, { desc = "Messages half page down" })
+        vim.keymap.set({ "n", "t" }, "<C-a>", function() require("opencode").toggle() end, { desc = "Toggle Floating Opencode" })
+        -- vim.api.nvim_create_user_command("OpenCodePlan", function()
+        --   local oc = require("opencode")
+        --   oc.toggle()                       -- launch/attach to opencode UI
+        --   oc.command("agent.select plan")  -- switch to Plan agent
+        -- end, { desc = "OpenCode: Plan agent" })
+        -- vim.keymap.set({ "n", "t" }, "<C-a>", "<cmd>OpenCodePlan<CR>", { desc = "OpenCode Plan Agent" })
       end,
     },
   config: ""

@@ -188,10 +188,13 @@ nvim_motion:
       -- use opts = {} for passing setup options
       -- this is equivalent to setup({}) function
     },
-  config: ""
+  config: |
+    vim.keymap.set({ 'n', 'x' }, '<C-u>', '<C-d>', { noremap = true, silent = true, desc = 'Vim: Scroll Down (Half Page)' })
+    vim.keymap.set({ 'n', 'x' }, '<C-i>', '<C-u>', { noremap = true, silent = true, desc = 'Vim: Scroll Up (Half Page)' })
+    vim.keymap.set({ 'n', 'x' }, '<C-d>', '<Nop>', { noremap = true, silent = true, desc = 'Vim: Disable Half Page Down' })
   keymaps: |
     {
       mode = 'n',
       { '<C-o>', '<cmd>Portal jumplist backward<CR>', desc = 'Portal: Jump Backward', },
-      { '<C-i>', '<cmd>Portal jumplist forward<CR>', desc = 'Portal: Jump Forward', },
+      { '<C-p>', '<cmd>Portal jumplist forward<CR>', desc = 'Portal: Jump Forward', },
     },
