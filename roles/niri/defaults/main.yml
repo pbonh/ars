@@ -32,6 +32,8 @@ niri_global_layout_options: |
 # - open_on_output: Optional monitor identifier
 # - layout: Optional per-workspace layout overrides (raw KDL snippet)
 niri_named_workspaces:
+  vault:
+    name: "vault"
   browse:
     name: "browse"
   obsidian:
@@ -40,8 +42,6 @@ niri_named_workspaces:
     name: "code"
   calc:
     name: "calc"
-  vault:
-    name: "vault"
   office:
     name: "office"
   media:
