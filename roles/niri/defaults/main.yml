@@ -55,9 +55,15 @@ niri_named_workspaces:
 # - at_startup: match at-startup=true when true (default: false)
 # - extra_match: optional extra match tokens (raw string, e.g., "wm-class=... ")
 niri_window_rules:
+  bitwarden:
+    workspace: "vault"
+    app_id: '^(Bitwarden|com\.bitwarden\.desktop)$'
   brave:
     workspace: "browse"
-    app_id: '^Brave-Web-Browser$'
+    app_id: '^brave-browser$'
+  protonmail:
+    workspace: "browse"
+    app_id: '^Proton Mail$'
   opera:
     workspace: "browse"
     app_id: '^Opera$'
@@ -67,12 +73,6 @@ niri_window_rules:
   obsidian:
     workspace: "obsidian"
     app_id: '^obsidian$'
-  libreoffice:
-    workspace: "office"
-    app_id: '^libreoffice-startcenter$'
-  onlyoffice:
-    workspace: "office"
-    app_id: '^ONLYOFFICE$'
   boxbuddy:
     workspace: "code"
     app_id: '^io\.github\.dvlv\.boxbuddyrs$'
@@ -91,6 +91,12 @@ niri_window_rules:
   konsole:
     workspace: "code"
     app_id: '^org\.kde\.konsole$'
+  libreoffice:
+    workspace: "office"
+    app_id: '^libreoffice-startcenter$'
+  onlyoffice:
+    workspace: "office"
+    app_id: '^ONLYOFFICE$'
   kalgebra:
     workspace: "calc"
     app_id: '^org\.kde\.kalgebra$'
@@ -109,9 +115,6 @@ niri_window_rules:
   plasmatube:
     workspace: "media"
     app_id: '^org\.kde\.plasmatube$'
-  bitwarden:
-    workspace: "vault"
-    app_id: '^(Bitwarden|com\.bitwarden\.desktop)$'
   # launch with: alacritty --class dropdown
   dropdown:
     app_id: '^dropdown$'
