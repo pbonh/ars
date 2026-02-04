@@ -1,7 +1,7 @@
 ---
 system_home: "/home"
-homebrew_install_path: "{{ system_home }}/linuxbrew/.linuxbrew"
-homebrew_path: "{{ homebrew_install_path }}/bin"
+homebrew_install_path: "{{ homebrew_install_path_macos if ansible_system == 'Darwin' else system_home ~ '/linuxbrew/.linuxbrew' }}"
+homebrew_path: "{{ homebrew_path_macos if ansible_system == 'Darwin' else homebrew_install_path ~ '/bin' }}"
 homebrew_install_path_macos: "{{ system_home }}/homebrew/.homebrew"
 homebrew_path_macos: "{{ homebrew_install_path_macos }}/bin"
 homebrew_install_url: "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
