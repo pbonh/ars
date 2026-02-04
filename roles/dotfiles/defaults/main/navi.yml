@@ -1,6 +1,6 @@
 ---
 #navi_exe: "{{ tool_system_path }}navi"
-xdg_config_dir_navi: "{{ xdg_share_dir }}/navi"
+xdg_config_dir_navi: "{{ xdg_config_dir_navi_macos if ansible_system == 'Darwin' else xdg_share_dir ~ '/navi' }}"
 xdg_config_dir_navi_macos: "{{ macos_config_dir }}/navi"
 xdg_config_dir_navi_cheats: "{{ xdg_config_dir_navi }}/cheats"
 navi_shell_cmd: "eval \"$(navi --print)\""
@@ -279,4 +279,3 @@ navi_cmd_variables:
 # cat <jsons>
 # 
 # $ jsons: find . -iname '*.json' -type f -print --- --multi --map "navi fn map::expand"
-

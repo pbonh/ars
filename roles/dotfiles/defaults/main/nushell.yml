@@ -1,5 +1,5 @@
 ---
-nushell_config_dir: "{{ xdg_config_dir }}/nushell"
+nushell_config_dir: "{{ nushell_config_dir_macos if ansible_system == 'Darwin' else xdg_config_dir ~ '/nushell' }}"
 nushell_config_dir_macos: "{{ macos_config_dir }}/nushell"
 nu_mise_config: ""
 nu_mise_env: ""
