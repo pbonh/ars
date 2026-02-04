@@ -9,12 +9,21 @@
       if [[ -n {{ homebrew_path }} ]]; then
         eval "$({{ homebrew_path }}/brew shellenv)"
       fi
+      {% if "rust" in (install_languages | default([])) %}
+      {{ rust_brew_zsh_env }}
+      {% endif %}
     bash_homebrew_env: |
       if [[ -n {{ homebrew_path }} ]]; then
         eval "$({{ homebrew_path }}/brew shellenv)"
       fi
+      {% if "rust" in (install_languages | default([])) %}
+      {{ rust_brew_bash_env }}
+      {% endif %}
     nu_homebrew_env: |
       $env.PATH = ($env.PATH | split row (char esep) | append '{{ homebrew_path }}')
+      {% if "rust" in (install_languages | default([])) %}
+      {{ rust_brew_nushell_env }}
+      {% endif %}
     bash_fzf_path: ""
     zsh_fzf_path: ""
     tcsh_fzf_path: ""

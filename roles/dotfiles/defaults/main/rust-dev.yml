@@ -1,4 +1,14 @@
 ---
+rust_brew_packages:
+  rustup:
+    brew:
+      - "rustup"
+rust_brew_bash_env: |
+  . "$HOME/.cargo/env"
+rust_brew_zsh_env: |
+  . "$HOME/.cargo/env"
+rust_brew_nushell_env: |
+  $env.PATH = ($env.PATH | split row (char esep) | append '{{ dotfiles_user_home }}/.cargo/env.nu')
 rustup_dev_packages:
   rust-src:
     name: rust-src
