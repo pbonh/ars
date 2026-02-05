@@ -1,7 +1,8 @@
 Role Name
 =========
 
-A brief description of the role goes here.
+Configure distrobox container definitions and create containers using
+`distrobox assemble`.
 
 Requirements
 ------------
@@ -11,7 +12,19 @@ Any pre-requisites that may not be covered by Ansible itself or the role should 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+- `distrobox_dir`: Base directory for distrobox files.
+- `distrobox_config`: Directory where ini files are written.
+- `distrobox_home`: Base home directory for containers.
+- `distrobox_vms`: Map of distrobox definitions used to render ini files.
+
+Behavior
+--------
+
+- Writes one ini file per entry in `distrobox_vms`.
+- Creates containers with `distrobox assemble create --file <ini>`.
+- For clones, the source container is created and started at least once,
+  stopped for the clone operation, and then its prior running state is
+  restored afterward.
 
 Dependencies
 ------------
@@ -21,11 +34,9 @@ A list of other roles hosted on Galaxy should go here, plus any details in regar
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
     - hosts: servers
       roles:
-         - { role: username.rolename, x: 42 }
+        - { role: distrobox }
 
 License
 -------

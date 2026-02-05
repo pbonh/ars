@@ -1,0 +1,80 @@
+---
+- name: Distrobox | Set VM context | facts
+  ansible.builtin.set_fact:
+    distrobox_vm_name: "{{ distrobox_vm_item.key }}"
+    distrobox_clone_name: "{{ distrobox_vm_item.value.clone | default('') }}"
+    distrobox_target_exists: "{{ distrobox_vm_item.key in (distrobox_existing_names | default([])) }}"
+    distrobox_target_replace: "{{ (distrobox_vm_item.value.replace | default('false')) | bool }}"
+    distrobox_target_start_now: "{{ (distrobox_vm_item.value.start_now | default('false')) | bool }}"
+
+- name: Distrobox | Fail on clone cycles | assert
+  ansible.builtin.fail:
+    msg: "Distrobox clone cycle detected at '{{ distrobox_vm_name }}'."
+  when: distrobox_vm_name in (distrobox_chain | default([]))
+
+- name: Distrobox | Validate clone source | assert
+  ansible.builtin.fail:
+    msg: "Distrobox clone '{{ distrobox_vm_name }}' references undefined source '{{ distrobox_clone_name }}'."
+  when:
+    - distrobox_clone_name | length > 0
+    - distrobox_clone_name not in distrobox_vms
+
+- name: Distrobox | Set creation flag | facts
+  ansible.builtin.set_fact:
+    distrobox_target_will_create: "{{ (not distrobox_target_exists) or distrobox_target_replace }}"
+
+- name: Distrobox | Ensure clone source | tasks
+  ansible.builtin.include_tasks: ensure.yml
+  vars:
+    distrobox_vm_item: "{{ {'key': distrobox_clone_name, 'value': distrobox_vms[distrobox_clone_name]} }}"
+    distrobox_chain: "{{ (distrobox_chain | default([])) + [distrobox_vm_name] }}"
+  when:
+    - distrobox_clone_name | length > 0
+    - distrobox_target_will_create
+    - distrobox_clone_name not in distrobox_processed
+
+- name: Distrobox | Record clone source running state | facts
+  ansible.builtin.set_fact:
+    distrobox_clone_source_running: "{{ distrobox_clone_name in (distrobox_running_names | default([])) }}"
+  when:
+    - distrobox_clone_name | length > 0
+    - distrobox_target_will_create
+
+- name: Distrobox | Start clone source if stopped | command
+  ansible.builtin.command: distrobox enter --name "{{ distrobox_clone_name }}" -- true
+  changed_when: true
+  when:
+    - distrobox_clone_name | length > 0
+    - distrobox_target_will_create
+    - not distrobox_clone_source_running
+
+- name: Distrobox | Stop clone source for cloning | command
+  ansible.builtin.command: distrobox stop --name "{{ distrobox_clone_name }}"
+  changed_when: true
+  when:
+    - distrobox_clone_name | length > 0
+    - distrobox_target_will_create
+
+- name: Distrobox | Create container | command
+  ansible.builtin.command: distrobox assemble create --file "{{ distrobox_config }}/{{ distrobox_vm_name }}.ini"
+  changed_when: true
+  when: distrobox_target_will_create
+
+- name: Distrobox | Restore clone source running state | command
+  ansible.builtin.command: distrobox enter --name "{{ distrobox_clone_name }}" -- true
+  changed_when: true
+  when:
+    - distrobox_clone_name | length > 0
+    - distrobox_target_will_create
+    - distrobox_clone_source_running
+
+- name: Distrobox | Start container after creation | command
+  ansible.builtin.command: distrobox enter --name "{{ distrobox_vm_name }}" -- true
+  changed_when: true
+  when:
+    - distrobox_target_will_create
+    - distrobox_target_start_now
+
+- name: Distrobox | Mark processed | facts
+  ansible.builtin.set_fact:
+    distrobox_processed: "{{ distrobox_processed + [distrobox_vm_name] }}"

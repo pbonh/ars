@@ -1,0 +1,63 @@
+---
+- name: Distrobox | List containers | command
+  ansible.builtin.command: distrobox list --no-color
+  register: distrobox_list
+  changed_when: false
+
+- name: Distrobox | Initialize parsed list | facts
+  ansible.builtin.set_fact:
+    distrobox_list_entries: []
+
+- name: Distrobox | Parse container list | facts
+  ansible.builtin.set_fact:
+    distrobox_list_entries: >-
+      {{
+        distrobox_list_entries
+        + [
+          {
+            'name': parsed[0],
+            'status': (parsed[1] | default(''))
+          }
+        ]
+      }}
+  vars:
+    parsed: >-
+      {{
+        item
+        | regex_replace('\\s+\\|\\s+', '|')
+        | regex_replace('\\s{2,}', '|')
+        | split('|')
+      }}
+  loop: >-
+    {{
+      distrobox_list.stdout_lines
+      | reject('match', '^NAME\\s+')
+      | reject('match', '^[-=]+\\s*$')
+      | reject('match', '^\\s*$')
+      | list
+    }}
+
+- name: Distrobox | Set container state facts | facts
+  ansible.builtin.set_fact:
+    distrobox_existing_names: "{{ distrobox_list_entries | map(attribute='name') | list }}"
+    distrobox_running_names: >-
+      {{
+        distrobox_list_entries
+        | selectattr('status', 'search', '(?i)^(up|running)')
+        | map(attribute='name')
+        | list
+      }}
+
+- name: Distrobox | Initialize processed list | facts
+  ansible.builtin.set_fact:
+    distrobox_processed: []
+
+- name: Distrobox | Ensure configured containers | tasks
+  ansible.builtin.include_tasks: ensure.yml
+  loop: "{{ distrobox_vms | dict2items }}"
+  loop_control:
+    loop_var: distrobox_vm_item
+    label: "{{ distrobox_vm_item.key }}"
+  vars:
+    distrobox_chain: []
+  when: distrobox_vm_item.key not in distrobox_processed

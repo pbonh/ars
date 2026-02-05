@@ -16,3 +16,6 @@
     src: "distrobox.ini.j2"
     dest: "{{ distrobox_config }}/{{ item.key }}.ini"
   loop: "{{ distrobox_vms | dict2items }}"
+
+- name: Distrobox | Create Distroboxes | tasks
+  ansible.builtin.import_tasks: create.yml
