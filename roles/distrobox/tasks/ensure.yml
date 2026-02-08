@@ -84,15 +84,15 @@
             | ternary(['--additional-flags', distrobox_vm_item.value.additional_flags], [])
           )
         + (
-            distrobox_vm_item.value.pre_init_hooks is defined
+            distrobox_vm_item.value.get('pre_init_hooks') is not none
             | ternary(
                 ['--pre-init-hooks',
                  (
-                   (distrobox_vm_item.value.pre_init_hooks is sequence
-                    and distrobox_vm_item.value.pre_init_hooks is not string)
+                   (distrobox_vm_item.value.get('pre_init_hooks') is sequence
+                    and distrobox_vm_item.value.get('pre_init_hooks') is not string)
                    | ternary(
-                       (distrobox_vm_item.value.pre_init_hooks | join(' && ')),
-                       distrobox_vm_item.value.pre_init_hooks
+                       (distrobox_vm_item.value.get('pre_init_hooks') | join(' && ')),
+                       distrobox_vm_item.value.get('pre_init_hooks')
                      )
                  )
                 ],
@@ -100,15 +100,15 @@
               )
           )
         + (
-            distrobox_vm_item.value.init_hooks is defined
+            distrobox_vm_item.value.get('init_hooks') is not none
             | ternary(
                 ['--init-hooks',
                  (
-                   (distrobox_vm_item.value.init_hooks is sequence
-                    and distrobox_vm_item.value.init_hooks is not string)
+                   (distrobox_vm_item.value.get('init_hooks') is sequence
+                    and distrobox_vm_item.value.get('init_hooks') is not string)
                    | ternary(
-                       (distrobox_vm_item.value.init_hooks | join(' && ')),
-                       distrobox_vm_item.value.init_hooks
+                       (distrobox_vm_item.value.get('init_hooks') | join(' && ')),
+                       distrobox_vm_item.value.get('init_hooks')
                      )
                  )
                 ],
@@ -163,15 +163,15 @@
               )
           )
         + (
-            distrobox_vm_item.value.pre_init_hooks is defined
+            distrobox_vm_item.value.get('pre_init_hooks') is not none
             | ternary(
                 ['--pre-init-hooks',
                  (
-                   (distrobox_vm_item.value.pre_init_hooks is sequence
-                    and distrobox_vm_item.value.pre_init_hooks is not string)
+                   (distrobox_vm_item.value.get('pre_init_hooks') is sequence
+                    and distrobox_vm_item.value.get('pre_init_hooks') is not string)
                    | ternary(
-                       (distrobox_vm_item.value.pre_init_hooks | join(' && ')),
-                       distrobox_vm_item.value.pre_init_hooks
+                       (distrobox_vm_item.value.get('pre_init_hooks') | join(' && ')),
+                       distrobox_vm_item.value.get('pre_init_hooks')
                      )
                  )
                 ],
@@ -179,15 +179,15 @@
               )
           )
         + (
-            distrobox_vm_item.value.init_hooks is defined
+            distrobox_vm_item.value.get('init_hooks') is not none
             | ternary(
                 ['--init-hooks',
                  (
-                   (distrobox_vm_item.value.init_hooks is sequence
-                    and distrobox_vm_item.value.init_hooks is not string)
+                   (distrobox_vm_item.value.get('init_hooks') is sequence
+                    and distrobox_vm_item.value.get('init_hooks') is not string)
                    | ternary(
-                       (distrobox_vm_item.value.init_hooks | join(' && ')),
-                       distrobox_vm_item.value.init_hooks
+                       (distrobox_vm_item.value.get('init_hooks') | join(' && ')),
+                       distrobox_vm_item.value.get('init_hooks')
                      )
                  )
                 ],
