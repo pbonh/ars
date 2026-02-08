@@ -40,21 +40,13 @@
     - distrobox_clone_name | length > 0
     - distrobox_target_will_create
 
-- name: Distrobox | Start clone source if stopped | command
-  ansible.builtin.command: distrobox enter --name "{{ distrobox_clone_name }}" -- true
-  changed_when: true
-  when:
-    - distrobox_clone_name | length > 0
-    - distrobox_target_will_create
-    - not distrobox_clone_source_running
-
-- name: Distrobox | Stop clone source for cloning | command
+- name: Distrobox | Ensure clone source stopped for cloning | command
   ansible.builtin.command: distrobox stop "{{ distrobox_clone_name }}"
   changed_when: true
+  failed_when: false
   when:
     - distrobox_clone_name | length > 0
     - distrobox_target_will_create
-    - distrobox_clone_source_running
 
 - name: Distrobox | Create container | command
   ansible.builtin.command: distrobox assemble create --file "{{ distrobox_config }}/{{ distrobox_vm_name }}.ini"
