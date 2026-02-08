@@ -3,9 +3,17 @@ home={{ distrobox_home }}/{{ vm_name }}
 {% for key, value in distrobox_vm_opts.items() %}
 {% if value is sequence and value is not string %}
 {% for item in value %}
+{% if key == 'init_hooks' %}
+{{ key }}="{{ item | replace('"', '\\"') }}"
+{% else %}
 {{ key }}={{ item }}
+{% endif %}
 {% endfor %}
 {% else %}
+{% if key == 'init_hooks' %}
+{{ key }}="{{ value | replace('"', '\\"') }}"
+{% else %}
 {{ key }}={{ value }}
+{% endif %}
 {% endif %}
 {% endfor %}
