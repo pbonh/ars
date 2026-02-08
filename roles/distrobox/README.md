@@ -2,7 +2,7 @@ Role Name
 =========
 
 Configure distrobox container definitions and create containers using
-`distrobox assemble`.
+`distrobox create`.
 
 Requirements
 ------------
@@ -21,10 +21,12 @@ Behavior
 --------
 
 - Writes one ini file per entry in `distrobox_vms`.
-- Creates containers with `distrobox assemble create --file <ini>`.
-- For clones, the source container is created and started at least once,
-  stopped for the clone operation, and then its prior running state is
-  restored afterward.
+- Creates containers with `distrobox create` using the settings from
+  `distrobox_vms`.
+- For clones, containers are created with `distrobox create --clone` to
+  preserve the base container state; the source container is created and
+  started at least once, stopped for the clone operation, and its prior
+  running state is restored afterward.
 
 Dependencies
 ------------

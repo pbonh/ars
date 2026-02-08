@@ -48,10 +48,157 @@
     - distrobox_clone_name | length > 0
     - distrobox_target_will_create
 
-- name: Distrobox | Create container | command
-  ansible.builtin.command: distrobox assemble create --file "{{ distrobox_config }}/{{ distrobox_vm_name }}.ini"
+- name: Distrobox | Remove existing target when replacing | command
+  ansible.builtin.command: distrobox rm --force "{{ distrobox_vm_name }}"
   changed_when: true
-  when: distrobox_target_will_create
+  when:
+    - distrobox_target_replace
+    - distrobox_target_exists
+
+- name: Distrobox | Create container from clone | command
+  ansible.builtin.command:
+    argv: >-
+      {{
+        ['distrobox', 'create', '--clone', distrobox_clone_name,
+         '--name', distrobox_vm_name,
+         '--home', distrobox_home ~ '/' ~ distrobox_vm_name]
+        + (distrobox_vm_item.value.pull | default('false') | bool | ternary(['--pull'], ['--yes']))
+        + (distrobox_vm_item.value.init | default('false') | bool | ternary(['--init'], []))
+        + (distrobox_vm_item.value.nvidia | default('false') | bool | ternary(['--nvidia'], []))
+        + (distrobox_vm_item.value.root | default('false') | bool | ternary(['--root'], []))
+        + (
+            (distrobox_vm_item.value.entry is defined
+             and (distrobox_vm_item.value.entry | default('false') | bool) == false)
+            | ternary(['--no-entry'], [])
+          )
+        + (
+            distrobox_vm_item.value.volume is defined
+            | ternary(['--volume', distrobox_vm_item.value.volume], [])
+          )
+        + (
+            distrobox_vm_item.value.additional_packages is defined
+            | ternary(['--additional-packages', distrobox_vm_item.value.additional_packages], [])
+          )
+        + (
+            distrobox_vm_item.value.additional_flags is defined
+            | ternary(['--additional-flags', distrobox_vm_item.value.additional_flags], [])
+          )
+        + (
+            distrobox_vm_item.value.pre_init_hooks is defined
+            | ternary(
+                ['--pre-init-hooks',
+                 (
+                   (distrobox_vm_item.value.pre_init_hooks is sequence
+                    and distrobox_vm_item.value.pre_init_hooks is not string)
+                   | ternary(
+                       (distrobox_vm_item.value.pre_init_hooks | join(' && ')),
+                       distrobox_vm_item.value.pre_init_hooks
+                     )
+                 )
+                ],
+                []
+              )
+          )
+        + (
+            distrobox_vm_item.value.init_hooks is defined
+            | ternary(
+                ['--init-hooks',
+                 (
+                   (distrobox_vm_item.value.init_hooks is sequence
+                    and distrobox_vm_item.value.init_hooks is not string)
+                   | ternary(
+                       (distrobox_vm_item.value.init_hooks | join(' && ')),
+                       distrobox_vm_item.value.init_hooks
+                     )
+                 )
+                ],
+                []
+              )
+          )
+      }}
+  changed_when: true
+  when:
+    - distrobox_target_will_create
+    - distrobox_clone_name | length > 0
+
+- name: Distrobox | Create container from image | command
+  ansible.builtin.command:
+    argv: >-
+      {{
+        ['distrobox', 'create',
+         '--image', distrobox_vm_item.value.image,
+         '--name', distrobox_vm_name,
+         '--home', distrobox_home ~ '/' ~ distrobox_vm_name]
+        + (distrobox_vm_item.value.pull | default('false') | bool | ternary(['--pull'], ['--yes']))
+        + (distrobox_vm_item.value.init | default('false') | bool | ternary(['--init'], []))
+        + (distrobox_vm_item.value.nvidia | default('false') | bool | ternary(['--nvidia'], []))
+        + (distrobox_vm_item.value.root | default('false') | bool | ternary(['--root'], []))
+        + (
+            (distrobox_vm_item.value.entry is defined
+             and (distrobox_vm_item.value.entry | default('false') | bool) == false)
+            | ternary(['--no-entry'], [])
+          )
+        + (
+            distrobox_vm_item.value.volume is defined
+            | ternary(['--volume', distrobox_vm_item.value.volume], [])
+          )
+        + (
+            distrobox_vm_item.value.additional_packages is defined
+            | ternary(
+                ['--additional-packages',
+                 (distrobox_vm_item.value.additional_packages
+                  | regex_replace('^"(.*)"$', '\\1'))
+                ],
+                []
+              )
+          )
+        + (
+            distrobox_vm_item.value.additional_flags is defined
+            | ternary(
+                ['--additional-flags',
+                 (distrobox_vm_item.value.additional_flags
+                  | regex_replace('^"(.*)"$', '\\1'))
+                ],
+                []
+              )
+          )
+        + (
+            distrobox_vm_item.value.pre_init_hooks is defined
+            | ternary(
+                ['--pre-init-hooks',
+                 (
+                   (distrobox_vm_item.value.pre_init_hooks is sequence
+                    and distrobox_vm_item.value.pre_init_hooks is not string)
+                   | ternary(
+                       (distrobox_vm_item.value.pre_init_hooks | join(' && ')),
+                       distrobox_vm_item.value.pre_init_hooks
+                     )
+                 )
+                ],
+                []
+              )
+          )
+        + (
+            distrobox_vm_item.value.init_hooks is defined
+            | ternary(
+                ['--init-hooks',
+                 (
+                   (distrobox_vm_item.value.init_hooks is sequence
+                    and distrobox_vm_item.value.init_hooks is not string)
+                   | ternary(
+                       (distrobox_vm_item.value.init_hooks | join(' && ')),
+                       distrobox_vm_item.value.init_hooks
+                     )
+                 )
+                ],
+                []
+              )
+          )
+      }}
+  changed_when: true
+  when:
+    - distrobox_target_will_create
+    - distrobox_clone_name | length == 0
 
 - name: Distrobox | Restore clone source running state | command
   ansible.builtin.command: distrobox enter --name "{{ distrobox_clone_name }}" -- true
