@@ -29,7 +29,6 @@ distrobox_vms:
     pull: "true"
     root: "false"
     replace: "true"
-    start_now: "true"
     init_hooks:
       - "sudo dnf install -y ansible"
       - "sudo dnf groupinstall -y \"Development Tools\""
@@ -45,7 +44,6 @@ distrobox_vms:
     pull: "false"
     root: "false"
     replace: "true"
-    start_now: "true"
     init_hooks:
       - "NONINTERACTIVE=1 sudo -u {{ ansible_env.USER }} /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
       - "sudo -u {{ ansible_env.USER }} /home/linuxbrew/.linuxbrew/bin/brew shellenv && sudo -u {{ ansible_env.USER }} /home/linuxbrew/.linuxbrew/bin/brew install gcc ansible-language-server bash-language-server lua-language-server yaml-language-server"
@@ -58,7 +56,6 @@ distrobox_vms:
     pull: "false"
     root: "false"
     replace: "true"
-    start_now: "true"
     entry: "true"
     init_hooks:
       - "{{ distrobox_ssh_bootstrap_cmd }}"
@@ -74,7 +71,6 @@ distrobox_vms:
     pull: "false"
     root: "false"
     replace: "true"
-    start_now: "true"
     entry: "true"
     init_hooks:
       - "{{ distrobox_ssh_bootstrap_cmd }}"
@@ -89,7 +85,6 @@ distrobox_vms:
     pull: "true"
     root: "false"
     replace: "true"
-    start_now: "true"
     init_hooks:
       - "sudo dnf install -y ansible"
       - "rm -rf ~/.ssh"
@@ -104,7 +99,6 @@ distrobox_vms:
     pull: "false"
     root: "false"
     replace: "true"
-    start_now: "true"
     init_hooks:
       # - "sudo -u {{ ansible_env.USER }} curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm"
       # - "sudo -u {{ ansible_env.USER }} . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh && sudo -u {{ ansible_env.USER }} curl -fsSL https://get.jetpack.io/devbox | bash -s -- -f"
@@ -119,7 +113,6 @@ distrobox_vms:
     pull: "false"
     root: "false"
     replace: "true"
-    start_now: "true"
     entry: "true"
     volume: "{{ distrobox_home }}/AlmaBase/.ssh:$HOME/.ssh"
   DebianBase:
@@ -130,7 +123,6 @@ distrobox_vms:
     pull: "true"
     root: "false"
     replace: "true"
-    start_now: "true"
     init_hooks:
       # - "sudo apt install -y ansible"
       - "rm -rf ~/.ssh"
