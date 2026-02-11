@@ -714,3 +714,8 @@ dev_packages:
       - "sst/tap/opencode"
     devbox:
       - "opencode"
+  chafa:
+    brew:
+      - "chafa"
+    devbox:
+      - "chafa"
