@@ -1,6 +1,5 @@
 ---
 display_profile: "laptop"
-desktop_environment: "kde"
 system_home: "/home"
 immutable_system_home: "/var/home"
 install_languages: []
