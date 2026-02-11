@@ -20,8 +20,11 @@ config-mise:
 devbox:
   {{ task_prelude }} ansible-playbook devbox.yml
 
+install-homebrew:
+  {{ task_prelude }} ansible-playbook homebrew.yml --tags "install"
+
 homebrew:
-  {{ task_prelude }} ansible-playbook homebrew.yml
+  {{ task_prelude }} ansible-playbook homebrew.yml --tags "config" --skip-tags "install"
 
 nonroot:
   {{ task_prelude }} ansible-playbook nonroot.yml

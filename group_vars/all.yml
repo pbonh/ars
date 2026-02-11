@@ -56,6 +56,9 @@ homebrew_taps:
   opencode:
     brew_tap:
       - "sst/tap"
+  sidecar:
+    brew_tap:
+      - "marcus/tap"
 homebrew_brewfile_extra_taps: []
 homebrew_brewfile_extra_formulae: []
 homebrew_brewfile_extra_casks: []
@@ -721,6 +724,7 @@ dev_packages:
       - "chafa"
   sidecar:
     brew:
+      - "marcus/tap/td"
       - "marcus/tap/sidecar"
     devbox:
       - "sidecar"
