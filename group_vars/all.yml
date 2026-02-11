@@ -719,3 +719,8 @@ dev_packages:
       - "chafa"
     devbox:
       - "chafa"
+  sidecar:
+    brew:
+      - "marcus/tap/sidecar"
+    devbox:
+      - "sidecar"
