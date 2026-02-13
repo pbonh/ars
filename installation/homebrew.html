@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-46303f49.js";
+            window.path_to_searchindex_js = "../searchindex-ba768e87.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-bbf1516f.js"></script>
@@ -179,9 +179,9 @@
 <pre><code class="language-bash">/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 </code></pre>
 <p>To install the Homebrew packages, ensure <code>ansible</code> is installed and create a file to apply your
-customizations. The variable <code>tool_provider</code> MUST be specified as <code>homebrew</code>. The remaining variables
-are optional, but keep in mind that they will overwrite any customizations that you have made to
-git, ssh, neovim, tmux, etc.</p>
+customizations. Homebrew is the default tool provider. The remaining variables are optional, but
+keep in mind that they will overwrite any customizations that you have made to git, ssh, neovim,
+tmux, etc.</p>
 <p>Example Yaml Config(brew.yml):</p>
 <pre><code class="language-yaml">---
 tool_provider: "homebrew"

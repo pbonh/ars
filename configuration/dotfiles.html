@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-46303f49.js";
+            window.path_to_searchindex_js = "../searchindex-ba768e87.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-bbf1516f.js"></script>
@@ -207,6 +207,52 @@ zellij_kdl_layouts:
 </code></pre>
 <p>If checking out the <code>ars</code> repo directly, then create <code>vars/local.yml</code>, and add configuration there, no <code>-e</code> option necessary.</p>
 <pre><code class="language-bash">ansible-playbook playbook.yml --skip-tags "install"
+</code></pre>
+<h2 id="bitwarden-cli--wl-clipboard-flatpak"><a class="header" href="#bitwarden-cli--wl-clipboard-flatpak">Bitwarden CLI + wl-clipboard (Flatpak)</a></h2>
+<p>This is a quick way to copy passwords to the Wayland clipboard using the Flatpak Bitwarden CLI.</p>
+<p>Set a Flatpak wrapper alias and unlock once per shell session:</p>
+<pre><code class="language-bash">alias bw='flatpak run --command=bw com.bitwarden.desktop'
+export BW_SESSION="$(bw unlock --raw)"
+</code></pre>
+<p>Copy by exact item name:</p>
+<pre><code class="language-bash">bw get password "Item Name" | wl-copy
+</code></pre>
+<p>Search and pick an item ID (requires <code>jq</code>):</p>
+<pre><code class="language-bash">bw list items --search "query" | jq -r '.[] | "\(.id)\t\(.name)"'
+bw get password &lt;id&gt; | wl-copy
+</code></pre>
+<h3 id="bashrc-helpers"><a class="header" href="#bashrc-helpers">Bashrc helpers</a></h3>
+<pre><code class="language-bash"># ~/.bashrc
+alias bw='flatpak run --command=bw com.bitwarden.desktop'
+
+bw_unlock() {
+  export BW_SESSION="$(bw unlock --raw)"
+}
+
+bw_copy_name() {
+  bw get password "$1" | wl-copy
+}
+
+bw_search() {
+  bw list items --search "$1" | jq -r '.[] | "\(.id)\t\(.name)"'
+}
+
+bw_copy_id() {
+  bw get password "$1" | wl-copy
+}
+
+bw_pick_copy() {
+  local selection
+  selection="$(bw list items --search "$1" | jq -r '.[] | "\(.id)\t\(.name)"' | fzf)"
+  [ -n "$selection" ] || return 1
+  bw get password "${selection%%$'\t'*}" | wl-copy
+}
+</code></pre>
+<p>Clipboard auto-clear (optional): check <code>wl-copy --help</code> for a <code>--clear</code> flag; if available, you can clear after a delay.</p>
+<pre><code class="language-bash">bw_copy_name_clear() {
+  bw get password "$1" | wl-copy
+  (sleep 20; wl-copy --clear) &amp;
+}
 </code></pre>
 
                     </main>

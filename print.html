@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-46303f49.js";
+            window.path_to_searchindex_js = "searchindex-ba768e87.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-bbf1516f.js"></script>
@@ -231,17 +231,17 @@ is also a portable version of ansible available(<code>scripts/bootstrap_ansible<
 <li>KDE</li>
 </ul>
 <h2 id="developer-tools"><a class="header" href="#developer-tools">Developer Tools</a></h2>
-<p>There are 4 installation options to choose from for the developer tools (mise is the default):</p>
+<p>There are 4 installation options to choose from for the developer tools (homebrew is the default):</p>
 <ol>
-<li>Mise (default)</li>
+<li>Homebrew (default)</li>
+<li>Mise</li>
 <li>Devbox</li>
-<li>Homebrew</li>
 <li>Non-Root</li>
 </ol>
-<p>Mise is the default tool manager for the developer toolset. Devbox uses <code>nix</code>, and supports custom
-shell environments. Homebrew is widely supported and contains many macOS programs. Non-Root is
-useful when you don’t have root permissions, but still need to install the developer tools. All 4
-are compatible with Linux &amp; macOS.</p>
+<p>Homebrew is the default tool manager for the developer toolset. Mise provides a curated toolchain,
+and Devbox uses <code>nix</code> with support for custom shell environments. Non-Root is useful when you don’t
+have root permissions, but still need to install the developer tools. All 4 are compatible with
+Linux &amp; macOS.</p>
 <p>EITHER
 Checkout repository and create <code>.envrc</code> File(Example)</p>
 <pre><code class="language-bash">touch .envrc
@@ -265,19 +265,19 @@ ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install,en
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="developer-tools-1"><a class="header" href="#developer-tools-1">Developer Tools</a></h1>
-<p>This repo supports installing terminal developer tools &amp; packages via mise (default), devbox,
-homebrew, and cargo (Non-Root).</p>
+<p>This repo supports installing terminal developer tools &amp; packages via homebrew (default), mise,
+devbox, and cargo (Non-Root).</p>
 <p>The options are presented in the recommended order:</p>
 <ol>
-<li>Mise (default)</li>
+<li>Homebrew (default)</li>
+<li>Mise</li>
 <li>Devbox</li>
-<li>Homebrew</li>
 <li>Non-Root</li>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="mise"><a class="header" href="#mise">Mise</a></h1>
-<p>Mise is the default package manager for the developer tools in this repo. The role installs the
-mise binary and applies the tool configuration for you.</p>
+<p>Mise is a package manager for the developer tools in this repo. The role installs the mise binary
+and applies the tool configuration for you.</p>
 <p>To install the Mise-managed packages, ensure <code>ansible</code> is installed and create a file to apply your
 customizations. The variable <code>tool_provider</code> MUST be specified as <code>mise</code>. The remaining variables are
 optional, but keep in mind that they will overwrite any customizations that you have made to git,
@@ -326,9 +326,9 @@ openai_api_key: "MY_OPENAI_API_KEY"
 <pre><code class="language-bash">/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 </code></pre>
 <p>To install the Homebrew packages, ensure <code>ansible</code> is installed and create a file to apply your
-customizations. The variable <code>tool_provider</code> MUST be specified as <code>homebrew</code>. The remaining variables
-are optional, but keep in mind that they will overwrite any customizations that you have made to
-git, ssh, neovim, tmux, etc.</p>
+customizations. Homebrew is the default tool provider. The remaining variables are optional, but
+keep in mind that they will overwrite any customizations that you have made to git, ssh, neovim,
+tmux, etc.</p>
 <p>Example Yaml Config(brew.yml):</p>
 <pre><code class="language-yaml">---
 tool_provider: "homebrew"
@@ -480,6 +480,52 @@ zellij_kdl_layouts:
 </code></pre>
 <p>If checking out the <code>ars</code> repo directly, then create <code>vars/local.yml</code>, and add configuration there, no <code>-e</code> option necessary.</p>
 <pre><code class="language-bash">ansible-playbook playbook.yml --skip-tags "install"
+</code></pre>
+<h2 id="bitwarden-cli--wl-clipboard-flatpak"><a class="header" href="#bitwarden-cli--wl-clipboard-flatpak">Bitwarden CLI + wl-clipboard (Flatpak)</a></h2>
+<p>This is a quick way to copy passwords to the Wayland clipboard using the Flatpak Bitwarden CLI.</p>
+<p>Set a Flatpak wrapper alias and unlock once per shell session:</p>
+<pre><code class="language-bash">alias bw='flatpak run --command=bw com.bitwarden.desktop'
+export BW_SESSION="$(bw unlock --raw)"
+</code></pre>
+<p>Copy by exact item name:</p>
+<pre><code class="language-bash">bw get password "Item Name" | wl-copy
+</code></pre>
+<p>Search and pick an item ID (requires <code>jq</code>):</p>
+<pre><code class="language-bash">bw list items --search "query" | jq -r '.[] | "\(.id)\t\(.name)"'
+bw get password &lt;id&gt; | wl-copy
+</code></pre>
+<h3 id="bashrc-helpers"><a class="header" href="#bashrc-helpers">Bashrc helpers</a></h3>
+<pre><code class="language-bash"># ~/.bashrc
+alias bw='flatpak run --command=bw com.bitwarden.desktop'
+
+bw_unlock() {
+  export BW_SESSION="$(bw unlock --raw)"
+}
+
+bw_copy_name() {
+  bw get password "$1" | wl-copy
+}
+
+bw_search() {
+  bw list items --search "$1" | jq -r '.[] | "\(.id)\t\(.name)"'
+}
+
+bw_copy_id() {
+  bw get password "$1" | wl-copy
+}
+
+bw_pick_copy() {
+  local selection
+  selection="$(bw list items --search "$1" | jq -r '.[] | "\(.id)\t\(.name)"' | fzf)"
+  [ -n "$selection" ] || return 1
+  bw get password "${selection%%$'\t'*}" | wl-copy
+}
+</code></pre>
+<p>Clipboard auto-clear (optional): check <code>wl-copy --help</code> for a <code>--clear</code> flag; if available, you can clear after a delay.</p>
+<pre><code class="language-bash">bw_copy_name_clear() {
+  bw get password "$1" | wl-copy
+  (sleep 20; wl-copy --clear) &amp;
+}
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
