@@ -1,0 +1,24 @@
+---
+- name: Codex | Ensure config directory exists
+  ansible.builtin.file:
+    path: "{{ codex_config_dir }}"
+    state: directory
+    mode: "0700"
+
+- name: Codex | Check Codex home directory
+  ansible.builtin.stat:
+    path: "{{ codex_home_dir }}"
+  register: codex_home_stat
+
+- name: Codex | Link Codex home to XDG config
+  ansible.builtin.file:
+    src: "{{ codex_config_dir }}"
+    dest: "{{ codex_home_dir }}"
+    state: link
+  when: not codex_home_stat.stat.exists
+
+- name: Codex | Write config.toml
+  ansible.builtin.template:
+    src: "codex/config.toml.j2"
+    dest: "{{ codex_config_path }}"
+    mode: "0600"

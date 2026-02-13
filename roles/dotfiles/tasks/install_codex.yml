@@ -1,0 +1,8 @@
+---
+- name: Codex | Install Codex CLI
+  community.general.npm:
+    name: "{{ codex_npm_package }}"
+    global: true
+    state: "{{ codex_npm_state }}"
+    executable: "{{ codex_npm_executable }}"
+    version: "{{ codex_npm_version | default(omit, true) }}"

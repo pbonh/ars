@@ -1,0 +1,9 @@
+---
+codex_npm_package: "@openai/codex"
+codex_npm_state: "present"
+codex_npm_version: null
+codex_npm_executable: "npm"
+codex_default_model: "gpt-5.2-codex"
+codex_config_dir: "{{ xdg_config_dir }}/codex"
+codex_config_path: "{{ codex_config_dir }}/config.toml"
+codex_home_dir: "{{ ansible_env.HOME }}/.codex"

@@ -179,3 +179,16 @@
   tags:
     - claude
     - ai
+
+- name: Install Codex CLI
+  import_tasks: tasks/install_codex.yml
+  tags:
+    - install
+    - codex
+    - ai
+
+- name: Configure Codex CLI
+  import_tasks: tasks/configure_codex.yml
+  tags:
+    - codex
+    - ai
