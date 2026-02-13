@@ -1,0 +1,204 @@
+---
+- name: Claude | Set base variables
+  ansible.builtin.set_fact:
+    claude_gcs_bucket: "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases"
+    claude_download_dir: "{{ ansible_env.HOME }}/.claude/downloads"
+    claude_target: "latest"
+
+- name: Claude | Determine OS
+  ansible.builtin.set_fact:
+    claude_os: "{{ 'darwin' if ansible_system == 'Darwin' else ('linux' if ansible_system == 'Linux' else 'unsupported') }}"
+
+- name: Claude | Ensure OS is supported
+  ansible.builtin.assert:
+    that:
+      - claude_os in ['darwin', 'linux']
+    fail_msg: "Unsupported OS: {{ ansible_system }}"
+
+- name: Claude | Determine architecture
+  ansible.builtin.set_fact:
+    claude_arch_base: >-
+      {{
+        'x64' if ansible_architecture in ['x86_64', 'amd64'] else
+        ('arm64' if ansible_architecture in ['aarch64', 'arm64'] else 'unsupported')
+      }}
+
+- name: Claude | Ensure architecture is supported
+  ansible.builtin.assert:
+    that:
+      - claude_arch_base != 'unsupported'
+    fail_msg: "Unsupported architecture: {{ ansible_architecture }}"
+
+- name: Claude | Check Rosetta translation
+  ansible.builtin.command: sysctl -n sysctl.proc_translated
+  register: claude_rosetta
+  changed_when: false
+  failed_when: false
+  when: claude_os == 'darwin'
+
+- name: Claude | Select architecture
+  ansible.builtin.set_fact:
+    claude_arch: "{{ 'arm64' if (claude_os == 'darwin' and claude_arch_base == 'x64' and (claude_rosetta.stdout | trim) == '1') else claude_arch_base }}"
+
+- name: Claude | Check musl libc (x86_64)
+  ansible.builtin.stat:
+    path: "/lib/libc.musl-x86_64.so.1"
+  register: claude_musl_x86
+  when: claude_os == 'linux'
+
+- name: Claude | Check musl libc (aarch64)
+  ansible.builtin.stat:
+    path: "/lib/libc.musl-aarch64.so.1"
+  register: claude_musl_arm
+  when: claude_os == 'linux'
+
+- name: Claude | Check ldd for musl
+  ansible.builtin.command: ldd /bin/ls
+  register: claude_ldd
+  changed_when: false
+  failed_when: false
+  when: claude_os == 'linux'
+
+- name: Claude | Determine musl usage
+  ansible.builtin.set_fact:
+    claude_use_musl: >-
+      {{
+        claude_os == 'linux' and (
+          (claude_musl_x86.stat.exists | default(false)) or
+          (claude_musl_arm.stat.exists | default(false)) or
+          ((claude_ldd.stdout | default('')) | regex_search('musl'))
+        )
+      }}
+
+- name: Claude | Compose platform
+  ansible.builtin.set_fact:
+    claude_platform: >-
+      {{
+        (
+          'linux-' ~ (claude_arch | trim) ~ (claude_use_musl | ternary('-musl', ''))
+          if claude_os == 'linux'
+          else (claude_os | trim) ~ '-' ~ (claude_arch | trim)
+        ) | trim
+      }}
+
+- name: Claude | Check for claude in PATH
+  ansible.builtin.command: which claude
+  register: claude_in_path
+  changed_when: false
+  failed_when: false
+
+- name: Claude | Set candidate install paths
+  ansible.builtin.set_fact:
+    claude_candidate_paths:
+      - "{{ ansible_env.HOME }}/.local/bin/claude"
+      - "{{ ansible_env.HOME }}/.claude/bin/claude"
+      - "{{ ansible_env.HOME }}/bin/claude"
+
+- name: Claude | Check common install locations
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: "{{ claude_candidate_paths }}"
+  register: claude_candidate_stats
+  when: claude_in_path.rc != 0
+
+- name: Claude | Select installed claude path
+  ansible.builtin.set_fact:
+    claude_exe_path: >-
+      {% if claude_in_path.rc == 0 %}
+      {{ claude_in_path.stdout | trim }}
+      {% else %}
+      {{ (claude_candidate_stats.results | selectattr('stat.exists') | map(attribute='item') | list | first | default('')) }}
+      {% endif %}
+
+- name: Claude | Read installed version
+  ansible.builtin.command: "{{ claude_exe_path }} --version"
+  register: claude_version_output
+  changed_when: false
+  failed_when: false
+  when: claude_exe_path | length > 0
+
+- name: Claude | Parse installed version
+  ansible.builtin.set_fact:
+    claude_installed_version: >-
+      {{
+        (claude_version_output.stdout | default('') | regex_search('[0-9]+\\.[0-9]+\\.[0-9]+(?:-[^[:space:]]+)?'))
+        | default('', true)
+      }}
+
+- name: Claude | Fetch latest version
+  ansible.builtin.uri:
+    url: "{{ claude_gcs_bucket }}/latest"
+    return_content: true
+  register: claude_latest_response
+  changed_when: false
+
+- name: Claude | Set latest version
+  ansible.builtin.set_fact:
+    claude_latest_version: "{{ claude_latest_response.content | trim }}"
+
+- name: Claude | Determine install requirement
+  ansible.builtin.set_fact:
+    claude_install_required: >-
+      {{
+        (claude_exe_path | length == 0) or
+        (claude_installed_version | length == 0) or
+        (claude_installed_version != claude_latest_version)
+      }}
+
+- name: Claude | Ensure download directory exists
+  ansible.builtin.file:
+    path: "{{ claude_download_dir }}"
+    state: directory
+    mode: "0755"
+  when: claude_install_required
+
+- name: Claude | Fetch release manifest
+  ansible.builtin.uri:
+    url: "{{ claude_gcs_bucket }}/{{ claude_latest_version }}/manifest.json"
+    return_content: true
+  register: claude_manifest_response
+  changed_when: false
+  when: claude_install_required
+
+- name: Claude | Parse manifest
+  ansible.builtin.set_fact:
+    claude_manifest: "{{ claude_manifest_response.content | from_json }}"
+  when: claude_install_required
+
+- name: Claude | Parse manifest checksum
+  ansible.builtin.set_fact:
+    claude_checksum: "{{ claude_manifest.platforms.get(claude_platform, {}).get('checksum', '') }}"
+  when: claude_install_required
+
+- name: Claude | Validate checksum
+  ansible.builtin.assert:
+    that:
+      - claude_checksum | length == 64
+      - claude_checksum is regex('^[0-9a-f]{64}$')
+    fail_msg: "Platform {{ claude_platform }} not found in manifest"
+  when: claude_install_required
+
+- name: Claude | Set binary path
+  ansible.builtin.set_fact:
+    claude_binary_path: "{{ claude_download_dir }}/claude-{{ claude_latest_version }}-{{ claude_platform }}"
+  when: claude_install_required
+
+- name: Claude | Download claude binary
+  ansible.builtin.get_url:
+    url: "{{ claude_gcs_bucket }}/{{ claude_latest_version }}/{{ claude_platform }}/claude"
+    dest: "{{ claude_binary_path }}"
+    mode: "0755"
+    checksum: "sha256:{{ claude_checksum }}"
+  register: claude_download
+  when: claude_install_required
+
+- name: Claude | Run installer
+  ansible.builtin.command: "{{ claude_binary_path }} install {{ claude_target }}"
+  changed_when: true
+  when: claude_install_required
+
+- name: Claude | Remove downloaded binary
+  ansible.builtin.file:
+    path: "{{ claude_binary_path }}"
+    state: absent
+  when: claude_install_required

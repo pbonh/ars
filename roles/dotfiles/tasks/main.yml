@@ -166,3 +166,16 @@
   tags:
     - opencode
     - ai
+
+- name: Install Claude Code
+  import_tasks: tasks/install_claude_code.yml
+  tags:
+    - install
+    - claude
+    - ai
+
+- name: Configure Claude Code
+  import_tasks: tasks/configure_claude_code.yml
+  tags:
+    - claude
+    - ai

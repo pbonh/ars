@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -n "$ANTHROPIC_API_KEY" ]; then
+  printf '%s\n' "$ANTHROPIC_API_KEY"
+  exit 0
+fi
+
+printf '%s\n' "{{ claude_anthropic_api_key }}"
