@@ -74,3 +74,5 @@
     zoxide_exe: "{{ cargo_path }}zoxide"
     fzf_exe: "{{ fzf_path }}/fzf"
     nvim_exe: "{{ nvim_exe_default }}"
+    opencode_exe: "opencode"
+    sidecar_exe: "sidecar"

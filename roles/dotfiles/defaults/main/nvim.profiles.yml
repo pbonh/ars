@@ -167,19 +167,6 @@ nvim_plugin_example:
       require('plugin').setup()
     keymaps: |
       { '<leader>_', { n = '<cmd>command<CR>', }, description = 'Description', },
-nvim_default_plugins:
-  ui: "{{ nvim_ui_default }}"
-  project: "{{ nvim_project_default }}"
-  legendary: "{{ nvim_legendary_default }}"
-  telescope: "{{ nvim_telescope_default }}"
-  hydra: "{{ nvim_hydra_default }}"
-  treesitter: "{{ nvim_treesitter_default }}"
-  git: "{{ nvim_git_default }}"
-  terminal: "{{ nvim_terminal_default }}"
-  motion: "{{ nvim_motion_default }}"
-  colorscheme: "{{ nvim_colorscheme_default }}"
-  intellisense: "{{ nvim_intellisense_default }}"
-  debugger: "{{ nvim_debugger_default }}"
 nvim_extra_plugins: {}
 nvim_startup_commands: |
   -- [[ User Global Startup Commands ]]

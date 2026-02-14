@@ -3,7 +3,7 @@ opencode_install_script_path: "{{ ansible_env.HOME }}/opencode-install.sh"
 opencode_install_dir: "{{ ansible_env.HOME }}/.opencode"
 opencode_path: "{{ opencode_install_dir }}/bin"
 opencode_config_dir: "{{ xdg_config_dir }}/opencode"
-opencode_default_model: "openai/gpt-5.2-codex"
+opencode_default_model: "openai/gpt-5.3-codex"
 opencode_agents_repo_url: "https://github.com/darrenhinde/OpenAgents.git"
 opencode_agents_repo_dest: "{{ dot_download_dir }}/OpenAgents"
 opencode_agents_directories:
