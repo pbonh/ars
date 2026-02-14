@@ -1,0 +1,7 @@
+---
+sidecar_config_dir: "{{ xdg_config_dir }}/sidecar"
+sidecar_config_path: "{{ sidecar_config_dir }}/config.json"
+sidecar_global_config:
+  ui:
+    showClock: true
+    nerdFontsEnabled: true

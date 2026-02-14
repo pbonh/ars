@@ -192,3 +192,9 @@
   tags:
     - codex
     - ai
+
+- name: Configure Sidecar
+  import_tasks: tasks/configure_sidecar.yml
+  tags:
+    - sidecar
+    - ai
