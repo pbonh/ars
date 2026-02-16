@@ -41,182 +41,56 @@ user_llama_model_info:
     model_name: "qwen2.5-coder"
     model_tag: "{{ distilled_param_count }}"
     model_ctx: "{{ distilled_ctx_size }}"
-openai_model: "gpt-5-mini"
-openai_ctx_size: "{{ ctx_sizes['256k'] }}"
-ollama_port: "11434"
-ollama_address: "http://localhost:{{ ollama_port }}"
-nvim_codecompanion_adapter_config_ollama: |
-        ollama = function()
-          return require("codecompanion.adapters").extend("ollama", {
-            env = {
-              url = "{{ ollama_address }}",
-            },
-          })
-        end,
-nvim_codecompanion_adapter_config_openai: |
-        openai = function()
-          return require("codecompanion.adapters").extend("openai", {
-            env = {
-              api_key = "{{ openai_api_key }}"
-            },
-            schema = {
-              model = {
-                default = "{{ openai_model }}",
-              },
-              num_ctx = {
-                default = {{ openai_ctx_size }},
-              },
-            },
-          })
-        end,
-nvim_codecompanion_adapter_config_user: |
-        {%- for model_name in user_llama_model_info -%}
-        {% set llama_model_info = user_llama_model_info[model_name] %}
-        {{ llama_model_info['name'] |indent (2) }} = function()
-          return require("codecompanion.adapters").extend("ollama", {
-            name = "{{ llama_model_info['name'] }}",
-            schema = {
-              model = {
-                default = "{{ llama_model_info['model_name'] }}:{{ llama_model_info['model_tag'] }}",
-              },
-              num_ctx = {
-                default = {{ llama_model_info['model_ctx'] }},
-              },
-              num_predict = {
-                default = -1,
-              },
-            },
-          })
-        end,
-        {% endfor %}
-nvim_codecompanion_display_config: |
-      display = {
-        chat = {
-          -- Options to customize the UI of the chat buffer
-          window = {
-            layout = "float", -- float|vertical|horizontal|buffer
-          },
-        },
-      },
-nvim_codecompanion_adapter_config: |
-      adapters = {
-        http = {
-          {{ nvim_codecompanion_adapter_config_ollama | indent(2) }}
-          {{ nvim_codecompanion_adapter_config_openai | indent(2) }}
-          {{ nvim_codecompanion_adapter_config_user | indent(2) }}
-        },
-      },
-nvim_codecompanion_prompt_library_docusaurus: |
-        ["Docusaurus"] = {
-          strategy = "chat",
-          description = "Write documentation for me",
-          opts = {
-            index = 11,
-            is_slash_cmd = false,
-            auto_submit = false,
-            short_name = "docs",
-          },
-          references = {
-            {
-              type = "file",
-              path = {
-                "doc/.vitepress/config.mjs",
-                "lua/codecompanion/config.lua",
-                "README.md",
-              },
-            },
-          },
-          prompts = {
-            {
-              role = "user",
-              content = [[I'm rewriting the documentation for my plugin CodeCompanion.nvim, as I'm moving to a vitepress website. Can you help me rewrite it?
-
-              I'm sharing my vitepress config file so you have the context of how the documentation website is structured in the `sidebar` section of that file.
-
-              I'm also sharing my `config.lua` file which I'm mapping to the `configuration` section of the sidebar.
-              ]],
-            },
-          },
-        },
-nvim_codecompanion_prompt_library: |
-      prompt_library = {
-        {{ nvim_codecompanion_prompt_library_docusaurus }}
-      },
-nvim_codecompanion_chat_select_ui: |
-          slash_commands = {
-            ["file"] = {
-              opts = {
-                provider = "fzf_lua", -- Other options include 'default', 'mini_pick', 'fzf_lua', snacks
-                contains_code = true,
-              },
-            },
-            ["buffer"] = {
-              opts = {
-                provider = "fzf_lua", -- Other options include 'default', 'mini_pick', 'fzf_lua', snacks
-                contains_code = true,
-              },
-            },
-          },
-nvim_ai_companion:
+ai_adapter_companion: "codex"
+ai_codecompanion_codex_auth_method: "openai-api-key"
+nvim_ai_codecompanion:
   lazy: |
     {
       "olimorris/codecompanion.nvim",
+      event = "VeryLazy",
       dependencies = {
         "nvim-lua/plenary.nvim",
-        "nvim-treesitter/nvim-treesitter",
       },
-      config = true
+      opts = {
+        adapters = {
+          acp = {
+            codex = function()
+              return require("codecompanion.adapters").extend("codex", {
+                defaults = {
+                  auth_method = "{{ ai_codecompanion_codex_auth_method }}",
+                },
+                env = {
+                  OPENAI_API_KEY = "{{ openai_api_key }}",
+                },
+              })
+            end,
+            claude_code = function()
+              return require("codecompanion.adapters").extend("claude_code", {
+                env = {
+                  ANTHROPIC_API_KEY = "{{ anthropic_api_key }}",
+                },
+              })
+            end,
+          },
+        },
+        interactions = {
+          chat = {
+            adapter = "{{ ai_adapter_companion }}",
+          },
+        },
+      },
     },
-  config: |
-    require("codecompanion").setup({
-      strategies = {
-        chat = {
-          adapter = "{{ ai_adapter_chat }}",
-          {{ nvim_codecompanion_chat_select_ui | indent(6) }}
-        },
-        inline = {
-          adapter = "{{ ai_adapter_inline }}",
-        },
-        cmd = {
-          adapter = "{{ ai_adapter_cmd }}",
-        },
-      },
-      {{ nvim_codecompanion_display_config | indent(2) }}
-      {{ nvim_codecompanion_adapter_config | indent(2) }}
-      {{ nvim_codecompanion_prompt_library | indent(2) }}
-    })
-    -- Expand 'cc' into 'CodeCompanion' in the command line
-    -- vim.cmd([[cab cc CodeCompanion]])
+    {
+      "MeanderingProgrammer/render-markdown.nvim",
+      ft = { "markdown", "codecompanion" }
+    },
+  config: ""
   keymaps: |
     {
-      mode = 'n',
-      { '<leader>Ct', '<cmd>CodeCompanionChat Toggle<CR>', desc = 'CodeCompanion: Toggle Chat Window', },
-      { '<leader>Ca', '<cmd>CodeCompanionActions<CR>', desc = 'CodeCompanion: Actions', },
-      { '<leader>Ce', '<cmd>lua require("codecompanion").prompt("explain")<CR>', desc = 'CodeCompanion: Explain', },
+      mode = {'n', 't'},
+      icon = '',
+      { '<C-a>', '<cmd>CodeCompanionChat Toggle<CR>', desc = 'CodeCompanion: Toggle Chat', },
     },
-nvim_ai_companion_chatgpt:
-  lazy: "{{ nvim_ai_companion['lazy'] }}"
-  config: |
-    require("codecompanion").setup({
-      strategies = {
-        chat = {
-          adapter = "{{ chatgpt_ai_adapter_chat }}",
-          {{ nvim_codecompanion_chat_select_ui | indent(6) }}
-        },
-        inline = {
-          adapter = "{{ chatgpt_ai_adapter_inline }}",
-        },
-        cmd = {
-          adapter = "{{ chatgpt_ai_adapter_cmd }}",
-        },
-      },
-      {{ nvim_codecompanion_display_config | indent(2) }}
-      {{ nvim_codecompanion_adapter_config | indent(2) }}
-      {{ nvim_codecompanion_prompt_library | indent(2) }}
-    })
-    -- Expand 'cc' into 'CodeCompanion' in the command line
-    -- vim.cmd([[cab cc CodeCompanion]])
-  keymaps: "{{ nvim_ai_companion['keymaps'] }}"
 nvim_ai_avante:
   lazy: |
     {
