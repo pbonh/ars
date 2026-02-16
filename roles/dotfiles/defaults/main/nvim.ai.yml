@@ -41,9 +41,10 @@ user_llama_model_info:
     model_name: "qwen2.5-coder"
     model_tag: "{{ distilled_param_count }}"
     model_ctx: "{{ distilled_ctx_size }}"
-ai_adapter_companion: "codex"
+ai_provider: "codex"
+ai_adapter_companion: "{{ ai_provider }}"
 ai_codecompanion_codex_auth_method: "openai-api-key"
-ai_avante_provider: "codex"
+ai_avante_provider: "{{ ai_provider }}"
 nvim_ai_codecompanion:
   lazy: |
     {
@@ -186,6 +187,58 @@ nvim_ai_avante:
       icon = '',
       { '<C-a>', '<cmd>AvanteToggle<CR>', desc = 'Avante: Toggle Chat', },
     },
+nvim_ai_agentic:
+  lazy: |
+    {
+      "carlos-algms/agentic.nvim",
+      opts = {
+        -- Available by default: "claude-acp" | "gemini-acp" | "codex-acp" | "opencode-acp" | "cursor-acp" | "auggie-acp"
+        provider = "{{ ai_provider }}-acp",
+        acp_providers = {
+          ["codex-acp"] = {
+            default_mode = "read-only",
+          },
+        },
+      },
+      -- these are just suggested keymaps; customize as desired
+      keys = {
+        {
+          "<C-a>",
+          function() require("agentic").toggle() end,
+          mode = { "n", "v", "i" },
+          desc = "Toggle Agentic Chat"
+        },
+        {
+          "<C-'>",
+          function() require("agentic").new_session() end,
+          mode = { "n", "v", "i" },
+          desc = "New Agentic Session"
+        },
+        -- {
+        --   "<C-'>",
+        --   function() require("agentic").add_selection_or_file_to_context() end,
+        --   mode = { "n", "v" },
+        --   desc = "Add file or selection to Agentic to Context"
+        -- },
+        -- {
+        --   "<C-,>",
+        --   function() require("agentic").new_session() end,
+        --   mode = { "n", "v", "i" },
+        --   desc = "New Agentic Session"
+        -- },
+        -- {
+        --   "<A-i>r", -- ai Restore
+        --   function()
+        --       require("agentic").restore_session()
+        --   end,
+        --   desc = "Agentic Restore session",
+        --   silent = true,
+        --   mode = { "n", "v", "i" },
+        -- },
+      },
+    },
+  config: ""
+  keymaps: ""
 nvim_ai_opencode:
   lazy: |
     {
