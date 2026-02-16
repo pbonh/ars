@@ -1,0 +1,17 @@
+---
+cline_npm_package: "cline"
+cline_npm_state: "present"
+cline_npm_version: null
+cline_npm_executable: "npm"
+cline_config_dir: "{{ ansible_env.HOME }}/.cline/data"
+cline_global_state_path: "{{ cline_config_dir }}/globalState.json"
+cline_secrets_path: "{{ cline_config_dir }}/secrets.json"
+cline_global_state:
+  provider: "openai-native"
+  model: "{{ codex_default_model }}"
+cline_secrets:
+  providers:
+    openai-native:
+      apiKey: "{{ codex_openai_api_key }}"
+    anthropic:
+      apiKey: "{{ claude_anthropic_api_key }}"

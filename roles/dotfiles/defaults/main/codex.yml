@@ -1,4 +1,5 @@
 ---
+codex_openai_api_key: ""
 codex_npm_package: "@openai/codex"
 codex_npm_state: "present"
 codex_npm_version: null

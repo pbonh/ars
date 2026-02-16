@@ -193,6 +193,19 @@
     - codex
     - ai
 
+# - name: Install Cline CLI
+#   import_tasks: tasks/install_cline.yml
+#   tags:
+#     - install
+#     - cline
+#     - ai
+
+# - name: Configure Cline CLI
+#   import_tasks: tasks/configure_cline.yml
+#   tags:
+#     - cline
+#     - ai
+
 - name: Configure Sidecar
   import_tasks: tasks/configure_sidecar.yml
   tags:

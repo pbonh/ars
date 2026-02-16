@@ -1,0 +1,8 @@
+---
+- name: Cline | Install Cline CLI
+  community.general.npm:
+    name: "{{ cline_npm_package }}"
+    global: true
+    state: "{{ cline_npm_state }}"
+    executable: "{{ cline_npm_executable }}"
+    version: "{{ cline_npm_version | default(omit, true) }}"

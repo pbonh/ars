@@ -1,0 +1,19 @@
+---
+- name: Cline | Ensure config directory exists
+  ansible.builtin.file:
+    path: "{{ cline_config_dir }}"
+    state: directory
+    mode: "0700"
+
+- name: Cline | Write globalState.json
+  ansible.builtin.template:
+    src: "cline/globalState.json.j2"
+    dest: "{{ cline_global_state_path }}"
+    mode: "0600"
+
+- name: Cline | Write secrets.json
+  ansible.builtin.template:
+    src: "cline/secrets.json.j2"
+    dest: "{{ cline_secrets_path }}"
+    mode: "0600"
+  no_log: true
