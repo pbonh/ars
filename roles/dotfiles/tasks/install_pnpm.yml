@@ -1,0 +1,8 @@
+---
+- name: Pnpm | Install pnpm
+  community.general.npm:
+    name: "{{ pnpm_npm_package }}"
+    global: true
+    state: "{{ pnpm_npm_state }}"
+    executable: "{{ pnpm_npm_executable }}"
+    version: "{{ pnpm_npm_version | default(omit, true) }}"

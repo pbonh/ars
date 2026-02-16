@@ -1,0 +1,11 @@
+---
+acp_adapters:
+  - "opencode-ai"
+  - "@zed-industries/codex-acp"
+  - "@google/gemini-cli"
+  - "@zed-industries/claude-code-acp"
+acp_pnpm_state: "present"
+acp_pnpm_version: null
+acp_pnpm_executable: "pnpm"
+acp_pnpm_global: true
+acp_pnpm_home: "{{ xdg_data_dir }}/pnpm"

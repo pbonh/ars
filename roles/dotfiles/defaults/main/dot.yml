@@ -44,6 +44,10 @@ path_directories:
     name: local
     prepend: false
     path: "/usr/local/bin"
+  pnpm:
+    name: pnpm
+    prepend: false
+    path: "{{ acp_pnpm_home }}"
   scripts:
     name: scripts
     prepend: false
@@ -57,6 +61,10 @@ nonroot_path_directories:
     name: local
     prepend: false
     path: "/usr/local/bin"
+  pnpm:
+    name: pnpm
+    prepend: false
+    path: "{{ acp_pnpm_home }}"
   home_local:
     name: home_local
     prepend: false

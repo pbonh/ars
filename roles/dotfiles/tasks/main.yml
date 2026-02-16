@@ -180,6 +180,18 @@
     - claude
     - ai
 
+- name: Install pnpm
+  import_tasks: tasks/install_pnpm.yml
+  tags:
+    - install
+    - pnpm
+
+- name: Install ACP adapters
+  import_tasks: tasks/install_acp_adapters.yml
+  tags:
+    - install
+    - acp
+
 - name: Install Codex CLI
   import_tasks: tasks/install_codex.yml
   tags:

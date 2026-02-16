@@ -1,0 +1,20 @@
+---
+- name: ACP | Setup pnpm
+  ansible.builtin.command: "{{ acp_pnpm_executable }} setup"
+  args:
+    creates: "{{ acp_pnpm_home }}"
+  environment:
+    PNPM_HOME: "{{ acp_pnpm_home }}"
+    PATH: "{{ acp_pnpm_home }}:{{ ansible_env.PATH }}"
+
+- name: ACP | Install adapters
+  community.general.pnpm:
+    name: "{{ item }}"
+    global: "{{ acp_pnpm_global }}"
+    state: "{{ acp_pnpm_state }}"
+    executable: "{{ acp_pnpm_executable }}"
+    version: "{{ acp_pnpm_version | default(omit, true) }}"
+  loop: "{{ acp_adapters }}"
+  environment:
+    PNPM_HOME: "{{ acp_pnpm_home }}"
+    PATH: "{{ acp_pnpm_home }}:{{ ansible_env.PATH }}"

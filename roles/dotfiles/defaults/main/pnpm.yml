@@ -1,0 +1,5 @@
+---
+pnpm_npm_package: "pnpm"
+pnpm_npm_state: "present"
+pnpm_npm_version: null
+pnpm_npm_executable: "npm"
