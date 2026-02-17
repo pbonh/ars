@@ -1,0 +1,12 @@
+---
+{% if skill.description is defined %}
+description: {{ skill.description }}
+{% endif %}
+{% if skill.allowed_tools is defined %}
+allowed-tools: {{ skill.allowed_tools }}
+{% endif %}
+{% if skill.disable_model_invocation is defined %}
+disable-model-invocation: {{ skill.disable_model_invocation | lower }}
+{% endif %}
+---
+{{ skill.content }}

@@ -3,3 +3,26 @@ claude_anthropic_api_key: "sk-ant-api00-asdfjkl"
 claude_config_dir: "{{ ansible_env.HOME }}/.claude"
 claude_settings_path: "{{ claude_config_dir }}/settings.json"
 claude_api_key_helper_path: "{{ claude_config_dir }}/api-key-helper.sh"
+claude_skills_dir: "{{ claude_config_dir }}/skills"
+claude_agents_dir: "{{ claude_config_dir }}/agents"
+
+# claude_skills:
+#   - name: "review-code"
+#     description: "Review code for best practices"
+#     allowed_tools: "Read,Grep,Glob"
+#     disable_model_invocation: true
+#     content: |
+#       Skill instructions here...
+claude_skills: []
+
+# claude_agents:
+#   - name: "planner"
+#     description: "Designs implementation plans"
+#     tools: "Read,Grep,Glob,Bash"
+#     disallowed_tools: "Write,Edit"
+#     model: "opus"
+#     permission_mode: "plan"
+#     max_turns: 20
+#     content: |
+#       System prompt here...
+claude_agents: []

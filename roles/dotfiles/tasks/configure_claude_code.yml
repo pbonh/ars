@@ -40,3 +40,44 @@
     content: "{{ claude_settings_merged | to_nice_json }}"
     mode: "0600"
   no_log: true
+
+- name: Claude | Ensure skills directory exists
+  ansible.builtin.file:
+    path: "{{ claude_skills_dir }}"
+    state: directory
+    mode: "0755"
+  when: claude_skills | length > 0
+
+- name: Claude | Create per-skill subdirectories
+  ansible.builtin.file:
+    path: "{{ claude_skills_dir }}/{{ skill.name }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ claude_skills }}"
+  loop_control:
+    loop_var: skill
+
+- name: Claude | Template SKILL.md files
+  ansible.builtin.template:
+    src: "claude/SKILL.md.j2"
+    dest: "{{ claude_skills_dir }}/{{ skill.name }}/SKILL.md"
+    mode: "0644"
+  loop: "{{ claude_skills }}"
+  loop_control:
+    loop_var: skill
+
+- name: Claude | Ensure agents directory exists
+  ansible.builtin.file:
+    path: "{{ claude_agents_dir }}"
+    state: directory
+    mode: "0755"
+  when: claude_agents | length > 0
+
+- name: Claude | Template agent files
+  ansible.builtin.template:
+    src: "claude/agent.md.j2"
+    dest: "{{ claude_agents_dir }}/{{ agent.name }}.md"
+    mode: "0644"
+  loop: "{{ claude_agents }}"
+  loop_control:
+    loop_var: agent

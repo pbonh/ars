@@ -1,0 +1,30 @@
+---
+{% if agent.description is defined %}
+description: {{ agent.description }}
+{% endif %}
+{% if agent.tools is defined %}
+tools: {{ agent.tools }}
+{% endif %}
+{% if agent.disallowed_tools is defined %}
+disallowedTools: {{ agent.disallowed_tools }}
+{% endif %}
+{% if agent.model is defined %}
+model: {{ agent.model }}
+{% endif %}
+{% if agent.permission_mode is defined %}
+permissionMode: {{ agent.permission_mode }}
+{% endif %}
+{% if agent.max_turns is defined %}
+maxTurns: {{ agent.max_turns }}
+{% endif %}
+{% if agent.skills is defined %}
+skills:
+{% for s in agent.skills %}
+  - {{ s }}
+{% endfor %}
+{% endif %}
+{% if agent.mcp_servers is defined %}
+mcpServers: {{ agent.mcp_servers | to_nice_yaml }}
+{% endif %}
+---
+{{ agent.content }}
