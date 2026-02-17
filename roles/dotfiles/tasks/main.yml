@@ -33,145 +33,138 @@
   tags:
     - setup
 
-- name: Shell | Install Scripts | task
-  import_tasks: tasks/install_scripts.yml
+- name: Shell | Scripts | task
+  import_tasks: tasks/scripts.yml
   tags:
     - scripts
 
-- name: Install Zsh Config
-  import_tasks: tasks/install_zsh.yml
+- name: Zsh Config
+  import_tasks: tasks/zsh.yml
   tags:
     - zsh
     - env
 
-- name: Install Nushell Config
-  import_tasks: tasks/install_nushell.yml
+- name: Nushell Config
+  import_tasks: tasks/nushell.yml
   tags:
     - nushell
     - env
 
-- name: Install Bash Config
-  import_tasks: tasks/install_bash.yml
+- name: Bash Config
+  import_tasks: tasks/bash.yml
   tags:
     - bash
     - env
 
-- name: Install Tcsh Config
-  import_tasks: tasks/install_tcsh.yml
+- name: Tcsh Config
+  import_tasks: tasks/tcsh.yml
   tags:
     - tcsh
     - env
 
-- name: Install Git Config
-  import_tasks: tasks/install_git.yml
+- name: Git Config
+  import_tasks: tasks/git.yml
   tags:
     - git
     - env
 
-- name: Install Lazygit Config
-  import_tasks: tasks/install_lazygit.yml
+- name: Lazygit Config
+  import_tasks: tasks/lazygit.yml
   tags:
     - git
     - env
 
-- name: Install Gitui Config
-  import_tasks: tasks/install_gitui.yml
+- name: Gitui Config
+  import_tasks: tasks/gitui.yml
   tags:
     - git
     - env
 
-- name: Install Yazi Config
-  import_tasks: tasks/install_yazi.yml
+- name: Yazi Config
+  import_tasks: tasks/yazi.yml
   tags:
     - yazi
     - env
 
-- name: Install Navi Config
-  import_tasks: tasks/install_navi.yml
+- name: Navi Config
+  import_tasks: tasks/navi.yml
   tags:
     - navi
     - env
 
-- name: Install Broot Config
-  import_tasks: tasks/install_broot.yml
+- name: Broot Config
+  import_tasks: tasks/broot.yml
   tags:
     - broot
     - env
 
 - name: Cleanup Neovim Config
   no_log: true
-  import_tasks: tasks/install_neovim_configs_cleanup.yml
+  import_tasks: tasks/neovim_configs_cleanup.yml
   tags:
     - neovim-config-clean
     - editor
 
-- name: Install Neovim Config
+- name: Neovim Config
   no_log: true
-  import_tasks: tasks/install_neovim_configs.yml
+  import_tasks: tasks/neovim_configs.yml
   tags:
     - neovim-config
     - neovim-config-clean
     - editor
 
-- name: Install Helix Config
-  import_tasks: tasks/install_helix_config.yml
+- name: Helix Config
+  import_tasks: tasks/helix_config.yml
   tags:
     - helix-config
     - editor
 
-- name: Install Tmux Config
-  import_tasks: tasks/install_tmux.yml
+- name: Tmux Config
+  import_tasks: tasks/tmux.yml
   tags:
     - tmux
     - session
 
-- name: Install Zellij Config
-  import_tasks: tasks/install_zellij.yml
+- name: Zellij Config
+  import_tasks: tasks/zellij.yml
   tags:
     - zellij
     - session
 
-- name: Install Zellij Plugins
-  import_tasks: tasks/install_zellij_plugins.yml
+- name: Zellij Plugins
+  import_tasks: tasks/zellij_plugins.yml
   tags:
     - zellij
     - session
 
-- name: Install Ranger-Zoxide Plugin
-  import_tasks: tasks/install_ranger_zoxide.yml
+- name: Ranger-Zoxide Plugin
+  import_tasks: tasks/ranger_zoxide.yml
   tags:
     - ranger
     - env
 
-- name: Install Bookmarks
-  import_tasks: tasks/install_bookmarks.yml
+- name: Bookmarks
+  import_tasks: tasks/bookmarks.yml
   tags:
     - bookmarks
     - env
 
-- name: Install Direnv Config
-  import_tasks: tasks/install_direnv.yml
+- name: Direnv Config
+  import_tasks: tasks/direnv.yml
   tags:
     - direnv
     - env
 
-- name: Install Joplin Config
-  import_tasks: tasks/install_joplin.yml
+- name: Joplin Config
+  import_tasks: tasks/joplin.yml
   tags:
     - joplin
     - notes
 
-- name: Install OpenCode Config
-  import_tasks: tasks/install_opencode.yml
+- name: OpenCode Config
+  import_tasks: tasks/opencode.yml
   tags:
     - opencode
-    - ai
-
-- name: Install Claude Code
-  import_tasks: tasks/install_claude_code.yml
-  tags:
-    - install
-    - claude
     - ai
 
 - name: Configure Claude Code
@@ -180,37 +173,11 @@
     - claude
     - ai
 
-- name: Install pnpm
-  import_tasks: tasks/install_pnpm.yml
-  tags:
-    - install
-    - pnpm
-
-- name: Install ACP adapters
-  import_tasks: tasks/install_acp_adapters.yml
-  tags:
-    - install
-    - acp
-
-- name: Install Codex CLI
-  import_tasks: tasks/install_codex.yml
-  tags:
-    - install
-    - codex
-    - ai
-
 - name: Configure Codex CLI
   import_tasks: tasks/configure_codex.yml
   tags:
     - codex
     - ai
-
-# - name: Install Cline CLI
-#   import_tasks: tasks/install_cline.yml
-#   tags:
-#     - install
-#     - cline
-#     - ai
 
 # - name: Configure Cline CLI
 #   import_tasks: tasks/configure_cline.yml

@@ -4,6 +4,7 @@ import 'scripts/just/distrobox.just'
 import 'scripts/just/kde.just'
 import 'scripts/just/mdbook.just'
 import 'scripts/just/niri.just'
+import 'scripts/just/node.just'
 import 'scripts/just/ucore.just'
 
 set dotenv-load := true

@@ -32,7 +32,7 @@
   loop: "{{ nvim_xdg_modular_profiles | dict2items }}"
 
 - name: Neovim | Setup Neovim Profile Configs(Modular) | template
-  include_tasks: install_neovim_configs_iterate_plugins.yml
+  include_tasks: neovim_configs_iterate_plugins.yml
   loop: "{{ nvim_xdg_modular_profiles | dict2items }}"
   loop_control:
     loop_var: profile

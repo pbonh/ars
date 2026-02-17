@@ -57,16 +57,16 @@ nushell_custom_config: |
             cmd: "commandline edit --insert ({{ fzf_exe }} --layout=reverse)"
         }
       }
-      {
-        name: run_cmd_navi
-        modifier: CONTROL
-        keycode: Char_a
-        mode: vi_insert
-        event: {
-            send: executehostcommand
-            cmd: "commandline edit --insert ({{ navi_exe }} --print)"
-        }
-      }
+      # {
+      #   name: run_cmd_navi
+      #   modifier: CONTROL
+      #   keycode: Char_a
+      #   mode: vi_insert
+      #   event: {
+      #       send: executehostcommand
+      #       cmd: "commandline edit --insert ({{ navi_exe }} --print)"
+      #   }
+      # }
     ]
   }
 nushell_fzf_config: |

@@ -43,6 +43,17 @@
       tags:
         - install
 
+- name: Install Node Packages
+  hosts: localhost
+  vars_files:
+    - vars/local.yml
+  tasks:
+    - import_role:
+        name: node
+      tags:
+        - install
+        - node
+
 - name: Configure Environment
   hosts: localhost
   vars_files:
