@@ -71,7 +71,7 @@
     path: "{{ claude_agents_dir }}"
     state: directory
     mode: "0755"
-  when: claude_agents | length > 0
+  when: (claude_agents | length > 0) or (claude_voltagent_agents | length > 0)
 
 - name: Claude | Template agent files
   ansible.builtin.template:
@@ -81,3 +81,14 @@
   loop: "{{ claude_agents }}"
   loop_control:
     loop_var: agent
+
+- name: Claude | Download VoltAgent community agents
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/{{ claude_voltagent_repo }}/{{ claude_voltagent_ref }}/categories/{{ item }}.md"
+    dest: "{{ claude_agents_dir }}/{{ item | basename }}.md"
+    mode: "0644"
+    force: true
+  loop: "{{ claude_voltagent_agents }}"
+  loop_control:
+    label: "{{ item | basename }}"
+  when: claude_voltagent_agents | length > 0

@@ -26,3 +26,14 @@ claude_skills: []
 #     content: |
 #       System prompt here...
 claude_agents: []
+
+# VoltAgent community subagents from GitHub
+# https://github.com/VoltAgent/awesome-claude-code-subagents
+claude_voltagent_repo: "VoltAgent/awesome-claude-code-subagents"
+claude_voltagent_ref: "main"
+# claude_voltagent_agents:
+#   - "01-core-development/api-designer"
+#   - "01-core-development/backend-developer"
+#   - "04-quality-security/security-auditor"
+#   - "09-meta-orchestration/agent-installer"
+claude_voltagent_agents: []
