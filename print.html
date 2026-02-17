@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-ba768e87.js";
+            window.path_to_searchindex_js = "searchindex-8cb969f7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-bbf1516f.js"></script>
@@ -258,10 +258,10 @@ EOF
 <p>OR
 Ansible Pull</p>
 <pre><code class="language-bash"># (Non-Root, Shell Tools Only)
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "env" -e "{tool_provider: \"nonroot\"}"
+ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "env" -e "{tool_provider: \"nonroot\"}"
 
 # (Install Non-Root, Shell Tools Only)
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install,env" -e "{tool_provider: \"nonroot\"}"
+ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install,env" -e "{tool_provider: \"nonroot\"}"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="developer-tools-1"><a class="header" href="#developer-tools-1">Developer Tools</a></h1>
@@ -292,7 +292,7 @@ anthropic_api_key: "MY_ANTHROPIC_API_KEY"
 openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Mise packages:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@mise.yml"
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@mise.yml"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="devbox"><a class="header" href="#devbox">Devbox</a></h1>
@@ -318,7 +318,7 @@ anthropic_api_key: "MY_ANTHROPIC_API_KEY"
 openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Devbox packages:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@devbox.yml"
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@devbox.yml"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="homebrew"><a class="header" href="#homebrew">Homebrew</a></h1>
@@ -339,7 +339,7 @@ anthropic_api_key: "MY_ANTHROPIC_API_KEY"
 openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Homebrew packages:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@brew.yml"
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@brew.yml"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="non-root"><a class="header" href="#non-root">Non-Root</a></h1>
@@ -357,7 +357,7 @@ anthropic_api_key: "MY_ANTHROPIC_API_KEY"
 openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Non-Root packages:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@nonroot.yml"
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@nonroot.yml"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="workstation-gui-1"><a class="header" href="#workstation-gui-1">Workstation GUI</a></h1>
@@ -476,7 +476,7 @@ zellij_kdl_layouts:
       }
 </code></pre>
 <p>The above settings can be applied by running:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --skip-tags "install" -e "@devbox.yml"
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --skip-tags "install" -e "@devbox.yml"
 </code></pre>
 <p>If checking out the <code>ars</code> repo directly, then create <code>vars/local.yml</code>, and add configuration there, no <code>-e</code> option necessary.</p>
 <pre><code class="language-bash">ansible-playbook playbook.yml --skip-tags "install"

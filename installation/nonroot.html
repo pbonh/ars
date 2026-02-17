@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ba768e87.js";
+            window.path_to_searchindex_js = "../searchindex-8cb969f7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-bbf1516f.js"></script>
@@ -189,7 +189,7 @@ anthropic_api_key: "MY_ANTHROPIC_API_KEY"
 openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Non-Root packages:</p>
-<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@nonroot.yml"
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@nonroot.yml"
 </code></pre>
 
                     </main>

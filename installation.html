@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-ba768e87.js";
+            window.path_to_searchindex_js = "searchindex-8cb969f7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-bbf1516f.js"></script>
@@ -239,10 +239,10 @@ EOF
 <p>OR
 Ansible Pull</p>
 <pre><code class="language-bash"># (Non-Root, Shell Tools Only)
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "env" -e "{tool_provider: \"nonroot\"}"
+ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "env" -e "{tool_provider: \"nonroot\"}"
 
 # (Install Non-Root, Shell Tools Only)
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install,env" -e "{tool_provider: \"nonroot\"}"
+ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install,env" -e "{tool_provider: \"nonroot\"}"
 </code></pre>
 
                     </main>
