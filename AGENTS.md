@@ -1,15 +1,93 @@
-## MANDATORY: Use td for Task Management
+# AGENTS.md
 
-Run `td usage -q --new-session` at conversation start (or after /clear). This tells you what to work on next.
+This repo uses **td** as the canonical task backlog + session handoff log. If `td` disagrees with chat history, **trust `td`**.
 
-When presenting changes, include the usual summary and file list, then prompt the user to update td state when appropriate. Follow the td state diagram rules:
-- `open` → `in_progress` via `td start <id>`
-- `in_progress` → `in_review` via `td review <id>`
-- `in_review` → `closed` via `td approve <id>` (must be a different session)
-- `in_review` → `blocked` via `td reject <id> --reason "..."`
-- `in_progress` → `blocked` when work cannot proceed (log a blocker with `td log --blocker "..."`)
+## Quick start (mandatory)
 
-If unsure which state applies, ask and provide the exact td command(s) to run.
+At the **start of every session**:
+
+1. Inspect current work + start a fresh session context:
+   - `td usage --new-session`
+2. Pick an issue to work on:
+   - `td next` (recommended), or `td ready`, or `td list`
+3. Begin + focus the work:
+   - `td start <issue-id>`
+   - `td focus <issue-id>`
+
+While working:
+
+- Log meaningful progress (keep it short and factual):
+  - `td log "…"`
+  - `td log --decision "…"`
+  - `td log --blocker "…"`
+- Link files you touch so reviewers can jump straight to diffs:
+  - `td link <issue-id> path/to/file1 path/to/file2`
+
+Before you stop (end of context window, switching tasks, or pausing):
+
+- **Always** write a structured handoff:
+  - `td handoff <issue-id> --done "…" --remaining "…" --decision "…" --uncertain "…"`
+
+## Review workflow (mandatory separation)
+
+When implementation is ready for review:
+
+- Submit:
+  - `td review <issue-id>`
+
+For review (must be a **different session** than the implementer):
+
+- List reviewable work:
+  - `td reviewable`
+- Read full context + handoff:
+  - `td context <issue-id>`
+- Inspect changed files:
+  - `td files <issue-id>`
+- Decide:
+  - `td approve <issue-id>`
+  - `td reject <issue-id> --reason "…"` (be specific about what must change)
+
+## Creating tasks (when new work arrives)
+
+If the user request isn’t already tracked in `td`, create an issue first so work stays resumable:
+
+- Create:
+  - `td create "<short title>" --type feature|bug|chore|docs|refactor|test --priority P0|P1|P2|P3`
+- If needed, model larger efforts:
+  - `td epic create "<epic title>" --priority P0|P1|P2|P3`
+  - `td create "<child task>" --parent <epic-id>`
+- If work depends on other work:
+  - `td dep add <issue-id> <depends-on-issue-id>`
+  - `td critical-path`
+
+## Querying / finding context
+
+Use these instead of “guessing what’s in progress”:
+
+- `td show <issue-id>` (full details)
+- `td search "<text>"` (full-text search)
+- `td query "<expression>"` (advanced filtering)
+- `td blocked` (find blockers)
+
+## Installing / initializing td (one-time per dev environment)
+
+If `td` is not available:
+
+- Install:
+  - `go install github.com/marcus/td@latest`
+- Initialize in the repo root:
+  - `td init`
+
+> Note: `td init` creates a local database under `.todos/` (keep it untracked).
+
+## Definition of done (for agents)
+
+Only mark work “done” in a handoff when:
+
+- The change is implemented and locally validated (tests/lint/typecheck as appropriate for the repo).
+- The handoff’s `--remaining` section is either empty or contains concrete, actionable follow-ups.
+- Any non-obvious choices are captured under `--decision`.
+- Any open questions are captured under `--uncertain`.
 
 ## Project Layout Snapshot (Keep In Sync)
 
@@ -28,16 +106,6 @@ Top-level playbooks in this repo:
 - `playbook.yml`
 - `requirements.yml`
 
-Justfile entrypoints:
-- Root `justfile` imports `scripts/just/*.just` and uses `just --choose` by default.
-- `scripts/just/apps.just`: `install-apps`
-- `scripts/just/distrobox.just`: `distrobox`, `distrobox-ubuntu`, `pull-ars`
-- `scripts/just/dotfiles.just`: `install-requirements`, `setup`, `dotfiles`, `mise`, `install-mise-gpg`, `config-mise`, `devbox`, `install-homebrew`, `homebrew`, `nonroot`, `dot`, `shell`, `nushell`, `scripts`, `bash`, `zsh`, `tcsh`, `neovim`, `rebuild-neovim`, `zellij`, `yazi`, `navi`, `ai`, `ollama`, `code2prompt`
-- `scripts/just/kde.just`: `workstation-kde`, `backup-kde-config`, `restore-kde-config`, `generate-uuid`
-- `scripts/just/mdbook.just`: `mdbook-build`, `mdbook-serve`, `mdbook-serve-all`, `mdbook-push`, `mdbook-rsync`, `mdbook-gh-pages`
-- `scripts/just/niri.just`: `workstation-niri`
-- `scripts/just/ucore.just`: `regenerate-ignition-file`
-
 Key structure:
 - `roles/` for role definitions
 - `group_vars/` and `host_vars/` for inventory-scoped variables
@@ -45,26 +113,3 @@ Key structure:
 - `vars/` for shared vars (note `vars/local.yml` is skip-worktree via `just setup`)
 - `files/` for static files
 
-## Specialization: Ansible Authoring
-
-Primary focus is writing Ansible modules/tasks/roles/variables for this repo.
-- Prefer `ansible.builtin` modules and idempotent patterns.
-- Avoid `shell`/`command` unless necessary; if used, set `changed_when` and `failed_when`.
-- Structure roles as: `defaults/main.yml` for defaults, `tasks/main.yml` for tasks, `handlers/main.yml` for handlers, and use `notify` where appropriate.
-- Keep YAML concise, consistent, and check-mode friendly.
-- Respect existing playbook entrypoints and `just` tasks; avoid inventing new flows unless needed.
-
-## Terminal-Centric Developer Flow
-
-Assume a terminal-first workflow using `zellij`, `neovim`, `fzf`, `nushell`, and `sidecar`.
-- Provide CLI-friendly steps and short, composable commands suitable for running in panes.
-- Avoid GUI-only instructions.
-- For search/navigation, prefer `rg`, `fd`, and `fzf` patterns.
-
-## Specialization: Ansible Authoring
-
-Focus on writing Ansible modules/tasks/roles/variables. Prefer `ansible.builtin` modules, idempotent patterns, and check-mode friendly logic. Avoid `shell`/`command` unless necessary; if used, set `changed_when`/`failed_when`. Use clear variable naming, defaults in role `defaults/main.yml`, role tasks in `tasks/main.yml`, handlers in `handlers/main.yml`, and `notify` where appropriate. Keep YAML concise and consistent.
-
-## Terminal-Centric Developer Flow
-
-Assume a terminal-first workflow with `zellij`, `neovim`, `fzf`, `nushell`, and `sidecar`. Provide CLI-friendly steps and short, composable commands suitable for running in panes. Avoid GUI-only instructions. When suggesting navigation or search, prefer `rg`, `fd`, and `fzf`-style patterns.
