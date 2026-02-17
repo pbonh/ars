@@ -156,7 +156,7 @@ nvim_intellisense_default:
     { 'e]', { n = '<cmd>Lspsaga diagnostic_jump_next<CR>', }, description = 'LSPSaga: Next Diagnostic', },
     { '[E', { n = 'function() require(\'lspsaga.diagnostic\').goto_prev({ severity = vim.diagnostic.severity.ERROR }) end', }, description = 'LSPSaga: Previous Error', },
     { 'E]', { n = 'function() require(\'lspsaga.diagnostic\').goto_next({ severity = vim.diagnostic.severity.ERROR }) end', }, description = 'LSPSaga: Next Error', },
-    { '<C-Space>', { n = '<cmd>lua require("nvim-navbuddy").open()<CR>', }, description = 'NavBuddy: Open', },
+    -- { '<C-Space>', { n = '<cmd>lua require("nvim-navbuddy").open()<CR>', }, description = 'NavBuddy: Open', },
 nvim_intellisense:
   lazy: |
     {
@@ -304,7 +304,7 @@ nvim_intellisense:
     { 'e]', { n = '<cmd>Lspsaga diagnostic_jump_next<CR>', }, description = 'LSPSaga: Next Diagnostic', },
     { '[E', { n = 'function() require(\'lspsaga.diagnostic\').goto_prev({ severity = vim.diagnostic.severity.ERROR }) end', }, description = 'LSPSaga: Previous Error', },
     { 'E]', { n = 'function() require(\'lspsaga.diagnostic\').goto_next({ severity = vim.diagnostic.severity.ERROR }) end', }, description = 'LSPSaga: Next Error', },
-    { '<C-Space>', { n = '<cmd>lua require("nvim-navbuddy").open()<CR>', }, description = 'NavBuddy: Open', },
+    -- { '<C-Space>', { n = '<cmd>lua require("nvim-navbuddy").open()<CR>', }, description = 'NavBuddy: Open', },
 nvim_lspzero:
   lazy: |
     {
@@ -370,13 +370,13 @@ nvim_lspconfig_cmp_base:
           mapping = cmp.mapping.preset.insert({
             ['<C-b>'] = cmp.mapping.scroll_docs(-4),
             ['<C-f>'] = cmp.mapping.scroll_docs(4),
-            ['<C-Space>'] = cmp.mapping.complete(),
+            -- ['<C-Space>'] = cmp.mapping.complete(),
             ['<C-e>'] = cmp.mapping.abort(),
             ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
             ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
             ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
             ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-            ['<C-Space>'] = cmp.mapping.complete(),
+            -- ['<C-Space>'] = cmp.mapping.complete(),
           }),
           sources = cmp.config.sources({
             { name = 'nvim_lsp' },
@@ -544,13 +544,13 @@ nvim_lspconfig_cmp_navbuddy_lazy: |
         mapping = cmp.mapping.preset.insert({
           ['<C-b>'] = cmp.mapping.scroll_docs(-4),
           ['<C-f>'] = cmp.mapping.scroll_docs(4),
-          ['<C-Space>'] = cmp.mapping.complete(),
+          -- ['<C-Space>'] = cmp.mapping.complete(),
           ['<C-e>'] = cmp.mapping.abort(),
           ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
           ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
           ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
           ['<C-y>'] = cmp.mapping.confirm({ select = true }),
-          ['<C-Space>'] = cmp.mapping.complete(),
+          -- ['<C-Space>'] = cmp.mapping.complete(),
         }),
         sources = cmp.config.sources({
           {
@@ -561,8 +561,20 @@ nvim_lspconfig_cmp_navbuddy_lazy: |
               },
             },
           },
+          -- {
+          --   name = 'path',
+          --   option = {
+          --       pathMappings = {
+          --           ['@'] = '${folder}',
+          --       },
+          --       -- option = {
+          --       --   get_cwd = function(_)
+          --       --     return vim.fn.getcwd()
+          --       --   end,
+          --       -- },
+          --   },
+          -- },
           { name = 'vsnip' },
-        }, {
           { name = 'buffer' },
         })
       })

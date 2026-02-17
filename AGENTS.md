@@ -1,6 +1,6 @@
 ## MANDATORY: Use td for Task Management
 
-Run td usage --new-session at conversation start (or after /clear). This tells you what to work on next.
+Run `td usage -q --new-session` at conversation start (or after /clear). This tells you what to work on next.
 
 When presenting changes, include the usual summary and file list, then prompt the user to update td state when appropriate. Follow the td state diagram rules:
 - `open` → `in_progress` via `td start <id>`
