@@ -272,39 +272,52 @@ nvim_ai_codex:
 nvim_ai_claude:
   lazy: |
     {
-      {
-        "coder/claudecode.nvim",
-        dependencies = { "folke/snacks.nvim" },
-        keys = {
-          { "<C-a>", "<cmd>ClaudeCodeFocus<cr>", desc = "Claude Code: Focus", mode = { "n", "x" } },
-          { "<C-'>", "<cmd>ClaudeCodeAdd %<cr>", desc = "Claude Code: Add current buffer", mode = { "n", "x" } },
-          { "<C-'>", "<cmd>ClaudeCodeSend<cr>", desc = "Claude Code: Send to Claude", mode = "v" },
-        },
-        opts = {
-          terminal = {
-            ---@module "snacks"
-            ---@type snacks.win.Config|{}
-            snacks_win_opts = {
-              position = "float",
-              width = 0.9,
-              height = 0.9,
-              keys = {
-                claude_hide = {
-                  "<C-a>",
-                  function(self)
-                    self:hide()
-                  end,
-                  mode = "t",
-                  desc = "Hide",
-                },
+      "coder/claudecode.nvim",
+      dependencies = { "folke/snacks.nvim" },
+      keys = {
+        { "<C-a>", "<cmd>ClaudeCodeFocus<cr>", desc = "Claude Code: Focus", mode = { "n", "x" } },
+        { "<C-'>", "<cmd>ClaudeCodeAdd %<cr>", desc = "Claude Code: Add current buffer", mode = { "n", "x" } },
+        { "<C-'>", "<cmd>ClaudeCodeSend<cr>", desc = "Claude Code: Send to Claude", mode = "v" },
+      },
+      opts = {
+        terminal = {
+          ---@module "snacks"
+          ---@type snacks.win.Config|{}
+          snacks_win_opts = {
+            position = "float",
+            width = 0.9,
+            height = 0.9,
+            keys = {
+              claude_hide = {
+                "<C-a>",
+                function(self)
+                  self:hide()
+                end,
+                mode = "t",
+                desc = "Hide",
               },
             },
           },
         },
       },
     },
-  config: ""
-  keymaps: ""
+  config: |
+    local Terminal  = require('toggleterm.terminal').Terminal
+    local sidecar = Terminal:new({
+      cmd = '{{ sidecar_exe }}',
+      shell = '{{ command_shell }}',
+      hidden = true,
+      start_in_insert = true,
+    })
+    function sidecar_terminal_runner()
+      sidecar:toggle()
+    end
+  keymaps: |
+    {
+      mode = {'n', 't'},
+      icon = '',
+      { '<C-/>', '<cmd>lua sidecar_terminal_runner()<CR>', desc = 'ToggleTerm: Sidecar', },
+    },
 nvim_ai_opencode:
   lazy: |
     {
