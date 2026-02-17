@@ -29,5 +29,5 @@ openai_api_key: "MY_OPENAI_API_KEY"
 Now use `ansible-pull` to install the Devbox packages:
 
 ```bash
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@devbox.yml"
+ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@devbox.yml"
 ```

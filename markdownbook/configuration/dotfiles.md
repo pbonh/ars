@@ -34,7 +34,7 @@ zellij_kdl_layouts:
 The above settings can be applied by running:
 
 ```bash
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --skip-tags "install" -e "@devbox.yml"
+ansible-pull -U https://github.com/pbonh/ars.git ars.yml --skip-tags "install" -e "@devbox.yml"
 ```
 
 If checking out the `ars` repo directly, then create `vars/local.yml`, and add configuration there, no `-e` option necessary.

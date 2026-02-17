@@ -17,6 +17,7 @@ Top-level playbooks in this repo:
 - `apps.yml`
 - `devbox.yml`
 - `distrobox.yml`
+- `ars.yml`
 - `dotfiles.yml`
 - `homebrew.yml`
 - `kde.yml`

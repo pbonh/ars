@@ -22,5 +22,5 @@ openai_api_key: "MY_OPENAI_API_KEY"
 Now use `ansible-pull` to install the Mise packages:
 
 ```bash
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install" -e "@mise.yml"
+ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@mise.yml"
 ```

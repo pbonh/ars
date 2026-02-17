@@ -71,8 +71,8 @@ OR
 Ansible Pull
 ```bash
 # (Non-Root, Shell Tools Only)
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "env" -e "{tool_provider: \"nonroot\"}"
+ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "env" -e "{tool_provider: \"nonroot\"}"
 
 # (Install Non-Root, Shell Tools Only)
-ansible-pull -U https://github.com/pbonh/ars.git dotfiles.yml --tags "install,env" -e "{tool_provider: \"nonroot\"}"
+ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install,env" -e "{tool_provider: \"nonroot\"}"
 ```
