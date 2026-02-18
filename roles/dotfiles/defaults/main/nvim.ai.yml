@@ -6,8 +6,9 @@ ai_adapter_cmd: "{{ ai_adapter_chat }}"
 chatgpt_ai_adapter_chat: "openai"
 chatgpt_ai_adapter_inline: "{{ chatgpt_ai_adapter_chat }}"
 chatgpt_ai_adapter_cmd: "{{ chatgpt_ai_adapter_chat }}"
-anthropic_api_key: "{{ lookup('env', 'ANTHROPIC_API_KEY') }}"
-openai_api_key: "{{ lookup('env', 'OPENAI_API_KEY') }}"
+anthropic_api_key: "{{ lookup('env', 'ANTHROPIC_API_KEY') | default('') }}"
+openai_api_key: "{{ lookup('env', 'OPENAI_API_KEY') | default('') }}"
+moonshot_api_key: "{{ lookup('env', 'MOONSHOT_API_KEY') | default('') }}"
 ctx_sizes:
   2k: 2048
   4k: 4096

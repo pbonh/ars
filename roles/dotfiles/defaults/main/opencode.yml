@@ -24,6 +24,10 @@ opencode_global_config:
       models: {}
       options:
         apiKey: "{{ openai_api_key }}"
+    moonshot:
+      models: {}
+      options:
+        apiKey: "{{ moonshot_api_key }}"
 opencode_agent_example: |
   "agent": {
     "code-reviewer": {
