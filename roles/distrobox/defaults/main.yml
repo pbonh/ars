@@ -12,7 +12,7 @@ distrobox_vm_images:
     tag: "latest"
   rockylinux:
     name: "rockylinux"
-    tag: "9"
+    tag: "10"
   almalinux:
     name: "almalinux"
     tag: "9"
