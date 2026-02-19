@@ -55,6 +55,29 @@
     - distrobox_target_replace
     - distrobox_target_exists
 
+- name: Distrobox | Resolve volume source path | facts
+  ansible.builtin.set_fact:
+    distrobox_volume_source: "{{ distrobox_vm_item.value.volume | regex_replace(':.*$', '') }}"
+  when:
+    - distrobox_vm_item.value.volume is defined
+
+- name: Distrobox | Check volume source exists | stat
+  ansible.builtin.stat:
+    path: "{{ distrobox_volume_source }}"
+  register: distrobox_volume_source_stat
+  when:
+    - distrobox_vm_item.value.volume is defined
+
+- name: Distrobox | Ensure volume source directory | file
+  ansible.builtin.file:
+    path: "{{ distrobox_volume_source }}"
+    state: directory
+    mode: "0700"
+  when:
+    - distrobox_vm_item.value.volume is defined
+    - not distrobox_volume_source_stat.stat.exists
+    - distrobox_target_will_create
+
 - name: Distrobox | Create container from clone | command
   ansible.builtin.command:
     argv: >-
