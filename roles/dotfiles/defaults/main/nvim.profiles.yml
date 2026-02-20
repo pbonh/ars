@@ -287,7 +287,8 @@ nvim_plugin_groups_snacks:
   test: "{{ nvim_test }}"
   notes: "{{ nvim_markdown }}"
   motion: "{{ nvim_motion }}"
-  ai: "{{ nvim_ai_opencode }}"
+  opencode: "{{ nvim_ai_opencode_sudotee }}"
+  ai: "{{ nvim_ai_claude }}"
 nvim_plugin_groups_bone:
   telescope: "{{ nvim_fzf_lua }}"
   project: "{{ nvim_project }}"

@@ -302,23 +302,8 @@ nvim_ai_claude:
         },
       },
     },
-  config: |
-    local Terminal  = require('toggleterm.terminal').Terminal
-    local sidecar = Terminal:new({
-      cmd = '{{ sidecar_exe }}',
-      shell = '{{ command_shell }}',
-      hidden = true,
-      start_in_insert = true,
-    })
-    function sidecar_terminal_runner()
-      sidecar:toggle()
-    end
-  keymaps: |
-    {
-      mode = {'n', 't'},
-      icon = '',
-      { '<C-/>', '<cmd>lua sidecar_terminal_runner()<CR>', desc = 'ToggleTerm: Sidecar', },
-    },
+  config: ""
+  keymaps: ""
 nvim_ai_opencode:
   lazy: |
     {
@@ -361,6 +346,28 @@ nvim_ai_opencode:
         --   oc.command("agent.select plan")  -- switch to Plan agent
         -- end, { desc = "OpenCode: Plan agent" })
         -- vim.keymap.set({ "n", "t" }, "<C-a>", "<cmd>OpenCodePlan<CR>", { desc = "OpenCode Plan Agent" })
+      end,
+    },
+  config: ""
+  keymaps: ""
+nvim_ai_opencode_sudotee:
+  lazy: |
+    {
+      "sudo-tee/opencode.nvim",
+      config = function()
+        require("opencode").setup({
+          preferred_picker = 'snacks', -- 'telescope', 'fzf', 'mini.pick', 'snacks', 'select', if nil, it will use the best available picker. Note mini.pick does not support multiple selections
+          preferred_completion = 'nvim-cmp', -- 'blink', 'nvim-cmp','vim_complete' if nil, it will use the best available completion
+          default_mode = 'build', -- 'build' or 'plan' or any custom configured. @see [OpenCode Agents](https://opencode.ai/docs/modes/)
+          keymap = {
+            input_window = {
+              ['<C-t>'] = { 'cycle_variant', mode = { 'n', 'i' } }, -- Cycle through available model variants
+            },
+            output_window = {
+              ['<C-t>'] = { 'cycle_variant', mode = { 'n' } }, -- Cycle through available model variants
+            },
+          },
+        })
         local Terminal  = require('toggleterm.terminal').Terminal
         local sidecar = Terminal:new({
           cmd = '{{ sidecar_exe }}',
@@ -372,6 +379,19 @@ nvim_ai_opencode:
           sidecar:toggle()
         end
       end,
+      dependencies = {
+        "nvim-lua/plenary.nvim",
+        {
+          "MeanderingProgrammer/render-markdown.nvim",
+          opts = {
+            anti_conceal = { enabled = false },
+            file_types = { 'markdown', 'opencode_output' },
+          },
+          ft = { 'markdown', 'Avante', 'copilot-chat', 'opencode_output' },
+        },
+        'hrsh7th/nvim-cmp',
+        'folke/snacks.nvim',
+      },
     },
   config: ""
   keymaps: |
