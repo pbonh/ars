@@ -308,10 +308,30 @@ nvim_ai_opencode:
   lazy: |
     {
       "NickvanDyke/opencode.nvim",
+      version = "*", -- Latest stable release
       dependencies = {
-        -- Recommended for `ask()` and `select()`.
-        -- Required for `toggle()`.
-        { "folke/snacks.nvim", opts = { input = {}, picker = {} } },
+        {
+          -- `snacks.nvim` integration is recommended, but optional
+          ---@module "snacks" <- Loads `snacks.nvim` types for configuration intellisense
+          "folke/snacks.nvim",
+          optional = true,
+          opts = {
+            input = {}, -- Enhances `ask()`
+            picker = { -- Enhances `select()`
+              actions = {
+                opencode_send = function(...) return require("opencode").snacks_picker_send(...) end,
+              },
+              win = {
+                input = {
+                  keys = {
+                    ["<a-a>"] = { "opencode_send", mode = { "n", "i" } },
+                  },
+                },
+              },
+            },
+            terminal = {}, -- Enables the `snacks` provider
+          },
+        },
       },
       config = function()
         vim.g.opencode_opts = {
@@ -320,32 +340,32 @@ nvim_ai_opencode:
               win = {
                 position = "float",
                 enter = true,
+                on_buf = function(win)
+                  vim.keymap.set("t", "<C-u>", function() require("opencode").command("session.half.page.up") end, { desc = "Messages half page up", buffer = win.buf })
+                  vim.keymap.set("t", "<C-d>", function() require("opencode").command("session.half.page.down") end, { desc = "Messages half page down", buffer = win.buf })
+                  vim.keymap.set("n", "gg", function() require("opencode").command("session.first") end, { desc = "Scroll to Beginning", buffer = win.buf })
+                  vim.keymap.set("n", "G", function() require("opencode").command("session.last") end, { desc = "Scroll to End", buffer = win.buf })
+                  vim.keymap.set({"n", "t"}, "<esc>", function() require("opencode").command("session.interrupt") end, { desc = "Interrupt", buffer = win.buf })
+                end,
               },
             },
           },
         }
 
         -- Required for `vim.g.opencode_opts.auto_reload`
-        vim.opt.autoread = true
+        vim.o.autoread = true
 
         -- Recommended/example keymaps
         vim.keymap.set({ "n", "x" }, "<leader>Ca", function() require("opencode").ask("@this: ", { submit = true }) end, { desc = "Ask about this" })
-        vim.keymap.set({ "n", "x" }, "<C-'>", function() require("opencode").ask("@buffer: ", { submit = true }) end, { desc = "Ask about buffer" })
+        vim.keymap.set({ "n", "x" }, "<leader>Cb", function() require("opencode").ask("@buffer: ", { submit = true }) end, { desc = "Ask about buffer" })
         vim.keymap.set({ "n", "x" }, "<leader>Cs", function() require("opencode").select() end, { desc = "Select prompt" })
         vim.keymap.set({ "n", "x" }, "<leader>C+", function() require("opencode").prompt("@this") end, { desc = "Add this" })
         vim.keymap.set("n", "<leader>Cc", function() require("opencode").command() end, { desc = "Select command" })
         vim.keymap.set("n", "<leader>Cn", function() require("opencode").command("session.new") end, { desc = "New session" })
         vim.keymap.set("n", "<leader>Ci", function() require("opencode").command("session.interrupt") end, { desc = "Interrupt session" })
         vim.keymap.set("n", "<leader>CA", function() require("opencode").command("agent.cycle") end, { desc = "Cycle selected agent" })
-        vim.keymap.set("t", "<C-u>",    function() require("opencode").command("session.half.page.up") end, { desc = "Messages half page up" })
-        vim.keymap.set("t", "<C-d>",    function() require("opencode").command("session.half.page.down") end, { desc = "Messages half page down" })
-        vim.keymap.set({ "n", "t" }, "<C-a>", function() require("opencode").toggle() end, { desc = "Toggle Floating Opencode" })
-        -- vim.api.nvim_create_user_command("OpenCodePlan", function()
-        --   local oc = require("opencode")
-        --   oc.toggle()                       -- launch/attach to opencode UI
-        --   oc.command("agent.select plan")  -- switch to Plan agent
-        -- end, { desc = "OpenCode: Plan agent" })
-        -- vim.keymap.set({ "n", "t" }, "<C-a>", "<cmd>OpenCodePlan<CR>", { desc = "OpenCode Plan Agent" })
+        -- vim.keymap.set("n", "<leader>Co", function() require("opencode").toggle() end, { desc = "Toggle Floating Opencode" })
+        vim.keymap.set({ "n", "t" }, "<C-.>", function() require("opencode").toggle() end, { desc = "Opencode: Toggle" })
       end,
     },
   config: ""
@@ -358,7 +378,7 @@ nvim_ai_opencode_sudotee:
         require("opencode").setup({
           preferred_picker = 'snacks', -- 'telescope', 'fzf', 'mini.pick', 'snacks', 'select', if nil, it will use the best available picker. Note mini.pick does not support multiple selections
           preferred_completion = 'nvim-cmp', -- 'blink', 'nvim-cmp','vim_complete' if nil, it will use the best available completion
-          default_mode = 'build', -- 'build' or 'plan' or any custom configured. @see [OpenCode Agents](https://opencode.ai/docs/modes/)
+          default_mode = 'todo', -- 'build' or 'plan' or any custom configured. @see [OpenCode Agents](https://opencode.ai/docs/modes/)
           keymap = {
             input_window = {
               ['<C-t>'] = { 'cycle_variant', mode = { 'n', 'i' } }, -- Cycle through available model variants
