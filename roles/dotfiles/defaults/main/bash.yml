@@ -56,26 +56,28 @@ bash_plugins_source:
 bash_fzf_path: "export PATH=$PATH:{{ fzf_path }}"
 bash_fzf_setup: |
   FZF_CTRL_R_OPTS= eval "$({{ fzf_exe }} --bash)"
-  if type -t atuin-bind >/dev/null 2>&1; then
-    atuin-bind -m emacs '\C-r' atuin-search
-    atuin-bind -m vi-insert '\C-r' atuin-search-viins
-    atuin-bind -m vi-command '\C-r' atuin-search-vicmd
-    atuin-bind -m emacs '\e[A' atuin-up-search
-    atuin-bind -m emacs '\eOA' atuin-up-search
-    atuin-bind -m vi-insert '\e[A' atuin-up-search-viins
-    atuin-bind -m vi-insert '\eOA' atuin-up-search-viins
-    atuin-bind -m vi-command '\e[A' atuin-up-search-vicmd
-    atuin-bind -m vi-command '\eOA' atuin-up-search-vicmd
-  else
-    bind -x '"\C-r": __atuin_history'
-    bind -m vi-insert -x '"\C-r": __atuin_history --keymap-mode=vim-insert'
-    bind -m vi-command -x '"\C-r": __atuin_history --keymap-mode=vim-normal'
-    bind -x '"\e[A": __atuin_history --shell-up-key-binding'
-    bind -x '"\eOA": __atuin_history --shell-up-key-binding'
-    bind -m vi-insert -x '"\e[A": __atuin_history --shell-up-key-binding --keymap-mode=vim-insert'
-    bind -m vi-insert -x '"\eOA": __atuin_history --shell-up-key-binding --keymap-mode=vim-insert'
-    bind -m vi-command -x '"\e[A": __atuin_history --shell-up-key-binding --keymap-mode=vim-normal'
-    bind -m vi-command -x '"\eOA": __atuin_history --shell-up-key-binding --keymap-mode=vim-normal'
+  if [[ $- == *i* ]] && [[ -t 0 ]] && [[ -t 1 ]]; then
+    if type -t atuin-bind >/dev/null 2>&1; then
+      atuin-bind -m emacs '\C-r' atuin-search
+      atuin-bind -m vi-insert '\C-r' atuin-search-viins
+      atuin-bind -m vi-command '\C-r' atuin-search-vicmd
+      atuin-bind -m emacs '\e[A' atuin-up-search
+      atuin-bind -m emacs '\eOA' atuin-up-search
+      atuin-bind -m vi-insert '\e[A' atuin-up-search-viins
+      atuin-bind -m vi-insert '\eOA' atuin-up-search-viins
+      atuin-bind -m vi-command '\e[A' atuin-up-search-vicmd
+      atuin-bind -m vi-command '\eOA' atuin-up-search-vicmd
+    else
+      bind -x '"\C-r": __atuin_history'
+      bind -m vi-insert -x '"\C-r": __atuin_history --keymap-mode=vim-insert'
+      bind -m vi-command -x '"\C-r": __atuin_history --keymap-mode=vim-normal'
+      bind -x '"\e[A": __atuin_history --shell-up-key-binding'
+      bind -x '"\eOA": __atuin_history --shell-up-key-binding'
+      bind -m vi-insert -x '"\e[A": __atuin_history --shell-up-key-binding --keymap-mode=vim-insert'
+      bind -m vi-insert -x '"\eOA": __atuin_history --shell-up-key-binding --keymap-mode=vim-insert'
+      bind -m vi-command -x '"\e[A": __atuin_history --shell-up-key-binding --keymap-mode=vim-normal'
+      bind -m vi-command -x '"\eOA": __atuin_history --shell-up-key-binding --keymap-mode=vim-normal'
+    fi
   fi
   export PATH="$PATH:{{ bash_git_fuzzy }}/bin"
   {{ bash_fzf_path }}
