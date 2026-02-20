@@ -122,7 +122,7 @@ nvim_hydra_default:
           }
        },
        mode = {'n','x'},
-       body = '<leader>o',
+       body = '<leader>v',
        heads = {
           { 'n', function()
              if vim.o.number == true then
@@ -385,7 +385,7 @@ nvim_hydra:
               }
            },
            mode = {'n','x'},
-           body = '<leader>o',
+           body = '<leader>v',
            heads = {
               { 'n', function()
                  if vim.o.number == true then
