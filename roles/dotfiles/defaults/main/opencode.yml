@@ -3,6 +3,7 @@ opencode_install_script_path: "{{ ansible_env.HOME }}/opencode-install.sh"
 opencode_install_dir: "{{ ansible_env.HOME }}/.opencode"
 opencode_path: "{{ opencode_install_dir }}/bin"
 opencode_config_dir: "{{ xdg_config_dir }}/opencode"
+opencode_agents_dir: "{{ opencode_config_dir }}/agents"
 opencode_default_model: "openai/gpt-5.2-codex"
 opencode_agents_repo_url: "https://github.com/darrenhinde/OpenAgents.git"
 opencode_agents_repo_dest: "{{ dot_download_dir }}/OpenAgents"
@@ -10,11 +11,40 @@ opencode_agents_directories:
   - agent
   - command
   - context
+opencode_agents:
+  - name: "todo"
+    header:
+      description: Primary agent for td workflow management
+      mode: primary
+      tools:
+        bash: true
+        write: false
+        edit: false
+        webfetch: false
+      permission:
+        bash:
+          "*": ask
+          "td *": allow
+    body: |
+      You are the primary todo manager for this project.
+
+      Mandatory startup
+      - Always run: `td usage --new-session` at the start of a conversation.
+
+      Mandatory shutdown
+      - Before ending context, ALWAYS run:
+        `td handoff <issue-id> --done "..." --remaining "..." --decision "..." --uncertain "..."`
+
+      Workflow focus
+      - Use `td` to start, log, and handoff work.
+      - Prefer `td ws` when handling multiple related issues.
+      - Do not use `td close`.
+      - Keep shell commands short and composable.
 opencode_global_config:
   $schema: "https://opencode.ai/config.json"
   theme: "tokyonight"
   model: "{{ opencode_default_model }}"
-  default_agent: "plan"
+  default_agent: "todo"
   provider:
     anthropic:
       models: {}

@@ -24,3 +24,21 @@
     dest: "{{ opencode_config_dir }}/{{ item }}"
     remote_src: true
   loop: "{{ opencode_agents_directories }}"
+
+- name: opencode | Ensure agents directory exists | file
+  ansible.builtin.file:
+    path: "{{ opencode_agents_dir }}"
+    state: directory
+    mode: "0755"
+  when: opencode_agents | length > 0
+
+- name: opencode | Write custom agents | copy
+  ansible.builtin.copy:
+    dest: "{{ opencode_agents_dir }}/{{ item.name }}.md"
+    content: |-
+      ---
+      {{ item.header | default({}) | to_nice_yaml(indent=0) | regex_replace('^---\\n', '') | regex_replace('\\n\\.\\.\\.\\n?$', '') | trim }}
+      ---
+      {{ item.body | default('') | trim }}
+    mode: "0644"
+  loop: "{{ opencode_agents }}"
