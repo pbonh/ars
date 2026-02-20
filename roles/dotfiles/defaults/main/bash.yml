@@ -177,10 +177,12 @@ bash_navi_setup: |
   _navi_widget_legacy() {
      _navi_call --print
   }
-  if [ ${BASH_VERSION:0:1} -lt 4 ]; then
-     bind '"\C-a": " \C-b\C-k \C-u`_navi_widget_legacy`\e\C-e\C-a\C-y\C-h\C-e\e \C-y\ey\C-x\C-x\C-f"'
-  else
-     bind -x '"\C-a": _navi_widget'
+  if [[ $- == *i* ]] && [[ -t 0 ]] && [[ -t 1 ]]; then
+    if [ ${BASH_VERSION:0:1} -lt 4 ]; then
+       bind '"\C-a": " \C-b\C-k \C-u`_navi_widget_legacy`\e\C-e\C-a\C-y\C-h\C-e\e \C-y\ey\C-x\C-x\C-f"'
+    else
+       bind -x '"\C-a": _navi_widget'
+    fi
   fi
 bash_default_aliases: |
   {% for shell_alias in shell_aliases -%}
