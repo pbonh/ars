@@ -1,10 +1,3 @@
-# Agents: Mandatory: use td usage --new-session to see open work.
-
-# Agents: Before context ends, ALWAYS run:
-```sh
-td handoff <issue-id> --done "..." --remaining "..." --decision "..." --uncertain "..."
-```
-
 # Agents: Project Layout Snapshot (Keep In Sync)
 
 Top-level playbooks in this repo:
