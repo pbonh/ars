@@ -3,6 +3,7 @@ opencode_install_script_path: "{{ ansible_env.HOME }}/opencode-install.sh"
 opencode_install_dir: "{{ ansible_env.HOME }}/.opencode"
 opencode_path: "{{ opencode_install_dir }}/bin"
 opencode_config_dir: "{{ xdg_config_dir }}/opencode"
+opencode_skills_dir: "{{ opencode_config_dir }}/skills"
 opencode_agents_dir: "{{ opencode_config_dir }}/agents"
 opencode_default_agent: "plan"
 opencode_default_model: "openai/gpt-5.2-codex"
@@ -251,11 +252,49 @@ opencode_agents:
       - Production code changed (paths + intent)
       - Commands run (and whether they passed)
       - Any follow-ups remaining
+opencode_skills:
+  - name: "td"
+    description: "Track work with td (issues, logs, handoffs, reviews)."
+    compatibility: "opencode"
+    metadata:
+      workflow: "task-tracking"
+      audience: "agents"
+    content: |
+      ## What I do
+      - Keep a task backlog with td issues and structured handoffs.
+      - Encourage clear progress logs and decisions.
+      - Promote review workflow (separate session approves).
+
+      ## When to use me
+      Use this for multi-step work or anything likely to span sessions.
+
+      ## Core workflow
+      1) Start session: `td usage --new-session`
+      2) Create issue: `td create "Title" --type feature --priority P1`
+      3) Start work: `td start <id>`
+      4) Log progress: `td log "message"` or `td log --decision "rationale"`
+      5) Handoff: `td handoff <id> --done "..." --remaining "..." --decision "..." --uncertain "..."`
+
+      ## Review
+      - Submit: `td review <id>`
+      - Different session approves: `td approve <id>`
+      - If rejected: `td reject <id> --reason "..."`
+
+      ## Helpful commands
+      - `td list`, `td ready`, `td next`
+      - `td show <id>`, `td focus <id>`
+      - `td link <id> <files...>`
 opencode_global_config:
   $schema: "https://opencode.ai/config.json"
   theme: "tokyonight"
   model: "{{ opencode_default_model }}"
   default_agent: "{{ opencode_default_agent }}"
+  permission:
+    skill:
+      "*": "allow"
+      "td": "allow"
+      "internal-*": "deny"
+      "experimental-*": "ask"
   provider:
     anthropic:
       models: {}
