@@ -4,6 +4,7 @@ opencode_install_dir: "{{ ansible_env.HOME }}/.opencode"
 opencode_path: "{{ opencode_install_dir }}/bin"
 opencode_config_dir: "{{ xdg_config_dir }}/opencode"
 opencode_agents_dir: "{{ opencode_config_dir }}/agents"
+opencode_default_agent: "plan"
 opencode_default_model: "openai/gpt-5.2-codex"
 opencode_orchestrator_model: "{{ opencode_default_model }}"
 opencode_implementer_model: "openai/gpt-5.1-codex-mini"
@@ -14,34 +15,6 @@ opencode_agents_directories:
   - command
   - context
 opencode_agents:
-  - name: "todo"
-    header:
-      description: Primary agent for td workflow management
-      mode: primary
-      tools:
-        bash: true
-        write: false
-        edit: false
-        webfetch: false
-      permission:
-        bash:
-          "*": ask
-          "td *": allow
-    body: |
-      You are the primary todo manager for this project.
-
-      Mandatory startup
-      - Always run: `td usage --new-session` at the start of a conversation.
-
-      Mandatory shutdown
-      - Before ending context, ALWAYS run:
-        `td handoff <issue-id> --done "..." --remaining "..." --decision "..." --uncertain "..."`
-
-      Workflow focus
-      - Use `td` to start, log, and handoff work.
-      - Prefer `td ws` when handling multiple related issues.
-      - Do not use `td close`.
-      - Keep shell commands short and composable.
   - name: "rust-orchestrator"
     header:
       description: Rust planner/architect/orchestrator. Reads code/docs, writes exhaustive specs, then delegates implementation to @rust-tdd.
@@ -282,7 +255,7 @@ opencode_global_config:
   $schema: "https://opencode.ai/config.json"
   theme: "tokyonight"
   model: "{{ opencode_default_model }}"
-  default_agent: "todo"
+  default_agent: "{{ opencode_default_agent }}"
   provider:
     anthropic:
       models: {}
