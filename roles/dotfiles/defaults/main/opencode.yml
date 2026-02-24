@@ -48,7 +48,6 @@ opencode_agents:
       mode: primary
       model: "{{ opencode_orchestrator_model }}"
       temperature: 0.1
-      steps: 20
       tools:
         write: false
         edit: false
@@ -58,7 +57,7 @@ opencode_agents:
         webfetch: deny
         bash:
           "*": ask
-          "ls*": allow
+          "ls *": allow
           "cat *": allow
           "rg *": allow
           "grep *": allow
@@ -69,6 +68,7 @@ opencode_agents:
           "git log*": allow
           "cargo metadata*": allow
           "cargo tree*": allow
+          "td *": allow
         task:
           "*": deny
           "rust-tdd": allow
@@ -156,7 +156,6 @@ opencode_agents:
       mode: subagent
       model: "{{ opencode_implementer_model }}"
       temperature: 0.2
-      steps: 60
       tools:
         write: true
         edit: true
@@ -175,12 +174,13 @@ opencode_agents:
           "grep *": allow
           "fd *": allow
           "find *": allow
-          "ls*": allow
+          "ls *": allow
           "cat *": allow
           "git status*": allow
           "git diff*": allow
           "git log*": allow
           "git show*": allow
+          "td *": allow
           "git push*": deny
           "rm *": ask
     body: |
