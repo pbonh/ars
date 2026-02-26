@@ -248,16 +248,16 @@ nvim_ai_codex:
       cmd = { 'Codex', 'CodexToggle' }, -- Optional: Load only on command execution
       keys = {
         {
-          '<C-a>', -- Change this to your preferred keybinding
+          "<C-'>", -- Change this to your preferred keybinding
           function() require('codex').toggle() end,
           desc = 'Toggle Codex popup or side-panel',
-          mode = { 'n', 't' }
+          mode = { 'n', 'x' }
         },
       },
       opts = {
         keymaps     = {
-          toggle = '<C-a>', -- Keybind to toggle Codex window (Disabled by default, watch out for conflicts)
-          quit = '<C-q>', -- Keybind to close the Codex window (default: Ctrl + q)
+          toggle = "<C-'>", -- Keybind to toggle Codex window (Disabled by default, watch out for conflicts)
+          quit = "<C-q>", -- Keybind to close the Codex window (default: Ctrl + q)
         },         -- Disable internal default keymap (<leader>cc -> :CodexToggle)
         border      = 'rounded',  -- Options: 'single', 'double', or 'rounded'
         width       = 0.8,        -- Width of the floating window (0.0 to 1.0)
@@ -277,8 +277,8 @@ nvim_ai_claude:
       dependencies = { "folke/snacks.nvim" },
       keys = {
         { "<C-a>", "<cmd>ClaudeCodeFocus<cr>", desc = "Claude Code: Focus", mode = { "n", "x" } },
-        { "<C-'>", "<cmd>ClaudeCodeAdd %<cr>", desc = "Claude Code: Add current buffer", mode = { "n", "x" } },
-        { "<C-'>", "<cmd>ClaudeCodeSend<cr>", desc = "Claude Code: Send to Claude", mode = "v" },
+        -- { "<C-'>", "<cmd>ClaudeCodeAdd %<cr>", desc = "Claude Code: Add current buffer", mode = { "n", "x" } },
+        -- { "<C-'>", "<cmd>ClaudeCodeSend<cr>", desc = "Claude Code: Send to Claude", mode = "v" },
       },
       opts = {
         terminal = {
