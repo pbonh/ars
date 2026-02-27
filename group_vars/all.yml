@@ -362,6 +362,11 @@ dev_packages:
       - "nodejs"
     devbox:
       - "nodejs"
+  bun:
+    brew:
+      - "oven-sh/bun/bun"
+    devbox:
+      - "bun"
   yarn:
     brew:
       - "yarn"
