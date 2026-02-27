@@ -1,1 +1,38 @@
-model = "{{ codex_default_model }}"
+{% macro toml_value(value) -%}
+{% if value is boolean %}
+{{ 'true' if value else 'false' }}
+{% elif value is number %}
+{{ value }}
+{% elif value is string %}
+"{{ value | replace('"', '\\"') }}"
+{% elif value is sequence %}
+{{ value | to_json }}
+{% else %}
+"{{ value | string | replace('"', '\\"') }}"
+{% endif %}
+{%- endmacro %}
+
+{% macro render_table(table, prefix='') -%}
+{%- set lines = [] -%}
+{%- for key, value in table.items() if value is not mapping -%}
+{%- set _ = lines.append(key ~ ' = ' ~ toml_value(value)) -%}
+{%- endfor -%}
+{%- for key, value in table.items() if value is mapping -%}
+{%- if lines | length > 0 -%}
+{%- set _ = lines.append('') -%}
+{%- endif -%}
+{%- if prefix -%}
+{%- set header = '[' ~ prefix ~ '.' ~ key ~ ']' -%}
+{%- else -%}
+{%- set header = '[' ~ key ~ ']' -%}
+{%- endif -%}
+{%- set _ = lines.append(header) -%}
+{%- set nested = render_table(value, prefix ~ '.' ~ key if prefix else key) -%}
+{%- for nested_line in nested.split('\n') -%}
+{%- set _ = lines.append(nested_line) -%}
+{%- endfor -%}
+{%- endfor -%}
+{{ lines | join('\n') }}
+{%- endmacro %}
+
+{{ render_table(codex_config) }}
