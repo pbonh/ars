@@ -297,6 +297,11 @@ dev_packages:
       - "yq"
     nonroot:
       - "yq"
+  scooter:
+    brew:
+      - "scooter"
+    devbox:
+      - "scooter"
   ghq:
     brew:
       - "ghq"
