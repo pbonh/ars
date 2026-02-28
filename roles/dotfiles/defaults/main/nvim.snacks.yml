@@ -68,6 +68,8 @@ nvim_snacks:
           function()
             Snacks.picker.files({
               focus = "input",
+              cmd = "fd",
+              args = { "--type", "d" },
               matcher = { fuzzy = true },
               confirm = function(picker, item)
                 picker:close()
@@ -78,9 +80,13 @@ nvim_snacks:
                 if not path then
                   return
                 end
+                local is_dir = item.dir or vim.fn.isdirectory(path) == 1
                 local relpath = vim.fn.fnamemodify(path, ":.")
                 if relpath == "" then
                   relpath = path
+                end
+                if is_dir and not relpath:match("/$") then
+                  relpath = relpath .. "/"
                 end
                 local text = "@" .. relpath
                 local row, col = unpack(vim.api.nvim_win_get_cursor(0))
