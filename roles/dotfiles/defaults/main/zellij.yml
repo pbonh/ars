@@ -11,8 +11,8 @@ zellij_layout_dir: "{{ zellij_config_dir }}/layouts"
 zellij_env_variables:
   nvim_appname: "{{ zellij_nvim_app }}"
   # shell: "{{ zellij_shell }}"
-  anthropic_api_key: "{{ anthropic_api_key }}"
-  openai_api_key: "{{ openai_api_key }}"
+  # anthropic_api_key: "{{ anthropic_api_key }}"
+  # openai_api_key: "{{ openai_api_key }}"
 zellij_env_variables_file: |
   {% for env_var, env_value in zellij_env_variables.items() %}
   {{ env_var | upper }} "{{ env_value }}"
