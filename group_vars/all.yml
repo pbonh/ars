@@ -302,11 +302,19 @@ dev_packages:
       - "scooter"
     devbox:
       - "scooter"
+  github:
+    brew:
+      - "gh"
+    devbox:
+      - "gitAndTools.gh"
   ghq:
     brew:
       - "ghq"
     devbox:
       - "ghq"
+  worktrunk:
+    brew:
+      - "worktrunk"
   gdb:
     brew:
       - "gdb"
@@ -568,11 +576,6 @@ dev_packages:
       - "grex"
     devbox:
       - "grex"
-  gitAndTools.gh:
-    brew:
-      - "gh"
-    devbox:
-      - "gitAndTools.gh"
   lazygit:
     brew:
       - "lazygit"
