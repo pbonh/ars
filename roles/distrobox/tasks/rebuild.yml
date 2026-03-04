@@ -1,0 +1,20 @@
+---
+- name: Distrobox | Rebuild | List containers | command
+  ansible.builtin.command: distrobox list --no-color
+  register: distrobox_rebuild_list
+  changed_when: false
+
+- name: Distrobox | Rebuild | Stop containers | command
+  ansible.builtin.command: "distrobox stop --yes {{ item.key }}"
+  loop: "{{ distrobox_vms | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: item.key in distrobox_rebuild_list.stdout
+  ignore_errors: true
+
+- name: Distrobox | Rebuild | Remove containers | command
+  ansible.builtin.command: "distrobox rm --force {{ item.key }}"
+  loop: "{{ distrobox_vms | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: item.key in distrobox_rebuild_list.stdout

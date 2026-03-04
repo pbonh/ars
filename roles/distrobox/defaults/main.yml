@@ -19,7 +19,35 @@ distrobox_vm_images:
   centos:
     name: "centos"
     tag: "stream9"
-distrobox_ssh_bootstrap_cmd: "if [ ! -f ~/.ssh/id_ed25519 ] || [ ! -f ~/.ssh/id_ed25519.pub ]; then mkdir -p ~/.ssh && chmod 700 ~/.ssh && chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh && sudo -u {{ ansible_env.USER }} ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\"; fi"
+distrobox_rhel_dev_package_install:
+  - "sudo dnf install -y ansible-core"
+  - "sudo dnf groupinstall -y \"Development Tools\""
+distrobox_base_image_ssh_init:
+  - "rm -rf ~/.ssh"
+  - "mkdir -p ~/.ssh"
+  - "chmod 700 ~/.ssh"
+  - "chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh"
+  - "sudo -u {{ ansible_env.USER }} ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\""
+distrobox_linuxbrew_install:
+  - "NONINTERACTIVE=1 sudo -u {{ ansible_env.USER }} /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+  - "sudo -u {{ ansible_env.USER }} /home/linuxbrew/.linuxbrew/bin/brew shellenv && sudo -u {{ ansible_env.USER }} /home/linuxbrew/.linuxbrew/bin/brew install gcc ansible-language-server bash-language-server lua-language-server yaml-language-server"
+  - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} /home/linuxbrew"
+  - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cache"
+distrobox_devbox_install:
+  # - "sudo -u {{ ansible_env.USER }} curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm"
+  # - "sudo -u {{ ansible_env.USER }} . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh && sudo -u {{ ansible_env.USER }} curl -fsSL https://get.jetpack.io/devbox | bash -s -- -f"
+  - "sudo -u {{ ansible_env.USER }} wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_devbox_ci.sh | bash"
+  - "chmod 755 /usr/local/bin/devbox"
+  - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.local"
+  - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} /nix"
+distrobox_ssh_bootstrap_cmd:
+  - "if [ ! -f ~/.ssh/id_ed25519 ] || [ ! -f ~/.ssh/id_ed25519.pub ]; then mkdir -p ~/.ssh && chmod 700 ~/.ssh && chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh && sudo -u {{ ansible_env.USER }} ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\"; fi"
+distrobox_rustup_install:
+  - "curl -fsSL https://static.rust-lang.org/rustup/rustup-init.sh | sudo -u \"$USER\" sh -s -- -y --no-modify-path --default-toolchain stable"
+  # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cache"
+  # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cargo"
+  # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.profile"
+  # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.rustup"
 distrobox_vms:
   RockyBase:
     additional_packages: "\"epel-release git vim curl\""
@@ -29,14 +57,7 @@ distrobox_vms:
     pull: "true"
     root: "false"
     replace: "true"
-    init_hooks:
-      - "sudo dnf install -y ansible"
-      - "sudo dnf groupinstall -y \"Development Tools\""
-      - "rm -rf ~/.ssh"
-      - "mkdir -p ~/.ssh"
-      - "chmod 700 ~/.ssh"
-      - "chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh"
-      - "sudo -u {{ ansible_env.USER }} ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\""
+    init_hooks: "{{ distrobox_rhel_dev_package_install + distrobox_base_image_ssh_init }}"
   RockyBrew:
     clone: "RockyBase"
     init: "false"
@@ -44,11 +65,7 @@ distrobox_vms:
     pull: "false"
     root: "false"
     replace: "true"
-    init_hooks:
-      - "NONINTERACTIVE=1 sudo -u {{ ansible_env.USER }} /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-      - "sudo -u {{ ansible_env.USER }} /home/linuxbrew/.linuxbrew/bin/brew shellenv && sudo -u {{ ansible_env.USER }} /home/linuxbrew/.linuxbrew/bin/brew install gcc ansible-language-server bash-language-server lua-language-server yaml-language-server"
-      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} /home/linuxbrew"
-      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cache"
+    init_hooks: "{{ distrobox_linuxbrew_install }}"
   RustDev:
     clone: "RockyBrew"
     init: "false"
@@ -57,13 +74,7 @@ distrobox_vms:
     root: "false"
     replace: "true"
     entry: "true"
-    init_hooks:
-      - "{{ distrobox_ssh_bootstrap_cmd }}"
-      - "sudo -u \"$USER\" sh -c 'curl -fsSL \"https://static.rust-lang.org/rustup/rustup-init.sh\" | sh -s -- -y --no-modify-path --default-toolchain stable'"
-      # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cache"
-      # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.cargo"
-      # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.profile"
-      # - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.rustup"
+    init_hooks: "{{ distrobox_ssh_bootstrap_cmd + distrobox_rustup_install }}"
   DotDev:
     clone: "RockyBrew"
     init: "false"
@@ -72,8 +83,7 @@ distrobox_vms:
     root: "false"
     replace: "true"
     entry: "true"
-    init_hooks:
-      - "{{ distrobox_ssh_bootstrap_cmd }}"
+    init_hooks: "{{ distrobox_ssh_bootstrap_cmd }}"
 # echo >> /var/home/phillip/VMs/Homes/RockyBrew/.bashrc
 # echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /var/home/phillip/VMs/Homes/RockyBrew/.bashrc
 # eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -85,13 +95,7 @@ distrobox_vms:
     pull: "true"
     root: "false"
     replace: "true"
-    init_hooks:
-      - "sudo dnf install -y ansible"
-      - "rm -rf ~/.ssh"
-      - "mkdir -p ~/.ssh"
-      - "chmod 700 ~/.ssh"
-      - "chown {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.ssh"
-      - "ssh-keygen -t ed25519 -N \"\" -f ~/.ssh/id_ed25519 -C \"{{ git_email }}\""
+    init_hooks: "{{ distrobox_rhel_dev_package_install + distrobox_base_image_ssh_init }}"
   AlmaDevbox:
     clone: "AlmaBase"
     init: "true"
@@ -99,13 +103,7 @@ distrobox_vms:
     pull: "false"
     root: "false"
     replace: "true"
-    init_hooks:
-      # - "sudo -u {{ ansible_env.USER }} curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install --no-confirm"
-      # - "sudo -u {{ ansible_env.USER }} . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh && sudo -u {{ ansible_env.USER }} curl -fsSL https://get.jetpack.io/devbox | bash -s -- -f"
-      - "sudo -u {{ ansible_env.USER }} wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_devbox_ci.sh | bash"
-      - "chmod 755 /usr/local/bin/devbox"
-      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} ~/.local"
-      - "chown -R {{ ansible_env.USER }}:{{ ansible_env.USER }} /nix"
+    init_hooks: "{{ distrobox_devbox_install }}"
   Devbox:
     clone: "AlmaDevbox"
     init: "true"

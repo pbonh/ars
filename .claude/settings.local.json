@@ -6,7 +6,13 @@
       "WebSearch",
       "Bash(curl:*)",
       "Bash(python3:*)",
-      "WebFetch(domain:sidecar.haplab.com)"
+      "WebFetch(domain:sidecar.haplab.com)",
+      "WebFetch(domain:distrobox.it)",
+      "Bash(just distrobox-rebuild:*)",
+      "Bash(distrobox list:*)",
+      "Bash(distrobox:*)",
+      "Bash(podman inspect:*)",
+      "Bash(podman image:*)"
     ]
   }
 }

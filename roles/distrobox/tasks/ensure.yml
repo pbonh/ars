@@ -6,6 +6,15 @@
     distrobox_target_exists: "{{ distrobox_vm_item.key in (distrobox_existing_names | default([])) }}"
     distrobox_target_replace: "{{ (distrobox_vm_item.value.replace | default('false')) | bool }}"
     distrobox_target_start_now: "{{ (distrobox_vm_item.value.start_now | default('false')) | bool }}"
+    distrobox_is_clone_source: >-
+      {{
+        distrobox_vms.values()
+        | selectattr('clone', 'defined')
+        | map(attribute='clone')
+        | select('equalto', distrobox_vm_item.key)
+        | list
+        | length > 0
+      }}
 
 - name: Distrobox | Fail on clone cycles | assert
   ansible.builtin.fail:
@@ -41,7 +50,7 @@
     - distrobox_target_will_create
 
 - name: Distrobox | Ensure clone source stopped for cloning | command
-  ansible.builtin.command: distrobox stop "{{ distrobox_clone_name }}"
+  ansible.builtin.command: distrobox stop --yes "{{ distrobox_clone_name }}"
   changed_when: true
   failed_when: false
   when:
@@ -170,7 +179,7 @@
             | ternary(
                 ['--additional-packages',
                  (distrobox_vm_item.value.additional_packages
-                  | regex_replace('^"(.*)"$', '\\1'))
+                  | regex_replace('^"|"$', ''))
                 ],
                 []
               )
@@ -180,7 +189,7 @@
             | ternary(
                 ['--additional-flags',
                  (distrobox_vm_item.value.additional_flags
-                  | regex_replace('^"(.*)"$', '\\1'))
+                  | regex_replace('^"|"$', ''))
                 ],
                 []
               )
@@ -236,7 +245,7 @@
   changed_when: true
   when:
     - distrobox_target_will_create
-    - distrobox_target_start_now
+    - distrobox_target_start_now or distrobox_is_clone_source
 
 - name: Distrobox | Mark processed | facts
   ansible.builtin.set_fact:

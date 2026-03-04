@@ -17,5 +17,11 @@
     dest: "{{ distrobox_config }}/{{ item.key }}.ini"
   loop: "{{ distrobox_vms | dict2items }}"
 
+- name: Distrobox | Force Rebuild | tasks
+  ansible.builtin.include_tasks: rebuild.yml
+  tags:
+    - never
+    - rebuild
+
 - name: Distrobox | Create Distroboxes | tasks
   ansible.builtin.import_tasks: create.yml
