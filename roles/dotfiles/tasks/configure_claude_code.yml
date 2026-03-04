@@ -29,10 +29,11 @@
     claude_settings_existing: "{{ (claude_settings_raw.content | b64decode | from_json) if claude_settings_stat.stat.exists else {} }}"
   no_log: true
 
-# - name: Claude | Merge apiKeyHelper setting
-#   ansible.builtin.set_fact:
-#     claude_settings_merged: "{{ claude_settings_existing | combine({'apiKeyHelper': claude_api_key_helper_path}, recursive=True) }}"
-#   no_log: true
+- name: Claude | Merge apiKeyHelper setting
+  ansible.builtin.set_fact:
+    claude_settings_merged: "{{ claude_settings_existing }}"
+    # claude_settings_merged: "{{ claude_settings_existing | combine({'apiKeyHelper': claude_api_key_helper_path}, recursive=True) }}"
+  no_log: true
 
 - name: Claude | Write settings.json
   ansible.builtin.copy:
