@@ -15,7 +15,7 @@ distrobox_vm_images:
     tag: "10"
   almalinux:
     name: "almalinux"
-    tag: "9"
+    tag: "latest"
   centos:
     name: "centos"
     tag: "stream9"
