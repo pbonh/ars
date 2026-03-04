@@ -334,25 +334,42 @@ nvim_ai_opencode:
         },
       },
       config = function()
-        vim.g.opencode_opts = {
-          provider = {
-            snacks = {
-              win = {
-                position = "float",
-                enter = true,
-                on_buf = function(win)
-                  vim.keymap.set("t", "<C-u>", function() require("opencode").command("session.half.page.up") end, { desc = "Messages half page up", buffer = win.buf })
-                  vim.keymap.set("t", "<C-d>", function() require("opencode").command("session.half.page.down") end, { desc = "Messages half page down", buffer = win.buf })
-                  vim.keymap.set("n", "gg", function() require("opencode").command("session.first") end, { desc = "Scroll to Beginning", buffer = win.buf })
-                  vim.keymap.set("n", "G", function() require("opencode").command("session.last") end, { desc = "Scroll to End", buffer = win.buf })
-                  vim.keymap.set({"n", "t"}, "<esc>", function() require("opencode").command("session.interrupt") end, { desc = "Interrupt", buffer = win.buf })
+        local opencode_cmd = "opencode --port"
+        local snacks_terminal_opts = {
+          win = {
+            position = "float",
+            enter = true,
+            on_win = function(win)
+              vim.api.nvim_create_autocmd("TermOpen", {
+                buffer = win.buf,
+                once = true,
+                callback = function(event)
+                  vim.keymap.set("t", "<C-i>", function() require("opencode").command("session.half.page.up") end, { desc = "Messages half page up", buffer = event.buf })
+                  vim.keymap.set("t", "<C-u>", function() require("opencode").command("session.half.page.down") end, { desc = "Messages half page down", buffer = event.buf })
+                  vim.keymap.set("n", "gg", function() require("opencode").command("session.first") end, { desc = "Scroll to Beginning", buffer = event.buf })
+                  vim.keymap.set("n", "G", function() require("opencode").command("session.last") end, { desc = "Scroll to End", buffer = event.buf })
+                  vim.keymap.set({ "n", "t" }, "<esc>", function() require("opencode").command("session.interrupt") end, { desc = "Interrupt", buffer = event.buf })
                 end,
-              },
-            },
+              })
+            end,
           },
         }
 
-        -- Required for `vim.g.opencode_opts.auto_reload`
+        vim.g.opencode_opts = {
+          server = {
+            start = function()
+              require("snacks.terminal").open(opencode_cmd, snacks_terminal_opts)
+            end,
+            stop = function()
+              require("snacks.terminal").get(opencode_cmd, snacks_terminal_opts):close()
+            end,
+            toggle = function()
+              require("snacks.terminal").toggle(opencode_cmd, snacks_terminal_opts)
+            end,
+          },
+        }
+
+        -- Required for `vim.g.opencode_opts.events.reload`
         vim.o.autoread = true
 
         -- Recommended/example keymaps
