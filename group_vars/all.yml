@@ -365,6 +365,11 @@ dev_packages:
   python39Packages.pynvim:
     devbox:
       - "pynvim"
+  uv:
+    brew:
+      - "uv"
+    devbox:
+      - "uv"
   nodejs:
     brew:
       - "nodejs"
