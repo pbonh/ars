@@ -1,0 +1,12 @@
+---
+- name: Node | Install npm packages
+  community.general.npm:
+    name: "{{ item.name }}"
+    global: "{{ item.global | default(true) }}"
+    state: "{{ item.state | default('present') }}"
+    executable: "{{ item.executable | default('npm') }}"
+    version: "{{ item.version | default(omit, true) }}"
+  loop: "{{ node_npm_packages }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.enabled | default(true)

@@ -1,9 +1,10 @@
 ---
-- name: Install pnpm
-  import_tasks: tasks/install_pnpm.yml
+- name: Install npm packages
+  import_tasks: tasks/install_node_packages.yml
   tags:
     - install
-    - pnpm
+    - npm
+    - node
 
 - name: Install Claude Code
   import_tasks: tasks/install_claude_code.yml
@@ -12,23 +13,8 @@
     - claude
     - ai
 
-- name: Install Codex CLI
-  import_tasks: tasks/install_codex.yml
-  tags:
-    - install
-    - codex
-    - ai
-
-# - name: Install Cline CLI
-#   import_tasks: tasks/install_cline.yml
-#   tags:
-#     - install
-#     - cline
-#     - ai
-
 - name: Install ACP adapters
   import_tasks: tasks/install_acp_adapters.yml
   tags:
     - install
     - acp
-

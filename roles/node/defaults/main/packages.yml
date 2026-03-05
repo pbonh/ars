@@ -1,0 +1,18 @@
+---
+node_npm_packages:
+  - name: "{{ pnpm_npm_package }}"
+    state: "{{ pnpm_npm_state }}"
+    version: "{{ pnpm_npm_version }}"
+    executable: "{{ pnpm_npm_executable }}"
+    global: true
+  - name: "{{ codex_npm_package }}"
+    state: "{{ codex_npm_state }}"
+    version: "{{ codex_npm_version }}"
+    executable: "{{ codex_npm_executable }}"
+    global: true
+  - name: "{{ cline_npm_package }}"
+    state: "{{ cline_npm_state }}"
+    version: "{{ cline_npm_version }}"
+    executable: "{{ cline_npm_executable }}"
+    global: true
+    enabled: false
