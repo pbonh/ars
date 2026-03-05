@@ -126,7 +126,11 @@ nushell_zellij_aliases: |
       wt switch
       return
     }
-    let wt_cmd = "bash -lc 'wt switch && wt_name=$(basename \"$(git rev-parse --show-toplevel 2>/dev/null)\") && [ -n \"$wt_name\" ] && zellij action rename-tab \"$wt_name\"'"
+    {% if zellij_shell_cmd == 'nu' %}
+    let wt_cmd = 'wt switch; if $env.LAST_EXIT_CODE == 0 { let wt_name = (git rev-parse --show-toplevel | str trim | path basename); if $wt_name != "" { zellij action rename-tab $wt_name } }'
+    {% else %}
+    let wt_cmd = 'wt switch && wt_name=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)") && [ -n "$wt_name" ] && zellij action rename-tab "$wt_name"'
+    {% endif %}
     {{ zellij_exe }} action new-tab -c $env.PWD -n "{{ zellij_worktrunk_switch_tab_name }}"
     {{ zellij_exe }} action write-chars $wt_cmd
     {{ zellij_exe }} action write 13
@@ -136,7 +140,11 @@ nushell_zellij_aliases: |
       wt switch --branches --remotes
       return
     }
-    let wt_cmd = "bash -lc 'wt switch --branches --remotes && wt_name=$(basename \"$(git rev-parse --show-toplevel 2>/dev/null)\") && [ -n \"$wt_name\" ] && zellij action rename-tab \"$wt_name\"'"
+    {% if zellij_shell_cmd == 'nu' %}
+    let wt_cmd = 'wt switch --branches --remotes; if $env.LAST_EXIT_CODE == 0 { let wt_name = (git rev-parse --show-toplevel | str trim | path basename); if $wt_name != "" { zellij action rename-tab $wt_name } }'
+    {% else %}
+    let wt_cmd = 'wt switch --branches --remotes && wt_name=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)") && [ -n "$wt_name" ] && zellij action rename-tab "$wt_name"'
+    {% endif %}
     {{ zellij_exe }} action new-tab -c $env.PWD -n "{{ zellij_worktrunk_switch_tab_name }}"
     {{ zellij_exe }} action write-chars $wt_cmd
     {{ zellij_exe }} action write 13
