@@ -344,8 +344,8 @@ nvim_ai_opencode:
                 buffer = win.buf,
                 once = true,
                 callback = function(event)
-                  vim.keymap.set("t", "<C-i>", function() require("opencode").command("session.half.page.up") end, { desc = "Messages half page up", buffer = event.buf })
-                  vim.keymap.set("t", "<C-u>", function() require("opencode").command("session.half.page.down") end, { desc = "Messages half page down", buffer = event.buf })
+                  vim.keymap.set("t", "<C-p>", function() require("opencode").command("session.half.page.up") end, { desc = "Messages half page up", buffer = event.buf })
+                  vim.keymap.set("t", "<C-n>", function() require("opencode").command("session.half.page.down") end, { desc = "Messages half page down", buffer = event.buf })
                   vim.keymap.set("n", "gg", function() require("opencode").command("session.first") end, { desc = "Scroll to Beginning", buffer = event.buf })
                   vim.keymap.set("n", "G", function() require("opencode").command("session.last") end, { desc = "Scroll to End", buffer = event.buf })
                   vim.keymap.set({ "n", "t" }, "<esc>", function() require("opencode").command("session.interrupt") end, { desc = "Interrupt", buffer = event.buf })
