@@ -38,6 +38,7 @@ zsh_default_env: |
   {% endfor %}
 zsh_extra_env: ""
 zsh_default_plugins: |
+  if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init zsh)"; fi
   eval "$({{ atuin_exe }} init zsh)"
   eval "$({{ direnv_exe }} hook zsh)"
   eval "$({{ starship_exe }} init zsh)"

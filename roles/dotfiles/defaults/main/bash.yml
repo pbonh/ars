@@ -119,6 +119,8 @@ bash_fzf_setup: |
   {% for fzf_env_var in fzf_env -%}
   {{ "export " + fzf_env[fzf_env_var]['name'] + "='" + fzf_env[fzf_env_var]['env'] + "'" }}
   {% endfor %}
+bash_worktrunk_env: |
+  if command -v wt >/dev/null 2>&1; then eval "$(command wt config shell init bash)"; fi
 bash_atuin_env: |
   export ATUIN_NOBIND="true"
   eval "$({{ atuin_exe }} init bash)"
