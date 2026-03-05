@@ -65,6 +65,9 @@ zellij_plugins:
   #           SwitchToMode "Normal"
   #       }
 zellij_kdl_config_file: "{{ zellij_config_dir }}/config.kdl"
+zellij_worktrunk_switch_alias: "zws"
+zellij_worktrunk_switch_all_alias: "zwsb"
+zellij_worktrunk_switch_tab_name: "wt-switch"
 zellij_kdl_template_info_default: |
   tab_template name="shell-in-dir" {
       pane size=1 borderless=true {

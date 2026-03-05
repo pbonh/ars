@@ -121,3 +121,23 @@ nushell_zellij_aliases: |
   {% for zellij_layout in zellij_kdl_layouts -%}
   alias z{{ zellij_layout }} = {{ zellij_exe }} --layout {{ zellij_kdl_layouts[zellij_layout]['name'] }}
   {% endfor %}
+  def {{ zellij_worktrunk_switch_alias }} [] {
+    if (($env.ZELLIJ? | default "") == "") {
+      wt switch
+      return
+    }
+    let wt_cmd = "bash -lc 'wt switch && wt_name=$(basename \"$(git rev-parse --show-toplevel 2>/dev/null)\") && [ -n \"$wt_name\" ] && zellij action rename-tab \"$wt_name\"'"
+    {{ zellij_exe }} action new-tab -c $env.PWD -n "{{ zellij_worktrunk_switch_tab_name }}"
+    {{ zellij_exe }} action write-chars $wt_cmd
+    {{ zellij_exe }} action write 13
+  }
+  def {{ zellij_worktrunk_switch_all_alias }} [] {
+    if (($env.ZELLIJ? | default "") == "") {
+      wt switch --branches --remotes
+      return
+    }
+    let wt_cmd = "bash -lc 'wt switch --branches --remotes && wt_name=$(basename \"$(git rev-parse --show-toplevel 2>/dev/null)\") && [ -n \"$wt_name\" ] && zellij action rename-tab \"$wt_name\"'"
+    {{ zellij_exe }} action new-tab -c $env.PWD -n "{{ zellij_worktrunk_switch_tab_name }}"
+    {{ zellij_exe }} action write-chars $wt_cmd
+    {{ zellij_exe }} action write 13
+  }

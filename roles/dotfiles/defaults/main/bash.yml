@@ -196,6 +196,28 @@ bash_zellij_aliases: |
   {% for zellij_layout in zellij_kdl_layouts -%}
   alias z{{ zellij_layout }}='{{ zellij_exe }} --layout {{ zellij_kdl_layouts[zellij_layout]['name'] }}'
   {% endfor %}
+  zellij_worktrunk_switch() {
+    local wt_cmd='bash -lc '\''wt switch && wt_name=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)") && [ -n "$wt_name" ] && zellij action rename-tab "$wt_name"'\'''
+    if [ -z "$ZELLIJ" ]; then
+      wt switch
+      return
+    fi
+    {{ zellij_exe }} action new-tab -c "$PWD" -n "{{ zellij_worktrunk_switch_tab_name }}"
+    {{ zellij_exe }} action write-chars "$wt_cmd"
+    {{ zellij_exe }} action write 13
+  }
+  zellij_worktrunk_switch_all() {
+    local wt_cmd='bash -lc '\''wt switch --branches --remotes && wt_name=$(basename "$(git rev-parse --show-toplevel 2>/dev/null)") && [ -n "$wt_name" ] && zellij action rename-tab "$wt_name"'\'''
+    if [ -z "$ZELLIJ" ]; then
+      wt switch --branches --remotes
+      return
+    fi
+    {{ zellij_exe }} action new-tab -c "$PWD" -n "{{ zellij_worktrunk_switch_tab_name }}"
+    {{ zellij_exe }} action write-chars "$wt_cmd"
+    {{ zellij_exe }} action write 13
+  }
+  alias {{ zellij_worktrunk_switch_alias }}='zellij_worktrunk_switch'
+  alias {{ zellij_worktrunk_switch_all_alias }}='zellij_worktrunk_switch_all'
 bash_ssh_setup: |
   env={{ dotfiles_user_home }}/.ssh/agent.env
   agent_load_env () { test -f "$env" && . "$env" >| /dev/null ; }
