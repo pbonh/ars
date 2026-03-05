@@ -286,7 +286,7 @@ nvim_hydra:
          _K_: prev hunk   _u_: undo last stage   _p_: preview hunk   _B_: blame show full 
          ^ ^              _S_: stage buffer                          _/_: show base file
          ^
-         ^ ^              _g_: Neogit          <esc>: exit           _q_: exit
+         ^ ^              _g_: Neogit          _w_: switch worktree  _q_: exit
         ]]
         Hydra({
            name = 'Git',
@@ -350,6 +350,7 @@ nvim_hydra:
               { 'B', function() gitsigns.blame_line{ full = true } end, { desc = 'blame show full' } },
               { '/', gitsigns.show, { exit = true, desc = 'show base file' } }, -- show the base of the file
               { 'g', '<Cmd>Neogit<CR>', { exit = true, desc = '' } },
+              { 'w', function() require('snacks').picker.worktrees() end, { exit = true, desc = 'switch worktree' } },
               -- { 'g', '<Cmd>Gitui<CR>', { exit = true, desc = 'Gitui' } },
               { 'q', nil, { exit = true, nowait = true, desc = 'exit' } },
               { '<Esc>', nil,  { exit = true, desc = false }}
