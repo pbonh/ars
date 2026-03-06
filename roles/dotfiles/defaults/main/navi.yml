@@ -126,6 +126,14 @@ navi_cheats:
         - "submodule"
         - "sync"
         - "--recursive"
+    checkout_submodules:
+      description: "Perform Initial Submodule Checkout"
+      cmd: "git"
+      args:
+        - "submodule"
+        - "update"
+        - "--init"
+        - "--recursive"
     pull_latest:
       description: "Pull Latest"
       cmd: "git"
