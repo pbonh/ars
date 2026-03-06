@@ -16,3 +16,8 @@ node_npm_packages:
     executable: "{{ cline_npm_executable }}"
     global: true
     enabled: false
+  - name: "{{ openspec_npm_package }}"
+    state: "{{ openspec_npm_state }}"
+    version: "{{ openspec_npm_version }}"
+    executable: "{{ openspec_npm_executable }}"
+    global: true

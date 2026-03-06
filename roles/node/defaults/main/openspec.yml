@@ -1,0 +1,5 @@
+---
+openspec_npm_package: "@fission-ai/openspec"
+openspec_npm_state: "present"
+openspec_npm_version: null
+openspec_npm_executable: "npm"
