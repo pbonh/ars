@@ -1,0 +1,5 @@
+---
+pi_npm_package: "@mariozechner/pi-coding-agent"
+pi_npm_state: "present"
+pi_npm_version: null
+pi_npm_executable: "npm"
