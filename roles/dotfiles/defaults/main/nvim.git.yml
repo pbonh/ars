@@ -52,7 +52,9 @@ nvim_git:
         "folke/snacks.nvim",
       },
       config = function()
-        require("worktrees").setup()
+        require("worktrees").setup({
+          use_netrw = false,
+        })
       end,
     },
   config: ""
