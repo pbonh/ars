@@ -315,21 +315,7 @@ nvim_hydra:
               on_exit = function()
                  if vim.bo.buftype == "" and vim.fn.filereadable(vim.fn.expand("%:p")) == 1 then
                    local cursor_pos = vim.api.nvim_win_get_cursor(0)
-                   local prev_modeline = vim.api.nvim_get_option_value('modeline', { scope = 'global' })
-                   local prev_modelines = vim.api.nvim_get_option_value('modelines', { scope = 'global' })
-                   vim.api.nvim_set_option_value('modeline', false, { scope = 'global' })
-                   vim.api.nvim_set_option_value('modelines', 0, { scope = 'global' })
-
-                   local ok, err = pcall(function()
-                     vim.cmd 'loadview'
-                   end)
-
-                   vim.api.nvim_set_option_value('modeline', prev_modeline, { scope = 'global' })
-                   vim.api.nvim_set_option_value('modelines', prev_modelines, { scope = 'global' })
-
-                   if not ok then
-                     error(err)
-                   end
+                   vim.cmd 'loadview'
                    vim.api.nvim_win_set_cursor(0, cursor_pos)
                    vim.cmd 'normal zv'
                    -- gitsigns.toggle_signs(false)
