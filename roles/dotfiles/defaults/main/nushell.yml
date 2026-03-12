@@ -26,24 +26,24 @@ nushell_fzf_env: |
   {% endfor %}
   $env.SKIM_DEFAULT_COMMAND = '{{ fd_exe }} --type f || git ls-tree -r --name-only HEAD || {{ rg_exe }} --files || find .'
 nushell_worktrunk_env: |
-  source {{ nushell_config_dir }}/vendor/autoload/wt.nu
+  source "{{ nushell_config_dir }}/vendor/autoload/wt.nu"
 nushell_atuin_config_file: "{{ atuin_dir }}/init.nu"
 nushell_carapace_config_file: "{{ carapace_dir }}/init.nu"
 nushell_atuin_config: |
-  source {{ nushell_atuin_config_file }}
+  source "{{ nushell_atuin_config_file }}"
 nushell_atuin_env: |
   {{ atuin_exe }} init nu | save --force {{ nushell_atuin_config_file }}
 nushell_carapace_config: |
-  source {{ nushell_carapace_config_file }}
+  source "{{ nushell_carapace_config_file }}"
 nushell_carapace_env: |
-  {{ carapace_exe }} _carapace nushell | save --force {{ nushell_carapace_config_file }}
+  {{ carapace_exe }} _carapace nushell | save --force "{{ nushell_carapace_config_file }}"
 nushell_starship_dir: "{{ xdg_data_dir }}/nushell/vendor/autoload"
 nushell_starship_source: "{{ nushell_starship_dir }}/starship.nu"
 nushell_starship_config: |
-  use {{ nushell_starship_source }}
+  use "{{ nushell_starship_source }}"
 nushell_starship_env: |
   mkdir ($nu.data-dir | path join "vendor/autoload")
-  {{ starship_exe }} init nu | save -f {{ nushell_starship_source }}
+  {{ starship_exe }} init nu | save -f "{{ nushell_starship_source }}"
 nushell_custom_config: |
   $env.config = {
     show_banner: false
