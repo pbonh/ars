@@ -243,6 +243,11 @@ dev_packages:
       - "git"
     devbox:
       - "git"
+  jujutsu:
+    brew:
+      - "jj"
+    devbox:
+      - "jujutsu"
   act:
     brew:
       - "act"
