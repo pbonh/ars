@@ -29,6 +29,9 @@ nushell_worktrunk_env: |
   source "{{ nushell_config_dir }}/vendor/autoload/wt.nu"
 nushell_atuin_config_file: "{{ atuin_dir }}/init.nu"
 nushell_carapace_config_file: "{{ carapace_dir }}/init.nu"
+nushell_atuin_config_noinit: |
+  {{ atuin_exe }} daemon
+nushell_atuin_use_noinit: "{{ ansible_system != 'Darwin' and (ansible_service_mgr | default('')) != 'systemd' }}"
 nushell_atuin_config: |
   source "{{ nushell_atuin_config_file }}"
 nushell_atuin_env: |
