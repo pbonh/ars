@@ -62,24 +62,6 @@
     - tcsh
     - env
 
-- name: Git Config
-  import_tasks: tasks/git.yml
-  tags:
-    - git
-    - env
-
-- name: Lazygit Config
-  import_tasks: tasks/lazygit.yml
-  tags:
-    - git
-    - env
-
-- name: Gitui Config
-  import_tasks: tasks/gitui.yml
-  tags:
-    - git
-    - env
-
 - name: Yazi Config
   import_tasks: tasks/yazi.yml
   tags:

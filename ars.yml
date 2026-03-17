@@ -61,3 +61,12 @@
   tasks:
     - import_role:
         name: dotfiles
+
+- name: Configure Developer Settings
+  hosts: localhost
+  vars_files:
+    - vars/local.yml
+  tasks:
+    - import_role:
+        name: dev
+      when: dev_machine == true

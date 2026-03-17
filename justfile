@@ -1,4 +1,5 @@
 import 'scripts/just/apps.just'
+import 'scripts/just/dev.just'
 import 'scripts/just/dotfiles.just'
 import 'scripts/just/distrobox.just'
 import 'scripts/just/kde.just'
