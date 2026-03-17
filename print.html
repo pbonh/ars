@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-8cb969f7.js";
+            window.path_to_searchindex_js = "searchindex-38e7a82b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-bbf1516f.js"></script>
@@ -243,17 +243,24 @@ and Devbox uses <code>nix</code> with support for custom shell environments. Non
 have root permissions, but still need to install the developer tools. All 4 are compatible with
 Linux &amp; macOS.</p>
 <p>EITHER
-Checkout repository and create <code>.envrc</code> File(Example)</p>
+Checkout repository and create <code>.envrc</code> file (base example):</p>
 <pre><code class="language-bash">touch .envrc
 ln -s .envrc .env
 cat &lt;&lt; EOF &gt;&gt; .envrc
 DOTFILES_TASK_PRELUDE=python
-DOTFILES_BOOTSTRAP_GIT_NAME="Your Name"
-DOTFILES_BOOTSTRAP_GIT_EMAIL="your_name@address.com"
-DOTFILES_BOOTSTRAP_GITHUB_USERNAME="username"
 OPENAI_API_KEY="MY_OPENAI_API_KEY"
 ANTHROPIC_API_KEY="MY_ANTHROPIC_API_KEY"
 EOF
+</code></pre>
+<p>Optional Git-Enabled <code>.envrc</code> values (for the <code>dev</code> role):</p>
+<pre><code class="language-bash">cat &lt;&lt; EOF &gt;&gt; .envrc
+DOTFILES_BOOTSTRAP_GIT_NAME="Your Name"
+DOTFILES_BOOTSTRAP_GIT_EMAIL="your_name@address.com"
+DOTFILES_BOOTSTRAP_GITHUB_USERNAME="username"
+EOF
+</code></pre>
+<p>Apply optional Git/SSH + Git tooling config:</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "{dev_machine: true}"
 </code></pre>
 <p>OR
 Ansible Pull</p>
@@ -267,6 +274,8 @@ ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install,env" -e
 <h1 id="developer-tools-1"><a class="header" href="#developer-tools-1">Developer Tools</a></h1>
 <p>This repo supports installing terminal developer tools &amp; packages via homebrew (default), mise,
 devbox, and cargo (Non-Root).</p>
+<p>Base provider examples only require <code>tool_provider</code>. Git identity and GitHub username are optional
+and can be applied separately with the <code>dev</code> role (<code>dev.yml</code>) when desired.</p>
 <p>The options are presented in the recommended order:</p>
 <ol>
 <li>Homebrew (default)</li>
@@ -279,20 +288,24 @@ devbox, and cargo (Non-Root).</p>
 <p>Mise is a package manager for the developer tools in this repo. The role installs the mise binary
 and applies the tool configuration for you.</p>
 <p>To install the Mise-managed packages, ensure <code>ansible</code> is installed and create a file to apply your
-customizations. The variable <code>tool_provider</code> MUST be specified as <code>mise</code>. The remaining variables are
-optional, but keep in mind that they will overwrite any customizations that you have made to git,
-ssh, neovim, tmux, etc.</p>
-<p>Example Yaml Config(mise.yml):</p>
+customizations. The variable <code>tool_provider</code> MUST be specified as <code>mise</code>.</p>
+<p>Base Example Yaml Config(mise.yml):</p>
 <pre><code class="language-yaml">---
 tool_provider: "mise"
-git_name: "Your Name"
-git_email: "your_name@address.com"
-github_username: "username"
-anthropic_api_key: "MY_ANTHROPIC_API_KEY"
-openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Mise packages:</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@mise.yml"
+</code></pre>
+<p>Optional Git-Enabled Example Yaml Config(mise-git.yml):</p>
+<pre><code class="language-yaml">---
+tool_provider: "mise"
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+</code></pre>
+<p>Apply optional Git/SSH + Git tooling config:</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@mise-git.yml"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="devbox"><a class="header" href="#devbox">Devbox</a></h1>
@@ -305,20 +318,24 @@ openai_api_key: "MY_OPENAI_API_KEY"
 <pre><code class="language-bash">wget -O - https://raw.githubusercontent.com/pbonh/ars/main/scripts/bootstrap_devbox.sh | bash
 </code></pre>
 <p>To install the Devbox packages, ensure <code>ansible</code> is installed and create a file to apply your
-customizations. The variable <code>tool_provider</code> MUST be specified as <code>devbox</code>. The remaining variables
-are optional, but keep in mind that they will overwrite any customizations that you have made to
-git, ssh, neovim, tmux, etc.</p>
-<p>Example Yaml Config(devbox.yml):</p>
+customizations. The variable <code>tool_provider</code> MUST be specified as <code>devbox</code>.</p>
+<p>Base Example Yaml Config(devbox.yml):</p>
 <pre><code class="language-yaml">---
 tool_provider: "devbox"
-git_name: "Your Name"
-git_email: "your_name@address.com"
-github_username: "username"
-anthropic_api_key: "MY_ANTHROPIC_API_KEY"
-openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Devbox packages:</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@devbox.yml"
+</code></pre>
+<p>Optional Git-Enabled Example Yaml Config(devbox-git.yml):</p>
+<pre><code class="language-yaml">---
+tool_provider: "devbox"
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+</code></pre>
+<p>Apply optional Git/SSH + Git tooling config:</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@devbox-git.yml"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="homebrew"><a class="header" href="#homebrew">Homebrew</a></h1>
@@ -326,38 +343,46 @@ openai_api_key: "MY_OPENAI_API_KEY"
 <pre><code class="language-bash">/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 </code></pre>
 <p>To install the Homebrew packages, ensure <code>ansible</code> is installed and create a file to apply your
-customizations. Homebrew is the default tool provider. The remaining variables are optional, but
-keep in mind that they will overwrite any customizations that you have made to git, ssh, neovim,
-tmux, etc.</p>
-<p>Example Yaml Config(brew.yml):</p>
+customizations. Homebrew is the default tool provider.</p>
+<p>Base Example Yaml Config(brew.yml):</p>
 <pre><code class="language-yaml">---
 tool_provider: "homebrew"
-git_name: "Your Name"
-git_email: "your_name@address.com"
-github_username: "username"
-anthropic_api_key: "MY_ANTHROPIC_API_KEY"
-openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Homebrew packages:</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@brew.yml"
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="non-root"><a class="header" href="#non-root">Non-Root</a></h1>
-<p>To install the Non-Root packages, ensure <code>ansible</code> is installed and create a file to apply your
-customizations. The variable <code>tool_provider</code> MUST be specified as <code>nonroot</code>. The remaining variables
-are optional, but keep in mind that they will overwrite any customizations that you have made to
-git, ssh, neovim, tmux, etc.</p>
-<p>Example Yaml Config(nonroot.yml):</p>
+<p>Optional Git-Enabled Example Yaml Config(brew-git.yml):</p>
 <pre><code class="language-yaml">---
-tool_provider: "nonroot"
+tool_provider: "homebrew"
+dev_machine: true
 git_name: "Your Name"
 git_email: "your_name@address.com"
 github_username: "username"
-anthropic_api_key: "MY_ANTHROPIC_API_KEY"
-openai_api_key: "MY_OPENAI_API_KEY"
+</code></pre>
+<p>Apply optional Git/SSH + Git tooling config:</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@brew-git.yml"
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="non-root"><a class="header" href="#non-root">Non-Root</a></h1>
+<p>To install the Non-Root packages, ensure <code>ansible</code> is installed and create a file to apply your
+customizations. The variable <code>tool_provider</code> MUST be specified as <code>nonroot</code>.</p>
+<p>Base Example Yaml Config(nonroot.yml):</p>
+<pre><code class="language-yaml">---
+tool_provider: "nonroot"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Non-Root packages:</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@nonroot.yml"
+</code></pre>
+<p>Optional Git-Enabled Example Yaml Config(nonroot-git.yml):</p>
+<pre><code class="language-yaml">---
+tool_provider: "nonroot"
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+</code></pre>
+<p>Apply optional Git/SSH + Git tooling config:</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@nonroot-git.yml"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="workstation-gui-1"><a class="header" href="#workstation-gui-1">Workstation GUI</a></h1>
@@ -398,6 +423,9 @@ not use the same devbox/homebrew/nonroot scripting.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
 <p>This repo offers configuration of the developer environment in the both the desktop and terminal.</p>
+<p>Base configuration examples in this section do not require GitHub username, Git identity, or SSH
+credentials. Optional Git-enabled examples are included where relevant for users that want managed
+Git/SSH settings.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="gui"><a class="header" href="#gui">GUI</a></h1>
 <p>This will configure KDE Workspaces and Activities as specified by the user. Defaults are available.</p>
@@ -452,14 +480,14 @@ kwin_rules:
 selectivly apply them. Users are strongly encouraged to set their own project, layouts, aliases,
 etc.</p>
 <p>The bare minimum would be:</p>
-<p>Example:</p>
+<p>Base Example:</p>
 <pre><code class="language-yaml"># devbox.yml
 ---
 tool_provider: "devbox"
 projects:
   ars:
     name: "pbonh/ars"
-    url: "{{ github_ssh_url }}:pbonh/ars.git"
+    url: "https://github.com/pbonh/ars.git"
     path: "{{ code_checkout_path_github }}/pbonh/ars"
 zellij_kdl_layouts:
   dotfiles:
@@ -475,8 +503,25 @@ zellij_kdl_layouts:
           }
       }
 </code></pre>
+<p>Optional Git-Enabled Example:</p>
+<pre><code class="language-yaml"># devbox-git.yml
+---
+tool_provider: "devbox"
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+projects:
+  ars:
+    name: "pbonh/ars"
+    url: "{{ github_ssh_url }}:pbonh/ars.git"
+    path: "{{ code_checkout_path_github }}/pbonh/ars"
+</code></pre>
 <p>The above settings can be applied by running:</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --skip-tags "install" -e "@devbox.yml"
+</code></pre>
+<p>Apply optional Git/SSH + Git tooling config:</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@devbox-git.yml"
 </code></pre>
 <p>If checking out the <code>ars</code> repo directly, then create <code>vars/local.yml</code>, and add configuration there, no <code>-e</code> option necessary.</p>
 <pre><code class="language-bash">ansible-playbook playbook.yml --skip-tags "install"
@@ -529,7 +574,7 @@ bw_pick_copy() {
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
-<p>Example(MacOS):</p>
+<p>Base Example (macOS):</p>
 <pre><code class="language-yaml"># macos.yml
 ---
 tool_provider: "devbox"
@@ -539,11 +584,11 @@ term_dev_name: "pbonh/term-dev.nix"
 projects:
   ars:
     name: "{{ ars_name }}"
-    url: "{{ github_ssh_url }}:{{ ars_name }}.git"
+    url: "https://github.com/{{ ars_name }}.git"
     path: "{{ code_checkout_path_github }}/{{ ars_name }}"
   term_dev:
     name: "{{ term_dev_name }}"
-    url: "{{ github_ssh_url }}:{{ term_dev_name }}.git"
+    url: "https://github.com/{{ term_dev_name }}.git"
     path: "{{ code_checkout_path_github }}/{{ term_dev_name }}"
 other_projects: "{{ projects | dict2items | 
              map(attribute='key', 
@@ -569,7 +614,7 @@ zellij_kdl_layouts:
               start_suspended true
           }
       }
-      tab name="Dotfiles" split_direction="vertical" cwd="{{ dotfiles_checkout_dir }}" {
+      tab name="Dotfiles" split_direction="vertical" cwd="{{ projects['term_dev']['path'] }}" {
           pane {
               command "env"
               args {% set bash_arg_list = nvim_exe_bone_bash_cmd %}
@@ -588,7 +633,19 @@ zellij_kdl_layouts:
 nushell_config_dir: "{{ macos_config_dir }}/nushell"
 xdg_config_dir_navi: "{{ macos_config_dir }}/navi"
 </code></pre>
-<p>Example(Devbox,AMD-ROCM):</p>
+<p>Optional Git-Enabled Overlay (macos-git.yml):</p>
+<pre><code class="language-yaml">---
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+projects:
+  ars:
+    url: "{{ github_ssh_url }}:{{ ars_name }}.git"
+  term_dev:
+    url: "{{ github_ssh_url }}:{{ term_dev_name }}.git"
+</code></pre>
+<p>Base Example (Devbox, AMD-ROCM):</p>
 <pre><code class="language-yaml">---
 tool_provider: "devbox"
 rocm_support: true
@@ -596,7 +653,7 @@ ars_name: "pbonh/ars"
 projects:
   ars:
     name: "{{ ars_name }}"
-    url: "{{ github_ssh_url }}/{{ ars_name }}.git"
+    url: "https://github.com/{{ ars_name }}.git"
     path: "{{ code_checkout_path_github }}/{{ ars_name }}"
 other_projects: "{{ projects | dict2items | 
              map(attribute='key', 
@@ -640,6 +697,20 @@ zellij_kdl_layouts:
               start_suspended true
           }
       }
+</code></pre>
+<p>Optional Git-Enabled Overlay (devbox-rocm-git.yml):</p>
+<pre><code class="language-yaml">---
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+projects:
+  ars:
+    url: "{{ github_ssh_url }}:{{ ars_name }}.git"
+</code></pre>
+<p>Apply optional Git/SSH + Git tooling config:</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@macos-git.yml"
+ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@devbox-rocm-git.yml"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="license-1"><a href="#license-1" class="header">License</a></h1>

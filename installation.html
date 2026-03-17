@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-8cb969f7.js";
+            window.path_to_searchindex_js = "searchindex-38e7a82b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-bbf1516f.js"></script>
@@ -224,17 +224,24 @@ and Devbox uses <code>nix</code> with support for custom shell environments. Non
 have root permissions, but still need to install the developer tools. All 4 are compatible with
 Linux &amp; macOS.</p>
 <p>EITHER
-Checkout repository and create <code>.envrc</code> File(Example)</p>
+Checkout repository and create <code>.envrc</code> file (base example):</p>
 <pre><code class="language-bash">touch .envrc
 ln -s .envrc .env
 cat &lt;&lt; EOF &gt;&gt; .envrc
 DOTFILES_TASK_PRELUDE=python
-DOTFILES_BOOTSTRAP_GIT_NAME="Your Name"
-DOTFILES_BOOTSTRAP_GIT_EMAIL="your_name@address.com"
-DOTFILES_BOOTSTRAP_GITHUB_USERNAME="username"
 OPENAI_API_KEY="MY_OPENAI_API_KEY"
 ANTHROPIC_API_KEY="MY_ANTHROPIC_API_KEY"
 EOF
+</code></pre>
+<p>Optional Git-Enabled <code>.envrc</code> values (for the <code>dev</code> role):</p>
+<pre><code class="language-bash">cat &lt;&lt; EOF &gt;&gt; .envrc
+DOTFILES_BOOTSTRAP_GIT_NAME="Your Name"
+DOTFILES_BOOTSTRAP_GIT_EMAIL="your_name@address.com"
+DOTFILES_BOOTSTRAP_GITHUB_USERNAME="username"
+EOF
+</code></pre>
+<p>Apply optional Git/SSH + Git tooling config:</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "{dev_machine: true}"
 </code></pre>
 <p>OR
 Ansible Pull</p>

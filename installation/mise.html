@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-8cb969f7.js";
+            window.path_to_searchindex_js = "../searchindex-38e7a82b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-bbf1516f.js"></script>
@@ -178,20 +178,24 @@
 <p>Mise is a package manager for the developer tools in this repo. The role installs the mise binary
 and applies the tool configuration for you.</p>
 <p>To install the Mise-managed packages, ensure <code>ansible</code> is installed and create a file to apply your
-customizations. The variable <code>tool_provider</code> MUST be specified as <code>mise</code>. The remaining variables are
-optional, but keep in mind that they will overwrite any customizations that you have made to git,
-ssh, neovim, tmux, etc.</p>
-<p>Example Yaml Config(mise.yml):</p>
+customizations. The variable <code>tool_provider</code> MUST be specified as <code>mise</code>.</p>
+<p>Base Example Yaml Config(mise.yml):</p>
 <pre><code class="language-yaml">---
 tool_provider: "mise"
-git_name: "Your Name"
-git_email: "your_name@address.com"
-github_username: "username"
-anthropic_api_key: "MY_ANTHROPIC_API_KEY"
-openai_api_key: "MY_OPENAI_API_KEY"
 </code></pre>
 <p>Now use <code>ansible-pull</code> to install the Mise packages:</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@mise.yml"
+</code></pre>
+<p>Optional Git-Enabled Example Yaml Config(mise-git.yml):</p>
+<pre><code class="language-yaml">---
+tool_provider: "mise"
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+</code></pre>
+<p>Apply optional Git/SSH + Git tooling config:</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@mise-git.yml"
 </code></pre>
 
                     </main>

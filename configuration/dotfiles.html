@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-8cb969f7.js";
+            window.path_to_searchindex_js = "../searchindex-38e7a82b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-bbf1516f.js"></script>
@@ -179,14 +179,14 @@
 selectivly apply them. Users are strongly encouraged to set their own project, layouts, aliases,
 etc.</p>
 <p>The bare minimum would be:</p>
-<p>Example:</p>
+<p>Base Example:</p>
 <pre><code class="language-yaml"># devbox.yml
 ---
 tool_provider: "devbox"
 projects:
   ars:
     name: "pbonh/ars"
-    url: "{{ github_ssh_url }}:pbonh/ars.git"
+    url: "https://github.com/pbonh/ars.git"
     path: "{{ code_checkout_path_github }}/pbonh/ars"
 zellij_kdl_layouts:
   dotfiles:
@@ -202,8 +202,25 @@ zellij_kdl_layouts:
           }
       }
 </code></pre>
+<p>Optional Git-Enabled Example:</p>
+<pre><code class="language-yaml"># devbox-git.yml
+---
+tool_provider: "devbox"
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+projects:
+  ars:
+    name: "pbonh/ars"
+    url: "{{ github_ssh_url }}:pbonh/ars.git"
+    path: "{{ code_checkout_path_github }}/pbonh/ars"
+</code></pre>
 <p>The above settings can be applied by running:</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --skip-tags "install" -e "@devbox.yml"
+</code></pre>
+<p>Apply optional Git/SSH + Git tooling config:</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@devbox-git.yml"
 </code></pre>
 <p>If checking out the <code>ars</code> repo directly, then create <code>vars/local.yml</code>, and add configuration there, no <code>-e</code> option necessary.</p>
 <pre><code class="language-bash">ansible-playbook playbook.yml --skip-tags "install"
