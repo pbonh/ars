@@ -30,6 +30,10 @@ git_ssh: /usr/bin/ssh
 github_url: "https://github.com"
 github_ssh_url: "git@github.com"
 codeberg_url: "https://codeberg.org"
+code_checkout_path: "{{ dotfiles_user_home }}/Code"
+code_checkout_path_github: "{{ code_checkout_path }}/github.com"
+code_checkout_path_gitlab: "{{ code_checkout_path }}/gitlab.com"
+code_home_dir: "{{ code_checkout_path_github }}"
 gcc_exe: /usr/bin/gcc
 gpp_exe: /usr/bin/g++
 make_exe: "make"
