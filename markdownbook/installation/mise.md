@@ -4,23 +4,32 @@ Mise is a package manager for the developer tools in this repo. The role install
 and applies the tool configuration for you.
 
 To install the Mise-managed packages, ensure `ansible` is installed and create a file to apply your
-customizations. The variable `tool_provider` MUST be specified as `mise`. The remaining variables are
-optional, but keep in mind that they will overwrite any customizations that you have made to git,
-ssh, neovim, tmux, etc.
+customizations. The variable `tool_provider` MUST be specified as `mise`.
 
-Example Yaml Config(mise.yml):
+Base Example Yaml Config(mise.yml):
 ```yaml
 ---
 tool_provider: "mise"
-git_name: "Your Name"
-git_email: "your_name@address.com"
-github_username: "username"
-anthropic_api_key: "MY_ANTHROPIC_API_KEY"
-openai_api_key: "MY_OPENAI_API_KEY"
 ```
 
 Now use `ansible-pull` to install the Mise packages:
 
 ```bash
 ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@mise.yml"
+```
+
+Optional Git-Enabled Example Yaml Config(mise-git.yml):
+```yaml
+---
+tool_provider: "mise"
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+```
+
+Apply optional Git/SSH + Git tooling config:
+
+```bash
+ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@mise-git.yml"
 ```

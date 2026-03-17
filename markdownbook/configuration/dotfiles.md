@@ -6,7 +6,7 @@ etc.
 
 The bare minimum would be:
 
-Example:
+Base Example:
 ```yaml
 # devbox.yml
 ---
@@ -14,7 +14,7 @@ tool_provider: "devbox"
 projects:
   ars:
     name: "pbonh/ars"
-    url: "{{ github_ssh_url }}:pbonh/ars.git"
+    url: "https://github.com/pbonh/ars.git"
     path: "{{ code_checkout_path_github }}/pbonh/ars"
 zellij_kdl_layouts:
   dotfiles:
@@ -31,10 +31,33 @@ zellij_kdl_layouts:
       }
 ```
 
+Optional Git-Enabled Example:
+
+```yaml
+# devbox-git.yml
+---
+tool_provider: "devbox"
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+projects:
+  ars:
+    name: "pbonh/ars"
+    url: "{{ github_ssh_url }}:pbonh/ars.git"
+    path: "{{ code_checkout_path_github }}/pbonh/ars"
+```
+
 The above settings can be applied by running:
 
 ```bash
 ansible-pull -U https://github.com/pbonh/ars.git ars.yml --skip-tags "install" -e "@devbox.yml"
+```
+
+Apply optional Git/SSH + Git tooling config:
+
+```bash
+ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@devbox-git.yml"
 ```
 
 If checking out the `ars` repo directly, then create `vars/local.yml`, and add configuration there, no `-e` option necessary.

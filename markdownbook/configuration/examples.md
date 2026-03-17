@@ -1,6 +1,6 @@
 # Examples
 
-Example(MacOS):
+Base Example (macOS):
 ```yaml
 # macos.yml
 ---
@@ -11,11 +11,11 @@ term_dev_name: "pbonh/term-dev.nix"
 projects:
   ars:
     name: "{{ ars_name }}"
-    url: "{{ github_ssh_url }}:{{ ars_name }}.git"
+    url: "https://github.com/{{ ars_name }}.git"
     path: "{{ code_checkout_path_github }}/{{ ars_name }}"
   term_dev:
     name: "{{ term_dev_name }}"
-    url: "{{ github_ssh_url }}:{{ term_dev_name }}.git"
+    url: "https://github.com/{{ term_dev_name }}.git"
     path: "{{ code_checkout_path_github }}/{{ term_dev_name }}"
 other_projects: "{{ projects | dict2items | 
              map(attribute='key', 
@@ -41,7 +41,7 @@ zellij_kdl_layouts:
               start_suspended true
           }
       }
-      tab name="Dotfiles" split_direction="vertical" cwd="{{ dotfiles_checkout_dir }}" {
+      tab name="Dotfiles" split_direction="vertical" cwd="{{ projects['term_dev']['path'] }}" {
           pane {
               command "env"
               args {% set bash_arg_list = nvim_exe_bone_bash_cmd %}
@@ -61,7 +61,21 @@ nushell_config_dir: "{{ macos_config_dir }}/nushell"
 xdg_config_dir_navi: "{{ macos_config_dir }}/navi"
 ```
 
-Example(Devbox,AMD-ROCM):
+Optional Git-Enabled Overlay (macos-git.yml):
+```yaml
+---
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+projects:
+  ars:
+    url: "{{ github_ssh_url }}:{{ ars_name }}.git"
+  term_dev:
+    url: "{{ github_ssh_url }}:{{ term_dev_name }}.git"
+```
+
+Base Example (Devbox, AMD-ROCM):
 ```yaml
 ---
 tool_provider: "devbox"
@@ -70,7 +84,7 @@ ars_name: "pbonh/ars"
 projects:
   ars:
     name: "{{ ars_name }}"
-    url: "{{ github_ssh_url }}/{{ ars_name }}.git"
+    url: "https://github.com/{{ ars_name }}.git"
     path: "{{ code_checkout_path_github }}/{{ ars_name }}"
 other_projects: "{{ projects | dict2items | 
              map(attribute='key', 
@@ -114,3 +128,23 @@ zellij_kdl_layouts:
               start_suspended true
           }
       }
+```
+
+Optional Git-Enabled Overlay (devbox-rocm-git.yml):
+```yaml
+---
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+projects:
+  ars:
+    url: "{{ github_ssh_url }}:{{ ars_name }}.git"
+```
+
+Apply optional Git/SSH + Git tooling config:
+
+```bash
+ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@macos-git.yml"
+ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@devbox-rocm-git.yml"
+```

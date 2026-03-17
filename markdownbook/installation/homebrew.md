@@ -7,23 +7,32 @@ The following command will install homebrew for Linux or macOS systems:
 ```
 
 To install the Homebrew packages, ensure `ansible` is installed and create a file to apply your
-customizations. Homebrew is the default tool provider. The remaining variables are optional, but
-keep in mind that they will overwrite any customizations that you have made to git, ssh, neovim,
-tmux, etc.
+customizations. Homebrew is the default tool provider.
 
-Example Yaml Config(brew.yml):
+Base Example Yaml Config(brew.yml):
 ```yaml
 ---
 tool_provider: "homebrew"
-git_name: "Your Name"
-git_email: "your_name@address.com"
-github_username: "username"
-anthropic_api_key: "MY_ANTHROPIC_API_KEY"
-openai_api_key: "MY_OPENAI_API_KEY"
 ```
 
 Now use `ansible-pull` to install the Homebrew packages:
 
 ```bash
 ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@brew.yml"
+```
+
+Optional Git-Enabled Example Yaml Config(brew-git.yml):
+```yaml
+---
+tool_provider: "homebrew"
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+```
+
+Apply optional Git/SSH + Git tooling config:
+
+```bash
+ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@brew-git.yml"
 ```

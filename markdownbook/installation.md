@@ -54,19 +54,33 @@ have root permissions, but still need to install the developer tools. All 4 are 
 Linux & macOS.
 
 EITHER
-Checkout repository and create `.envrc` File(Example)
+Checkout repository and create `.envrc` file (base example):
 ```bash
 touch .envrc
 ln -s .envrc .env
 cat << EOF >> .envrc
 DOTFILES_TASK_PRELUDE=python
-DOTFILES_BOOTSTRAP_GIT_NAME="Your Name"
-DOTFILES_BOOTSTRAP_GIT_EMAIL="your_name@address.com"
-DOTFILES_BOOTSTRAP_GITHUB_USERNAME="username"
 OPENAI_API_KEY="MY_OPENAI_API_KEY"
 ANTHROPIC_API_KEY="MY_ANTHROPIC_API_KEY"
 EOF
 ```
+
+Optional Git-Enabled `.envrc` values (for the `dev` role):
+
+```bash
+cat << EOF >> .envrc
+DOTFILES_BOOTSTRAP_GIT_NAME="Your Name"
+DOTFILES_BOOTSTRAP_GIT_EMAIL="your_name@address.com"
+DOTFILES_BOOTSTRAP_GITHUB_USERNAME="username"
+EOF
+```
+
+Apply optional Git/SSH + Git tooling config:
+
+```bash
+ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "{dev_machine: true}"
+```
+
 OR
 Ansible Pull
 ```bash

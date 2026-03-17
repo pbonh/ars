@@ -1,23 +1,32 @@
 # Non-Root
 
 To install the Non-Root packages, ensure `ansible` is installed and create a file to apply your
-customizations. The variable `tool_provider` MUST be specified as `nonroot`. The remaining variables
-are optional, but keep in mind that they will overwrite any customizations that you have made to
-git, ssh, neovim, tmux, etc.
+customizations. The variable `tool_provider` MUST be specified as `nonroot`.
 
-Example Yaml Config(nonroot.yml):
+Base Example Yaml Config(nonroot.yml):
 ```yaml
 ---
 tool_provider: "nonroot"
-git_name: "Your Name"
-git_email: "your_name@address.com"
-github_username: "username"
-anthropic_api_key: "MY_ANTHROPIC_API_KEY"
-openai_api_key: "MY_OPENAI_API_KEY"
 ```
 
 Now use `ansible-pull` to install the Non-Root packages:
 
 ```bash
 ansible-pull -U https://github.com/pbonh/ars.git ars.yml --tags "install" -e "@nonroot.yml"
+```
+
+Optional Git-Enabled Example Yaml Config(nonroot-git.yml):
+```yaml
+---
+tool_provider: "nonroot"
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+```
+
+Apply optional Git/SSH + Git tooling config:
+
+```bash
+ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@nonroot-git.yml"
 ```
