@@ -148,3 +148,47 @@ Apply optional Git/SSH + Git tooling config:
 ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@macos-git.yml"
 ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@devbox-rocm-git.yml"
 ```
+
+Optional SSH Overlay (YubiKey/FIDO2 defaults):
+
+```yaml
+# git-yubikey-defaults.yml
+---
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+projects:
+  ars:
+    url: "{{ github_ssh_url }}:pbonh/ars.git"
+
+# Uses role defaults:
+# bash_ssh_fido2_enabled: true
+# zsh_ssh_fido2_enabled: true
+# dev_ssh_manage_fido2_stanza: true
+```
+
+Optional SSH Overlay (plain ssh-agent config):
+
+```yaml
+# git-plain-ssh.yml
+---
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+projects:
+  ars:
+    url: "{{ github_ssh_url }}:pbonh/ars.git"
+
+bash_ssh_fido2_enabled: false
+zsh_ssh_fido2_enabled: false
+dev_ssh_manage_fido2_stanza: false
+```
+
+Apply SSH mode overlays with the `dev` role:
+
+```bash
+ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@git-yubikey-defaults.yml"
+ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@git-plain-ssh.yml"
+```

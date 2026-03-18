@@ -75,6 +75,11 @@ DOTFILES_BOOTSTRAP_GITHUB_USERNAME="username"
 EOF
 ```
 
+For SSH mode examples (YubiKey/FIDO2 defaults vs plain ssh-agent), see:
+
+- [Configuration > Dotfiles](configuration/dotfiles.md)
+- [Configuration > Examples](configuration/examples.md)
+
 Apply optional Git/SSH + Git tooling config:
 
 ```bash
