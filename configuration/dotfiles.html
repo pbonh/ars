@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-38e7a82b.js";
+            window.path_to_searchindex_js = "../searchindex-07b98916.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-bbf1516f.js"></script>
@@ -216,11 +216,44 @@ projects:
     url: "{{ github_ssh_url }}:pbonh/ars.git"
     path: "{{ code_checkout_path_github }}/pbonh/ars"
 </code></pre>
+<p>Optional SSH Overlay (YubiKey/FIDO2 defaults):</p>
+<pre><code class="language-yaml"># devbox-git-yubikey.yml
+---
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+projects:
+  ars:
+    url: "{{ github_ssh_url }}:pbonh/ars.git"
+
+# Uses role defaults:
+# bash_ssh_fido2_enabled: true
+# zsh_ssh_fido2_enabled: true
+# dev_ssh_manage_fido2_stanza: true
+</code></pre>
+<p>Optional SSH Overlay (plain ssh-agent config):</p>
+<pre><code class="language-yaml"># devbox-git-plain-ssh.yml
+---
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+projects:
+  ars:
+    url: "{{ github_ssh_url }}:pbonh/ars.git"
+
+bash_ssh_fido2_enabled: false
+zsh_ssh_fido2_enabled: false
+dev_ssh_manage_fido2_stanza: false
+</code></pre>
 <p>The above settings can be applied by running:</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git ars.yml --skip-tags "install" -e "@devbox.yml"
 </code></pre>
 <p>Apply optional Git/SSH + Git tooling config:</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@devbox-git.yml"
+ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@devbox-git-yubikey.yml"
+ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@devbox-git-plain-ssh.yml"
 </code></pre>
 <p>If checking out the <code>ars</code> repo directly, then create <code>vars/local.yml</code>, and add configuration there, no <code>-e</code> option necessary.</p>
 <pre><code class="language-bash">ansible-playbook playbook.yml --skip-tags "install"
