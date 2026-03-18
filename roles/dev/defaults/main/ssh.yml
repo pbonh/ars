@@ -1,0 +1,9 @@
+---
+dev_ssh_manage_fido2_stanza: true
+dev_ssh_config_file: "{{ dotfiles_user_home }}/.ssh/config"
+dev_ssh_fido2_identity_file: "{{ dotfiles_user_home }}/.ssh/id_ed25519_sk"
+dev_ssh_fido2_identity_agent: "SSH_AUTH_SOCK"
+dev_ssh_fido2_hosts:
+  - github.com
+  - codeberg.org
+dev_ssh_fido2_user: git

@@ -1,0 +1,21 @@
+---
+- name: SSH | Ensure .ssh directory exists | file
+  ansible.builtin.file:
+    path: "{{ dotfiles_user_home }}/.ssh"
+    state: directory
+    mode: "0700"
+
+- name: SSH | Manage FIDO2 SSH config stanza | blockinfile
+  ansible.builtin.blockinfile:
+    path: "{{ dev_ssh_config_file }}"
+    create: true
+    mode: "0600"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: dev-fido2"
+    block: |
+      Host {{ dev_ssh_fido2_hosts | join(' ') }}
+        User {{ dev_ssh_fido2_user }}
+        IdentityAgent {{ dev_ssh_fido2_identity_agent }}
+        AddKeysToAgent yes
+        IdentityFile {{ dev_ssh_fido2_identity_file }}
+        IdentitiesOnly yes
+  when: dev_ssh_manage_fido2_stanza | bool

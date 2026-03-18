@@ -224,7 +224,7 @@ zsh_zellij_aliases: |
   }
   alias {{ zellij_worktrunk_switch_alias }}='zellij_worktrunk_switch'
   alias {{ zellij_worktrunk_switch_all_alias }}='zellij_worktrunk_switch_all'
-zsh_ssh_setup: |
+zsh_ssh_setup_plain: |
   env={{ dotfiles_user_home }}/.ssh/agent.env
   agent_load_env () {
       if [ -f "$env" ] && [ ! -r "$env" ]; then
@@ -245,3 +245,74 @@ zsh_ssh_setup: |
       ssh-add
   fi
   unset env
+zsh_ssh_fido2_enabled: true
+zsh_ssh_fido2_auto_generate: true
+zsh_ssh_fido2_auto_add: true
+zsh_ssh_fido2_key_type: "ed25519-sk"
+zsh_ssh_fido2_key_file: "{{ dotfiles_user_home }}/.ssh/id_ed25519_sk"
+zsh_ssh_fido2_application: "ssh:default"
+zsh_ssh_fido2_comment: "{{ ansible_env.USER }}@yubikey-fido2"
+zsh_ssh_setup_fido2: |
+  env={{ dotfiles_user_home }}/.ssh/agent.env
+  ssh_fido2_key_file="{{ zsh_ssh_fido2_key_file }}"
+  ssh_fido2_key_pub="${ssh_fido2_key_file}.pub"
+  ssh_fido2_key_type="{{ zsh_ssh_fido2_key_type }}"
+  ssh_fido2_application="{{ zsh_ssh_fido2_application }}"
+  ssh_fido2_key_comment="{{ zsh_ssh_fido2_comment }}"
+  agent_load_env () {
+      if [ -f "$env" ] && [ ! -r "$env" ]; then
+          rm -f "$env"
+      fi
+      [ -r "$env" ] && . "$env" >| /dev/null
+  }
+  agent_start () {
+      (umask 077; ssh-agent >| "$env")
+      . "$env" >| /dev/null
+  }
+  fido2_generate_if_missing () {
+      if [ "{{ zsh_ssh_fido2_auto_generate | bool | lower }}" != "true" ]; then
+          return
+      fi
+      if [ -f "$ssh_fido2_key_file" ] && [ -f "$ssh_fido2_key_pub" ]; then
+          return
+      fi
+      if ! command -v ssh-keygen >/dev/null 2>&1; then
+          return
+      fi
+      if [ ! -t 0 ] || [ ! -t 1 ]; then
+          return
+      fi
+      mkdir -p "{{ dotfiles_user_home }}/.ssh"
+      chmod 700 "{{ dotfiles_user_home }}/.ssh" >/dev/null 2>&1 || true
+      ssh-keygen \
+          -t "$ssh_fido2_key_type" \
+          -O resident \
+          -O verify-required \
+          -O "application=$ssh_fido2_application" \
+          -f "$ssh_fido2_key_file" \
+          -C "$ssh_fido2_key_comment"
+  }
+  fido2_add_key () {
+      if [ "{{ zsh_ssh_fido2_auto_add | bool | lower }}" != "true" ]; then
+          return
+      fi
+      if [ ! -f "$ssh_fido2_key_file" ]; then
+          return
+      fi
+      ssh-add "$ssh_fido2_key_file" >/dev/null
+  }
+  agent_load_env
+  # agent_run_state: 0=agent running w/ key; 1=agent w/o key; 2=agent not running
+  agent_run_state=$(ssh-add -l >| /dev/null 2>&1; echo $?)
+  if [ ! "$SSH_AUTH_SOCK" ] || [ "$agent_run_state" = 2 ]; then
+      agent_start
+  fi
+  fido2_generate_if_missing
+  fido2_add_key
+  unset env
+  unset ssh_fido2_key_file
+  unset ssh_fido2_key_pub
+  unset ssh_fido2_key_type
+  unset ssh_fido2_application
+  unset ssh_fido2_key_comment
+zsh_ssh_setup: "{{ zsh_ssh_setup_fido2 if (zsh_ssh_fido2_enabled | bool) else zsh_ssh_setup_plain }}"
