@@ -132,6 +132,13 @@ dev_packages:
       - "zellij"
     nonroot:
       - "zellij"
+  television:
+    brew:
+      - "television"
+    devbox:
+      - "television"
+    nonroot:
+      - "television"
   fzf:
     brew:
       - "fzf"
