@@ -106,10 +106,25 @@ zellij_kdl_template_info_zjstatus: |
           }
       }
   }
-zellij_kdl_layouts:
+zellij_kdl_layouts_from_projects_json: >-
+  {%- set layouts = {} -%}
+  {%- for project_key, project in (projects | default({})).items() -%}
+  {%- set tab_name = (project.name | default(project_key)) | regex_replace('^.*/', '') -%}
+  {%- set layout_info = 'tab name="' ~ tab_name ~ '" split_direction="vertical" cwd="' ~ project.path ~ '" focus=true {\n    pane {\n        command "' ~ nvim_exe ~ '"\n        start_suspended true\n    }\n}\n' -%}
+  {%- set _ = layouts.update({
+        project_key: {
+          'name': project_key,
+          'cwd': project.path,
+          'template_info': zellij_kdl_template_info_default,
+          'layout_info': layout_info
+        }
+      }) -%}
+  {%- endfor -%}
+  {{ layouts | to_json }}
+zellij_kdl_layouts_extra:
   example:
     name: dev1
-    cwd: "{{ ansible_env.HOME }}"
+    cwd: "{{ code_home_dir }}"
     template_info: "{{ zellij_kdl_template_info_default }}"
     layout_info: |
       tab name="Notes" split_direction="vertical" focus=true {
@@ -131,6 +146,7 @@ zellij_kdl_layouts:
               cwd "{{ xdg_config_dir }}"
           }
       }
+zellij_kdl_layouts: "{{ (zellij_kdl_layouts_from_projects_json | from_json) | combine(zellij_kdl_layouts_extra | default({}), recursive=True) }}"
 yazelix_tab_template_default: |
     tab_template name="ui" {
         pane size=1 borderless=true {
