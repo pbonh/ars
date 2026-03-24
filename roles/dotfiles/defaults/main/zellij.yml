@@ -68,6 +68,9 @@ zellij_kdl_config_file: "{{ zellij_config_dir }}/config.kdl"
 zellij_worktrunk_switch_alias: "zws"
 zellij_worktrunk_switch_all_alias: "zwsb"
 zellij_worktrunk_switch_tab_name: "wt-switch"
+zellij_kdl_generated_monitor_tab_enabled: true
+zellij_kdl_generated_monitor_tab_name: "System Monitor"
+zellij_kdl_generated_monitor_cmd: "btm"
 zellij_kdl_template_info_default: |
   tab_template name="shell-in-dir" {
       pane size=1 borderless=true {
@@ -110,7 +113,12 @@ zellij_kdl_layouts_from_projects_json: >-
   {%- set layouts = {} -%}
   {%- for project_key, project in (projects | default({})).items() -%}
   {%- set tab_name = (project.name | default(project_key)) | regex_replace('^.*/', '') -%}
-  {%- set layout_info = 'tab name="' ~ tab_name ~ '" split_direction="vertical" cwd="' ~ project.path ~ '" focus=true {\n    pane {\n        command "' ~ nvim_exe ~ '"\n        start_suspended true\n    }\n}\n' -%}
+  {%- set editor_tab_layout_info = 'tab name="' ~ tab_name ~ '" split_direction="vertical" cwd="' ~ project.path ~ '" focus=true {\n    pane {\n        command "' ~ nvim_exe ~ '"\n        start_suspended true\n    }\n}\n' -%}
+  {%- set monitor_tab_layout_info = '' -%}
+  {%- if zellij_kdl_generated_monitor_tab_enabled | default(true) -%}
+  {%- set monitor_tab_layout_info = 'tab name="' ~ zellij_kdl_generated_monitor_tab_name ~ '" split_direction="vertical" {\n    pane {\n        command "' ~ zellij_kdl_generated_monitor_cmd ~ '"\n        start_suspended true\n    }\n}\n' -%}
+  {%- endif -%}
+  {%- set layout_info = editor_tab_layout_info ~ monitor_tab_layout_info -%}
   {%- set _ = layouts.update({
         project_key: {
           'name': project_key,
