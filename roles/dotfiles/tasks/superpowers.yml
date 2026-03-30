@@ -1,0 +1,144 @@
+---
+# Superpowers - https://github.com/obra/superpowers
+# Agentic skills framework for coding agents (TDD, debugging, collaboration patterns)
+
+- name: Superpowers | Clone repository
+  ansible.builtin.git:
+    repo: "{{ superpowers_repo_url }}"
+    dest: "{{ superpowers_repo_dest }}"
+    version: "{{ superpowers_repo_ref }}"
+
+# --- Claude Code integration ---
+# Symlink skills, agents, and commands into ~/.claude/
+
+- name: Superpowers | Claude | Ensure skills directory exists
+  ansible.builtin.file:
+    path: "{{ superpowers_claude_skills_dir }}"
+    state: directory
+    mode: "0755"
+  when: superpowers_claude_enabled
+
+- name: Superpowers | Claude | Symlink skill directories
+  ansible.builtin.file:
+    src: "{{ superpowers_repo_dest }}/skills/{{ item }}"
+    dest: "{{ superpowers_claude_skills_dir }}/{{ item }}"
+    state: link
+    force: true
+  loop: "{{ superpowers_claude_skill_dirs }}"
+  when: superpowers_claude_enabled
+
+- name: Superpowers | Claude | Ensure agents directory exists
+  ansible.builtin.file:
+    path: "{{ superpowers_claude_agents_dir }}"
+    state: directory
+    mode: "0755"
+  when: superpowers_claude_enabled
+
+- name: Superpowers | Claude | Symlink agent files
+  ansible.builtin.file:
+    src: "{{ item }}"
+    dest: "{{ superpowers_claude_agents_dir }}/{{ item | basename }}"
+    state: link
+    force: true
+  with_fileglob:
+    - "{{ superpowers_repo_dest }}/agents/*.md"
+  when: superpowers_claude_enabled
+
+- name: Superpowers | Claude | Ensure commands directory exists
+  ansible.builtin.file:
+    path: "{{ superpowers_claude_commands_dir }}"
+    state: directory
+    mode: "0755"
+  when: superpowers_claude_enabled
+
+- name: Superpowers | Claude | Symlink command files
+  ansible.builtin.file:
+    src: "{{ item }}"
+    dest: "{{ superpowers_claude_commands_dir }}/{{ item | basename }}"
+    state: link
+    force: true
+  with_fileglob:
+    - "{{ superpowers_repo_dest }}/commands/*.md"
+  when: superpowers_claude_enabled
+
+- name: Superpowers | Claude | Check existing hooks.json
+  ansible.builtin.stat:
+    path: "{{ superpowers_claude_hooks_path }}"
+  register: superpowers_claude_hooks_stat
+  when: superpowers_claude_enabled
+
+- name: Superpowers | Claude | Read existing hooks.json
+  ansible.builtin.slurp:
+    src: "{{ superpowers_claude_hooks_path }}"
+  register: superpowers_claude_hooks_raw
+  when: superpowers_claude_enabled and superpowers_claude_hooks_stat.stat.exists
+
+- name: Superpowers | Claude | Parse existing hooks.json
+  ansible.builtin.set_fact:
+    superpowers_claude_hooks_existing: "{{ (superpowers_claude_hooks_raw.content | b64decode | from_json) if (superpowers_claude_hooks_stat.stat.exists and superpowers_claude_hooks_raw is not skipped) else {} }}"
+  when: superpowers_claude_enabled
+
+- name: Superpowers | Claude | Build superpowers hook entry
+  ansible.builtin.set_fact:
+    superpowers_claude_session_hook:
+      hooks:
+        SessionStart:
+          - matcher: "startup|clear|compact"
+            hooks:
+              - type: command
+                command: "CLAUDE_PLUGIN_ROOT={{ superpowers_repo_dest }} {{ superpowers_repo_dest }}/hooks/session-start"
+                async: false
+  when: superpowers_claude_enabled
+
+- name: Superpowers | Claude | Merge hooks.json
+  ansible.builtin.set_fact:
+    superpowers_claude_hooks_merged: "{{ superpowers_claude_hooks_existing | default({}) | combine(superpowers_claude_session_hook, recursive=True, list_merge='append_rp') }}"
+  when: superpowers_claude_enabled
+
+- name: Superpowers | Claude | Write hooks.json
+  ansible.builtin.copy:
+    dest: "{{ superpowers_claude_hooks_path }}"
+    content: "{{ superpowers_claude_hooks_merged | to_nice_json }}"
+    mode: "0644"
+  when: superpowers_claude_enabled
+
+# --- Codex integration ---
+# Clone repo to ~/.codex/superpowers, symlink skills to ~/.agents/skills/superpowers
+
+- name: Superpowers | Codex | Ensure clone directory parent exists
+  ansible.builtin.file:
+    path: "{{ superpowers_codex_clone_dir | dirname }}"
+    state: directory
+    mode: "0700"
+  when: superpowers_codex_enabled
+
+- name: Superpowers | Codex | Symlink repository to Codex directory
+  ansible.builtin.file:
+    src: "{{ superpowers_repo_dest }}"
+    dest: "{{ superpowers_codex_clone_dir }}"
+    state: link
+    force: true
+  when: superpowers_codex_enabled
+
+- name: Superpowers | Codex | Ensure agents skills directory exists
+  ansible.builtin.file:
+    path: "{{ superpowers_codex_agents_skills_dir }}"
+    state: directory
+    mode: "0755"
+  when: superpowers_codex_enabled
+
+- name: Superpowers | Codex | Symlink skills for discovery
+  ansible.builtin.file:
+    src: "{{ superpowers_repo_dest }}/skills"
+    dest: "{{ superpowers_codex_agents_skills_dir }}/superpowers"
+    state: link
+    force: true
+  when: superpowers_codex_enabled
+
+# --- OpenCode integration ---
+# Add plugin entry to opencode.json config
+
+- name: Superpowers | OpenCode | Add plugin to global config
+  ansible.builtin.set_fact:
+    opencode_global_config: "{{ opencode_global_config | combine({'plugin': [superpowers_opencode_plugin]}, recursive=True) }}"
+  when: superpowers_opencode_enabled

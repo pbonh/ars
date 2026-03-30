@@ -1,0 +1,38 @@
+---
+superpowers_repo_url: "https://github.com/obra/superpowers.git"
+superpowers_repo_ref: "main"
+superpowers_repo_dest: "{{ dot_download_dir }}/superpowers"
+
+# Claude Code integration
+# Manual install: clone repo, symlink skills/agents/commands into ~/.claude/
+superpowers_claude_enabled: true
+superpowers_claude_skills_dir: "{{ claude_config_dir }}/skills"
+superpowers_claude_agents_dir: "{{ claude_config_dir }}/agents"
+superpowers_claude_commands_dir: "{{ claude_config_dir }}/commands"
+superpowers_claude_hooks_path: "{{ claude_config_dir }}/hooks.json"
+superpowers_claude_skill_dirs:
+  - brainstorming
+  - dispatching-parallel-agents
+  - executing-plans
+  - finishing-a-development-branch
+  - receiving-code-review
+  - requesting-code-review
+  - subagent-driven-development
+  - systematic-debugging
+  - test-driven-development
+  - using-git-worktrees
+  - using-superpowers
+  - verification-before-completion
+  - writing-plans
+  - writing-skills
+
+# Codex integration
+# Manual install: clone repo to ~/.codex/superpowers, symlink skills to ~/.agents/skills/superpowers
+superpowers_codex_enabled: true
+superpowers_codex_clone_dir: "{{ codex_home_dir }}/superpowers"
+superpowers_codex_agents_skills_dir: "{{ ansible_env.HOME }}/.agents/skills"
+
+# OpenCode integration
+# Plugin-based install: add plugin entry to opencode.json
+superpowers_opencode_enabled: true
+superpowers_opencode_plugin: "superpowers@git+https://github.com/obra/superpowers.git"
