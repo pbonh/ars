@@ -152,27 +152,19 @@ nushell_zellij_aliases: |
     {{ zellij_exe }} action write-chars $wt_cmd
     {{ zellij_exe }} action write 13
   }
-  def zellij_open_tool_tab [tab_name tool_command ...args] {
+  def zellij_open_tool [pane_name tool_command ...args] {
     if (($env.ZELLIJ? | default "") == "") {
       run-external $tool_command ...$args
       return
     }
-    let escaped_args = ($args | each { |arg| "'" + ($arg | str replace -a "'" "''") + "'" } | str join " ")
-    let tab_cmd = if $escaped_args == "" {
-      $tool_command
-    } else {
-      $"($tool_command) ($escaped_args)"
-    }
-    {{ zellij_exe }} action new-tab -c $env.PWD -n $tab_name
-    {{ zellij_exe }} action write-chars $tab_cmd
-    {{ zellij_exe }} action write 13
+    {{ zellij_exe }} run --floating --close-on-exit --name $pane_name --height "{{ zellij_ai_pane_height }}" --width "{{ zellij_ai_pane_width }}" --x "{{ zellij_ai_pane_x }}" --y "{{ zellij_ai_pane_y }}" -- $tool_command ...$args
   }
   def {{ zellij_claude_alias }} [...args] {
-    zellij_open_tool_tab "{{ zellij_claude_tab_name }}" "{{ zellij_claude_command }}" ...$args
+    zellij_open_tool "{{ zellij_claude_pane_name }}" "{{ zellij_claude_command }}" ...$args
   }
   def {{ zellij_codex_alias }} [...args] {
-    zellij_open_tool_tab "{{ zellij_codex_tab_name }}" "{{ zellij_codex_command }}" ...$args
+    zellij_open_tool "{{ zellij_codex_pane_name }}" "{{ zellij_codex_command }}" ...$args
   }
   def {{ zellij_opencode_alias }} [...args] {
-    zellij_open_tool_tab "{{ zellij_opencode_tab_name }}" "{{ zellij_opencode_command }}" ...$args
+    zellij_open_tool "{{ zellij_opencode_pane_name }}" "{{ zellij_opencode_command }}" ...$args
   }
