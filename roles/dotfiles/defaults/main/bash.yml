@@ -228,6 +228,36 @@ bash_zellij_aliases: |
   }
   alias {{ zellij_worktrunk_switch_alias }}='zellij_worktrunk_switch'
   alias {{ zellij_worktrunk_switch_all_alias }}='zellij_worktrunk_switch_all'
+  zellij_open_tool_tab() {
+    local tab_name="$1"
+    shift
+    local tool_command="$1"
+    shift
+    if [ -z "$ZELLIJ" ]; then
+      "$tool_command" "$@"
+      return
+    fi
+    local tab_cmd="$tool_command"
+    local arg
+    for arg in "$@"; do
+      tab_cmd="$tab_cmd $(printf '%q' "$arg")"
+    done
+    {{ zellij_exe }} action new-tab -c "$PWD" -n "$tab_name"
+    {{ zellij_exe }} action write-chars "$tab_cmd"
+    {{ zellij_exe }} action write 13
+  }
+  zellij_claude_tab() {
+    zellij_open_tool_tab "{{ zellij_claude_tab_name }}" "{{ zellij_claude_command }}" "$@"
+  }
+  zellij_codex_tab() {
+    zellij_open_tool_tab "{{ zellij_codex_tab_name }}" "{{ zellij_codex_command }}" "$@"
+  }
+  zellij_opencode_tab() {
+    zellij_open_tool_tab "{{ zellij_opencode_tab_name }}" "{{ zellij_opencode_command }}" "$@"
+  }
+  alias {{ zellij_claude_alias }}='zellij_claude_tab'
+  alias {{ zellij_codex_alias }}='zellij_codex_tab'
+  alias {{ zellij_opencode_alias }}='zellij_opencode_tab'
 bash_ssh_setup_plain: |
   env={{ dotfiles_user_home }}/.ssh/agent.env
   agent_load_env () { test -f "$env" && . "$env" >| /dev/null ; }

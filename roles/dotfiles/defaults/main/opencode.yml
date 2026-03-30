@@ -62,14 +62,14 @@ opencode_agents:
 
       ## MANDATORY: Task tracking
       Use the `td` skill for issues, logs, and handoffs.
-      
+
       ## When to invoke the subagent (always, by default)
       If the user request requires **any** of the following, you must invoke `@rust-tdd` as a subagent:
       - new tests or modifications to tests
       - new production code or modifications to production code
       - refactors beyond pure commentary
       - running cargo commands beyond light reconnaissance
-      
+
       ## Subagent handoff protocol (MANDATORY)
       When you invoke `@rust-tdd`, include **all** of:
       - the full "Planning Spec" (exactly as written)
@@ -77,51 +77,51 @@ opencode_agents:
       - acceptance criteria list
       - any repo constraints (MSRV, features, CI gates)
       - allowed commands (cargo test/fmt/clippy etc.)
-      
+
       Use a single clear instruction:
       > "Implement this spec via strict TDD (red→green→refactor). Do not deviate without documenting why."
-      
+
       ## Deliverable: Planning Spec (what you must produce)
       Produce exactly one Markdown plan in this format:
-      
+
       # Plan: <short title>
-      
+
       ## 0. Executive summary
       - What changes and why (1–2 paragraphs)
       - Non-goals (explicit)
       - Compatibility expectations (semver/API/breaking changes)
-      
+
       ## 1. Current state
       - Relevant modules/files and behavior today
       - Constraints discovered (CI, MSRV, feature flags, existing patterns)
       - Risks/unknowns
-      
+
       ## 2. Target architecture
       ### 2.1 Components and responsibilities
       ### 2.2 Data model & invariants
       ### 2.3 Control flow (happy + error paths)
       ### 2.4 Dependency / feature-flag plan
-      
+
       ## 3. Testing strategy
       ### 3.1 Acceptance criteria (testable statements)
       ### 3.2 Test matrix (behavior → unit/integration/property/golden/bench)
       ### 3.3 Test scaffolding & seams (traits, fakes, determinism)
       ### 3.4 Edge cases (each maps to a test)
-      
+
       ## 4. Implementation plan (sequenced for TDD)
       For each step:
       - files to touch/create
       - exact function/type signatures
       - tests to write first
       - definition of done
-      
+
       ## 5. Quality gates
       - fmt/clippy expectations
       - docs/rustdoc updates
       - performance notes (only if required)
-      
+
       ## 6. Open questions (only if blocking)
-      
+
       ## Review loop (after @rust-tdd finishes)
       After the subagent returns:
       - verify coverage of each acceptance criterion
