@@ -159,6 +159,13 @@ nushell_zellij_aliases: |
     }
     {{ zellij_exe }} run --floating --close-on-exit --name $pane_name --height "{{ zellij_ai_pane_height }}" --width "{{ zellij_ai_pane_width }}" --x "{{ zellij_ai_pane_x }}" --y "{{ zellij_ai_pane_y }}" -- $tool_command ...$args
   }
+  def zellij_open_tool_pane [pane_name tool_command ...args] {
+    if (($env.ZELLIJ? | default "") == "") {
+      run-external $tool_command ...$args
+      return
+    }
+    {{ zellij_exe }} run --close-on-exit --name $pane_name -- $tool_command ...$args
+  }
   def {{ zellij_claude_alias }} [...args] {
     zellij_open_tool "{{ zellij_claude_pane_name }}" "{{ zellij_claude_command }}" ...$args
   }
@@ -167,4 +174,13 @@ nushell_zellij_aliases: |
   }
   def {{ zellij_opencode_alias }} [...args] {
     zellij_open_tool "{{ zellij_opencode_pane_name }}" "{{ zellij_opencode_command }}" ...$args
+  }
+  def {{ zellij_claude_pane_alias }} [...args] {
+    zellij_open_tool_pane "{{ zellij_claude_pane_name }}" "{{ zellij_claude_command }}" ...$args
+  }
+  def {{ zellij_codex_pane_alias }} [...args] {
+    zellij_open_tool_pane "{{ zellij_codex_pane_name }}" "{{ zellij_codex_command }}" ...$args
+  }
+  def {{ zellij_opencode_pane_alias }} [...args] {
+    zellij_open_tool_pane "{{ zellij_opencode_pane_name }}" "{{ zellij_opencode_command }}" ...$args
   }
