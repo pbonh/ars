@@ -6,9 +6,9 @@ opencode_config_dir: "{{ xdg_config_dir }}/opencode"
 opencode_skills_dir: "{{ opencode_config_dir }}/skills"
 opencode_agents_dir: "{{ opencode_config_dir }}/agents"
 opencode_default_agent: "plan"
-opencode_default_model: "moonshot/kimi-k2.5"
+opencode_default_model: "{{ (fireworks_api_key is defined) | ternary('fireworks/kimi-k2.5-turbo', 'moonshot/kimi-k2.5') }}"
 opencode_orchestrator_model: "{{ opencode_default_model }}"
-opencode_implementer_model: "moonshot/kimi-k2.5"
+opencode_implementer_model: "{{ (fireworks_api_key is defined) | ternary('fireworks/kimi-k2.5-turbo', 'moonshot/kimi-k2.5') }}"
 opencode_agents_repo_url: "https://github.com/darrenhinde/OpenAgents.git"
 opencode_agents_repo_dest: "{{ dot_download_dir }}/OpenAgents"
 opencode_agents_directories:
@@ -532,6 +532,10 @@ opencode_skills:
       - `td list`, `td ready`, `td next`
       - `td show <id>`, `td focus <id>`
       - `td link <id> <files...>`
+opencode_provider_anthropic: "{{ (anthropic_api_key is defined and anthropic_api_key | length > 0) | ternary({'anthropic': {'models': {}, 'options': {'apiKey': anthropic_api_key}}}, {}) }}"
+opencode_provider_openai: "{{ (openai_api_key is defined and openai_api_key | length > 0) | ternary({'openai': {'models': {}, 'options': {'apiKey': openai_api_key}}}, {}) }}"
+opencode_provider_moonshot: "{{ (moonshot_api_key is defined and moonshot_api_key | length > 0) | ternary({'moonshot': {'models': {}, 'options': {'apiKey': moonshot_api_key}}}, {}) }}"
+opencode_provider_fireworks: "{{ (fireworks_api_key is defined and fireworks_api_key | length > 0) | ternary({'fireworks': {'models': {}, 'options': {'apiKey': fireworks_api_key}}}, {}) }}"
 opencode_global_config:
   $schema: "https://opencode.ai/config.json"
   theme: "tokyonight"
@@ -543,19 +547,7 @@ opencode_global_config:
       "td": "allow"
       "internal-*": "deny"
       "experimental-*": "ask"
-  provider:
-    anthropic:
-      models: {}
-      options:
-        apiKey: "{{ anthropic_api_key }}"
-    openai:
-      models: {}
-      options:
-        apiKey: "{{ openai_api_key }}"
-    moonshot:
-      models: {}
-      options:
-        apiKey: "{{ moonshot_api_key }}"
+  provider: "{{ {} | combine(opencode_provider_anthropic) | combine(opencode_provider_openai) | combine(opencode_provider_moonshot) | combine(opencode_provider_fireworks) }}"
 opencode_agent_example: |
   "agent": {
     "code-reviewer": {
