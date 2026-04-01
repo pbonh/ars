@@ -411,7 +411,7 @@ nvim_treesitter_main:
             vim.api.nvim_create_autocmd({ "FileType" }, {
               pattern = filetypes,
               callback = function(event)
-                vim.treesitter.start(event.buf, parser)
+                pcall(vim.treesitter.start, event.buf, parser)
               end,
             })
           end
