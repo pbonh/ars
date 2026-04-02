@@ -8,8 +8,8 @@ pi_sessions_dir: "{{ ansible_env.HOME }}/.pi/sessions"
 pi_prompts_dir: "{{ ansible_env.HOME }}/.pi/prompts"
 pi_harness_dir: "{{ ansible_env.HOME }}/.pi/harness"
 
-pi_default_provider: "moonshot"
-pi_default_model: "kimi-k2.5"
+pi_default_provider: "fireworks"
+pi_default_model: "accounts/fireworks/models/kimi-k2.5-turbo"
 pi_default_thinking_level: "high"
 pi_theme: "dark"
 
@@ -40,7 +40,8 @@ pi_skills: []
 # pi_extensions:
 #   - "my-extension.ts"
 #   - "my-extension"
-pi_extensions: []
+pi_extensions:
+  - "fireworks.ts"
 
 pi_global_config:
   defaultProvider: "{{ pi_default_provider }}"
