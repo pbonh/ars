@@ -9,10 +9,10 @@ The dotfiles role currently handles both config file content generation (Jinja2 
 
 ## Solution
 
-Separate config rendering from deployment:
+Separate config content management from deployment:
 
-1. **Ansible** renders templates into a git-tracked `predeploy/` directory with portable paths and placeholder secrets.
-2. **Tuckr** symlinks the rendered configs to `$HOME`, runs hooks for secret injection and post-install tasks (git clones, plugin downloads).
+1. **Ansible** renders templates, creates directories, clones plugins, and downloads extras — all into a git-tracked `predeploy/` directory with portable paths and placeholder secrets. Third-party content (cloned repos, downloaded plugins) is `.gitignore`'d.
+2. **Tuckr** symlinks the fully-assembled `predeploy/` tree to `$HOME`, and runs hooks for the small number of groups that need secret injection.
 
 ## Predeploy Directory Structure
 
