@@ -255,6 +255,9 @@ zsh_zellij_aliases: |
   zellij_opencode_pane() {
     zellij_open_tool "{{ zellij_opencode_pane_name }}" "{{ zellij_opencode_command }}" "$@"
   }
+  zellij_pi_pane() {
+    zellij_open_tool "{{ zellij_pi_pane_name }}" "{{ zellij_pi_command }}" "$@"
+  }
   zellij_claude_tab() {
     zellij_open_tool_pane "{{ zellij_claude_pane_name }}" "{{ zellij_claude_command }}" "$@"
   }
@@ -264,12 +267,17 @@ zsh_zellij_aliases: |
   zellij_opencode_tab() {
     zellij_open_tool_pane "{{ zellij_opencode_pane_name }}" "{{ zellij_opencode_command }}" "$@"
   }
+  zellij_pi_tab() {
+    zellij_open_tool_pane "{{ zellij_pi_pane_name }}" "{{ zellij_pi_command }}" "$@"
+  }
   alias {{ zellij_claude_alias }}='zellij_claude_pane'
   alias {{ zellij_codex_alias }}='zellij_codex_pane'
   alias {{ zellij_opencode_alias }}='zellij_opencode_pane'
+  alias {{ zellij_pi_alias }}='zellij_pi_pane'
   alias {{ zellij_claude_pane_alias }}='zellij_claude_tab'
   alias {{ zellij_codex_pane_alias }}='zellij_codex_tab'
   alias {{ zellij_opencode_pane_alias }}='zellij_opencode_tab'
+  alias {{ zellij_pi_pane_alias }}='zellij_pi_tab'
 zsh_ssh_setup_plain: |
   env={{ dotfiles_user_home }}/.ssh/agent.env
   agent_load_env () {

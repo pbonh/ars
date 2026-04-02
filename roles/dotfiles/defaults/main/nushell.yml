@@ -175,6 +175,9 @@ nushell_zellij_aliases: |
   def {{ zellij_opencode_alias }} [...args] {
     zellij_open_tool "{{ zellij_opencode_pane_name }}" "{{ zellij_opencode_command }}" ...$args
   }
+  def {{ zellij_pi_alias }} [...args] {
+    zellij_open_tool "{{ zellij_pi_pane_name }}" "{{ zellij_pi_command }}" ...$args
+  }
   def {{ zellij_claude_pane_alias }} [...args] {
     zellij_open_tool_pane "{{ zellij_claude_pane_name }}" "{{ zellij_claude_command }}" ...$args
   }
@@ -183,4 +186,7 @@ nushell_zellij_aliases: |
   }
   def {{ zellij_opencode_pane_alias }} [...args] {
     zellij_open_tool_pane "{{ zellij_opencode_pane_name }}" "{{ zellij_opencode_command }}" ...$args
+  }
+  def {{ zellij_pi_pane_alias }} [...args] {
+    zellij_open_tool_pane "{{ zellij_pi_pane_name }}" "{{ zellij_pi_command }}" ...$args
   }
