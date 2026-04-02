@@ -246,38 +246,16 @@ zsh_zellij_aliases: |
     fi
     {{ zellij_exe }} run --close-on-exit --name "$pane_name" -- "$tool_command" "$@"
   }
-  zellij_claude_pane() {
-    zellij_open_tool "{{ zellij_claude_pane_name }}" "{{ zellij_claude_command }}" "$@"
+  {% for agent_name, agent_config in zellij_ai_agents.items() %}
+  zellij_{{ agent_name }}_pane() {
+    zellij_open_tool "{{ agent_config.pane_name }}" "{{ agent_config.command }}" "$@"
   }
-  zellij_codex_pane() {
-    zellij_open_tool "{{ zellij_codex_pane_name }}" "{{ zellij_codex_command }}" "$@"
+  zellij_{{ agent_name }}_tab() {
+    zellij_open_tool_pane "{{ agent_config.pane_name }}" "{{ agent_config.command }}" "$@"
   }
-  zellij_opencode_pane() {
-    zellij_open_tool "{{ zellij_opencode_pane_name }}" "{{ zellij_opencode_command }}" "$@"
-  }
-  zellij_pi_pane() {
-    zellij_open_tool "{{ zellij_pi_pane_name }}" "{{ zellij_pi_command }}" "$@"
-  }
-  zellij_claude_tab() {
-    zellij_open_tool_pane "{{ zellij_claude_pane_name }}" "{{ zellij_claude_command }}" "$@"
-  }
-  zellij_codex_tab() {
-    zellij_open_tool_pane "{{ zellij_codex_pane_name }}" "{{ zellij_codex_command }}" "$@"
-  }
-  zellij_opencode_tab() {
-    zellij_open_tool_pane "{{ zellij_opencode_pane_name }}" "{{ zellij_opencode_command }}" "$@"
-  }
-  zellij_pi_tab() {
-    zellij_open_tool_pane "{{ zellij_pi_pane_name }}" "{{ zellij_pi_command }}" "$@"
-  }
-  alias {{ zellij_claude_alias }}='zellij_claude_pane'
-  alias {{ zellij_codex_alias }}='zellij_codex_pane'
-  alias {{ zellij_opencode_alias }}='zellij_opencode_pane'
-  alias {{ zellij_pi_alias }}='zellij_pi_pane'
-  alias {{ zellij_claude_pane_alias }}='zellij_claude_tab'
-  alias {{ zellij_codex_pane_alias }}='zellij_codex_tab'
-  alias {{ zellij_opencode_pane_alias }}='zellij_opencode_tab'
-  alias {{ zellij_pi_pane_alias }}='zellij_pi_tab'
+  alias {{ agent_config.alias }}='zellij_{{ agent_name }}_pane'
+  alias {{ agent_config.pane_alias }}='zellij_{{ agent_name }}_tab'
+  {% endfor %}
 zsh_ssh_setup_plain: |
   env={{ dotfiles_user_home }}/.ssh/agent.env
   agent_load_env () {
