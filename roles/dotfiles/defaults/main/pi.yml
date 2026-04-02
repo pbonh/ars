@@ -1,0 +1,52 @@
+---
+pi_config_dir: "{{ ansible_env.HOME }}/.pi/agent"
+pi_settings_path: "{{ pi_config_dir }}/settings.json"
+pi_skills_dir: "{{ pi_config_dir }}/skills"
+pi_extensions_dir: "{{ pi_config_dir }}/extensions"
+pi_sessions_dir: "{{ ansible_env.HOME }}/.pi/sessions"
+
+pi_default_provider: "moonshot"
+pi_default_model: "kimi-k2.5"
+pi_default_thinking_level: "high"
+pi_theme: "dark"
+
+pi_packages:
+  - source: "pi-skills"
+    skills:
+      - "brave-search"
+    extensions: []
+
+# Extra resource paths loaded from settings.json.
+pi_skill_paths: []
+pi_extension_paths: []
+pi_prompt_paths: []
+pi_theme_paths: []
+
+# Example:
+# pi_skills:
+#   - name: "my-skill"
+#     description: "What this skill does and when to use it."
+#     content: |
+#       # My Skill
+#       Skill instructions.
+pi_skills: []
+
+# Extensions are copied from role files at roles/dotfiles/files/pi/extensions/<item>.
+# Example:
+# pi_extensions:
+#   - "my-extension.ts"
+#   - "my-extension"
+pi_extensions: []
+
+pi_global_config:
+  defaultProvider: "{{ pi_default_provider }}"
+  defaultModel: "{{ pi_default_model }}"
+  defaultThinkingLevel: "{{ pi_default_thinking_level }}"
+  theme: "{{ pi_theme }}"
+  sessionDir: "{{ pi_sessions_dir }}"
+  enableSkillCommands: true
+  packages: "{{ pi_packages }}"
+  skills: "{{ pi_skill_paths }}"
+  extensions: "{{ pi_extension_paths }}"
+  prompts: "{{ pi_prompt_paths }}"
+  themes: "{{ pi_theme_paths }}"

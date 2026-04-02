@@ -1,0 +1,21 @@
+---
+name: {{ skill.name }}
+description: {{ skill.description }}
+{% if skill.license is defined %}
+license: {{ skill.license }}
+{% endif %}
+{% if skill.compatibility is defined %}
+compatibility: {{ skill.compatibility }}
+{% endif %}
+{% if skill.allowed_tools is defined %}
+allowed-tools: {{ skill.allowed_tools }}
+{% endif %}
+{% if skill.disable_model_invocation is defined %}
+disable-model-invocation: {{ skill.disable_model_invocation | bool | lower }}
+{% endif %}
+{% if skill.metadata is defined %}
+metadata:
+{{ skill.metadata | to_nice_yaml(indent=2) | regex_replace('^---\n', '') | indent(2) }}
+{% endif %}
+---
+{{ skill.content | trim }}

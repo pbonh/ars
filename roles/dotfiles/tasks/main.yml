@@ -155,6 +155,12 @@
     - opencode
     - ai
 
+- name: Pi Config
+  import_tasks: tasks/pi.yml
+  tags:
+    - pi
+    - ai
+
 - name: Configure Claude Code
   import_tasks: tasks/configure_claude_code.yml
   tags:

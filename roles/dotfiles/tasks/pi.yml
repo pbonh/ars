@@ -1,0 +1,76 @@
+---
+- name: Pi | Ensure config directory exists
+  ansible.builtin.file:
+    path: "{{ pi_config_dir }}"
+    state: directory
+    mode: "0700"
+
+- name: Pi | Check settings.json
+  ansible.builtin.stat:
+    path: "{{ pi_settings_path }}"
+  register: dotfiles_pi_settings_stat
+
+- name: Pi | Read settings.json
+  ansible.builtin.slurp:
+    src: "{{ pi_settings_path }}"
+  register: dotfiles_pi_settings_raw
+  when: dotfiles_pi_settings_stat.stat.exists
+
+- name: Pi | Parse settings.json
+  ansible.builtin.set_fact:
+    dotfiles_pi_settings_existing: "{{ (dotfiles_pi_settings_raw.content | b64decode | from_json) if dotfiles_pi_settings_stat.stat.exists else {} }}"
+
+- name: Pi | Merge settings.json
+  ansible.builtin.set_fact:
+    dotfiles_pi_settings_merged: "{{ dotfiles_pi_settings_existing | combine(pi_global_config, recursive=True) }}"
+
+- name: Pi | Write settings.json
+  ansible.builtin.template:
+    src: "pi/settings.json.j2"
+    dest: "{{ pi_settings_path }}"
+    mode: "0600"
+
+- name: Pi | Ensure sessions directory exists
+  ansible.builtin.file:
+    path: "{{ pi_sessions_dir }}"
+    state: directory
+    mode: "0700"
+
+- name: Pi | Ensure skills directory exists
+  ansible.builtin.file:
+    path: "{{ pi_skills_dir }}"
+    state: directory
+    mode: "0755"
+  when: pi_skills | length > 0
+
+- name: Pi | Create per-skill subdirectories
+  ansible.builtin.file:
+    path: "{{ pi_skills_dir }}/{{ skill.name }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ pi_skills }}"
+  loop_control:
+    loop_var: skill
+
+- name: Pi | Template SKILL.md files
+  ansible.builtin.template:
+    src: "pi/skills/SKILL.md.j2"
+    dest: "{{ pi_skills_dir }}/{{ skill.name }}/SKILL.md"
+    mode: "0644"
+  loop: "{{ pi_skills }}"
+  loop_control:
+    loop_var: skill
+
+- name: Pi | Ensure extensions directory exists
+  ansible.builtin.file:
+    path: "{{ pi_extensions_dir }}"
+    state: directory
+    mode: "0755"
+  when: pi_extensions | length > 0
+
+- name: Pi | Copy custom extensions
+  ansible.builtin.copy:
+    src: "pi/extensions/{{ item }}"
+    dest: "{{ pi_extensions_dir }}/{{ item }}"
+    mode: preserve
+  loop: "{{ pi_extensions }}"

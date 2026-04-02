@@ -131,6 +131,7 @@ dmypy.json
 # Ansible Bootstrap Files
 ansible.tar.bz2
 ansible/
+.ansible/
 ansible-*
 
 # User Ansible Variables File
