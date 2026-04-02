@@ -177,38 +177,61 @@ chmod +x "$TARGET_DIR/api-key-helper.sh"
 
 ## Workflow
 
-### Commands
+### Local checkout (repo cloned directly)
 
 ```sh
 # Step 1: Render configs into predeploy tree
 ansible-playbook dotfiles.yml
 
 # Step 2: Deploy to system
-tuckr set \*
+TUCKR_HOME=./predeploy tuckr set \*
+```
+
+### ansible-pull hosts (no pre-existing checkout)
+
+Use `ansible-pull -d` to clone the repo to a persistent location. The checkout persists across runs and serves as the tuckr home:
+
+```sh
+# Step 1: Pull and render into persistent checkout
+ansible-pull -U https://github.com/pbonh/ars.git -d ~/.local/share/ars ars.yml --skip-tags "install" -e "@devbox.yml"
+
+# Step 2: Deploy from the persistent checkout
+TUCKR_HOME=~/.local/share/ars/predeploy tuckr set \*
+```
+
+Optional extra-vars files (e.g., `devbox-git.yml`, `devbox-git-yubikey.yml`) work the same way — pass them with `-e` as before. The `dev.yml` playbook also works:
+
+```sh
+ansible-pull -U https://github.com/pbonh/ars.git -d ~/.local/share/ars dev.yml -e "@devbox-git.yml"
+TUCKR_HOME=~/.local/share/ars/predeploy tuckr set \*
 ```
 
 ### Justfile recipes
 
 ```just
+predeploy_dir := justfile_directory() / "predeploy"
+
 # Render configs only
 render:
     ansible-playbook dotfiles.yml
 
 # Deploy rendered configs via tuckr
 deploy:
-    tuckr set \*
+    TUCKR_HOME={{predeploy_dir}} tuckr set \*
 
 # Full flow: render then deploy
 sync: render deploy
 
 # Remove all deployed symlinks
 undeploy:
-    tuckr unset \*
+    TUCKR_HOME={{predeploy_dir}} tuckr unset \*
 
 # Check deployment status
 status:
-    tuckr status
+    TUCKR_HOME={{predeploy_dir}} tuckr status
 ```
+
+The justfile recipes are for local checkout use. On `ansible-pull` hosts, the two-step commands above are run directly (or wrapped in a shell alias/script).
 
 ### Reviewing changes
 
