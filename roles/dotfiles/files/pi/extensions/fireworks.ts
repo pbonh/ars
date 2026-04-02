@@ -8,29 +8,15 @@ export default function (pi: ExtensionAPI) {
     authHeader: true,
     models: [
       {
-        id: "accounts/fireworks/models/kimi-k2.5-turbo",
-        name: "Kimi K2.5 Turbo",
-        reasoning: true,
-        input: ["text", "image"],
-        cost: {
-          input: 0.70,
-          output: 2.80,
-          cacheRead: 0.07,
-          cacheWrite: 0.70
-        },
-        contextWindow: 256000,
-        maxTokens: 16384
-      },
-      {
-        id: "accounts/fireworks/models/kimi-k2.5",
+        id: "accounts/fireworks/models/kimi-k2p5",
         name: "Kimi K2.5",
         reasoning: true,
         input: ["text", "image"],
         cost: {
-          input: 2.00,
-          output: 8.00,
-          cacheRead: 0.20,
-          cacheWrite: 2.00
+          input: 0.60,
+          output: 3.00,
+          cacheRead: 0.10,
+          cacheWrite: 0.60
         },
         contextWindow: 256000,
         maxTokens: 16384
