@@ -34,6 +34,11 @@ nvim_git:
       },
       config = function()
         require('neogit').setup({
+          diff_viewer = "diffview",
+          integrations = {
+            diffview = true,
+            snacks = true,
+          },
           -- kind = "floating",
           -- floating = {
           --   relative = "editor",
