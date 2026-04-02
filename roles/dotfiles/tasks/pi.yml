@@ -74,3 +74,45 @@
     dest: "{{ pi_extensions_dir }}/{{ item }}"
     mode: preserve
   loop: "{{ pi_extensions }}"
+
+- name: Pi | Ensure prompts directory exists
+  ansible.builtin.file:
+    path: "{{ pi_prompts_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Pi | Deploy prep agent prompt
+  ansible.builtin.copy:
+    src: "pi/prompts/prep.md"
+    dest: "{{ pi_prompts_dir }}/prep.md"
+    mode: "0644"
+
+- name: Pi | Deploy planner agent prompt
+  ansible.builtin.copy:
+    src: "pi/prompts/plan.md"
+    dest: "{{ pi_prompts_dir }}/plan.md"
+    mode: "0644"
+
+- name: Pi | Ensure harness directory exists
+  ansible.builtin.file:
+    path: "{{ pi_harness_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Pi | Deploy generator agent prompt
+  ansible.builtin.copy:
+    src: "pi/harness/generator-prompt.md"
+    dest: "{{ pi_harness_dir }}/generator-prompt.md"
+    mode: "0644"
+
+- name: Pi | Deploy evaluator agent prompt
+  ansible.builtin.copy:
+    src: "pi/harness/evaluator-prompt.md"
+    dest: "{{ pi_harness_dir }}/evaluator-prompt.md"
+    mode: "0644"
+
+- name: Pi | Deploy harness loop script
+  ansible.builtin.copy:
+    src: "pi/harness/loop.sh"
+    dest: "{{ pi_harness_dir }}/loop.sh"
+    mode: "0755"

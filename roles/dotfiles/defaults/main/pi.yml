@@ -5,6 +5,9 @@ pi_skills_dir: "{{ pi_config_dir }}/skills"
 pi_extensions_dir: "{{ pi_config_dir }}/extensions"
 pi_sessions_dir: "{{ ansible_env.HOME }}/.pi/sessions"
 
+pi_prompts_dir: "{{ ansible_env.HOME }}/.pi/prompts"
+pi_harness_dir: "{{ ansible_env.HOME }}/.pi/harness"
+
 pi_default_provider: "moonshot"
 pi_default_model: "kimi-k2.5"
 pi_default_thinking_level: "high"
@@ -19,7 +22,8 @@ pi_packages:
 # Extra resource paths loaded from settings.json.
 pi_skill_paths: []
 pi_extension_paths: []
-pi_prompt_paths: []
+pi_prompt_paths:
+  - "{{ pi_prompts_dir }}"
 pi_theme_paths: []
 
 # Example:
