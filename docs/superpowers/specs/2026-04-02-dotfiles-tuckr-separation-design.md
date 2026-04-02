@@ -57,12 +57,8 @@ predeploy/
 ├── Hooks/
 │   ├── claude/
 │   │   └── post.sh        (inject secrets from secrets file)
-│   ├── bash/
-│   │   └── post.sh        (git clone fzf-tab, git-fuzzy)
-│   ├── zellij/
-│   │   └── post.sh        (plugin clones)
-│   └── yazi/
-│       └── post.sh        (flavor/plugin downloads, git clones)
+│   └── cline/
+│       └── post.sh        (inject secrets from secrets file)
 └── Templates/
     ├── claude/
     │   └── api-key-helper.sh  (contains __ANTHROPIC_API_KEY__ placeholder)
@@ -111,9 +107,9 @@ Each task file in `roles/dotfiles/tasks/` changes in three ways:
    dest: "{{ predeploy_configs }}/bash_macos/.bashrc.d/homebrew"
    ```
 
-2. **Non-render tasks removed.** Git clones, directory creation, file downloads are extracted from Ansible tasks and moved to tuckr hook scripts.
+2. **Non-render tasks retargeted.** Directory creation, git clones, and file downloads stay in Ansible but target the `predeploy/` tree instead of `$HOME`. Cloned repos and downloaded plugins land inside the appropriate group's directory structure (e.g., `predeploy/Configs/bash/.bashrc.d/fzf-tab-completion/`). These are `.gitignore`'d by the user since they're third-party content.
 
-3. **Hook generation added.** Ansible renders hook scripts from `.j2` templates into `predeploy/Hooks/<group>/`.
+3. **Hook generation added.** Ansible renders secret-injection hook scripts from `.j2` templates into `predeploy/Hooks/<group>/`. Hooks are only needed for groups with secrets.
 
 ### Template variable substitutions
 
@@ -156,9 +152,9 @@ CLINE_SECRETS='{"key": "value"}'
 
 ### Hook design
 
-**Pre-hooks** are not used. All hooks are **post-hooks** to run after tuckr symlinks configs.
+Hooks are **only** needed for groups containing secrets. All other deployment (directory creation, git clones, plugin downloads) is handled by Ansible writing into the `predeploy/` tree, and tuckr symlinking the result to `$HOME`.
 
-**Secret injection hooks** read templates from `predeploy/Templates/<group>/`, substitute placeholders using values from the secrets file, and write the final file directly to the target location (bypassing symlinks since the file contains secrets that must not be git-tracked).
+**Secret injection hooks** are post-hooks. They read templates from `predeploy/Templates/<group>/`, substitute placeholders using values from the secrets file, and write the final file directly to the target location (bypassing symlinks since the file contains secrets that must not be git-tracked).
 
 Example — `Hooks/claude/post.sh`:
 
@@ -177,23 +173,7 @@ sed "s|__ANTHROPIC_API_KEY__|${ANTHROPIC_API_KEY}|g" \
 chmod +x "$TARGET_DIR/api-key-helper.sh"
 ```
 
-**Post-install hooks** handle git clones and plugin downloads.
-
-Example — `Hooks/bash/post.sh`:
-
-```sh
-#!/bin/sh
-BASHRC_D="${HOME}/.bashrc.d"
-mkdir -p "$BASHRC_D"
-
-[ -d "$BASHRC_D/fzf-tab-completion" ] || \
-    git clone https://github.com/lincheney/fzf-tab-completion "$BASHRC_D/fzf-tab-completion"
-
-[ -d "$BASHRC_D/git-fuzzy" ] || \
-    git clone https://github.com/bigH/git-fuzzy "$BASHRC_D/git-fuzzy"
-```
-
-**Ansible generates hook scripts** from `.j2` templates into `predeploy/Hooks/`, since repo URLs, plugin lists, and tool paths come from Ansible vars.
+**Ansible generates hook scripts** from `.j2` templates into `predeploy/Hooks/`, since secret variable names and tool paths come from Ansible vars.
 
 ## Workflow
 
@@ -234,6 +214,19 @@ status:
 
 After rendering, `git diff predeploy/` shows exactly what changed in configs before deploying. This enables a review step between render and deploy.
 
+## Git Management
+
+The `predeploy/` directory is git-tracked, but third-party content (cloned plugins, downloaded files) should be `.gitignore`'d. The user manages the `.gitignore` entries for these. Example:
+
+```gitignore
+# Third-party plugins cloned by Ansible
+predeploy/Configs/bash/.bashrc.d/fzf-tab-completion/
+predeploy/Configs/bash/.bashrc.d/git-fuzzy/
+predeploy/Configs/zellij/.config/zellij/plugins/
+predeploy/Configs/yazi/.config/yazi/flavors/
+predeploy/Configs/yazi/.config/yazi/plugins/
+```
+
 ## Migration Path
 
 1. Create `predeploy/` structure with `Configs/`, `Hooks/`, `Templates/` directories.
@@ -241,20 +234,23 @@ After rendering, `git diff predeploy/` shows exactly what changed in configs bef
 3. Refactor task files one group at a time, starting with simpler groups (e.g., `bash` first).
 4. For each group:
    - Change `dest:` to target `predeploy_configs`
+   - Retarget git clones, downloads, directory creation to predeploy tree
    - Replace `dotfiles_user_home` with `$HOME`/`~` in template content
    - Replace secret values with `__PLACEHOLDER__` tokens
-   - Extract git clones, downloads, directory creation to hook templates
    - Add platform-conditional directories where applicable
-5. Test each group: `ansible-playbook dotfiles.yml --tags bash`, then `tuckr set bash`.
-6. Once all groups are migrated, remove old direct-deploy paths.
-7. Set up the tuckr dotfiles symlink and secrets file.
-8. Update justfile with new recipes.
+   - Add `.gitignore` entries for third-party content
+5. For secret-containing groups only: create hook templates.
+6. Test each group: `ansible-playbook dotfiles.yml --tags bash`, then `tuckr set bash`.
+7. Once all groups are migrated, remove old direct-deploy paths.
+8. Set up the tuckr dotfiles symlink and secrets file.
+9. Update justfile with new recipes.
 
 ## Scope Estimate
 
-- ~15 task files to refactor (`dest:` changes + extracting non-render tasks)
-- ~5–10 hook script templates to create
+- ~15 task files to refactor (`dest:` changes + retargeting non-render tasks to predeploy)
+- ~2–3 hook script templates to create (secret-containing groups only)
 - ~2–3 secret-bearing templates to move to `Templates/`
 - New defaults for predeploy path variables
+- `.gitignore` additions for third-party content in predeploy
 - Justfile recipe additions
 - One-time tuckr symlink setup
