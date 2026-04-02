@@ -242,7 +242,7 @@ predeploy/Configs/yazi/.config/yazi/plugins/
 5. For secret-containing groups only: create hook templates.
 6. Test each group: `ansible-playbook dotfiles.yml --tags bash`, then `tuckr set bash`.
 7. Once all groups are migrated, remove old direct-deploy paths.
-8. Set up the tuckr dotfiles symlink and secrets file.
+8. Set up the secrets file.
 9. Update justfile with new recipes.
 
 ## Scope Estimate
@@ -253,4 +253,4 @@ predeploy/Configs/yazi/.config/yazi/plugins/
 - New defaults for predeploy path variables
 - `.gitignore` additions for third-party content in predeploy
 - Justfile recipe additions
-- One-time tuckr symlink setup
+- No symlink setup needed — `TUCKR_HOME` is set in justfile recipes
