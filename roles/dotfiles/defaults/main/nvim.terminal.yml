@@ -32,24 +32,21 @@ nvim_terminal:
             winblend = 1,
           }
         })
-        local Terminal  = require('toggleterm.terminal').Terminal
-        local justchoose = Terminal:new({
-          cmd = '{{ just_exe }} --choose',
-          shell = '{{ command_shell }}',
-          hidden = true,
-          start_in_insert = true,
-        })
+        local snacks_float_opts = {
+          win = {
+            position = "float",
+            width = 0.8,
+            height = 0.8,
+            enter = true,
+          },
+          start_insert = true,
+          auto_close = true,
+        }
         function just_terminal_runner()
-          justchoose:toggle()
+          require("snacks.terminal").toggle("{{ just_exe }} --choose", snacks_float_opts)
         end
-        local navi_run = Terminal:new({
-          cmd = '{{ navi_exe }} ',
-          shell = '{{ command_shell }}',
-          hidden = true,
-          start_in_insert = true,
-        })
         function navi_terminal_runner()
-          navi_run:toggle()
+          require("snacks.terminal").toggle("{{ navi_exe }}", snacks_float_opts)
         end
       end,
     },
@@ -91,8 +88,8 @@ nvim_terminal:
     {
       mode = 'n',
       icon = '',
-      { '<leader>j', '<cmd>lua just_terminal_runner()<CR>', desc = 'ToggleTerm: Justfile Chooser', },
-      { '<leader>n', '<cmd>lua navi_terminal_runner()<CR>', desc = 'ToggleTerm: Navi Runner', },
+      { '<leader>j', '<cmd>lua just_terminal_runner()<CR>', desc = 'Snacks: Justfile Chooser', },
+      { '<leader>n', '<cmd>lua navi_terminal_runner()<CR>', desc = 'Snacks: Navi Runner', },
       -- { '<leader>x', '<cmd>lua require("tfm").open()<CR>', desc = 'FM-Nvim: Yazi(Current File)', },
       -- { '<leader>X', '<cmd>lua require("tfm").open(vim.fn.getcwd())<CR>', desc = 'FM-Nvim: Yazi(Project Root)', },
       { '<leader>x', '<cmd>Yazi<CR>', desc = 'Yazi-Nvim: Yazi(Current File)', },
