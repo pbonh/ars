@@ -1,3 +1,4 @@
-git:
+configure-git:
   {{ task_prelude }} ansible-playbook dev.yml
-ssh: git
+
+configure-ssh: configure-git

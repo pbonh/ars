@@ -1,6 +1,8 @@
 # Workstation GUI
 
-The following Desktop Environements are supported, but this repository does not currently include
-installation of the environments themselves:
+The following Desktop Environments and Window Managers are supported:
 
-- KDE
+- [KDE Plasma](installation/kde.md) - Full desktop environment with advanced workspace management
+- [Niri](installation/niri.md) - Scrollable-tiling Wayland compositor
+
+See individual guides for installation and configuration instructions.

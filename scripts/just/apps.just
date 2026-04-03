@@ -1,2 +1,2 @@
 install-apps:
-  ansible-playbook apps.yml
+  {{ task_prelude }} ansible-playbook apps.yml

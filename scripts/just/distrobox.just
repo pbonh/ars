@@ -1,8 +1,8 @@
 distrobox:
-  ansible-playbook distrobox.yml
+  {{ task_prelude }} ansible-playbook distrobox.yml
 
 distrobox-rebuild:
-  ansible-playbook distrobox.yml --tags all,rebuild
+  {{ task_prelude }} ansible-playbook distrobox.yml --tags all,rebuild
 
 distrobox-ubuntu name:
   distrobox create --pull --image ubuntu:latest --init --home ~/distrobox/$USER --name {{ name }} --additional-packages "ansible git build-essential"

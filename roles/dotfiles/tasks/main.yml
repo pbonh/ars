@@ -26,11 +26,13 @@
 - name: Env | Setup Environment | task
   import_tasks: tasks/setup_env.yml
   tags:
+    - env
     - setup
 
 - name: Directory | Setup Directories | task
   import_tasks: tasks/setup_tools.yml
   tags:
+    - env
     - setup
 
 - name: Shell | Scripts | task

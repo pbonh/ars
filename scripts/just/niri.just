@@ -1,2 +1,2 @@
 workstation-niri:
-  ansible-playbook niri.yml
+  {{ task_prelude }} ansible-playbook niri.yml

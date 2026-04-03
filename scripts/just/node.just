@@ -1,2 +1,2 @@
 install-node-packages:
-  ansible-playbook node.yml
+  {{ task_prelude }} ansible-playbook node.yml

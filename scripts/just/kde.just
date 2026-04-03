@@ -1,5 +1,5 @@
 workstation-kde:
-  ansible-playbook kde.yml
+  {{ task_prelude }} ansible-playbook kde.yml
 
 backup-kde-config:
   konsave --save current_profile --force && konsave --export-profile current_profile && mv current_profile*.knsv roles/kde/files

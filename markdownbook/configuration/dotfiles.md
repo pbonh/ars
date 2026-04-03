@@ -167,3 +167,87 @@ bw_copy_name_clear() {
   (sleep 20; wl-copy --clear) &
 }
 ```
+
+## Available Tags
+
+The dotfiles role supports selective application via tags. Use `--tags` to apply specific configurations or `--skip-tags` to exclude them.
+
+### Tool-Specific Tags
+
+| Tag | Description | Just Task |
+|-----|-------------|-----------|
+| `env` | Environment setup (shell configs, directories) | `just dot` (default), `just shell` |
+| `bash` | Bash configuration | `just bash` |
+| `zsh` | Zsh configuration | `just zsh` |
+| `tcsh` | Tcsh configuration | `just tcsh` |
+| `nushell` | Nushell configuration | `just nushell` |
+| `scripts` | Shell scripts and aliases | `just scripts` |
+
+### Editor Tags
+
+| Tag | Description | Just Task |
+|-----|-------------|-----------|
+| `neovim-config` | Neovim configuration | `just neovim` |
+| `neovim-config-clean` | Clean and rebuild Neovim config | `just rebuild-neovim` |
+| `helix-config` | Helix editor configuration | - |
+| `editor` | All editor configurations | - |
+
+### Terminal Multiplexer Tags
+
+| Tag | Description | Just Task |
+|-----|-------------|-----------|
+| `zellij` | Zellij configuration | `just zellij` |
+| `tmux` | Tmux configuration | - |
+| `session` | All session managers | - |
+
+### File Manager Tags
+
+| Tag | Description | Just Task |
+|-----|-------------|-----------|
+| `yazi` | Yazi file manager config | `just yazi` |
+| `navi` | Navi cheatsheet tool | `just navi` |
+| `broot` | Broot file manager | - |
+| `ranger` | Ranger file manager | - |
+
+### AI Tool Tags
+
+| Tag | Description | Just Task |
+|-----|-------------|-----------|
+| `ai` | All AI tools configuration | `just ai` |
+| `pi` | Pi coding agent config | - |
+| `opencode` | OpenCode configuration | - |
+| `claude` | Claude Code configuration | - |
+| `codex` | Codex CLI configuration | - |
+| `sidecar` | Sidecar configuration | - |
+| `superpowers` | Superpowers skills | - |
+
+### Other Tags
+
+| Tag | Description | Just Task |
+|-----|-------------|-----------|
+| `direnv` | Direnv configuration | - |
+| `joplin` | Joplin notes configuration | - |
+| `bookmarks` | Bookmarks configuration | - |
+| `setup` | Directory and environment setup | - |
+
+### Common Usage Patterns
+
+Apply only shell configurations:
+```bash
+ansible-playbook ars.yml --tags "env" --skip-tags "install"
+```
+
+Apply only AI tool configurations:
+```bash
+ansible-playbook ars.yml --tags "ai" --skip-tags "install"
+```
+
+Apply only editor configurations:
+```bash
+ansible-playbook ars.yml --tags "editor" --skip-tags "install"
+```
+
+Exclude specific tools:
+```bash
+ansible-playbook ars.yml --skip-tags "install,neovim-config"
+```
