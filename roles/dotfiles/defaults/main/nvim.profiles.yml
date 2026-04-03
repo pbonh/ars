@@ -290,7 +290,7 @@ nvim_plugin_groups_snacks:
   motion: "{{ nvim_motion }}"
   opencode: "{{ nvim_ai_opencode }}"
   claude: "{{ nvim_ai_claude }}"
-  codex: "{{ nvim_ai_codex }}"
+  pi: "{{ nvim_ai_pi }}"
 nvim_plugin_groups_bone:
   telescope: "{{ nvim_fzf_lua }}"
   project: "{{ nvim_project }}"

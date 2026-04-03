@@ -387,6 +387,42 @@ nvim_ai_opencode:
     },
   config: ""
   keymaps: ""
+nvim_ai_pi:
+  lazy: |
+    {
+      "folke/snacks.nvim",
+      keys = {
+        {
+          "<C-'>",
+          function()
+            Snacks.terminal.toggle("pi", {
+              win = {
+                position = "float",
+                width = 0.9,
+                height = 0.9,
+                enter = true,
+                keys = {
+                  pi_hide = {
+                    "<C-'>",
+                    function(self)
+                      self:hide()
+                    end,
+                    mode = "t",
+                    desc = "Hide",
+                  },
+                },
+              },
+              start_insert = true,
+              auto_close = false,
+            })
+          end,
+          desc = "Pi: Toggle",
+          mode = { "n", "x" },
+        },
+      },
+    },
+  config: ""
+  keymaps: ""
 nvim_ai_opencode_sudotee:
   lazy: |
     {
