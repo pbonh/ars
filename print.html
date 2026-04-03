@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-07b98916.js";
+            window.path_to_searchindex_js = "searchindex-f129ac50.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-bbf1516f.js"></script>
+        <script src="toc-0027c84f.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -391,16 +391,27 @@ github_username: "username"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="workstation-gui-1"><a class="header" href="#workstation-gui-1">Workstation GUI</a></h1>
-<p>The following Desktop Environements are supported, but this repository does not currently include
-installation of the environments themselves:</p>
+<p>The following Desktop Environments and Window Managers are supported:</p>
 <ul>
-<li>KDE</li>
+<li><a href="installation/installation/kde.html">KDE Plasma</a> - Full desktop environment with advanced workspace management</li>
+<li><a href="installation/installation/niri.html">Niri</a> - Scrollable-tiling Wayland compositor</li>
 </ul>
+<p>See individual guides for installation and configuration instructions.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="kde"><a class="header" href="#kde">KDE</a></h1>
 <p>This will install KDE tools necessary for managing a KDE config, and enables config backup &amp; restore
 functionality. Make sure to specify your chosen <code>tool_provider</code>(<code>devbox</code> in this example).</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git kde.yml --tags "install" --skip-tags "kwin" -e "{tool_provider: \"devbox\"}"
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="niri"><a class="header" href="#niri">Niri</a></h1>
+<p>This will install and configure the Niri scrollable-tiling Wayland compositor.</p>
+<h2 id="installation-1"><a class="header" href="#installation-1">Installation</a></h2>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git niri.yml
+</code></pre>
+<h2 id="just-task"><a class="header" href="#just-task">Just Task</a></h2>
+<p>You can also use the just runner:</p>
+<pre><code class="language-bash">just workstation-niri
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="apps"><a class="header" href="#apps">Apps</a></h1>
@@ -412,6 +423,26 @@ functionality. Make sure to specify your chosen <code>tool_provider</code>(<code
 <h2 id="flatpak"><a class="header" href="#flatpak">Flatpak</a></h2>
 <p>This role will install Desktop applications via <a href="https://flathub.org">flathub</a>.</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git apps.yml
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="nodejs-packages"><a class="header" href="#nodejs-packages">Node.js Packages</a></h1>
+<p>This role installs Node.js packages via npm/pnpm as configured in your vars file.</p>
+<h2 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h2>
+<p>Ensure you have a tool provider installed (homebrew, mise, devbox, or nonroot) that provides Node.js.</p>
+<h2 id="installation-2"><a class="header" href="#installation-2">Installation</a></h2>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git node.yml --tags "install"
+</code></pre>
+<h2 id="just-task-1"><a class="header" href="#just-task-1">Just Task</a></h2>
+<pre><code class="language-bash">just install-node-packages
+</code></pre>
+<h2 id="configuration"><a class="header" href="#configuration">Configuration</a></h2>
+<p>Add Node packages to your <code>vars/local.yml</code>:</p>
+<pre><code class="language-yaml">---
+npm_packages:
+  - name: "typescript"
+    global: true
+  - name: "@angular/cli"
+    global: true
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="optional-tools"><a class="header" href="#optional-tools">Optional Tools</a></h1>
@@ -426,7 +457,7 @@ not use the same devbox/homebrew/nonroot scripting.</p>
 <pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git distrobox.yml -e "{git_email: \"your_email@address.com\"}"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
+<h1 id="configuration-1"><a class="header" href="#configuration-1">Configuration</a></h1>
 <p>This repo offers configuration of the developer environment in the both the desktop and terminal.</p>
 <p>Base configuration examples in this section do not require GitHub username, Git identity, or SSH
 credentials. Optional Git-enabled examples are included where relevant for users that want managed
@@ -609,6 +640,139 @@ bw_pick_copy() {
   bw get password "$1" | wl-copy
   (sleep 20; wl-copy --clear) &amp;
 }
+</code></pre>
+<h2 id="available-tags"><a class="header" href="#available-tags">Available Tags</a></h2>
+<p>The dotfiles role supports selective application via tags. Use <code>--tags</code> to apply specific configurations or <code>--skip-tags</code> to exclude them.</p>
+<h3 id="tool-specific-tags"><a class="header" href="#tool-specific-tags">Tool-Specific Tags</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Tag</th><th>Description</th><th>Just Task</th></tr>
+</thead>
+<tbody>
+<tr><td><code>env</code></td><td>Environment setup (shell configs, directories)</td><td><code>just dot</code> (default), <code>just shell</code></td></tr>
+<tr><td><code>bash</code></td><td>Bash configuration</td><td><code>just bash</code></td></tr>
+<tr><td><code>zsh</code></td><td>Zsh configuration</td><td><code>just zsh</code></td></tr>
+<tr><td><code>tcsh</code></td><td>Tcsh configuration</td><td><code>just tcsh</code></td></tr>
+<tr><td><code>nushell</code></td><td>Nushell configuration</td><td><code>just nushell</code></td></tr>
+<tr><td><code>scripts</code></td><td>Shell scripts and aliases</td><td><code>just scripts</code></td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="editor-tags"><a class="header" href="#editor-tags">Editor Tags</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Tag</th><th>Description</th><th>Just Task</th></tr>
+</thead>
+<tbody>
+<tr><td><code>neovim-config</code></td><td>Neovim configuration</td><td><code>just neovim</code></td></tr>
+<tr><td><code>neovim-config-clean</code></td><td>Clean and rebuild Neovim config</td><td><code>just rebuild-neovim</code></td></tr>
+<tr><td><code>helix-config</code></td><td>Helix editor configuration</td><td>-</td></tr>
+<tr><td><code>editor</code></td><td>All editor configurations</td><td>-</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="terminal-multiplexer-tags"><a class="header" href="#terminal-multiplexer-tags">Terminal Multiplexer Tags</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Tag</th><th>Description</th><th>Just Task</th></tr>
+</thead>
+<tbody>
+<tr><td><code>zellij</code></td><td>Zellij configuration</td><td><code>just zellij</code></td></tr>
+<tr><td><code>tmux</code></td><td>Tmux configuration</td><td>-</td></tr>
+<tr><td><code>session</code></td><td>All session managers</td><td>-</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="file-manager-tags"><a class="header" href="#file-manager-tags">File Manager Tags</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Tag</th><th>Description</th><th>Just Task</th></tr>
+</thead>
+<tbody>
+<tr><td><code>yazi</code></td><td>Yazi file manager config</td><td><code>just yazi</code></td></tr>
+<tr><td><code>navi</code></td><td>Navi cheatsheet tool</td><td><code>just navi</code></td></tr>
+<tr><td><code>broot</code></td><td>Broot file manager</td><td>-</td></tr>
+<tr><td><code>ranger</code></td><td>Ranger file manager</td><td>-</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="ai-tool-tags"><a class="header" href="#ai-tool-tags">AI Tool Tags</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Tag</th><th>Description</th><th>Just Task</th></tr>
+</thead>
+<tbody>
+<tr><td><code>ai</code></td><td>All AI tools configuration</td><td><code>just ai</code></td></tr>
+<tr><td><code>pi</code></td><td>Pi coding agent config</td><td>-</td></tr>
+<tr><td><code>opencode</code></td><td>OpenCode configuration</td><td>-</td></tr>
+<tr><td><code>claude</code></td><td>Claude Code configuration</td><td>-</td></tr>
+<tr><td><code>codex</code></td><td>Codex CLI configuration</td><td>-</td></tr>
+<tr><td><code>sidecar</code></td><td>Sidecar configuration</td><td>-</td></tr>
+<tr><td><code>superpowers</code></td><td>Superpowers skills</td><td>-</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="other-tags"><a class="header" href="#other-tags">Other Tags</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Tag</th><th>Description</th><th>Just Task</th></tr>
+</thead>
+<tbody>
+<tr><td><code>direnv</code></td><td>Direnv configuration</td><td>-</td></tr>
+<tr><td><code>joplin</code></td><td>Joplin notes configuration</td><td>-</td></tr>
+<tr><td><code>bookmarks</code></td><td>Bookmarks configuration</td><td>-</td></tr>
+<tr><td><code>setup</code></td><td>Directory and environment setup</td><td>-</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="common-usage-patterns"><a class="header" href="#common-usage-patterns">Common Usage Patterns</a></h3>
+<p>Apply only shell configurations:</p>
+<pre><code class="language-bash">ansible-playbook ars.yml --tags "env" --skip-tags "install"
+</code></pre>
+<p>Apply only AI tool configurations:</p>
+<pre><code class="language-bash">ansible-playbook ars.yml --tags "ai" --skip-tags "install"
+</code></pre>
+<p>Apply only editor configurations:</p>
+<pre><code class="language-bash">ansible-playbook ars.yml --tags "editor" --skip-tags "install"
+</code></pre>
+<p>Exclude specific tools:</p>
+<pre><code class="language-bash">ansible-playbook ars.yml --skip-tags "install,neovim-config"
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="developer-configuration"><a class="header" href="#developer-configuration">Developer Configuration</a></h1>
+<p>The <code>dev</code> role configures Git identity, SSH settings, and developer-specific tooling.</p>
+<h2 id="just-tasks"><a class="header" href="#just-tasks">Just Tasks</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Task</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>just configure-git</code></td><td>Configure Git user name, email, and GitHub settings</td></tr>
+<tr><td><code>just configure-ssh</code></td><td>Configure SSH keys and agent (depends on configure-git)</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="configuration-2"><a class="header" href="#configuration-2">Configuration</a></h2>
+<p>Set these variables in <code>vars/local.yml</code> or via <code>-e</code> flag:</p>
+<pre><code class="language-yaml">---
+dev_machine: true
+git_name: "Your Name"
+git_email: "your_name@address.com"
+github_username: "username"
+</code></pre>
+<h2 id="ansible-pull"><a class="header" href="#ansible-pull">Ansible-Pull</a></h2>
+<p>Apply developer configuration via ansible-pull:</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "{dev_machine: true, git_name: 'Your Name', git_email: 'email@example.com', github_username: 'username'}"
+</code></pre>
+<p>Or with a vars file:</p>
+<pre><code class="language-bash">ansible-pull -U https://github.com/pbonh/ars.git dev.yml -e "@dev-config.yml"
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="examples"><a class="header" href="#examples">Examples</a></h1>
