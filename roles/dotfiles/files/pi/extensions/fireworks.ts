@@ -8,8 +8,8 @@ export default function (pi: ExtensionAPI) {
     authHeader: true,
     models: [
       {
-        id: "accounts/fireworks/models/kimi-k2p5-turbo",
-        name: "Kimi K2.5",
+        id: "accounts/fireworks/routers/kimi-k2p5-turbo",
+        name: "Kimi K2.5 Turbo",
         reasoning: true,
         input: ["text", "image"],
         cost: {
