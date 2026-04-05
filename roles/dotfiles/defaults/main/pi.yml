@@ -9,7 +9,7 @@ pi_prompts_dir: "{{ ansible_env.HOME }}/.pi/prompts"
 pi_harness_dir: "{{ ansible_env.HOME }}/.pi/harness"
 
 pi_default_provider: "fireworks"
-pi_default_model: "accounts/fireworks/models/kimi-k2p5"
+pi_default_model: "accounts/fireworks/models/kimi-k2p5-turbo"
 pi_default_thinking_level: "high"
 pi_theme: "dark"
 
