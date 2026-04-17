@@ -521,6 +521,11 @@ dev_packages:
       - "glow"
     devbox:
       - "glow"
+  marp-cli:
+    brew:
+      - "marp-cli"
+    devbox:
+      - "marp-cli"
   rargs:
     brew:
       - "rargs"
