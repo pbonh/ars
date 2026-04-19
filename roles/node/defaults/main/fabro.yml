@@ -1,0 +1,4 @@
+---
+# Fabro AI orchestration tool
+# https://fabro.sh
+fabro_install_dir: "{{ ansible_env.HOME }}/.fabro/bin"

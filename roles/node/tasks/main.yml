@@ -18,3 +18,10 @@
   tags:
     - install
     - acp
+
+- name: Install Fabro
+  import_tasks: tasks/install_fabro.yml
+  tags:
+    - install
+    - fabro
+    - ai

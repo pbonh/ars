@@ -1,0 +1,175 @@
+---
+- name: Fabro | Set install variables
+  ansible.builtin.set_fact:
+    fabro_repo: "fabro-sh/fabro"
+    fabro_install_dir: "{{ ansible_env.HOME }}/.fabro/bin"
+    fabro_download_dir: "{{ ansible_env.HOME }}/.fabro/downloads"
+
+- name: Fabro | Determine OS
+  ansible.builtin.set_fact:
+    fabro_os: "{{ 'darwin' if ansible_system == 'Darwin' else ('linux' if ansible_system == 'Linux' else 'unsupported') }}"
+
+- name: Fabro | Ensure OS is supported
+  ansible.builtin.assert:
+    that:
+      - fabro_os in ['darwin', 'linux']
+    fail_msg: "Unsupported OS: {{ ansible_system }}. Supported: macOS (Apple Silicon), Linux (x86_64, aarch64)"
+
+- name: Fabro | Determine base architecture
+  ansible.builtin.set_fact:
+    fabro_arch_base: >-
+      {{
+        'x86_64' if ansible_architecture in ['x86_64', 'amd64'] else
+        ('aarch64' if ansible_architecture in ['aarch64', 'arm64'] else 'unsupported')
+      }}
+
+- name: Fabro | Ensure architecture is supported
+  ansible.builtin.assert:
+    that:
+      - fabro_arch_base != 'unsupported'
+    fail_msg: "Unsupported architecture: {{ ansible_architecture }}. Supported: x86_64, aarch64"
+
+- name: Fabro | Check Rosetta translation on macOS x86_64
+  ansible.builtin.command: sysctl -n sysctl.proc_translated
+  register: fabro_rosetta
+  changed_when: false
+  failed_when: false
+  when:
+    - fabro_os == 'darwin'
+    - fabro_arch_base == 'x86_64'
+
+- name: Fabro | Select architecture (handle Rosetta)
+  ansible.builtin.set_fact:
+    fabro_arch: "{{ 'aarch64' if (fabro_os == 'darwin' and fabro_arch_base == 'x86_64' and (fabro_rosetta.stdout | default('0') | trim) == '1') else fabro_arch_base }}"
+
+- name: Fabro | Fail on macOS Intel without Rosetta
+  ansible.builtin.fail:
+    msg: "fabro only supports Apple Silicon (arm64) on macOS. Intel Macs without Rosetta are not supported."
+  when:
+    - fabro_os == 'darwin'
+    - fabro_arch == 'x86_64'
+
+- name: Fabro | Compose target triple
+  ansible.builtin.set_fact:
+    fabro_target: >-
+      {{
+        (fabro_arch ~ '-unknown-linux-gnu')
+        if fabro_os == 'linux'
+        else (fabro_arch ~ '-apple-darwin')
+      }}
+
+- name: Fabro | Check for fabro in PATH
+  ansible.builtin.command: which fabro
+  register: fabro_in_path
+  changed_when: false
+  failed_when: false
+
+- name: Fabro | Set candidate install paths
+  ansible.builtin.set_fact:
+    fabro_candidate_paths:
+      - "{{ fabro_install_dir }}/fabro"
+      - "{{ ansible_env.HOME }}/.fabro/bin/fabro"
+
+- name: Fabro | Check common install locations
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: "{{ fabro_candidate_paths }}"
+  register: fabro_candidate_stats
+  when: fabro_in_path.rc != 0
+
+- name: Fabro | Select installed fabro path
+  ansible.builtin.set_fact:
+    fabro_exe_path: >-
+      {% if fabro_in_path.rc == 0 %}
+      {{ fabro_in_path.stdout | trim }}
+      {% else %}
+      {{ (fabro_candidate_stats.results | selectattr('stat.exists') | map(attribute='item') | list | first | default('')) }}
+      {% endif %}
+
+- name: Fabro | Read installed version
+  ansible.builtin.command: "{{ fabro_exe_path }} --version"
+  register: fabro_version_output
+  changed_when: false
+  failed_when: false
+  when: fabro_exe_path | length > 0
+
+- name: Fabro | Parse installed version
+  ansible.builtin.set_fact:
+    fabro_installed_version: >-
+      {{
+        (fabro_version_output.stdout | default('') | regex_search('([0-9]+\.[0-9]+\.[0-9]+)'))
+        | default('', true)
+      }}
+
+- name: Fabro | Get latest release tag from GitHub API
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/{{ fabro_repo }}/releases/latest"
+    headers:
+      Accept: "application/vnd.github+json"
+    return_content: true
+  register: fabro_latest_release
+  changed_when: false
+
+- name: Fabro | Set latest version
+  ansible.builtin.set_fact:
+    fabro_latest_version: "{{ fabro_latest_release.json.tag_name }}"
+
+- name: Fabro | Determine install requirement
+  ansible.builtin.set_fact:
+    fabro_install_required: >-
+      {{
+        (fabro_exe_path | length == 0) or
+        (fabro_installed_version | length == 0) or
+        (fabro_installed_version != (fabro_latest_version | regex_replace('^v', '')))
+      }}
+
+- name: Fabro | Ensure install directory exists
+  ansible.builtin.file:
+    path: "{{ fabro_install_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Fabro | Ensure download directory exists
+  ansible.builtin.file:
+    path: "{{ fabro_download_dir }}"
+    state: directory
+    mode: "0755"
+  when: fabro_install_required
+
+- name: Fabro | Set asset name
+  ansible.builtin.set_fact:
+    fabro_asset: "fabro-{{ fabro_target }}.tar.gz"
+    fabro_download_path: "{{ fabro_download_dir }}/fabro-{{ fabro_latest_version }}-{{ fabro_target }}.tar.gz"
+  when: fabro_install_required
+
+- name: Fabro | Download release asset
+  ansible.builtin.get_url:
+    url: "https://github.com/{{ fabro_repo }}/releases/download/{{ fabro_latest_version }}/{{ fabro_asset }}"
+    dest: "{{ fabro_download_path }}"
+    mode: "0644"
+  register: fabro_download
+  when: fabro_install_required
+
+- name: Fabro | Extract archive
+  ansible.builtin.unarchive:
+    src: "{{ fabro_download_path }}"
+    dest: "{{ fabro_download_dir }}"
+    remote_src: true
+  when: fabro_install_required
+
+- name: Fabro | Install binary
+  ansible.builtin.copy:
+    src: "{{ fabro_download_dir }}/fabro-{{ fabro_target }}/fabro"
+    dest: "{{ fabro_install_dir }}/fabro"
+    mode: "0755"
+    remote_src: true
+  when: fabro_install_required
+
+- name: Fabro | Verify installation
+  ansible.builtin.command: "{{ fabro_install_dir }}/fabro --version"
+  register: fabro_verify
+  changed_when: false
+
+- name: Fabro | Display installed version
+  ansible.builtin.debug:
+    msg: "fabro {{ fabro_verify.stdout | trim }} installed to {{ fabro_install_dir }}/fabro"

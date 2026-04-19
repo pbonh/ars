@@ -62,6 +62,10 @@ path_directories:
     name: home_local
     prepend: false
     path: "{{ default_home_local }}/bin"
+  fabro:
+    name: fabro
+    prepend: false
+    path: "{{ fabro_install_dir }}"
 nonroot_path_directories:
   local:
     name: local
