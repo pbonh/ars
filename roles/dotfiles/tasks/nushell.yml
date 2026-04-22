@@ -35,3 +35,10 @@
     path: "{{ carapace_dir }}"
     state: directory
     mode: '0755'
+
+- name: nushell | Generate Worktrunk Shell Integration | command
+  ansible.builtin.command:
+    cmd: "{{ wt_exe | default('wt') }} config shell install nu --yes"
+  args:
+    creates: "{{ nushell_worktrunk_config_file }}"
+  when: wt_exe is defined or (ansible_system == 'Darwin' or ansible_system == 'Linux')
