@@ -1,0 +1,5 @@
+---
+graphify_uv_package: "graphifyy"
+graphify_uv_state: "present"
+graphify_uv_version: null
+graphify_uv_executable: "uv"

@@ -6,6 +6,13 @@
     - npm
     - node
 
+- name: Install uv tool packages
+  import_tasks: tasks/install_uv_packages.yml
+  tags:
+    - install
+    - uv
+    - python
+
 - name: Install Claude Code
   import_tasks: tasks/install_claude_code.yml
   tags:

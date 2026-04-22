@@ -1,0 +1,6 @@
+---
+node_uv_packages:
+  - name: "{{ graphify_uv_package }}"
+    state: "{{ graphify_uv_state }}"
+    version: "{{ graphify_uv_version }}"
+    executable: "{{ graphify_uv_executable }}"

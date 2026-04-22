@@ -1,0 +1,31 @@
+---
+- name: Node | Install uv tool packages
+  ansible.builtin.command:
+    cmd: >-
+      {{ item.executable | default(node_uv_executable) }} tool install
+      {{ item.name }}{% if item.version | default(false) %}=={{ item.version }}{% endif %}
+  loop: "{{ node_uv_packages }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: node_uv_install
+  changed_when: >-
+    'Installed' in (node_uv_install.stderr | default('') ~ node_uv_install.stdout | default(''))
+    and 'Nothing to install' not in (node_uv_install.stderr | default('') ~ node_uv_install.stdout | default(''))
+  when:
+    - item.enabled | default(true)
+    - (item.state | default('present')) == 'present'
+
+- name: Node | Uninstall uv tool packages
+  ansible.builtin.command:
+    cmd: "{{ item.executable | default(node_uv_executable) }} tool uninstall {{ item.name }}"
+  loop: "{{ node_uv_packages }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: node_uv_uninstall
+  changed_when: "'Uninstalled' in (node_uv_uninstall.stderr | default('') ~ node_uv_uninstall.stdout | default(''))"
+  failed_when:
+    - node_uv_uninstall.rc != 0
+    - "'is not installed' not in (node_uv_uninstall.stderr | default(''))"
+  when:
+    - item.enabled | default(true)
+    - (item.state | default('present')) == 'absent'
