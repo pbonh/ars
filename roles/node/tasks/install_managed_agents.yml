@@ -1,0 +1,186 @@
+---
+- name: Ant | Determine OS
+  ansible.builtin.set_fact:
+    ant_os: "{{ 'macos' if ansible_system == 'Darwin' else ('linux' if ansible_system == 'Linux' else 'unsupported') }}"
+
+- name: Ant | Ensure OS is supported
+  ansible.builtin.assert:
+    that:
+      - ant_os in ['macos', 'linux']
+    fail_msg: "Unsupported OS: {{ ansible_system }}. Supported: macOS, Linux"
+
+- name: Ant | Determine base architecture
+  ansible.builtin.set_fact:
+    ant_arch_base: >-
+      {{
+        'amd64' if ansible_architecture in ['x86_64', 'amd64'] else
+        ('arm64' if ansible_architecture in ['aarch64', 'arm64'] else 'unsupported')
+      }}
+
+- name: Ant | Ensure architecture is supported
+  ansible.builtin.assert:
+    that:
+      - ant_arch_base != 'unsupported'
+    fail_msg: "Unsupported architecture: {{ ansible_architecture }}. Supported: amd64, arm64"
+
+- name: Ant | Check Rosetta translation on macOS
+  ansible.builtin.command: sysctl -n sysctl.proc_translated
+  register: ant_rosetta
+  changed_when: false
+  failed_when: false
+  when:
+    - ant_os == 'macos'
+    - ant_arch_base == 'amd64'
+
+- name: Ant | Select architecture (handle Rosetta)
+  ansible.builtin.set_fact:
+    ant_arch: "{{ 'arm64' if (ant_os == 'macos' and ant_arch_base == 'amd64' and (ant_rosetta.stdout | default('0') | trim) == '1') else ant_arch_base }}"
+
+- name: Ant | Set archive extension
+  ansible.builtin.set_fact:
+    ant_archive_ext: "{{ 'zip' if ant_os == 'macos' else 'tar.gz' }}"
+
+- name: Ant | Check for ant in PATH
+  ansible.builtin.command: which ant
+  register: ant_in_path
+  changed_when: false
+  failed_when: false
+
+- name: Ant | Set candidate install paths
+  ansible.builtin.set_fact:
+    ant_candidate_paths:
+      - "{{ ant_install_dir }}/ant"
+      - "{{ ansible_env.HOME }}/.local/bin/ant"
+      - "{{ ansible_env.HOME }}/bin/ant"
+
+- name: Ant | Check common install locations
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop: "{{ ant_candidate_paths }}"
+  register: ant_candidate_stats
+  when: ant_in_path.rc != 0
+
+- name: Ant | Select installed ant path
+  ansible.builtin.set_fact:
+    ant_exe_path: >-
+      {% if ant_in_path.rc == 0 %}
+      {{ ant_in_path.stdout | trim }}
+      {% else %}
+      {{ (ant_candidate_stats.results | selectattr('stat.exists') | map(attribute='item') | list | first | default('')) }}
+      {% endif %}
+
+- name: Ant | Read installed version
+  ansible.builtin.command: "{{ ant_exe_path | trim }} --version"
+  register: ant_version_output
+  changed_when: false
+  failed_when: false
+  when: (ant_exe_path | trim) | length > 0
+
+- name: Ant | Parse installed version
+  ansible.builtin.set_fact:
+    ant_installed_version: >-
+      {{
+        (ant_version_output.stdout | default('') | regex_search('([0-9]+\.[0-9]+\.[0-9]+)'))
+        | default('', true)
+      }}
+
+- name: Ant | Get latest release tag from GitHub API
+  ansible.builtin.uri:
+    url: "https://api.github.com/repos/{{ ant_repo }}/releases/latest"
+    headers:
+      Accept: "application/vnd.github+json"
+    return_content: true
+  register: ant_latest_release
+  changed_when: false
+
+- name: Ant | Set latest version
+  ansible.builtin.set_fact:
+    ant_latest_version: "{{ ant_latest_release.json.tag_name | regex_replace('^v', '') }}"
+
+- name: Ant | Determine install requirement
+  ansible.builtin.set_fact:
+    ant_install_required: >-
+      {{
+        ((ant_exe_path | trim) | length == 0) or
+        (ant_installed_version | length == 0) or
+        (ant_installed_version != ant_latest_version)
+      }}
+
+- name: Ant | Ensure install directory exists
+  ansible.builtin.file:
+    path: "{{ ant_install_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Ant | Ensure download directory exists
+  ansible.builtin.file:
+    path: "{{ ant_download_dir }}"
+    state: directory
+    mode: "0755"
+  when: ant_install_required
+
+- name: Ant | Set asset metadata
+  ansible.builtin.set_fact:
+    ant_asset: "ant_{{ ant_latest_version }}_{{ ant_os }}_{{ ant_arch }}.{{ ant_archive_ext }}"
+    ant_download_path: "{{ ant_download_dir }}/ant_{{ ant_latest_version }}_{{ ant_os }}_{{ ant_arch }}.{{ ant_archive_ext }}"
+    ant_extract_dir: "{{ ant_download_dir }}/ant_{{ ant_latest_version }}_{{ ant_os }}_{{ ant_arch }}"
+  when: ant_install_required
+
+- name: Ant | Download release asset
+  ansible.builtin.get_url:
+    url: "https://github.com/{{ ant_repo }}/releases/download/v{{ ant_latest_version }}/{{ ant_asset }}"
+    dest: "{{ ant_download_path }}"
+    mode: "0644"
+  when: ant_install_required
+
+- name: Ant | Ensure extract directory exists
+  ansible.builtin.file:
+    path: "{{ ant_extract_dir }}"
+    state: directory
+    mode: "0755"
+  when: ant_install_required
+
+- name: Ant | Extract archive
+  ansible.builtin.unarchive:
+    src: "{{ ant_download_path }}"
+    dest: "{{ ant_extract_dir }}"
+    remote_src: true
+  when: ant_install_required
+
+- name: Ant | Install binary
+  ansible.builtin.copy:
+    src: "{{ ant_extract_dir }}/ant"
+    dest: "{{ ant_install_dir }}/ant"
+    mode: "0755"
+    remote_src: true
+  when: ant_install_required
+
+- name: Ant | Remove macOS quarantine attribute
+  ansible.builtin.command: "xattr -d com.apple.quarantine {{ ant_install_dir }}/ant"
+  register: ant_xattr
+  changed_when: ant_xattr.rc == 0
+  failed_when: false
+  when:
+    - ant_install_required
+    - ant_os == 'macos'
+
+- name: Ant | Cleanup downloaded archive
+  ansible.builtin.file:
+    path: "{{ ant_download_path }}"
+    state: absent
+  when: ant_install_required
+
+- name: Ant | Cleanup extract directory
+  ansible.builtin.file:
+    path: "{{ ant_extract_dir }}"
+    state: absent
+  when: ant_install_required
+
+- name: Ant | Verify installation
+  ansible.builtin.command: "{{ ant_install_dir }}/ant --version"
+  register: ant_verify
+  changed_when: false
+
+- name: Ant | Display installed version
+  ansible.builtin.debug:
+    msg: "ant {{ ant_verify.stdout | trim }} installed to {{ ant_install_dir }}/ant"

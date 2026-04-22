@@ -20,6 +20,15 @@
     - claude
     - ai
 
+- name: Install Claude Managed Agents CLI
+  import_tasks: tasks/install_managed_agents.yml
+  tags:
+    - install
+    - claude
+    - managed-agents
+    - ant
+    - ai
+
 - name: Install ACP adapters
   import_tasks: tasks/install_acp_adapters.yml
   tags:

@@ -66,6 +66,10 @@ path_directories:
     name: fabro
     prepend: false
     path: "{{ fabro_install_dir }}"
+  ant:
+    name: ant
+    prepend: false
+    path: "{{ ant_install_dir }}"
 nonroot_path_directories:
   local:
     name: local
