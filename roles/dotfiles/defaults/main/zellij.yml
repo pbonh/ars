@@ -56,7 +56,7 @@ zellij_plugins:
     load_on_startup:
       args:
         triggers: "nvim|hx|fzf|yazi|btm|less|man|lazygit|atuin|zoxide"
-        reaction_seconds: "0.3"
+        reaction_seconds: "1.0"
   zjstatus:
     url: "https://github.com/dj95/zjstatus/releases/download/v0.13.1/zjstatus.wasm"
   # monocle:
