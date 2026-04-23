@@ -25,33 +25,38 @@ zellij_plugins:
     url: "https://github.com/imsnif/multitask/releases/download/0.38.2v2/multitask.wasm"
   forgot:
     url: "https://github.com/karimould/zellij-forgot/releases/download/0.3.0/zellij_forgot.wasm"
-    keybindings:
-      shared_except_locked: |
-        bind "Ctrl k" {
-            LaunchOrFocusPlugin "file:{{ zellij_plugin_dir }}/zellij_forgot.wasm" {
-                "LOAD_ZELLIJ_BINDINGS" "true"
-                floating true
-            }
-        }
+    launch_keybinding:
+      key: "Ctrl k"
+      args:
+        LOAD_ZELLIJ_BINDINGS: "true"
+        floating: true
   room:
     url: "https://github.com/rvcas/room/releases/latest/download/room.wasm"
-    keybindings:
-      shared_except_locked: |
-        bind "Ctrl y" {
-           LaunchOrFocusPlugin "file:{{ zellij_plugin_dir }}/room.wasm" {
-                floating true
-                ignore_case true
-            }
-        }
+    launch_keybinding:
+      key: "Ctrl y"
+      args:
+        floating: true
+        ignore_case: true
   harpoon:
     url: "https://github.com/Nacho114/harpoon/releases/download/v0.1.0/harpoon.wasm"
-    keybindings:
-      shared_except_locked: |
-        bind "Ctrl z" {
-            LaunchOrFocusPlugin "file:{{ zellij_plugin_dir }}/harpoon.wasm" {
-                floating true; move_to_focused_tab true;
-            }
-        }
+    launch_keybinding:
+      key: "Ctrl z"
+      args:
+        floating: true
+        move_to_focused_tab: true
+  worktree:
+    url: "https://github.com/sharph/zellij-worktree/releases/latest/download/zellij-worktree.wasm"
+    launch_keybinding:
+      key: "Ctrl a"
+      args:
+        floating: true
+        move_to_focused_tab: true
+  autolock:
+    url: "https://github.com/fresh2dev/zellij-autolock/releases/latest/download/zellij-autolock.wasm"
+    load_on_startup:
+      args:
+        triggers: "nvim|hx|fzf|yazi|btm|less|man|lazygit|atuin|zoxide"
+        reaction_seconds: "0.3"
   zjstatus:
     url: "https://github.com/dj95/zjstatus/releases/download/v0.13.1/zjstatus.wasm"
   # monocle:
