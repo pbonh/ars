@@ -66,7 +66,7 @@
     path: "{{ pi_extensions_dir }}"
     state: directory
     mode: "0755"
-  when: pi_extensions | length > 0
+  when: (pi_extensions | length > 0) or (pi_fireworks_enabled | default(false))
 
 - name: Pi | Copy custom extensions
   ansible.builtin.copy:
@@ -74,6 +74,13 @@
     dest: "{{ pi_extensions_dir }}/{{ item }}"
     mode: preserve
   loop: "{{ pi_extensions }}"
+
+- name: Pi | Template fireworks extension
+  ansible.builtin.template:
+    src: "pi/extensions/fireworks.ts.j2"
+    dest: "{{ pi_extensions_dir }}/fireworks.ts"
+    mode: "0644"
+  when: pi_fireworks_enabled | default(false)
 
 - name: Pi | Ensure prompts directory exists
   ansible.builtin.file:

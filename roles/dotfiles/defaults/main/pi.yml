@@ -9,7 +9,7 @@ pi_prompts_dir: "{{ ansible_env.HOME }}/.pi/prompts"
 pi_harness_dir: "{{ ansible_env.HOME }}/.pi/harness"
 
 pi_default_provider: "fireworks"
-pi_default_model: "accounts/fireworks/models/kimi-k2p5-turbo"
+pi_default_model: "accounts/fireworks/models/glm-5p1"
 pi_default_thinking_level: "high"
 pi_theme: "dark"
 
@@ -40,8 +40,74 @@ pi_skills: []
 # pi_extensions:
 #   - "my-extension.ts"
 #   - "my-extension"
-pi_extensions:
-  - "fireworks.ts"
+pi_extensions: []
+
+# Fireworks provider extension (templated to roles/dotfiles/templates/pi/extensions/fireworks.ts.j2).
+pi_fireworks_enabled: true
+pi_fireworks_provider_name: "fireworks"
+pi_fireworks_base_url: "https://api.fireworks.ai/inference/v1"
+pi_fireworks_api_key_env: "FIREWORKS_API_KEY"
+pi_fireworks_api: "openai-completions"
+pi_fireworks_auth_header: true
+
+pi_fireworks_models:
+  - id: "accounts/fireworks/models/glm-5p1"
+    name: "GLM 5.1"
+    reasoning: true
+    input: ["text"]
+    cost:
+      input: 1.40
+      output: 4.40
+      cacheRead: 0.26
+      cacheWrite: 1.40
+    contextWindow: 202000
+    maxTokens: 25344
+  - id: "accounts/fireworks/models/kimi-k2p5"
+    name: "Kimi K2.5"
+    reasoning: true
+    input: ["text", "image"]
+    cost:
+      input: 0.60
+      output: 3.00
+      cacheRead: 0.10
+      cacheWrite: 0.60
+    contextWindow: 262000
+    maxTokens: 32768
+  - id: "accounts/fireworks/models/kimi-k2p6"
+    name: "Kimi K2.6"
+    reasoning: true
+    input: ["text", "image"]
+    cost:
+      input: 0.95
+      output: 4.00
+      cacheRead: 0.16
+      cacheWrite: 0.95
+    contextWindow: 262000
+    maxTokens: 32768
+  # contextWindow / maxTokens not listed on Fireworks model page; values below are
+  # Qwen3-family defaults — verify and override if the real limits differ.
+  - id: "accounts/fireworks/models/qwen3p6-plus"
+    name: "Qwen 3.6 Plus"
+    reasoning: true
+    input: ["text", "image"]
+    cost:
+      input: 0.50
+      output: 3.00
+      cacheRead: 0.10
+      cacheWrite: 0.50
+    contextWindow: 128000
+    maxTokens: 16384
+  - id: "accounts/fireworks/models/deepseek-v4-pro"
+    name: "DeepSeek V4 Pro"
+    reasoning: true
+    input: ["text"]
+    cost:
+      input: 1.74
+      output: 3.48
+      cacheRead: 0.15
+      cacheWrite: 1.74
+    contextWindow: 1000000
+    maxTokens: 131072
 
 pi_global_config:
   defaultProvider: "{{ pi_default_provider }}"

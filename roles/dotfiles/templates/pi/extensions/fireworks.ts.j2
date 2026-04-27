@@ -1,0 +1,28 @@
+import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+
+export default function (pi: ExtensionAPI) {
+  pi.registerProvider("{{ pi_fireworks_provider_name }}", {
+    baseUrl: "{{ pi_fireworks_base_url }}",
+    apiKey: "{{ pi_fireworks_api_key_env }}",
+    api: "{{ pi_fireworks_api }}",
+    authHeader: {{ pi_fireworks_auth_header | ternary('true', 'false') }},
+    models: [
+{%- for model in pi_fireworks_models %}
+      {
+        id: "{{ model.id }}",
+        name: "{{ model.name }}",
+        reasoning: {{ model.reasoning | ternary('true', 'false') }},
+        input: [{% for inp in model.input %}"{{ inp }}"{% if not loop.last %}, {% endif %}{% endfor %}],
+        cost: {
+          input: {{ '%.2f' | format(model.cost.input) }},
+          output: {{ '%.2f' | format(model.cost.output) }},
+          cacheRead: {{ '%.2f' | format(model.cost.cacheRead) }},
+          cacheWrite: {{ '%.2f' | format(model.cost.cacheWrite) }}
+        },
+        contextWindow: {{ model.contextWindow }},
+        maxTokens: {{ model.maxTokens }}
+      }{% if not loop.last %},{% endif %}
+{%- endfor %}
+    ]
+  });
+}
