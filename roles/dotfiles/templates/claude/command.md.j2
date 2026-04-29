@@ -1,0 +1,15 @@
+---
+{% if command.description is defined %}
+description: {{ command.description }}
+{% endif %}
+{% if command.allowed_tools is defined %}
+allowed-tools: {{ command.allowed_tools }}
+{% endif %}
+{% if command.argument_hint is defined %}
+argument-hint: {{ command.argument_hint }}
+{% endif %}
+{% if command.model is defined %}
+model: {{ command.model }}
+{% endif %}
+---
+{{ command.content if command.content is defined else lookup('file', role_path ~ '/files/' ~ command.content_file) }}

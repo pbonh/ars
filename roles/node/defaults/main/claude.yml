@@ -5,6 +5,7 @@ claude_settings_path: "{{ claude_config_dir }}/settings.json"
 claude_api_key_helper_path: "{{ claude_config_dir }}/api-key-helper.sh"
 claude_skills_dir: "{{ claude_config_dir }}/skills"
 claude_agents_dir: "{{ claude_config_dir }}/agents"
+claude_commands_dir: "{{ claude_config_dir }}/commands"
 
 # claude_skills:
 #   - name: "review-code"
@@ -37,3 +38,12 @@ claude_voltagent_ref: "main"
 #   - "04-quality-security/security-auditor"
 #   - "09-meta-orchestration/agent-installer"
 claude_voltagent_agents: []
+
+# claude_commands:
+#   - name: "review"
+#     description: "Review the working tree"
+#     allowed_tools: "Bash,Read,Grep"
+#     argument_hint: "[--scope=staged]"
+#     model: "opus"
+#     content_file: "claude/commands/review.md"
+claude_commands: []
