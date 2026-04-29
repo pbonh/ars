@@ -763,3 +763,18 @@ dev_packages:
       - "marcus/tap/sidecar"
     devbox:
       - "sidecar"
+  poppler:
+    brew:
+      - "poppler"
+    devbox:
+      - "poppler_utils"
+  qpdf:
+    brew:
+      - "qpdf"
+    devbox:
+      - "qpdf"
+  ocrmypdf:
+    brew:
+      - "ocrmypdf"
+    devbox:
+      - "ocrmypdf"
