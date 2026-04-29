@@ -222,7 +222,7 @@ Any step failure → write `manifest.json` with `status: "failed"`, populate `fa
 - `slug` vs `filename`: `slug` is the title-derived identifier (`chapter-01-limits`); `filename` is what's on disk (`01-chapter-01-limits` with prefix, or unprefixed for special files).
 - `tool_versions` — captured at run time. Useful for diagnosing reproducibility issues.
 - `detection_method` — one of `bookmarks` | `toc_parse` | `llm`.
-- `failed_step` enum (only when `status: "failed"`): `detect_outline` | `detect_toc` | `detect_llm` | `ocr` | `slice` | `extract`.
+- `failed_step` enum (only when `status: "failed"`): `detect_outline` | `detect_llm` | `ocr` | `slice` | `extract`.
 
 ### Ansible plumbing
 
