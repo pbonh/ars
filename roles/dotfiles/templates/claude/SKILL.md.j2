@@ -9,4 +9,4 @@ allowed-tools: {{ skill.allowed_tools }}
 disable-model-invocation: {{ skill.disable_model_invocation | lower }}
 {% endif %}
 ---
-{{ skill.content }}
+{{ skill.content if skill.content is defined else lookup('file', role_path ~ '/files/' ~ skill.content_file) }}
