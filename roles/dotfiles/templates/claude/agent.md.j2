@@ -27,4 +27,4 @@ skills:
 mcpServers: {{ agent.mcp_servers | to_nice_yaml }}
 {% endif %}
 ---
-{{ agent.content }}
+{{ agent.content if agent.content is defined else lookup('file', role_path ~ '/files/' ~ agent.content_file) }}
