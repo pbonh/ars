@@ -187,7 +187,7 @@ Write `<book>/manifest.json` with `status: "complete"` using the schema below. T
 - `slug` is the title-derived identifier (`chapter-01-limits`); `filename` is what's on disk (`01-chapter-01-limits` with prefix, or unprefixed for special files).
 - `tool_versions` — captured at run time. Get from `<tool> --version` output.
 - `detection_method`: `bookmarks` | `toc_parse` | `llm`.
-- `failed_step` (only when `status: "failed"`): `detect_outline` | `detect_toc` | `detect_llm` | `ocr` | `slice` | `extract`.
+- `failed_step` (only when `status: "failed"`): `detect_outline` | `detect_llm` | `ocr` | `slice` | `extract`.
 
 ## Manual override path
 
