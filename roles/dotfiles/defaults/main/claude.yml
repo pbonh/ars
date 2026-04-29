@@ -14,7 +14,11 @@ claude_commands_dir: "{{ claude_config_dir }}/commands"
 #     disable_model_invocation: true
 #     content: |
 #       Skill instructions here...
-claude_skills: []
+claude_skills:
+  - name: "split-textbooks"
+    description: "Split a PDF textbook into per-section PDF slices and extracted markdown."
+    allowed_tools: "Bash,Read,Write,Edit,Glob"
+    content_file: "claude/skills/split-textbooks/SKILL.md"
 
 # claude_agents:
 #   - name: "planner"
@@ -46,4 +50,16 @@ claude_voltagent_agents: []
 #     argument_hint: "[--scope=staged]"
 #     model: "opus"
 #     content_file: "claude/commands/review.md"
-claude_commands: []
+claude_commands:
+  - name: "split-textbooks"
+    description: "Batch-process a directory of PDF textbooks"
+    allowed_tools: "Bash,Read,Write,Glob"
+    argument_hint: "<directory> [--force]"
+    model: "opus"
+    content_file: "claude/commands/split-textbooks.md"
+  - name: "split-textbook"
+    description: "Reprocess a single PDF textbook (overwrites prior output)"
+    allowed_tools: "Bash,Read,Write,Glob"
+    argument_hint: "<path-to-pdf>"
+    model: "opus"
+    content_file: "claude/commands/split-textbook.md"
