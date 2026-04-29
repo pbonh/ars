@@ -93,3 +93,19 @@
   loop_control:
     label: "{{ item | basename }}"
   when: claude_voltagent_agents | length > 0
+
+- name: Claude | Ensure commands directory exists
+  ansible.builtin.file:
+    path: "{{ claude_commands_dir }}"
+    state: directory
+    mode: "0755"
+  when: claude_commands | length > 0
+
+- name: Claude | Template command files
+  ansible.builtin.template:
+    src: "claude/command.md.j2"
+    dest: "{{ claude_commands_dir }}/{{ command.name }}.md"
+    mode: "0644"
+  loop: "{{ claude_commands }}"
+  loop_control:
+    loop_var: command
