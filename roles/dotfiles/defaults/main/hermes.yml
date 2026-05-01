@@ -14,7 +14,7 @@ hermes_fireworks_api_key: ""
 
 # ── Model configuration ──────────────────────────────────────────────────
 # Default model: switched via /model custom:fireworks:<model_id>
-hermes_model_default: "accounts/fireworks/models/deepseek-v4-pro"
+hermes_model_default: "{{ fireworks_default_model_id }}"
 
 # ── Custom providers ─────────────────────────────────────────────────────
 # https://hermes-agent.nousresearch.com/docs/integrations/providers#other-compatible-providers
@@ -22,18 +22,17 @@ hermes_model_default: "accounts/fireworks/models/deepseek-v4-pro"
 # Fireworks AI base URL: https://api.fireworks.ai/inference/v1
 hermes_custom_providers:
   - name: fireworks
-    base_url: "https://api.fireworks.ai/inference/v1"
-    key_env: FIREWORKS_API_KEY
+    base_url: "{{ fireworks_base_url }}"
+    key_env: "{{ fireworks_api_key_env }}"
     api_mode: chat_completions
-    models:
-      accounts/fireworks/models/glm-5p1:
-        context_length: 131072
-      accounts/fireworks/models/qwen3p6-plus:
-        context_length: 131072
-      accounts/fireworks/models/kimi-k2p6:
-        context_length: 131072
-      accounts/fireworks/models/deepseek-v4-pro:
-        context_length: 131072
+    models: >-
+      {{
+        dict(
+          fireworks_models | map(attribute='id') | zip(
+            fireworks_models | map(attribute='context_length') | map('list') | map('prepend', 'context_length') | map('dict')
+          ) | list
+        )
+      }}
 
 # ── Main config.yaml contents ────────────────────────────────────────────
 # Rendered as-is into ~/.hermes/config.yaml
@@ -42,7 +41,7 @@ hermes_config:
   model:
     default: "{{ hermes_model_default }}"
     provider: custom
-    base_url: "https://api.fireworks.ai/inference/v1"
+    base_url: "{{ fireworks_base_url }}"
   display:
     streaming: true
     show_reasoning: true

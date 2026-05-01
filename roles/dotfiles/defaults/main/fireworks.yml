@@ -1,0 +1,71 @@
+---
+# Fireworks AI provider settings — canonical source of truth for all tools
+fireworks_base_url: "https://api.fireworks.ai/inference/v1"
+fireworks_api_key_env: "FIREWORKS_API_KEY"
+
+# Default model ID used across tools
+fireworks_default_model_id: "accounts/fireworks/models/deepseek-v4-pro"
+
+# Canonical model definitions
+# Compatible with pi; hermes derives its narrower dict via Jinja2 transformation
+fireworks_models:
+  - id: "accounts/fireworks/models/glm-5p1"
+    name: "GLM 5.1"
+    context_length: 131072
+    contextWindow: 202000
+    maxTokens: 25344
+    reasoning: true
+    input: ["text"]
+    cost:
+      input: 1.40
+      output: 4.40
+      cacheRead: 0.26
+      cacheWrite: 1.40
+  - id: "accounts/fireworks/models/kimi-k2p5"
+    name: "Kimi K2.5"
+    context_length: 131072
+    contextWindow: 262000
+    maxTokens: 32768
+    reasoning: true
+    input: ["text", "image"]
+    cost:
+      input: 0.60
+      output: 3.00
+      cacheRead: 0.10
+      cacheWrite: 0.60
+  - id: "accounts/fireworks/models/kimi-k2p6"
+    name: "Kimi K2.6"
+    context_length: 131072
+    contextWindow: 262000
+    maxTokens: 32768
+    reasoning: true
+    input: ["text", "image"]
+    cost:
+      input: 0.95
+      output: 4.00
+      cacheRead: 0.16
+      cacheWrite: 0.95
+  - id: "accounts/fireworks/models/qwen3p6-plus"
+    name: "Qwen 3.6 Plus"
+    context_length: 131072
+    contextWindow: 128000
+    maxTokens: 16384
+    reasoning: true
+    input: ["text", "image"]
+    cost:
+      input: 0.50
+      output: 3.00
+      cacheRead: 0.10
+      cacheWrite: 0.50
+  - id: "accounts/fireworks/models/deepseek-v4-pro"
+    name: "DeepSeek V4 Pro"
+    context_length: 131072
+    contextWindow: 1000000
+    maxTokens: 131072
+    reasoning: true
+    input: ["text"]
+    cost:
+      input: 1.74
+      output: 3.48
+      cacheRead: 0.15
+      cacheWrite: 1.74
