@@ -29,7 +29,7 @@ hermes_custom_providers:
       {{
         dict(
           fireworks_models | map(attribute='id') | zip(
-            fireworks_models | map(attribute='context_length') | map('list') | map('prepend', 'context_length') | map('dict')
+            fireworks_models | map(attribute='context_length') | map('community.general.dict_kv', 'context_length')
           ) | list
         )
       }}
