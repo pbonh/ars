@@ -41,3 +41,10 @@
     - install
     - fabro
     - ai
+
+- name: Install Hermes Agent
+  import_tasks: tasks/install_hermes.yml
+  tags:
+    - install
+    - hermes
+    - ai

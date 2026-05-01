@@ -1,0 +1,39 @@
+---
+hermes_repo: "NousResearch/hermes-agent"
+hermes_branch: "main"
+hermes_home: "{{ ansible_env.HOME }}/.hermes"
+hermes_install_dir: "{{ hermes_home }}/hermes-agent"
+hermes_python_version: "3.11"
+hermes_use_venv: true
+
+# System dependencies (ripgrep, ffmpeg) — installed via the active tool_provider
+hermes_system_deps:
+  - ripgrep
+  - ffmpeg
+hermes_install_system_deps: true
+
+# Package manager for system deps — derived from tool_provider.
+# Override only if you need to deviate from the system's provider.
+# Valid values: "auto" (reads tool_provider), "brew", "nix", "none"
+hermes_pkg_manager: "auto"
+
+# Node.js browser/TUI dependencies (requires Node.js + npm)
+hermes_install_node_deps: false
+
+# Config directory structure
+hermes_config_subdirs:
+  - cron
+  - sessions
+  - logs
+  - pairing
+  - hooks
+  - image_cache
+  - audio_cache
+  - memories
+  - skills
+
+# Command symlink directory
+hermes_command_link_dir: "{{ ansible_env.HOME }}/.local/bin"
+
+# Whether to clone via SSH (falls back to HTTPS)
+hermes_use_ssh: false

@@ -1,0 +1,353 @@
+---
+- name: Hermes | Determine OS
+  ansible.builtin.set_fact:
+    hermes_os: "{{ 'macos' if ansible_system == 'Darwin' else ('linux' if ansible_system == 'Linux' else 'unsupported') }}"
+
+- name: Hermes | Ensure OS is supported
+  ansible.builtin.assert:
+    that:
+      - hermes_os in ['macos', 'linux']
+    fail_msg: "Unsupported OS: {{ ansible_system }}. Supported: macOS, Linux"
+
+- name: Hermes | Resolve package manager from tool_provider
+  ansible.builtin.set_fact:
+    hermes_pkg_mgr: >-
+      {% if hermes_pkg_manager != 'auto' %}
+        {{ hermes_pkg_manager }}
+      {% elif tool_provider == 'homebrew' %}
+        brew
+      {% elif tool_provider in ['devbox', 'mise'] %}
+        nix
+      {% elif tool_provider == 'nonroot' %}
+        none
+      {% else %}
+        none
+      {% endif %}
+
+- name: Hermes | Show resolved package manager
+  ansible.builtin.debug:
+    msg: >-
+      Hermes system deps will use package manager: {{ hermes_pkg_mgr }}
+      (tool_provider={{ tool_provider | default('unset') }})
+
+- name: Hermes | Install system dependencies via Homebrew
+  community.general.homebrew:
+    name: "{{ hermes_system_deps }}"
+    state: present
+  when:
+    - hermes_install_system_deps
+    - hermes_pkg_mgr == 'brew'
+
+- name: Hermes | Install system dependencies via Nix
+  ansible.builtin.command: >-
+    nix profile install nixpkgs#{{ item }}
+  loop: "{{ hermes_system_deps }}"
+  loop_control:
+    label: "{{ item }}"
+  register: hermes_nix_install
+  changed_when: true
+  failed_when:
+    - hermes_nix_install.rc != 0
+    - "'already exists' not in hermes_nix_install.stderr"
+  when:
+    - hermes_install_system_deps
+    - hermes_pkg_mgr == 'nix'
+
+- name: Hermes | Warn — no supported package manager for system deps
+  ansible.builtin.debug:
+    msg: >-
+      No supported package manager (brew or nix) detected for system dependencies
+      ({{ hermes_system_deps | join(', ') }}). Install them manually if needed.
+  when:
+    - hermes_install_system_deps
+    - hermes_pkg_mgr == 'none'
+
+# --- uv & Python ---
+
+- name: Hermes | Check for uv
+  ansible.builtin.command: which uv
+  register: hermes_which_uv
+  changed_when: false
+  failed_when: false
+
+- name: Hermes | Check ~/.local/bin/uv
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.local/bin/uv"
+  register: hermes_uv_local
+  when: hermes_which_uv.rc != 0
+
+- name: Hermes | Check ~/.cargo/bin/uv
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.cargo/bin/uv"
+  register: hermes_uv_cargo
+  when:
+    - hermes_which_uv.rc != 0
+    - not hermes_uv_local.stat.exists
+
+- name: Hermes | Set uv command path
+  ansible.builtin.set_fact:
+    hermes_uv_cmd: >-
+      {% if hermes_which_uv.rc == 0 %}
+        uv
+      {% elif hermes_uv_local.stat.exists | default(false) %}
+        {{ ansible_env.HOME }}/.local/bin/uv
+      {% elif hermes_uv_cargo.stat.exists | default(false) %}
+        {{ ansible_env.HOME }}/.cargo/bin/uv
+      {% else %}
+        ""
+      {% endif %}
+
+- name: Hermes | Install uv
+  ansible.builtin.shell: curl -LsSf https://astral.sh/uv/install.sh | sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/uv"
+  environment:
+    PATH: "{{ ansible_env.HOME }}/.local/bin:{{ ansible_env.PATH }}"
+  when: hermes_uv_cmd | length == 0
+
+- name: Hermes | Re-check uv after install
+  ansible.builtin.set_fact:
+    hermes_uv_cmd: "{{ ansible_env.HOME }}/.local/bin/uv"
+  when: hermes_uv_cmd | length == 0
+
+- name: Hermes | Ensure Python {{ hermes_python_version }} is available
+  ansible.builtin.command: >-
+    {{ hermes_uv_cmd }} python install {{ hermes_python_version }}
+  register: hermes_python_install
+  changed_when: "'Installed' in hermes_python_install.stdout"
+  failed_when: false
+
+- name: Hermes | Find Python path
+  ansible.builtin.command: "{{ hermes_uv_cmd }} python find {{ hermes_python_version }}"
+  register: hermes_python_find
+  changed_when: false
+
+- name: Hermes | Verify Python found
+  ansible.builtin.assert:
+    that:
+      - hermes_python_find.rc == 0
+      - hermes_python_find.stdout | length > 0
+    fail_msg: >-
+      Python {{ hermes_python_version }} not found after install attempt.
+      Install manually: {{ hermes_uv_cmd }} python install {{ hermes_python_version }}
+
+# --- Git clone / update ---
+
+- name: Hermes | Ensure install directory parent exists
+  ansible.builtin.file:
+    path: "{{ hermes_install_dir | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Hermes | Clone/update repository (HTTPS)
+  ansible.builtin.git:
+    repo: "https://github.com/{{ hermes_repo }}.git"
+    dest: "{{ hermes_install_dir }}"
+    version: "{{ hermes_branch }}"
+  when: not hermes_use_ssh
+
+- name: Hermes | Clone/update repository (SSH)
+  ansible.builtin.git:
+    repo: "git@github.com:{{ hermes_repo }}.git"
+    dest: "{{ hermes_install_dir }}"
+    version: "{{ hermes_branch }}"
+  when: hermes_use_ssh
+
+# --- Virtual environment ---
+
+- name: Hermes | Create virtual environment
+  ansible.builtin.command: >-
+    {{ hermes_uv_cmd }} venv {{ hermes_install_dir }}/venv
+    --python {{ hermes_python_version }}
+  args:
+    chdir: "{{ hermes_install_dir }}"
+    creates: "{{ hermes_install_dir }}/venv/bin/python"
+  when: hermes_use_venv
+
+# --- Python dependencies ---
+
+- name: Hermes | Install Python package with all extras
+  ansible.builtin.command: >-
+    {{ hermes_uv_cmd }} pip install -e ".[all]"
+  args:
+    chdir: "{{ hermes_install_dir }}"
+  environment:
+    VIRTUAL_ENV: "{{ hermes_install_dir }}/venv"
+  register: hermes_pip_install_all
+  failed_when: false
+
+- name: Hermes | Fall back to base install (no extras)
+  ansible.builtin.command: >-
+    {{ hermes_uv_cmd }} pip install -e "."
+  args:
+    chdir: "{{ hermes_install_dir }}"
+  environment:
+    VIRTUAL_ENV: "{{ hermes_install_dir }}/venv"
+  when: hermes_pip_install_all.rc != 0
+
+# --- Node.js dependencies (optional) ---
+
+- name: Hermes | Check for Node.js
+  ansible.builtin.command: which node
+  register: hermes_which_node
+  changed_when: false
+  failed_when: false
+
+- name: Hermes | Install Node.js dependencies
+  ansible.builtin.command: npm install --silent
+  args:
+    chdir: "{{ hermes_install_dir }}"
+  when:
+    - hermes_install_node_deps
+    - hermes_which_node.rc == 0
+  register: hermes_npm_install
+  failed_when: false
+
+- name: Hermes | Warn — Node.js not found for browser tools
+  ansible.builtin.debug:
+    msg: >-
+      Node.js not found; skipping browser/TUI dependency installation.
+      Install Node.js to enable browser tools.
+  when:
+    - hermes_install_node_deps
+    - hermes_which_node.rc != 0
+
+- name: Hermes | Install Playwright Chromium (Debian/Ubuntu with deps)
+  ansible.builtin.command: npx playwright install --with-deps chromium
+  args:
+    chdir: "{{ hermes_install_dir }}"
+  when:
+    - hermes_install_node_deps
+    - hermes_which_node.rc == 0
+    - ansible_os_family == 'Debian'
+  failed_when: false
+
+- name: Hermes | Install Playwright Chromium (other OSes, no auto-deps)
+  ansible.builtin.command: npx playwright install chromium
+  args:
+    chdir: "{{ hermes_install_dir }}"
+  when:
+    - hermes_install_node_deps
+    - hermes_which_node.rc == 0
+    - ansible_os_family != 'Debian'
+  failed_when: false
+
+# --- Command symlink ---
+
+- name: Hermes | Verify hermes entry point exists
+  ansible.builtin.stat:
+    path: "{{ hermes_install_dir }}/venv/bin/hermes"
+  register: hermes_entry_point
+
+- name: Hermes | Ensure command link directory exists
+  ansible.builtin.file:
+    path: "{{ hermes_command_link_dir }}"
+    state: directory
+    mode: "0755"
+  when: hermes_entry_point.stat.exists
+
+- name: Hermes | Symlink hermes command
+  ansible.builtin.file:
+    src: "{{ hermes_install_dir }}/venv/bin/hermes"
+    dest: "{{ hermes_command_link_dir }}/hermes"
+    state: link
+    force: true
+  when: hermes_entry_point.stat.exists
+
+- name: Hermes | Warn — hermes entry point not found
+  ansible.builtin.debug:
+    msg: >-
+      The 'hermes' CLI entry point was not found at
+      {{ hermes_install_dir }}/venv/bin/hermes.
+      The pip install may have failed — check the output above.
+  when: not hermes_entry_point.stat.exists
+
+# --- Configuration directory ---
+
+- name: Hermes | Ensure config directory structure
+  ansible.builtin.file:
+    path: "{{ hermes_home }}/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ hermes_config_subdirs }}"
+  loop_control:
+    label: "{{ hermes_home }}/{{ item }}"
+
+- name: Hermes | Check for existing .env
+  ansible.builtin.stat:
+    path: "{{ hermes_home }}/.env"
+  register: hermes_dot_env
+
+- name: Hermes | Check for .env template in repo
+  ansible.builtin.stat:
+    path: "{{ hermes_install_dir }}/.env.example"
+  register: hermes_dot_env_template
+
+- name: Hermes | Copy .env template
+  ansible.builtin.copy:
+    src: "{{ hermes_install_dir }}/.env.example"
+    dest: "{{ hermes_home }}/.env"
+    mode: "0600"
+    remote_src: true
+  when:
+    - not hermes_dot_env.stat.exists
+    - hermes_dot_env_template.stat.exists
+
+- name: Hermes | Create empty .env
+  ansible.builtin.file:
+    path: "{{ hermes_home }}/.env"
+    state: touch
+    mode: "0600"
+  when:
+    - not hermes_dot_env.stat.exists
+    - not hermes_dot_env_template.stat.exists
+
+- name: Hermes | Check for existing config.yaml
+  ansible.builtin.stat:
+    path: "{{ hermes_home }}/config.yaml"
+  register: hermes_config_yaml
+
+- name: Hermes | Copy config.yaml template
+  ansible.builtin.copy:
+    src: "{{ hermes_install_dir }}/cli-config.yaml.example"
+    dest: "{{ hermes_home }}/config.yaml"
+    mode: "0644"
+    remote_src: true
+  when:
+    - not hermes_config_yaml.stat.exists
+
+- name: Hermes | Check for existing SOUL.md
+  ansible.builtin.stat:
+    path: "{{ hermes_home }}/SOUL.md"
+  register: hermes_soul_md
+
+- name: Hermes | Create default SOUL.md
+  ansible.builtin.copy:
+    content: |
+      # Hermes Agent Persona
+
+      <!--
+      This file defines the agent's personality and tone.
+      The agent will embody whatever you write here.
+      Edit this to customize how Hermes communicates with you.
+
+      This file is loaded fresh each message -- no restart needed.
+      Delete the contents (or this file) to use the default personality.
+      -->
+    dest: "{{ hermes_home }}/SOUL.md"
+    mode: "0644"
+  when: not hermes_soul_md.stat.exists
+
+# --- Verification ---
+
+- name: Hermes | Verify installation
+  ansible.builtin.command: "{{ hermes_install_dir }}/venv/bin/hermes --version"
+  register: hermes_verify
+  changed_when: false
+  failed_when: false
+  when: hermes_entry_point.stat.exists
+
+- name: Hermes | Display installed version
+  ansible.builtin.debug:
+    msg: "hermes {{ hermes_verify.stdout | default('unknown') | trim }} installed to {{ hermes_install_dir }}"
+  when: hermes_entry_point.stat.exists
