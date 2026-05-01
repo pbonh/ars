@@ -8,7 +8,7 @@ hermes_config_dir: "{{ hermes_home_dir }}"
 hermes_skills_dir: "{{ hermes_home_dir }}/skills"
 
 # ── API Keys ──────────────────────────────────────────────────────────────
-hermes_fireworks_api_key: ""
+hermes_fireworks_api_key: "{{ fireworks_api_key | default('') }}"
 # hermes_openrouter_api_key: ""
 # hermes_anthropic_api_key: ""
 
@@ -40,8 +40,7 @@ hermes_custom_providers:
 hermes_config:
   model:
     default: "{{ hermes_model_default }}"
-    provider: custom
-    base_url: "{{ fireworks_base_url }}"
+    provider: "custom:fireworks"
   display:
     streaming: true
     show_reasoning: true
