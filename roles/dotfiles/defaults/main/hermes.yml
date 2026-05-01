@@ -1,8 +1,59 @@
 ---
-hermes_config_dir: "{{ xdg_config_dir }}/hermes"
-hermes_skills_dir: "{{ hermes_config_dir }}/skills"
+# Hermes agent uses ~/.hermes/ as its home directory
+# https://hermes-agent.nousresearch.com/docs/user-guide/configuration
+hermes_home_dir: "{{ ansible_env.HOME }}/.hermes"
+hermes_config_path: "{{ hermes_home_dir }}/config.yaml"
+hermes_env_path: "{{ hermes_home_dir }}/.env"
+hermes_config_dir: "{{ hermes_home_dir }}"
+hermes_skills_dir: "{{ hermes_home_dir }}/skills"
 
-# Wiki skills (from hermes_wiki_example/)
+# ── API Keys ──────────────────────────────────────────────────────────────
+hermes_fireworks_api_key: ""
+# hermes_openrouter_api_key: ""
+# hermes_anthropic_api_key: ""
+
+# ── Model configuration ──────────────────────────────────────────────────
+# Default model: switched via /model custom:fireworks:<model_id>
+hermes_model_default: "accounts/fireworks/models/deepseek-v4-pro"
+
+# ── Custom providers ─────────────────────────────────────────────────────
+# https://hermes-agent.nousresearch.com/docs/integrations/providers#other-compatible-providers
+# https://hermes-agent.nousresearch.com/docs/integrations/providers#named-custom-providers
+# Fireworks AI base URL: https://api.fireworks.ai/inference/v1
+hermes_custom_providers:
+  - name: fireworks
+    base_url: "https://api.fireworks.ai/inference/v1"
+    key_env: FIREWORKS_API_KEY
+    api_mode: chat_completions
+    models:
+      accounts/fireworks/models/glm-5p1:
+        context_length: 131072
+      accounts/fireworks/models/qwen3p6-plus:
+        context_length: 131072
+      accounts/fireworks/models/kimi-k2p6:
+        context_length: 131072
+      accounts/fireworks/models/deepseek-v4-pro:
+        context_length: 131072
+
+# ── Main config.yaml contents ────────────────────────────────────────────
+# Rendered as-is into ~/.hermes/config.yaml
+# Reference: https://hermes-agent.nousresearch.com/docs/user-guide/configuration
+hermes_config:
+  model:
+    default: "{{ hermes_model_default }}"
+    provider: custom
+    base_url: "https://api.fireworks.ai/inference/v1"
+  display:
+    streaming: true
+    show_reasoning: true
+  custom_providers: "{{ hermes_custom_providers }}"
+
+# ── .env contents (secrets) ──────────────────────────────────────────────
+# Written to ~/.hermes/.env — Hermes reads this for API keys
+hermes_env_vars:
+  FIREWORKS_API_KEY: "{{ hermes_fireworks_api_key }}"
+
+# ── Wiki skills (from hermes_wiki_example/) ──────────────────────────────
 hermes_skills:
   - name: "wiki"
     description: "Meta-skill: architecture overview, wiki detection, conventions"
