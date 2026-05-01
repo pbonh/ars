@@ -1,0 +1,19 @@
+{% if skill.content is defined %}
+---
+name: {{ skill.name }}
+description: {{ skill.description }}
+{% if skill.license is defined %}
+license: {{ skill.license }}
+{% endif %}
+{% if skill.compatibility is defined %}
+compatibility: {{ skill.compatibility }}
+{% endif %}
+{% if skill.metadata is defined %}
+metadata:
+{{ skill.metadata | to_nice_yaml(indent=2) | regex_replace('^---\n', '') | indent(2) }}
+{% endif %}
+---
+{{ skill.content | trim }}
+{% else %}
+{{ lookup('file', role_path ~ '/files/' ~ skill.content_file) }}
+{% endif %}

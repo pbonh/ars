@@ -1,0 +1,42 @@
+---
+hermes_config_dir: "{{ xdg_config_dir }}/hermes"
+hermes_skills_dir: "{{ hermes_config_dir }}/skills"
+
+# Wiki skills (from hermes_wiki_example/)
+hermes_skills:
+  - name: "wiki"
+    description: "Meta-skill: architecture overview, wiki detection, conventions"
+    content_file: "hermes/skills/wiki/SKILL.md"
+  - name: "wiki-bootstrap"
+    description: "Initialize a new wiki from the template"
+    content_file: "hermes/skills/wiki-bootstrap/SKILL.md"
+  - name: "wiki-collect"
+    description: "Gather source documents into raw/"
+    content_file: "hermes/skills/wiki-collect/SKILL.md"
+  - name: "wiki-ingest"
+    description: "Read raw/ sources and create/update wiki pages"
+    content_file: "hermes/skills/wiki-ingest/SKILL.md"
+  - name: "wiki-query"
+    description: "Search the wiki and synthesize answers with citations"
+    content_file: "hermes/skills/wiki-query/SKILL.md"
+  - name: "wiki-lint"
+    description: "Audit wiki health: orphans, contradictions, stale claims"
+    content_file: "hermes/skills/wiki-lint/SKILL.md"
+  - name: "wiki-journal"
+    description: "Create and manage research session entries"
+    content_file: "hermes/skills/wiki-journal/SKILL.md"
+  - name: "wiki-generate"
+    description: "Produce artifacts: flashcards, Marp slides, Mermaid diagrams"
+    content_file: "hermes/skills/wiki-generate/SKILL.md"
+
+# Example inline skill:
+# hermes_skills:
+#   - name: "my-skill"
+#     description: "What this skill does and when to use it."
+#     content: |
+#       ---
+#       name: my-skill
+#       description: Use when the user asks about X
+#       ---
+#       # My Skill
+#       Skill instructions here...

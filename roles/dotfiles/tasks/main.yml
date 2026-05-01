@@ -163,6 +163,12 @@
     - pi
     - ai
 
+- name: Configure Hermes
+  import_tasks: tasks/configure_hermes.yml
+  tags:
+    - hermes
+    - ai
+
 - name: Configure Claude Code
   import_tasks: tasks/configure_claude_code.yml
   tags:

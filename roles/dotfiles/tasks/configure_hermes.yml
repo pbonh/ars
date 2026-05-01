@@ -1,0 +1,40 @@
+---
+- name: Hermes | Ensure config directory exists
+  ansible.builtin.file:
+    path: "{{ hermes_config_dir }}"
+    state: directory
+    mode: "0700"
+
+- name: Hermes | Ensure skills directory exists
+  ansible.builtin.file:
+    path: "{{ hermes_skills_dir }}"
+    state: directory
+    mode: "0755"
+  when: hermes_skills | length > 0
+
+- name: Hermes | Create per-skill directories
+  ansible.builtin.file:
+    path: "{{ hermes_skills_dir }}/{{ skill.name }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ hermes_skills }}"
+  loop_control:
+    loop_var: skill
+
+- name: Hermes | Deploy skill directories (static assets)
+  ansible.builtin.copy:
+    src: "hermes/skills/{{ item.name }}/"
+    dest: "{{ hermes_skills_dir }}/{{ item.name }}/"
+    mode: "0644"
+  loop: "{{ hermes_skills | selectattr('content_file', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Hermes | Template SKILL.md files
+  ansible.builtin.template:
+    src: "hermes/SKILL.md.j2"
+    dest: "{{ hermes_skills_dir }}/{{ skill.name }}/SKILL.md"
+    mode: "0644"
+  loop: "{{ hermes_skills }}"
+  loop_control:
+    loop_var: skill
