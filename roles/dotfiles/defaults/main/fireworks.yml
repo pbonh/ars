@@ -57,6 +57,18 @@ fireworks_models:
       output: 3.00
       cacheRead: 0.10
       cacheWrite: 0.50
+  - id: "accounts/fireworks/models/minimax-m2p7"
+    name: "MiniMax M2.7"
+    context_length: 131072
+    contextWindow: 196608
+    maxTokens: 24576
+    reasoning: true
+    input: ["text"]
+    cost:
+      input: 0.30
+      output: 1.20
+      cacheRead: 0.06
+      cacheWrite: 0.30
   - id: "accounts/fireworks/models/deepseek-v4-pro"
     name: "DeepSeek V4 Pro"
     context_length: 131072
