@@ -39,18 +39,59 @@ Re-run the relevant Ansible role (`just homebrew` or `just devbox`) afterwards.
 
 Given input `<path>/book.pdf`:
 
+### 1a — Check for no-text scanned PDF
+
 1. Run `pdffonts <path>/book.pdf | tail -n +3`. Empty output → no embedded fonts.
 2. AND `pdftotext -l 5 <path>/book.pdf -` produces empty/whitespace-only output.
-3. → Scanned PDF. Run:
+3. → No-text scanned PDF. Run:
 
    ```bash
    ocrmypdf --skip-text --output-type pdf <path>/book.pdf <path>/book.ocr.pdf
    ```
 
-   Canonical PDF = `<path>/book.ocr.pdf`. Record `is_scanned: true`.
-4. Otherwise canonical = original. Record `is_scanned: false`.
+   Canonical PDF = `<path>/book.ocr.pdf`. Record `is_scanned: true`, `scan_type: no_text`.
 
-If `ocrmypdf` fails, write `manifest.json` with `status: failed`, `failed_step: ocr`, and abort this book.
+### 1b — Check for scanned PDF with OCR overlay (CRITICAL — many "text-layered" PDFs are actually this)
+
+Many PDFs appear text-layered (they have embedded fonts and `pdftotext` produces output) but are actually scanned page images with an invisible OCR text overlay. The OCR text layer is often unreliable — it contains word-internal spacing artifacts, garbled characters, jumbled columns, and broken hyphenation. **These PDFs must be detected and flagged for vision processing.**
+
+Run these checks:
+
+```bash
+# Count full-page images: one large image per page = scanned book
+pdfimages -list -f 1 -l 20 <path>/book.pdf
+```
+
+If **every page has exactly one image** and the images are large (width ≥ 1500px or height ≥ 2000px, roughly letter/A4 at 150+ dpi), this is a scanned PDF with OCR overlay.
+
+Also sample the text quality:
+
+```bash
+pdftotext -layout -f 1 -l 10 <path>/book.pdf -
+```
+
+Check the first 10 pages' extracted text for OCR artifact patterns:
+- Word-internal spacing: `\b[a-zA-Z]\s[a-zA-Z]\s[a-zA-Z]` matching common words like `t o`, `i t`, `o f`, `a n d`, `t h e`, `y o u` — count occurrences per 1000 characters.
+- Garbled sequences: lines containing 4+ consecutive consonants with no vowels (e.g., `futreds`, `prgdnaay`) — count per page.
+- Excessive inter-word spacing: lines with 5+ consecutive spaces in paragraph-like text.
+
+**Decision matrix:**
+
+| Condition | Classification |
+|-----------|---------------|
+| No fonts AND no text (1a) | `is_scanned: true`, `scan_type: no_text` — run `ocrmypdf` |
+| Full-page image on every page AND text layer exists | `is_scanned: true`, `scan_type: ocr_overlay` — canonical = original PDF (OCR already present), skip `ocrmypdf` |
+| Text layer with ≥5 word-internal spacing artifacts per 1000 chars | `is_scanned: true`, `scan_type: ocr_overlay` — canonical = original |
+| Text layer with ≥1 garbled sequence per 3 pages sampled | `is_scanned: true`, `scan_type: ocr_overlay` — canonical = original |
+| Text layer appears clean (none of the above) | `is_scanned: false`, `scan_type: native` — canonical = original |
+
+When `scan_type: ocr_overlay`, do NOT re-run `ocrmypdf` — the OCR layer already exists. Instead, the vision pass in Step 4c will read the page images directly and use the OCR text only as a hint.
+
+### 1c — Default
+
+If neither 1a nor 1b matched: canonical = original. Record `is_scanned: false`, `scan_type: native`.
+
+If `ocrmypdf` fails (1a path only), write `manifest.json` with `status: failed`, `failed_step: ocr`, and abort this book.
 
 ## Step 2 — Detect document structure
 
@@ -149,11 +190,13 @@ For each section in the detected structure, in order:
 |-----------------|-----------|----------|
 | `always` | — | Vision pass every page |
 | `never` | — | Text-only rules pass |
-| `auto` (default) | `is_scanned == true` | Vision pass every page |
+| `auto` (default) | `is_scanned == true` (any `scan_type`) | Vision pass every page |
 | `auto` | `is_scanned == false` AND section contains tables/equations/complex layout | Vision pass for flagged pages, text for others |
 | `auto` | `is_scanned == false` AND clean text layout | Text-only rules pass |
 
-**Heuristic for auto-detection on text-layered PDFs:**
+**IMPORTANT**: When `scan_type: ocr_overlay`, the vision pass MUST be used for all pages. The OCR text layer is unreliable and must not be the sole source of content. The page image is the ground truth; the OCR text serves only as a readability hint during the vision pass.
+
+**Heuristic for auto-detection on text-layered PDFs (`scan_type: native`):**
 Run `pdftotext -layout -f <start> -l <end> <canonical> -` on the section. If any page shows:
 - More than 30% non-ASCII or garbled characters, OR
 - Lines that look like table rows (≥3 column-aligned number/word groups separated by 2+ spaces), OR
@@ -195,9 +238,16 @@ For sections or pages flagged for vision processing:
    ```
 
 3. **Per-page vision analysis.** For each page image `page-NN.png`:
-   - Read the image via the image tool.
-   - Read the corresponding `page-NN.txt` for raw text reference.
-   - Emit cleaned markdown for that page following the rules in `references/page-processing.md`.
+   - Read the image via the image tool — **this is the primary source of truth** for scanned PDFs.
+   - Read the corresponding `page-NN.txt` for raw text reference — this is a *hint only*; for scanned PDFs it contains OCR artifacts (word-internal spacing, garbled boundaries, jumbled columns) that must be corrected from the image.
+   - Emit cleaned markdown for that page following the rules in `references/page-processing.md`. Critically:
+     - **Remove all running headers, footers, and page numbers** (ALL CAPS book/chapter title repeats, standalone page numbers, combined header+page-number lines).
+     - **Fix OCR word-internal spacing** (`t o` → `to`, `i t` → `it`, `o f` → `of`, `a n d` → `and`, `y o u` → `you`, etc.).
+     - **Collapse excessive inter-word spacing** to single spaces.
+     - **Reconstruct garbled text** from the image when the OCR produced nonsense character sequences.
+     - **Reflow paragraphs** into continuous prose with no internal line breaks.
+     - **Normalize ALL CAPS body text** to proper case (use **bold** for original emphasis).
+     - **Rejoin broken hyphenation** (line-break hyphens → rejoin word; keep legitimate compound hyphens).
    - Append to a per-section accumulator, separated by `\n\n` between pages.
 
 4. **Extract embedded images/figures** (text-layered PDFs only):
@@ -208,9 +258,17 @@ For sections or pages flagged for vision processing:
 
    Review extracted images. Discard tiny images (<10KB, likely icons) and duplicates. Rename significant ones to `fig-NN.ext` and reference them in the markdown as `![description](assets/images/<slug>/fig-NN.ext)` when the vision pass identifies a figure with a caption.
 
-5. **Write `src/<slug>.md`** from the accumulator.
+5. **Post-process the section accumulator.** Before writing the file, scan the accumulated markdown for remaining artifacts:
+   - Residual running headers/footers (look for ALL CAPS lines that repeat the chapter title or book title, especially with trailing digits).
+   - Any remaining word-internal spacing in common short words (` t o `, ` i t `, ` o f `, ` a n d `, ` t h e `, etc.).
+   - Lines with excessive inter-word spacing (3+ consecutive spaces within a line that is not a table or code block).
+   - Garbled character sequences (runs of 4+ consonants with no vowels, nonsensical word fragments).
+   - Stray standalone page numbers on their own line.
+   Remove or correct all of these. This is a safety net; most should have been caught per-page.
 
-6. **Clean up scratch text files** but retain page images and extracted figures in `src/assets/images/` so the built book includes them.
+6. **Write `src/<slug>.md`** from the cleaned accumulator.
+
+7. **Clean up scratch text files** but retain page images and extracted figures in `src/assets/images/` so the built book includes them.
 
 ### 4d — Front matter and back matter handling
 
@@ -261,6 +319,7 @@ Write `<out>/manifest.json`:
   "source_pdf": "book.pdf",
   "canonical_pdf": "book.ocr.pdf",
   "is_scanned": true,
+  "scan_type": "no_text",
   "page_count": 612,
   "page_offset": 12,
   "detection_method": "bookmarks",
@@ -302,6 +361,7 @@ Write `<out>/manifest.json`:
 ```
 
 Field notes:
+- `scan_type`: `"no_text"` (no OCR layer, ocrmypdf was run), `"ocr_overlay"` (scanned images with invisible OCR text layer, vision pass required), or `"native"` (digitally-born PDF with reliable text layer).
 - `strategy` per section: `"text"`, `"vision"`, or `"mixed"`.
 - `vision_mode`: the effective mode used (`auto`/`always`/`never`).
 - `failed_step`: `ocr`, `detect_outline`, `detect_llm`, `scaffold`, `extract`, `build`.
