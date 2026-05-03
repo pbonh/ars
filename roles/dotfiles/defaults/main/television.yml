@@ -164,24 +164,19 @@ television_channels:
         mode: "execute"
 
   zellij-sessions:
-    description: "Switch to a running Zellij session — Enter switches or attaches"
+    description: "Attach to a Zellij session — best run from outside zellij"
     requirements: ["zellij"]
     source:
       command: "zellij list-sessions -s"
     keybindings:
-      enter: "switch_or_attach"
+      enter: "attach"
     actions:
-      switch_or_attach:
-        description: "Switch to the session (when inside zellij) or attach (when outside)"
-        command: |
-          if [ -n "$ZELLIJ" ]; then
-            zellij action switch-session '{0}'
-          else
-            zellij attach '{0}'
-          fi
+      attach:
+        description: "Attach to the selected zellij session"
+        command: "zellij attach '{0}'"
         mode: "execute"
 
-  zellij-panes:
+  zellij-tabs:
     description: "Jump to a tab in the current Zellij session"
     requirements: ["zellij"]
     source:
@@ -199,8 +194,9 @@ television_channels:
     description: "Open a git worktree in a new Zellij tab"
     requirements: ["git", "zellij"]
     source:
-      # Output absolute paths only (one per line).
-      command: "git worktree list --porcelain | awk '/^worktree /{print $2}'"
+      # `awk sub(...)` strips the literal "worktree " prefix and emits the rest of the line,
+      # preserving paths that contain spaces.
+      command: "git worktree list --porcelain | awk '/^worktree /{sub(/^worktree /, \"\"); print}'"
     preview:
       command: "git -C '{0}' log --oneline -5 2>/dev/null"
     keybindings:
