@@ -18,6 +18,7 @@ television_input_bar_prompt: ">"
 television_input_bar_border: "rounded"
 
 television_results_panel_border: "rounded"
+television_status_bar_hidden: false
 television_preview_panel_size: 50
 television_preview_panel_border: "rounded"
 television_help_panel_show_categories: true

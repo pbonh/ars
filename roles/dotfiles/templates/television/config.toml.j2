@@ -19,7 +19,7 @@ border_type = "{{ television_input_bar_border }}"
 [ui.status_bar]
 separator_open = ""
 separator_close = ""
-hidden = false
+hidden = {{ television_status_bar_hidden | string | lower }}
 
 [ui.results_panel]
 border_type = "{{ television_results_panel_border }}"
