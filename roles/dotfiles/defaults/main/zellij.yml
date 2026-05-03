@@ -55,7 +55,7 @@ zellij_plugins:
     url: "https://github.com/fresh2dev/zellij-autolock/releases/latest/download/zellij-autolock.wasm"
     load_on_startup:
       args:
-        triggers: "nvim|hx|fzf|yazi|btm|less|man|lazygit|atuin|zoxide"
+        triggers: "nvim|hx|fzf|yazi|btm|less|man|lazygit|atuin|zoxide|tv"
         reaction_seconds: "1.0"
   zjstatus:
     url: "https://github.com/dj95/zjstatus/releases/download/v0.13.1/zjstatus.wasm"
