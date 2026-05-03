@@ -27,4 +27,29 @@ television_remote_show_descriptions: true
 television_remote_sort_alphabetically: true
 
 # Channels — populated in Tasks 2-4.
-television_channels: {}
+television_channels:
+  zellij-layouts:
+    description: "Pick a Zellij layout — Enter for new tab, Alt+s for new session"
+    source:
+      # Each layout key on its own line. Generated from zellij_kdl_layouts at template time.
+      command: >-
+        printf '%s\n' {{ (zellij_kdl_layouts | default({})).keys() | map('quote') | join(' ') }}
+    preview:
+      command: "echo 'Layout: {0}'"
+    keybindings:
+      enter: "new_tab_or_session"
+      alt-s: "new_session"
+    actions:
+      new_tab_or_session:
+        description: "New tab in current zellij session (or new session if outside zellij)"
+        command: |
+          if [ -n "$ZELLIJ" ]; then
+            zellij action new-tab --layout '{0}'
+          else
+            zellij --layout '{0}'
+          fi
+        mode: "execute"
+      new_session:
+        description: "Start a new zellij session with this layout"
+        command: "zellij --layout '{0}'"
+        mode: "execute"

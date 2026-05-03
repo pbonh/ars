@@ -16,3 +16,15 @@
     src: television/config.toml.j2
     dest: "{{ television_config_dir }}/config.toml"
     mode: '0644'
+
+- name: Television | Deploy Cable Channels | template
+  vars:
+    tv_channel_name: "{{ item.key }}"
+    tv_channel: "{{ item.value }}"
+  template:
+    src: television/cable/_channel.toml.j2
+    dest: "{{ television_cable_dir }}/{{ item.key }}.toml"
+    mode: '0644'
+  loop: "{{ television_channels | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
