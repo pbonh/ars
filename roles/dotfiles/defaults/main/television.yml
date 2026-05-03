@@ -39,8 +39,6 @@ zellij_actions_catalog:
   "Toggle Sync": "toggle-pane-sync-tab"
   "Move Tab Left": "move-tab left"
   "Move Tab Right": "move-tab right"
-  "Rename Session": "rename-session"
-  "Rename Tab": "rename-tab"
   "Close Pane": "close-pane"
   "Close Tab": "close-tab"
 
@@ -78,8 +76,13 @@ television_channels:
       command: >-
         printf '%s\n' {{ (zellij_ai_agents | default({})).keys() | map('quote') | join(' ') }}
     preview:
-      command: >-
-        printf 'Agent: %s\nCommand: %s\n' '{0}' "$(echo '{ {%- for k, v in (zellij_ai_agents | default({})).items() %}\"{{ k }}\":\"{{ v.command }}\"{% if not loop.last %},{% endif %}{%- endfor %} }' | jq -r '.[\"{0}\"]')"
+      command: |
+        {%- set agents = zellij_ai_agents | default({}) %}
+        case '{0}' in
+        {%- for k, v in agents.items() %}
+          {{ k }}) printf 'Agent: %s\nCommand: %s\n' '{{ k }}' '{{ v.command }}' ;;
+        {%- endfor %}
+        esac
     keybindings:
       enter: "open_floating"
       alt-t: "open_in_tab"
@@ -120,8 +123,13 @@ television_channels:
           | join(' ')
         }}
     preview:
-      command: >-
-        printf 'Plugin: %s\nKey: %s\n' '{0}' "$(echo '{ {%- for k, v in (zellij_plugins | default({})).items() if v.launch_keybinding is defined %}\"{{ k }}\":\"{{ v.launch_keybinding.key }}\"{% if not loop.last %},{% endif %}{%- endfor %} }' | jq -r '.[\"{0}\"]')"
+      command: |
+        {%- set plugins = zellij_plugins | default({}) %}
+        case '{0}' in
+        {%- for k, v in plugins.items() if v.launch_keybinding is defined %}
+          {{ k }}) printf 'Plugin: %s\nKey: %s\n' '{{ k }}' '{{ v.launch_keybinding.key }}' ;;
+        {%- endfor %}
+        esac
     keybindings:
       enter: "launch_plugin"
     actions:
