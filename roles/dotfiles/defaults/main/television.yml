@@ -26,6 +26,24 @@ television_help_panel_hidden: true
 television_remote_show_descriptions: true
 television_remote_sort_alphabetically: true
 
+# Curated catalog for the zellij-actions cable channel. Each entry maps a
+# human-readable label to the `zellij action` subcommand that runs.
+zellij_actions_catalog:
+  "New Pane": "new-pane"
+  "New Pane (Right)": "new-pane --direction right"
+  "New Pane (Down)": "new-pane --direction down"
+  "New Floating Pane": "new-pane --floating"
+  "New Tab": "new-tab"
+  "Toggle Fullscreen": "toggle-fullscreen"
+  "Toggle Floating": "toggle-floating-panes"
+  "Toggle Sync": "toggle-pane-sync-tab"
+  "Move Tab Left": "move-tab left"
+  "Move Tab Right": "move-tab right"
+  "Rename Session": "rename-session"
+  "Rename Tab": "rename-tab"
+  "Close Pane": "close-pane"
+  "Close Tab": "close-tab"
+
 # Channels — populated in Tasks 2-4.
 television_channels:
   zellij-layouts:
@@ -52,4 +70,87 @@ television_channels:
       new_session:
         description: "Start a new zellij session with this layout"
         command: "zellij --layout '{0}'"
+        mode: "execute"
+
+  zellij-ai-agents:
+    description: "Launch an AI agent — Enter floats, Alt+t opens in new tab"
+    source:
+      command: >-
+        printf '%s\n' {{ (zellij_ai_agents | default({})).keys() | map('quote') | join(' ') }}
+    preview:
+      command: >-
+        printf 'Agent: %s\nCommand: %s\n' '{0}' "$(echo '{ {%- for k, v in (zellij_ai_agents | default({})).items() %}\"{{ k }}\":\"{{ v.command }}\"{% if not loop.last %},{% endif %}{%- endfor %} }' | jq -r '.[\"{0}\"]')"
+    keybindings:
+      enter: "open_floating"
+      alt-t: "open_in_tab"
+    actions:
+      open_floating:
+        description: "Open AI agent in a floating pane"
+        command: |
+          {%- set agents = zellij_ai_agents | default({}) %}
+          case '{0}' in
+          {%- for k, v in agents.items() %}
+            {{ k }}) zellij action new-pane --floating --name "{{ v.pane_name }}" -- {{ v.command }} ;;
+          {%- endfor %}
+          esac
+        mode: "execute"
+      open_in_tab:
+        description: "Open AI agent in a new tab"
+        command: |
+          {%- set agents = zellij_ai_agents | default({}) %}
+          case '{0}' in
+          {%- for k, v in agents.items() %}
+            {{ k }}) zellij action new-tab --name "{{ v.pane_name }}" -- {{ v.command }} ;;
+          {%- endfor %}
+          esac
+        mode: "execute"
+
+  zellij-plugins:
+    description: "Launch a Zellij plugin — Enter focuses or launches the plugin"
+    source:
+      # Only plugins with a launch_keybinding are listed; load_on_startup-only
+      # plugins (autolock, zjstatus) are background-only and not user-launchable.
+      command: >-
+        printf '%s\n' {{
+          (zellij_plugins | default({}))
+          | dict2items
+          | selectattr('value.launch_keybinding', 'defined')
+          | map(attribute='key')
+          | map('quote')
+          | join(' ')
+        }}
+    preview:
+      command: >-
+        printf 'Plugin: %s\nKey: %s\n' '{0}' "$(echo '{ {%- for k, v in (zellij_plugins | default({})).items() if v.launch_keybinding is defined %}\"{{ k }}\":\"{{ v.launch_keybinding.key }}\"{% if not loop.last %},{% endif %}{%- endfor %} }' | jq -r '.[\"{0}\"]')"
+    keybindings:
+      enter: "launch_plugin"
+    actions:
+      launch_plugin:
+        description: "LaunchOrFocus the selected plugin"
+        command: |
+          {%- set plugins = zellij_plugins | default({}) %}
+          case '{0}' in
+          {%- for k, v in plugins.items() if v.launch_keybinding is defined %}
+            {{ k }}) zellij action launch-or-focus-plugin "file:{{ zellij_plugin_dir }}/{{ v.url | basename }}" ;;
+          {%- endfor %}
+          esac
+        mode: "execute"
+
+  zellij-actions:
+    description: "Run a common Zellij action against the current session"
+    source:
+      command: >-
+        printf '%s\n' {{ (zellij_actions_catalog | default({})).keys() | map('quote') | join(' ') }}
+    keybindings:
+      enter: "run_action"
+    actions:
+      run_action:
+        description: "Run the selected zellij action"
+        command: |
+          {%- set catalog = zellij_actions_catalog | default({}) %}
+          case '{0}' in
+          {%- for label, sub in catalog.items() %}
+            {{ label | to_json }}) zellij action {{ sub }} ;;
+          {%- endfor %}
+          esac
         mode: "execute"
