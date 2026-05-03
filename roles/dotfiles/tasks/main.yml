@@ -121,6 +121,12 @@
     - zellij
     - session
 
+- name: Television Config
+  import_tasks: tasks/television.yml
+  tags:
+    - television
+    - session
+
 - name: Ranger-Zoxide Plugin
   import_tasks: tasks/ranger_zoxide.yml
   tags:

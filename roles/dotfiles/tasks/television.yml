@@ -1,0 +1,18 @@
+---
+- name: Television | Setup Television Config Directory | file
+  file:
+    path: "{{ television_config_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Television | Setup Television Cable Directory | file
+  file:
+    path: "{{ television_cable_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Television | Deploy Global Config | template
+  template:
+    src: television/config.toml.j2
+    dest: "{{ television_config_dir }}/config.toml"
+    mode: '0644'

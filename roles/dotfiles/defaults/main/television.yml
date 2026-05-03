@@ -1,0 +1,29 @@
+---
+television_config_dir: "{{ xdg_config_dir }}/television"
+television_cable_dir: "{{ television_config_dir }}/cable"
+
+# Global config.toml settings — preserved from the user's prior config so
+# behavior (history, prompt, keybindings, shell integration) is unchanged.
+television_tick_rate: 50
+television_default_channel: "files"
+television_history_size: 200
+television_global_history: false
+
+television_ui_scale: 100
+television_ui_orientation: "landscape"
+television_theme: "default"
+
+television_input_bar_position: "top"
+television_input_bar_prompt: ">"
+television_input_bar_border: "rounded"
+
+television_results_panel_border: "rounded"
+television_preview_panel_size: 50
+television_preview_panel_border: "rounded"
+television_help_panel_show_categories: true
+television_help_panel_hidden: true
+television_remote_show_descriptions: true
+television_remote_sort_alphabetically: true
+
+# Channels — populated in Tasks 2-4.
+television_channels: {}

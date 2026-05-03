@@ -1,0 +1,93 @@
+# Managed by Ansible: roles/dotfiles/templates/television/config.toml.j2
+# Edit roles/dotfiles/defaults/main/television.yml and re-run the role.
+
+tick_rate = {{ television_tick_rate }}
+default_channel = "{{ television_default_channel }}"
+history_size = {{ television_history_size }}
+global_history = {{ television_global_history | string | lower }}
+
+[ui]
+ui_scale = {{ television_ui_scale }}
+orientation = "{{ television_ui_orientation }}"
+theme = "{{ television_theme }}"
+
+[ui.input_bar]
+position = "{{ television_input_bar_position }}"
+prompt = "{{ television_input_bar_prompt }}"
+border_type = "{{ television_input_bar_border }}"
+
+[ui.status_bar]
+separator_open = ""
+separator_close = ""
+hidden = false
+
+[ui.results_panel]
+border_type = "{{ television_results_panel_border }}"
+
+[ui.preview_panel]
+size = {{ television_preview_panel_size }}
+scrollbar = true
+border_type = "{{ television_preview_panel_border }}"
+hidden = false
+
+[ui.help_panel]
+show_categories = {{ television_help_panel_show_categories | string | lower }}
+hidden = {{ television_help_panel_hidden | string | lower }}
+
+[ui.remote_control]
+show_channel_descriptions = {{ television_remote_show_descriptions | string | lower }}
+sort_alphabetically = {{ television_remote_sort_alphabetically | string | lower }}
+
+[keybindings]
+esc = "quit"
+ctrl-c = "quit"
+down = "select_next_entry"
+ctrl-n = "select_next_entry"
+ctrl-j = "select_next_entry"
+up = "select_prev_entry"
+ctrl-p = "select_prev_entry"
+ctrl-up = "select_prev_history"
+ctrl-down = "select_next_history"
+tab = "toggle_selection_down"
+backtab = "toggle_selection_up"
+enter = "confirm_selection"
+pagedown = "scroll_preview_half_page_down"
+pageup = "scroll_preview_half_page_up"
+ctrl-f = "cycle_previews"
+ctrl-y = "copy_entry_to_clipboard"
+ctrl-r = "reload_source"
+ctrl-s = "cycle_sources"
+ctrl-t = "toggle_remote_control"
+ctrl-x = "toggle_action_picker"
+ctrl-o = "toggle_preview"
+ctrl-h = "toggle_help"
+f12 = "toggle_status_bar"
+ctrl-l = "toggle_layout"
+backspace = "delete_prev_char"
+ctrl-w = "delete_prev_word"
+ctrl-u = "delete_line"
+delete = "delete_next_char"
+left = "go_to_prev_char"
+right = "go_to_next_char"
+home = "go_to_input_start"
+ctrl-a = "go_to_input_start"
+end = "go_to_input_end"
+ctrl-e = "go_to_input_end"
+
+[shell_integration]
+fallback_channel = "files"
+
+[shell_integration.channel_triggers]
+"alias" = ["alias", "unalias"]
+"env" = ["export", "unset"]
+"dirs" = ["cd", "ls", "rmdir", "z"]
+"files" = ["cat", "less", "head", "tail", "vim", "nano", "bat", "cp", "mv", "rm", "touch", "chmod", "chown", "ln", "tar", "zip", "unzip", "gzip", "gunzip", "xz"]
+"git-diff" = ["git add", "git restore"]
+"git-branch" = ["git checkout", "git branch", "git merge", "git rebase", "git pull", "git push"]
+"git-log" = ["git log", "git show"]
+"docker-images" = ["docker run"]
+"git-repos" = ["nvim", "code", "hx", "git clone"]
+
+[shell_integration.keybindings]
+"smart_autocomplete" = "ctrl-t"
+"command_history" = "ctrl-r"
