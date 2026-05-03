@@ -10,6 +10,15 @@ keybinds {
             }
         }
         {% endfor %}
+        {% for name, kb in (zellij_television_keybindings | default({})).items() %}
+        bind "{{ kb.key }}" {
+            Run "tv"{% for arg in (kb.args | default([])) %} "{{ arg }}"{% endfor %} {
+                floating true
+                close_on_exit true
+            }
+            SwitchToMode "Normal"
+        }
+        {% endfor %}
     }
 }
 
