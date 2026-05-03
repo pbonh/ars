@@ -29,6 +29,22 @@
   loop_control:
     label: "{{ item.key }}"
 
+- name: Television | Find Existing Zellij Cable Files | find
+  find:
+    paths: "{{ television_cable_dir }}"
+    patterns: "zellij-*.toml"
+    file_type: file
+  register: existing_zellij_cable_files
+
+- name: Television | Remove Orphaned Zellij Cable Files | file
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ existing_zellij_cable_files.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  when: (item.path | basename | regex_replace('\\.toml$', '')) not in television_channels.keys()
+
 - name: Television | Remove orphaned forgot plugin wasm | file
   file:
     path: "{{ zellij_plugin_dir }}/zellij_forgot.wasm"

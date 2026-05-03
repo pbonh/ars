@@ -36,7 +36,7 @@ zellij_actions_catalog:
   "New Tab": "new-tab"
   "Toggle Fullscreen": "toggle-fullscreen"
   "Toggle Floating": "toggle-floating-panes"
-  "Toggle Sync": "toggle-pane-sync-tab"
+  "Toggle Sync": "toggle-active-sync-tab"
   "Move Tab Left": "move-tab left"
   "Move Tab Right": "move-tab right"
   "Close Pane": "close-pane"
@@ -173,7 +173,13 @@ television_channels:
     actions:
       attach:
         description: "Attach to the selected zellij session"
-        command: "zellij attach '{0}'"
+        command: |
+          if [ -n "$ZELLIJ" ]; then
+            printf 'Cannot switch sessions from inside zellij.\nDetach first (Ctrl+o, d) and run: zellij attach %s\n\nPress any key to dismiss...' '{0}'
+            read -r -n 1 _
+          else
+            zellij attach '{0}'
+          fi
         mode: "execute"
 
   zellij-tabs:
