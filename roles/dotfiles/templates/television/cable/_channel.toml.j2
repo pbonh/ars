@@ -2,8 +2,8 @@
 # Edit roles/dotfiles/defaults/main/television.yml -> television_channels[{{ tv_channel_name }}]
 
 [metadata]
-name = "{{ tv_channel_name }}"
-description = "{{ tv_channel.description }}"
+name = {{ tv_channel_name | to_json }}
+description = {{ tv_channel.description | to_json }}
 {% if tv_channel.requirements is defined %}
 requirements = {{ tv_channel.requirements | to_json }}
 {% endif %}
@@ -22,15 +22,19 @@ entry_delimiter = {{ tv_channel.source.entry_delimiter | to_json }}
 command = {{ tv_channel.preview.command | to_json }}
 {% endif %}
 
+{% if tv_channel.keybindings is defined %}
 [keybindings]
 {% for shortcut, action_name in tv_channel.keybindings.items() %}
 {{ shortcut }} = "actions:{{ action_name }}"
 {% endfor %}
+{% endif %}
 
+{% if tv_channel.actions is defined %}
 {% for action_name, action in tv_channel.actions.items() %}
 [actions.{{ action_name }}]
 description = {{ action.description | to_json }}
 command = {{ action.command | to_json }}
-mode = "{{ action.mode | default('execute') }}"
+mode = {{ action.mode | default('execute') | to_json }}
 
 {% endfor %}
+{% endif %}
