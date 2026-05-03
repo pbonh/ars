@@ -28,3 +28,8 @@
   loop: "{{ television_channels | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
+
+- name: Television | Remove orphaned forgot plugin wasm | file
+  file:
+    path: "{{ zellij_plugin_dir }}/zellij_forgot.wasm"
+    state: absent

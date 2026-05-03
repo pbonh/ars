@@ -23,13 +23,6 @@ zellij_env_variables_file: |
 zellij_plugins:
   mini_ci:
     url: "https://github.com/imsnif/multitask/releases/download/0.38.2v2/multitask.wasm"
-  forgot:
-    url: "https://github.com/karimould/zellij-forgot/releases/download/0.3.0/zellij_forgot.wasm"
-    launch_keybinding:
-      key: "Ctrl k"
-      args:
-        LOAD_ZELLIJ_BINDINGS: "true"
-        floating: true
   room:
     url: "https://github.com/rvcas/room/releases/latest/download/room.wasm"
     launch_keybinding:
