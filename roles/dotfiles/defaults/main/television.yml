@@ -162,3 +162,56 @@ television_channels:
           {%- endfor %}
           esac
         mode: "execute"
+
+  zellij-sessions:
+    description: "Switch to a running Zellij session — Enter switches or attaches"
+    requirements: ["zellij"]
+    source:
+      command: "zellij list-sessions -s"
+    keybindings:
+      enter: "switch_or_attach"
+    actions:
+      switch_or_attach:
+        description: "Switch to the session (when inside zellij) or attach (when outside)"
+        command: |
+          if [ -n "$ZELLIJ" ]; then
+            zellij action switch-session '{0}'
+          else
+            zellij attach '{0}'
+          fi
+        mode: "execute"
+
+  zellij-panes:
+    description: "Jump to a tab in the current Zellij session"
+    requirements: ["zellij"]
+    source:
+      # query-tab-names emits one tab name per line.
+      command: "zellij action query-tab-names"
+    keybindings:
+      enter: "go_to_tab"
+    actions:
+      go_to_tab:
+        description: "Switch focus to the selected tab"
+        command: "zellij action go-to-tab-name '{0}'"
+        mode: "execute"
+
+  zellij-worktrees:
+    description: "Open a git worktree in a new Zellij tab"
+    requirements: ["git", "zellij"]
+    source:
+      # Output absolute paths only (one per line).
+      command: "git worktree list --porcelain | awk '/^worktree /{print $2}'"
+    preview:
+      command: "git -C '{0}' log --oneline -5 2>/dev/null"
+    keybindings:
+      enter: "open_in_tab"
+    actions:
+      open_in_tab:
+        description: "Open a new tab with the worktree as cwd"
+        command: |
+          if [ -n "$ZELLIJ" ]; then
+            zellij action new-tab --cwd '{0}'
+          else
+            (cd '{0}' && zellij)
+          fi
+        mode: "execute"
