@@ -64,6 +64,10 @@ zellij_plugins:
   #           SwitchToMode "Normal"
   #       }
 zellij_television_keybindings:
+  # Direct per-channel keys avoid the remote-control flow: when channels are
+  # entered via `--show-remote`, TV's per-channel `enter = "actions:run_action"`
+  # binding races with the channel-switch Enter and silently quits without
+  # firing the action.
   master:
     key: "Ctrl k"
     args: ["--show-remote"]      # null-channel: launch remote-control browser
@@ -73,6 +77,21 @@ zellij_television_keybindings:
   ai_agents:
     key: "Alt a"
     args: ["zellij-ai-agents"]
+  actions:
+    key: "Alt r"
+    args: ["zellij-actions"]
+  tabs:
+    key: "Alt j"
+    args: ["zellij-tabs"]
+  worktrees:
+    key: "Alt w"
+    args: ["zellij-worktrees"]
+  sessions:
+    key: "Alt e"
+    args: ["zellij-sessions"]
+  plugins:
+    key: "Alt p"
+    args: ["zellij-plugins"]
 zellij_kdl_config_file: "{{ zellij_config_dir }}/config.kdl"
 zellij_worktrunk_switch_alias: "zws"
 zellij_worktrunk_switch_all_alias: "zwsb"
