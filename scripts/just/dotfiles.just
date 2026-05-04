@@ -36,10 +36,10 @@ pick:
   #!/usr/bin/env bash
   set -euo pipefail
   picker=""
-  if command -v fzf >/dev/null 2>&1; then
-    picker="fzf --multi --prompt=ansible-tag:❯ --height=40% --reverse --border"
-  elif command -v tv >/dev/null 2>&1; then
+  if command -v tv >/dev/null 2>&1; then
     picker="tv"
+  elif command -v fzf >/dev/null 2>&1; then
+    picker="fzf --multi --prompt=ansible-tag:❯ --height=40% --reverse --border"
   else
     echo "pick: requires fzf or tv on PATH" >&2
     exit 1
