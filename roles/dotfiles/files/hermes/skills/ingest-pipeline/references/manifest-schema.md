@@ -66,9 +66,9 @@ manifests written by `split-textbooks` and `pdf-to-mdbook`.
 | `phases[].name` | enum `split` \| `mdbook` \| `scaffold` \| `build` | Which logical phase this entry represents. |
 | `phases[].skill` | string \| `null` | Name of the sub-skill invoked, or `null` for in-orchestrator inline work. |
 | `phases[].status` | enum `pending` \| `in_progress` \| `complete` \| `failed` | Phase-local status. |
-| `phases[].manifest` | string (relative path) | Path to the sub-skill's `manifest.json` (relative to `book_root`). |
-| `phases[].subagent_invocation_id` | string | Opaque ID returned by Hermes' subagent delegation. Retained for log retracing. |
-| `failed_phase` | enum \| `null` | When `status: failed`, which phase tipped over. |
+| `phases[].manifest` | string (relative path) \| absent | Path to the sub-skill's `manifest.json` (relative to `book_root`). Omitted when `phases[].skill` is `null` (inline phases produce no sub-skill manifest). |
+| `phases[].subagent_invocation_id` | string \| absent | Opaque ID returned by Hermes' subagent delegation. Retained for log retracing. Omitted when `phases[].skill` is `null` (inline phases). |
+| `failed_phase` | enum `split` \| `mdbook` \| `scaffold` \| `build` \| `null` | When `status: failed`, which phase tipped over. |
 | `error_message` | string \| `null` | Free-form error from the failed phase. |
 | `notes` | array of strings | Free-form reconciliations (e.g., `"filesystem reclassified to S2 from S5; user deleted mdbook dir"`). |
 
