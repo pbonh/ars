@@ -14,11 +14,17 @@ Convert a single PDF into a complete, buildable mdBook. The skill handles both d
 
 ## Inputs
 
-The user provides:
-- Absolute path to the PDF file.
-- `--output-dir <path>` (optional) — mdBook root directory. Default: `<pdf-dir>/<stem>-mdbook/`.
-- `--vision <mode>` (optional) — `auto` (default), `always`, or `never`. Controls when the vision LLM pass runs.
-- `--force` (optional) — Overwrite existing output directory.
+The user provides one of:
+- **A single PDF file** — absolute path. Existing path: Steps 1–7 below.
+- **A directory of pre-split PDF slices** (from `split-textbooks`) —
+  absolute path. New path: Step 0.5 detects this and skips Steps 1–2.
+
+Optional flags:
+- `--output-dir <path>` — mdBook root directory.
+  - For PDF input, default: `<pdf-dir>/<stem>-mdbook/`.
+  - For directory input, default: `<dir>/<dirname>-mdbook/`.
+- `--vision <mode>` — `auto` (default), `always`, or `never`. Controls when the vision LLM pass runs.
+- `--force` — Overwrite existing output directory.
 
 ## Step 0 — Environment self-check
 
@@ -34,6 +40,63 @@ If any are missing, print install hints and abort:
 - Linux/devbox: `devbox add poppler qpdf ocrmypdf mdbook jq`
 
 Re-run the relevant Ansible role (`just homebrew` or `just devbox`) afterwards.
+
+## Step 0.5 — Detect input shape (single PDF vs. slice directory)
+
+If the input path is a `.pdf` file, set `slice_mode: false` and proceed to
+Step 1 unchanged.
+
+If the input path is a **directory**, set `slice_mode: true` and:
+
+1. **If `<dir>/manifest.json` exists with `schema_version: 2`** (a
+   `split-textbooks` manifest), read its `sections` array and use it as the
+   canonical section list for this run. Each entry yields:
+
+   ```
+   {
+     index:           <from manifest>,
+     title:           <from manifest>,
+     slug:            <from manifest>,
+     kind:            <from manifest>,
+     start_page:      1,                                       # always 1 (the slice itself)
+     end_page:        pdfinfo on <dir>/<filename>.pdf → "Pages"
+     slice_filename:  "<filename>.pdf"                          # NEW field for slice mode
+   }
+   ```
+
+   Skip Steps 1 (canonical resolution) and 2 (outline detection) — the
+   slicing already did that work. Set `detection_method: "slice_manifest"`,
+   `is_scanned`: copy from the slicing manifest's `is_scanned` field,
+   `scan_type`: copy `is_scanned ? "ocr_overlay" : "native"`.
+
+2. **Else if the directory contains slice PDFs** matching
+   `^\d{2}-[a-z0-9-]+\.pdf$`, derive the section list from filenames:
+
+   ```
+   index           = <NN as int>
+   slug            = <slug part>
+   title           = title-case of slug with hyphens → spaces
+   kind            = applied via the same regex used in Step 2's section-kind
+                     classification (case-insensitive match on title)
+   start_page      = 1
+   end_page        = pdfinfo <slice>.pdf → "Pages"
+   slice_filename  = "<NN-slug>.pdf"
+   ```
+
+   Set `detection_method: "slice_filenames"`. Run Step 1's scanned-PDF
+   detection on the **first** slice as a representative; record `is_scanned`
+   and `scan_type` once for the run.
+
+3. **Else** the directory is unrecognized → write `manifest.json` with
+   `failed_step: "detect_slices"` and stop.
+
+When `slice_mode: true`, skip Step 1 and Step 2 entirely. Step 3 (scaffold)
+proceeds normally; Step 4's per-section extraction loop runs over slices —
+read `<dir>/<slice_filename>` instead of `pdftotext -f <start> -l <end>
+<canonical>`. Use `pdftotext -layout <dir>/<slice_filename> -` (whole slice
+at once) and `pdftoppm -png -r 200 <dir>/<slice_filename> <out>/src/assets/
+images/<slug>/page` (every page of the slice). All other extraction logic is
+unchanged.
 
 ## Step 1 — Resolve canonical PDF (scanned vs. text-layered)
 
@@ -315,8 +378,10 @@ Write `<out>/manifest.json`:
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "slice_mode": false,
   "source_pdf": "book.pdf",
+  "source_dir": null,
   "canonical_pdf": "book.ocr.pdf",
   "is_scanned": true,
   "scan_type": "no_text",
@@ -342,6 +407,7 @@ Write `<out>/manifest.json`:
       "filename": "toc.md",
       "start_page": 5,
       "end_page": 11,
+      "slice_filename": null,
       "strategy": "text"
     },
     {
@@ -352,6 +418,7 @@ Write `<out>/manifest.json`:
       "filename": "01-chapter-01-limits.md",
       "start_page": 19,
       "end_page": 56,
+      "slice_filename": null,
       "strategy": "vision"
     }
   ],
@@ -361,10 +428,17 @@ Write `<out>/manifest.json`:
 ```
 
 Field notes:
+- `schema_version`: `2` for runs that follow this recipe (slice-mode aware). Manifests at `1` predate slice support.
+- `slice_mode`: `true` when input was a directory of slices; `false` when input was a single PDF.
+- `source_pdf`: present when `slice_mode: false`. Set to the input PDF filename.
+- `source_dir`: present when `slice_mode: true`. Set to the input directory path.
+- `canonical_pdf`: present when `slice_mode: false`. Same as `source_pdf` when not scanned.
 - `scan_type`: `"no_text"` (no OCR layer, ocrmypdf was run), `"ocr_overlay"` (scanned images with invisible OCR text layer, vision pass required), or `"native"` (digitally-born PDF with reliable text layer).
+- `detection_method`: `bookmarks` | `toc_parse` | `llm` | `slice_manifest` | `slice_filenames`.
 - `strategy` per section: `"text"`, `"vision"`, or `"mixed"`.
 - `vision_mode`: the effective mode used (`auto`/`always`/`never`).
-- `failed_step`: `ocr`, `detect_outline`, `detect_llm`, `scaffold`, `extract`, `build`.
+- `slice_filename` per section: relative filename inside `source_dir` when `slice_mode: true`; `null` otherwise.
+- `failed_step`: `ocr`, `detect_outline`, `detect_llm`, `detect_slices`, `scaffold`, `extract`, `build`.
 
 ## Step 7 — Validate build
 
@@ -401,6 +475,7 @@ Any step failure → write `manifest.json` with `status: "failed"`, populate `fa
 | Failure | Detected at | Behavior |
 |---------|-------------|----------|
 | Required tool missing | Step 0 | Print install hints; abort the run. No partial work. |
+| Slice directory unrecognized | Step 0.5 | `failed_step: detect_slices`. No partial work. |
 | Source PDF corrupt | `pdfinfo` non-zero | `failed_step: detect_outline`. Skip book; continue batch. |
 | OCR fails | `ocrmypdf` non-zero | `failed_step: ocr`. Delete `*.ocr.pdf` if zero/missing. |
 | All detection methods fail | After 2c | `failed_step: detect_llm`. Write empty `SUMMARY.md` with one entry linking to a single `full-text.md`. Continue. |
