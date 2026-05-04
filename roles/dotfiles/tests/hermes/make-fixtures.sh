@@ -45,6 +45,14 @@ PY
   fi
 }
 
+mkdir -p "$FIX_DIR/s1-single-pdf" \
+         "$FIX_DIR/s2-pre-split-pdfs" \
+         "$FIX_DIR/s5-complete" \
+         "$FIX_DIR/stale-pipeline-json" \
+         "$FIX_DIR/library/calculus" \
+         "$FIX_DIR/library/probability" \
+         "$FIX_DIR/library/discrete-math"
+
 # Single-PDF fixtures
 generate_pdf "$FIX_DIR/s1-single-pdf/book.pdf" "Single Large PDF"
 generate_pdf "$FIX_DIR/s5-complete/book.pdf" "Complete Book"
