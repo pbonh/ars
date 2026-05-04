@@ -37,7 +37,7 @@ pick:
   set -euo pipefail
   picker=""
   if command -v fzf >/dev/null 2>&1; then
-    picker="fzf --multi --prompt=ansible-tag>  --height=40% --reverse --border"
+    picker="fzf --multi --prompt=ansible-tag:❯ --height=40% --reverse --border"
   elif command -v tv >/dev/null 2>&1; then
     picker="tv"
   else
