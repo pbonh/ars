@@ -5,7 +5,8 @@
 # With HERMES_TEST=1 in env: also invokes `hermes` to drive each fixture and
 # asserts on the resulting pipeline.json.
 #
-# Exit 0 on all-pass; non-zero on first failure.
+# Exit 0 on all-pass; non-zero if any check fails. Runs all checks per
+# invocation so a single run reports the full picture.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -93,7 +94,7 @@ run_fixture_checks() {
   check_file_exists "s5 book-mdbook/book.toml"         "$FIX/s5-complete/book-mdbook/book.toml"
 
   # S0 must be empty (only .gitkeep)
-  if [ "$(find "$FIX/s0-empty" -type f ! -name '.gitkeep' | wc -l)" = "0" ]; then
+  if [ "$(find "$FIX/s0-empty" -type f ! -name '.gitkeep' | wc -l)" -eq 0 ]; then
     pass "s0-empty contains only .gitkeep"
   else
     fail "s0-empty should be empty (no PDFs / markdown)"
@@ -132,22 +133,22 @@ run_hermes_invocation() {
   fi
 
   # Prepare a working-copy of the s1 fixture (do not mutate the committed one).
-  local work
+  local work logfile
   work="$(mktemp -d -t ingest-pipeline.XXXXXX)"
+  logfile="$(mktemp -t ingest-pipeline-test.XXXXXX.log)"
+  trap 'rm -rf "$work"; rm -f "$logfile"' RETURN
   cp -a "$FIX/s1-single-pdf/." "$work/"
 
   echo "running ingest-pipeline against $work …"
-  if hermes -p "Run the ingest-pipeline skill on the directory $work. Use --vision never. Do not invoke any other skills beyond what the orchestrator dispatches." >/tmp/ingest-pipeline-test.log 2>&1; then
+  if hermes -p "Run the ingest-pipeline skill on the directory $work. Use --vision never. Do not invoke any other skills beyond what the orchestrator dispatches." >"$logfile" 2>&1; then
     if [ -f "$work/pipeline.json" ] && [ "$(jq -r '.status' "$work/pipeline.json")" = "complete" ]; then
       pass "Hermes drove s1 fixture to status: complete"
     else
-      fail "Hermes ran but pipeline.json missing or status != complete; see /tmp/ingest-pipeline-test.log"
+      fail "Hermes ran but pipeline.json missing or status != complete; see $logfile"
     fi
   else
-    fail "Hermes invocation failed; see /tmp/ingest-pipeline-test.log"
+    fail "Hermes invocation failed; see $logfile"
   fi
-
-  rm -rf "$work"
 }
 
 # ── Main ──────────────────────────────────────────────────────────────────
