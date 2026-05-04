@@ -83,6 +83,12 @@ hermes_skills:
   - name: "pdf-to-mdbook"
     description: "Convert PDF research papers and textbooks into fully structured mdBooks — handles scanned and text-layered PDFs, reconstructs TOC and indices, converts tables to markdown, extracts images, and uses vision-capable LLM for complex pages"
     content_file: "hermes/skills/pdf-to-mdbook/SKILL.md"
+  - name: "ingest-pipeline"
+    description: "Drive any PDF/markdown directory to a buildable mdBook — handles large PDFs, pre-split PDFs, pre-split markdown, partial mdBooks; idempotent and resumable. Calls split-textbooks and pdf-to-mdbook as Hermes subagents."
+    content_file: "hermes/skills/ingest-pipeline/SKILL.md"
+  - name: "ingest-pipeline-batch"
+    description: "Sweep a library directory and run ingest-pipeline on every book root that is not already complete."
+    content_file: "hermes/skills/ingest-pipeline-batch/SKILL.md"
 
 # Example inline skill:
 # hermes_skills:
