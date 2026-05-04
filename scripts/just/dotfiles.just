@@ -32,6 +32,35 @@ nonroot:
 dot tag='env':
   {{ task_prelude }} ansible-playbook ars.yml --tags "{{ tag }}" --skip-tags "install"
 
+pick:
+  #!/usr/bin/env bash
+  set -euo pipefail
+  picker=""
+  if command -v fzf >/dev/null 2>&1; then
+    picker="fzf --multi --prompt=ansible-tag>  --height=40% --reverse --border"
+  elif command -v tv >/dev/null 2>&1; then
+    picker="tv"
+  else
+    echo "pick: requires fzf or tv on PATH" >&2
+    exit 1
+  fi
+  tags=$({{ task_prelude }} ansible-playbook ars.yml --list-tags 2>/dev/null \
+    | awk -F'[][]' '/TASK TAGS:/ {print $2}' \
+    | tr ',' '\n' \
+    | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' \
+    | grep -v '^$' \
+    | grep -vE '^(install|always)$' \
+    | sort -u)
+  if [ -z "$tags" ]; then
+    echo "pick: no tags discovered from ars.yml" >&2
+    exit 1
+  fi
+  chosen=$(printf '%s\n' "$tags" | $picker) || exit 0
+  [ -z "$chosen" ] && exit 0
+  joined=$(printf '%s\n' "$chosen" | paste -sd, -)
+  echo ">> ansible-playbook ars.yml --tags \"$joined\" --skip-tags install"
+  {{ task_prelude }} ansible-playbook ars.yml --tags "$joined" --skip-tags install
+
 shell:
   {{ task_prelude }} ansible-playbook ars.yml --tags "env,scripts" --skip-tags "install"
 
