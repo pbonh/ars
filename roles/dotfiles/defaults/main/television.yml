@@ -27,23 +27,57 @@ television_remote_show_descriptions: true
 television_remote_sort_alphabetically: true
 
 # Curated catalog for the zellij-actions cable channel. Each entry maps a
-# human-readable label to the `zellij action` subcommand that runs.
+# human-readable label to a full shell command. The directional variants
+# prepend `toggle-floating-panes` because tv runs in a floating pane and
+# `new-pane --direction` splits the focused pane — without the toggle that
+# splits tv's own floating pane (invisible result), instead of the underlying
+# tiled pane the user expects.
 zellij_actions_catalog:
-  "New Pane": "new-pane"
-  "New Pane (Right)": "new-pane --direction right"
-  "New Pane (Down)": "new-pane --direction down"
-  "New Floating Pane": "new-pane --floating"
-  "New Tab": "new-tab"
-  "Toggle Fullscreen": "toggle-fullscreen"
-  "Toggle Floating": "toggle-floating-panes"
-  "Toggle Sync": "toggle-active-sync-tab"
-  "Move Tab Left": "move-tab left"
-  "Move Tab Right": "move-tab right"
-  "Close Pane": "close-pane"
-  "Close Tab": "close-tab"
+  "New Pane": "zellij action new-pane"
+  "New Pane (Right)": "zellij action toggle-floating-panes; zellij action new-pane --direction right"
+  "New Pane (Down)": "zellij action toggle-floating-panes; zellij action new-pane --direction down"
+  "New Floating Pane": "zellij action new-pane --floating"
+  "New Tab": "zellij action new-tab"
+  "Toggle Fullscreen": "zellij action toggle-fullscreen"
+  "Toggle Floating": "zellij action toggle-floating-panes"
+  "Toggle Sync": "zellij action toggle-active-sync-tab"
+  "Move Tab Left": "zellij action move-tab left"
+  "Move Tab Right": "zellij action move-tab right"
+  "Close Pane": "zellij action close-pane"
+  "Close Tab": "zellij action close-tab"
 
 # Channels — populated in Tasks 2-4.
 television_channels:
+  # Master picker. Avoids `tv --show-remote`'s two-Enter race (mode lookup
+  # for the action-firing Enter happens against RemoteControl mode, missing
+  # the per-channel `enter = "actions:run_action"` binding). Instead, this
+  # is a regular Channel-mode picker whose action exec's the chosen channel
+  # as a fresh tv invocation — one Enter per tv process, no race.
+  zellij-master:
+    description: "Pick a Zellij picker to launch"
+    source:
+      command: >-
+        printf '%s\n' {{
+          (television_channels | default({})) | dict2items
+          | rejectattr('key', 'equalto', 'zellij-master')
+          | map(attribute='key') | map('quote') | join(' ')
+        }}
+    preview:
+      command: |
+        {%- set chans = television_channels | default({}) %}
+        case {} in
+        {%- for k, v in chans.items() if k != 'zellij-master' %}
+          {{ k }}) printf '%s\n\n%s\n' '{{ k }}' {{ v.description | to_json }} ;;
+        {%- endfor %}
+        esac
+    keybindings:
+      enter: "launch"
+    actions:
+      launch:
+        description: "Launch the selected channel"
+        command: "tv {}"
+        mode: "execute"
+
   zellij-layouts:
     description: "Pick a Zellij layout — Enter for new tab, Alt+s for new session"
     source:
@@ -157,8 +191,8 @@ television_channels:
         command: |
           {%- set catalog = zellij_actions_catalog | default({}) %}
           case {} in
-          {%- for label, sub in catalog.items() %}
-            {{ label | to_json }}) zellij action {{ sub }} ;;
+          {%- for label, cmd in catalog.items() %}
+            {{ label | to_json }}) {{ cmd }} ;;
           {%- endfor %}
           esac
         mode: "execute"

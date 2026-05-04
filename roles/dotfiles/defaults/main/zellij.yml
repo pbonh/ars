@@ -70,7 +70,7 @@ zellij_television_keybindings:
   # firing the action.
   master:
     key: "Ctrl k"
-    args: ["--show-remote"]      # null-channel: launch remote-control browser
+    args: ["zellij-master"]      # custom master picker (avoids --show-remote race)
   layouts:
     key: "Alt l"
     args: ["zellij-layouts"]
