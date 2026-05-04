@@ -1,0 +1,10 @@
+[book]
+title = "Partial mdBook"
+authors = ["Test"]
+language = "en"
+multilingual = false
+src = "src"
+
+[build]
+build-dir = "book"
+create-missing = false
