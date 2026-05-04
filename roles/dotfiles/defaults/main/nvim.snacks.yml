@@ -64,6 +64,17 @@ nvim_snacks:
         { "<leader>:", function() Snacks.picker.command_history() end, desc = "Command History" },
         { "<leader>e", function() Snacks.explorer() end, desc = "File Explorer" },
         {
+          "<leader>j",
+          function()
+            Snacks.terminal.toggle("{{ just_exe }}", {
+              win = { position = "float", width = 0.9, height = 0.9, enter = true },
+              start_insert = true,
+              auto_close = false,
+            })
+          end,
+          desc = "Snacks Terminal: Just (default recipe)",
+        },
+        {
           "<C-Space>",
           function()
             Snacks.picker.files({

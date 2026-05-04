@@ -42,9 +42,6 @@ nvim_terminal:
           start_insert = true,
           auto_close = true,
         }
-        function just_terminal_runner()
-          require("snacks.terminal").toggle("{{ just_exe }} --choose", snacks_float_opts)
-        end
         function navi_terminal_runner()
           require("snacks.terminal").toggle("{{ navi_exe }}", snacks_float_opts)
         end
@@ -88,7 +85,6 @@ nvim_terminal:
     {
       mode = 'n',
       icon = '',
-      { '<leader>j', '<cmd>lua just_terminal_runner()<CR>', desc = 'Snacks: Justfile Chooser', },
       { '<leader>n', '<cmd>lua navi_terminal_runner()<CR>', desc = 'Snacks: Navi Runner', },
       -- { '<leader>x', '<cmd>lua require("tfm").open()<CR>', desc = 'FM-Nvim: Yazi(Current File)', },
       -- { '<leader>X', '<cmd>lua require("tfm").open(vim.fn.getcwd())<CR>', desc = 'FM-Nvim: Yazi(Project Root)', },
