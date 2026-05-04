@@ -51,7 +51,7 @@ television_channels:
       command: >-
         printf '%s\n' {{ (zellij_kdl_layouts | default({})).keys() | map('quote') | join(' ') }}
     preview:
-      command: "echo 'Layout: {0}'"
+      command: "printf 'Layout: %s\n' {}"
     keybindings:
       enter: "new_tab_or_session"
       alt-s: "new_session"
@@ -60,14 +60,14 @@ television_channels:
         description: "New tab in current zellij session (or new session if outside zellij)"
         command: |
           if [ -n "$ZELLIJ" ]; then
-            zellij action new-tab --layout '{0}'
+            zellij action new-tab --layout {}
           else
-            zellij --layout '{0}'
+            zellij --layout {}
           fi
         mode: "execute"
       new_session:
         description: "Start a new zellij session with this layout"
-        command: "zellij --layout '{0}'"
+        command: "zellij --layout {}"
         mode: "execute"
 
   zellij-ai-agents:
@@ -78,7 +78,7 @@ television_channels:
     preview:
       command: |
         {%- set agents = zellij_ai_agents | default({}) %}
-        case '{0}' in
+        case {} in
         {%- for k, v in agents.items() %}
           {{ k }}) printf 'Agent: %s\nCommand: %s\n' '{{ k }}' '{{ v.command }}' ;;
         {%- endfor %}
@@ -91,7 +91,7 @@ television_channels:
         description: "Open AI agent in a floating pane"
         command: |
           {%- set agents = zellij_ai_agents | default({}) %}
-          case '{0}' in
+          case {} in
           {%- for k, v in agents.items() %}
             {{ k }}) zellij action new-pane --floating --name "{{ v.pane_name }}" -- {{ v.command }} ;;
           {%- endfor %}
@@ -101,7 +101,7 @@ television_channels:
         description: "Open AI agent in a new tab"
         command: |
           {%- set agents = zellij_ai_agents | default({}) %}
-          case '{0}' in
+          case {} in
           {%- for k, v in agents.items() %}
             {{ k }}) zellij action new-tab --name "{{ v.pane_name }}" -- {{ v.command }} ;;
           {%- endfor %}
@@ -125,7 +125,7 @@ television_channels:
     preview:
       command: |
         {%- set plugins = zellij_plugins | default({}) %}
-        case '{0}' in
+        case {} in
         {%- for k, v in plugins.items() if v.launch_keybinding is defined %}
           {{ k }}) printf 'Plugin: %s\nKey: %s\n' '{{ k }}' '{{ v.launch_keybinding.key }}' ;;
         {%- endfor %}
@@ -137,7 +137,7 @@ television_channels:
         description: "LaunchOrFocus the selected plugin"
         command: |
           {%- set plugins = zellij_plugins | default({}) %}
-          case '{0}' in
+          case {} in
           {%- for k, v in plugins.items() if v.launch_keybinding is defined %}
             {{ k }}) zellij action launch-or-focus-plugin "file:{{ zellij_plugin_dir }}/{{ v.url | basename }}" ;;
           {%- endfor %}
@@ -156,7 +156,7 @@ television_channels:
         description: "Run the selected zellij action"
         command: |
           {%- set catalog = zellij_actions_catalog | default({}) %}
-          case '{0}' in
+          case {} in
           {%- for label, sub in catalog.items() %}
             {{ label | to_json }}) zellij action {{ sub }} ;;
           {%- endfor %}
@@ -175,10 +175,10 @@ television_channels:
         description: "Attach to the selected zellij session"
         command: |
           if [ -n "$ZELLIJ" ]; then
-            printf 'Cannot switch sessions from inside zellij.\nDetach first (Ctrl+o, d) and run: zellij attach %s\n\nPress any key to dismiss...' '{0}'
+            printf 'Cannot switch sessions from inside zellij.\nDetach first (Ctrl+o, d) and run: zellij attach %s\n\nPress any key to dismiss...' {}
             read -r -n 1 _
           else
-            zellij attach '{0}'
+            zellij attach {}
           fi
         mode: "execute"
 
@@ -193,7 +193,7 @@ television_channels:
     actions:
       go_to_tab:
         description: "Switch focus to the selected tab"
-        command: "zellij action go-to-tab-name '{0}'"
+        command: "zellij action go-to-tab-name {}"
         mode: "execute"
 
   zellij-worktrees:
@@ -204,7 +204,7 @@ television_channels:
       # preserving paths that contain spaces.
       command: "git worktree list --porcelain | awk '/^worktree /{sub(/^worktree /, \"\"); print}'"
     preview:
-      command: "git -C '{0}' log --oneline -5 2>/dev/null"
+      command: "git -C {} log --oneline -5 2>/dev/null"
     keybindings:
       enter: "open_in_tab"
     actions:
@@ -212,8 +212,8 @@ television_channels:
         description: "Open a new tab with the worktree as cwd"
         command: |
           if [ -n "$ZELLIJ" ]; then
-            zellij action new-tab --cwd '{0}'
+            zellij action new-tab --cwd {}
           else
-            (cd '{0}' && zellij)
+            (cd {} && zellij)
           fi
         mode: "execute"
