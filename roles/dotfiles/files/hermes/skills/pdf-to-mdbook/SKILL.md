@@ -65,9 +65,21 @@ If the input path is a **directory**, set `slice_mode: true` and:
    ```
 
    Skip Steps 1 (canonical resolution) and 2 (outline detection) — the
-   slicing already did that work. Set `detection_method: "slice_manifest"`,
-   `is_scanned`: copy from the slicing manifest's `is_scanned` field,
-   `scan_type`: copy `is_scanned ? "ocr_overlay" : "native"`.
+   slicing already did that work. Set `detection_method: "slice_manifest"`
+   and `is_scanned`: copy from the slicing manifest's `is_scanned` field.
+
+   Derive `scan_type` from the slicing manifest's `canonical_pdf` and
+   `source_pdf` fields:
+   - `is_scanned: false` → `scan_type: "native"`.
+   - `is_scanned: true` AND `canonical_pdf != source_pdf` (e.g. `book.ocr.pdf`
+     vs `book.pdf`) → `ocrmypdf` was run; the OCR text layer is reliable →
+     `scan_type: "no_text"`.
+   - `is_scanned: true` AND `canonical_pdf == source_pdf` → no OCR was added;
+     the original PDF carries an OCR overlay that may be unreliable →
+     `scan_type: "ocr_overlay"`.
+
+   This mapping prevents over-use of the vision pass on `no_text` books
+   where the OCR text layer is already trustworthy.
 
 2. **Else if the directory contains slice PDFs** matching
    `^\d{2}-[a-z0-9-]+\.pdf$`, derive the section list from filenames:
@@ -245,6 +257,18 @@ Create `src/assets/images/` now.
 
 ## Step 4 — Per-section content extraction
 
+**Slice-mode substitution.** When `slice_mode: true`, the per-section
+extraction loop iterates over slice files instead of page ranges of a
+canonical PDF. Throughout this step, substitute the following:
+- `<canonical>` → `<dir>/<slice_filename>` (the slice file for this section).
+- `-f <start> -l <end>` → drop these flags entirely (the slice contains only
+  this section's pages, and they are numbered 1..end_page within the slice).
+- `<canonical>` references in `pdfimages -all -f <start> -l <end>` similarly
+  drop the `-f`/`-l` flags and use the slice file as the input.
+
+The Step 4 text below is written for `slice_mode: false`. Apply the
+substitutions above when in slice mode.
+
 For each section in the detected structure, in order:
 
 ### 4a — Decide extraction strategy
@@ -420,6 +444,46 @@ Write `<out>/manifest.json`:
       "end_page": 56,
       "slice_filename": null,
       "strategy": "vision"
+    }
+  ],
+  "failed_step": null,
+  "error_message": null
+}
+```
+
+For a `slice_mode: true` run (input was a directory of pre-split PDFs), the manifest looks like:
+
+```json
+{
+  "schema_version": 2,
+  "slice_mode": true,
+  "source_pdf": null,
+  "source_dir": "/abs/path/to/book-slices",
+  "canonical_pdf": null,
+  "is_scanned": false,
+  "scan_type": "native",
+  "page_count": 0,
+  "page_offset": 0,
+  "detection_method": "slice_manifest",
+  "vision_mode": "auto",
+  "mdbook_dir": "book-slices-mdbook",
+  "status": "complete",
+  "generated_at": "2026-04-29T14:33:00Z",
+  "tool_versions": {
+    "pdftotext": "24.08.0",
+    "mdbook": "0.4.40"
+  },
+  "sections": [
+    {
+      "index": 1,
+      "kind": "chapter",
+      "title": "Chapter 1: Limits",
+      "slug": "chapter-01-limits",
+      "filename": "01-chapter-01-limits.md",
+      "start_page": 1,
+      "end_page": 38,
+      "slice_filename": "01-chapter-01-limits.pdf",
+      "strategy": "text"
     }
   ],
   "failed_step": null,
