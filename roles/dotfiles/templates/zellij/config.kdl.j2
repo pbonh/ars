@@ -15,6 +15,10 @@ keybinds {
             Run "tv"{% for arg in (kb.args | default([])) %} "{{ arg }}"{% endfor %} {
                 floating true
                 close_on_exit true
+                x "{{ zellij_television_pane_x }}"
+                y "{{ zellij_television_pane_y }}"
+                width "{{ zellij_television_pane_width }}"
+                height "{{ zellij_television_pane_height }}"
             }
             SwitchToMode "Normal"
         }

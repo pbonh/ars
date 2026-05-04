@@ -36,7 +36,7 @@ zellij_actions_catalog:
   "New Pane": "zellij action new-pane"
   "New Pane (Right)": "zellij action toggle-floating-panes; zellij action new-pane --direction right"
   "New Pane (Down)": "zellij action toggle-floating-panes; zellij action new-pane --direction down"
-  "New Floating Pane": "zellij action new-pane --floating"
+  "New Floating Pane": "zellij action new-pane --floating --width \"{{ zellij_television_pane_width }}\" --height \"{{ zellij_television_pane_height }}\" --x \"{{ zellij_television_pane_x }}\" --y \"{{ zellij_television_pane_y }}\""
   "New Tab": "zellij action new-tab"
   "Toggle Fullscreen": "zellij action toggle-fullscreen"
   "Toggle Floating": "zellij action toggle-floating-panes"
@@ -127,7 +127,7 @@ television_channels:
           {%- set agents = zellij_ai_agents | default({}) %}
           case {} in
           {%- for k, v in agents.items() %}
-            {{ k }}) zellij action new-pane --floating --name "{{ v.pane_name }}" -- {{ v.command }} ;;
+            {{ k }}) zellij action new-pane --floating --width "{{ zellij_television_pane_width }}" --height "{{ zellij_television_pane_height }}" --x "{{ zellij_television_pane_x }}" --y "{{ zellij_television_pane_y }}" --name "{{ v.pane_name }}" -- {{ v.command }} ;;
           {%- endfor %}
           esac
         mode: "execute"

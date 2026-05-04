@@ -63,6 +63,10 @@ zellij_plugins:
   #           };
   #           SwitchToMode "Normal"
   #       }
+zellij_television_pane_height: "90%"
+zellij_television_pane_width: "90%"
+zellij_television_pane_x: "6%"
+zellij_television_pane_y: "7%"
 zellij_television_keybindings:
   # Direct per-channel keys avoid the remote-control flow: when channels are
   # entered via `--show-remote`, TV's per-channel `enter = "actions:run_action"`
@@ -117,10 +121,13 @@ zellij_ai_agents:
     pane_alias: "zpp"
     pane_name: "AI - Pi"
     command: "pi"
-zellij_ai_pane_height: "90%"
-zellij_ai_pane_width: "90%"
-zellij_ai_pane_x: "5%"
-zellij_ai_pane_y: "5%"
+# Match the television master picker's floating geometry so every floating
+# AI-agent pane (shell aliases in bash/zsh/nushell, TV picker open_floating
+# action) lines up with the picker the user just launched it from.
+zellij_ai_pane_height: "{{ zellij_television_pane_height }}"
+zellij_ai_pane_width: "{{ zellij_television_pane_width }}"
+zellij_ai_pane_x: "{{ zellij_television_pane_x }}"
+zellij_ai_pane_y: "{{ zellij_television_pane_y }}"
 zellij_kdl_generated_monitor_tab_enabled: true
 zellij_kdl_generated_monitor_tab_name: "System Monitor"
 zellij_kdl_generated_monitor_cmd: "btm"
