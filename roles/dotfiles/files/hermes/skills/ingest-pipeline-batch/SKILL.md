@@ -14,6 +14,9 @@ resume.
 Sequential by default. `--parallel N` opt-in for users who want concurrency
 and have the token budget for it.
 
+**Required reference:**
+- `references/manifest-schema.md` (sibling skill `ingest-pipeline`'s reference) — defines both the per-book `pipeline.json` schema (used by Step 3 and Step 4) and the `library.json` schema (used by Step 1, Step 4, Step 5).
+
 ## Inputs
 
 - **Absolute path** to a library root directory.
@@ -37,7 +40,11 @@ level avoids spawning N subagents that all immediately abort.
 
 ## Step 1 — Load or create `library.json`
 
-Path: `<library_root>/library.json`.
+First, verify `<library_root>` exists and is a directory. If not, abort with
+a diagnostic: `"ingest-pipeline-batch: <library_root> is not a directory."`
+Do not write anything.
+
+Then, the `library.json` path: `<library_root>/library.json`.
 
 - If exists, load. Use it as the prior-run cache.
 - If missing, initialize:
@@ -57,7 +64,9 @@ For every immediate subdirectory of `<library_root>`:
 A directory is a "book root" if **any** of the following are true:
 - It contains exactly one `.pdf` file at its top level.
 - It contains a `pipeline.json` file (already managed).
-- It contains a `manifest.json` from `split-textbooks` (mid-process).
+- It contains an immediate subdirectory holding a `split-textbooks`
+  `manifest.json` (i.e., `<candidate>/*/manifest.json` exists with
+  `schema_version: 2` — mid-process from a standalone split run).
 - It contains both `book.toml` and `src/SUMMARY.md` (mid-process or done).
 
 Skip directories that match none of the above (likely user-managed
