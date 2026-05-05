@@ -40,13 +40,19 @@ If any are missing, print install hints and abort:
 - macOS: `brew install poppler qpdf ocrmypdf mdbook jq`
 - Linux/devbox: `devbox add poppler qpdf ocrmypdf mdbook jq`
 
-## Step 1 — Resolve `book_root` and `input_target`
+## Step 1 — Resolve `book_root`, `input_target`, and `working_dir`
 
 Resolve the user-provided target to an absolute path. Determine `book_root`:
 - If target is a `.pdf` file → `book_root = dirname(target)`.
 - If target is a directory → `book_root = target`.
 
-Record both as `input_target` and `book_root` for the manifest.
+Determine `working_dir`:
+- If `<book_root>/pipeline.json` exists and has `working_dir` set, load it.
+- Otherwise `working_dir = book_root` (initial state).
+
+Record `input_target`, `book_root`, and `working_dir` for the manifest. The
+`pipeline.json` file always lives at `book_root`; `working_dir` may equal
+`book_root` (initial) or a subdirectory (after `split-textbooks` runs).
 
 ## Step 2 — Classify state
 
@@ -68,7 +74,7 @@ Path: `<book_root>/pipeline.json`.
 - If the file does not exist, create it with:
   - `schema_version: 1`
   - `skill: "ingest-pipeline"`
-  - `book_root`, `input_target`, `initial_state`, `current_state`
+  - `book_root`, `input_target`, `working_dir`, `initial_state`, `current_state`
   - `status: "pending"`
   - `started_at`, `updated_at` from the current UTC time
   - `phases: []`
@@ -104,8 +110,12 @@ Invoke the `split-textbooks` skill via **subagent delegation** with:
 
 When the subagent returns:
 - On success → set the phase entry's `status: "complete"`, `completed_at: now`,
-  `manifest: "manifest.json"`, `subagent_invocation_id: <returned id>`.
-  Reclassify (loop to Step 2). New state should be S2.
+  `manifest: "<stem>/manifest.json"` (relative to `book_root` — `split-textbooks`
+  output sits in a `<stem>/` subdirectory), `subagent_invocation_id: <returned id>`.
+  **Update `pipeline.json` `working_dir: "<book_root>/<stem>/"`** so subsequent
+  reclassification and dispatch operate on the slice subdirectory.
+  Reclassify (loop to Step 2). New state should be S2 (the classifier now
+  examines `working_dir` per `references/state-detection.md`).
 - On failure → set the phase entry's `status: "failed"`, copy the
   sub-skill's `manifest.json` `error_message` into the pipeline-level
   `error_message`, set `failed_phase: "split"`, set top-level `status: "failed"`,
@@ -119,15 +129,22 @@ Update `pipeline.json`:
 
 Invoke `pdf-to-mdbook` via subagent delegation with:
 - Restricted toolset: `terminal`, `file`, `image` (for the vision pass).
-- Single argument: `<book_root>` (the directory).
+- Single argument: `<working_dir>` (the slice directory — equal to `<book_root>`
+  when the user entered at S2 with a pre-split directory; equal to
+  `<book_root>/<stem>/` when reached via the S1→S2 transition).
 - Flags: `--vision <user's choice or auto>`. If `--force` was passed at the
   pipeline level, also pass `--force` to the subagent.
 
 `pdf-to-mdbook` Step 0.5 will detect slice-directory input automatically.
 
 When the subagent returns:
-- On success → phase `status: "complete"`, `manifest: "<stem>-mdbook/manifest.json"`,
-  `completed_at: now`. Reclassify (loop to Step 2). New state should be S4.
+- On success → phase `status: "complete"`, `manifest: "<mdbook_dir>/manifest.json"`
+  (read the actual mdbook output dir name from the sub-skill's manifest's
+  `mdbook_dir` field; relative to `working_dir`),
+  `completed_at: now`. **Update `pipeline.json` `working_dir` to
+  `<working_dir>/<mdbook_dir>/`** so the next phase's classifier finds
+  `book.toml` and `src/SUMMARY.md` directly. Reclassify (loop to Step 2).
+  New state should be S4.
 - On failure → phase `status: "failed"`, `failed_phase: "mdbook"`, top-level
   `status: "failed"`, populate `error_message`, stop.
 
@@ -208,12 +225,18 @@ Inline:
    ```bash
    cd <out> && mdbook build
    ```
-4. On non-zero exit, capture stderr. Try one auto-fix round:
+4. On non-zero exit, capture stderr. Try **exactly one** auto-fix round:
    - Broken table syntax → reformat as fenced code block.
    - Missing `README.md` → write a one-line stub.
-   - Then rerun `mdbook build`.
-5. On success → phase `status: "complete"`. Reclassify (loop to Step 2). New
-   state should be S5.
+   - Then rerun `mdbook build` exactly once. If this rerun also fails, do
+     NOT attempt further fixes — proceed directly to the failure branch
+     (step 6).
+5. On success → phase `status: "complete"`. **Update top-level `pipeline.json`
+   `status: "complete"` and `current_state: "S5"` BEFORE reclassifying.** This
+   prevents a reclassification race where the classifier's S5 trigger
+   (`pipeline.json status: complete`) would otherwise see `in_progress` and
+   fall back through to S4 again. Then reclassify (loop to Step 2); the
+   classifier returns S5 deterministically.
 6. On failure → phase `status: "failed"`, `failed_phase: "build"`,
    `error_message: <stderr first 500 chars>`, top-level `status: "failed"`, stop.
 

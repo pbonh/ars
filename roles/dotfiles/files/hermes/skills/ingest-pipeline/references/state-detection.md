@@ -20,19 +20,24 @@ Run on every invocation, including reruns:
 
 1. Resolve the target to an absolute path. Identify whether it's a file or
    directory.
-2. Determine `book_root`:
+2. Determine `book_root` and `working_dir`:
    - If target is a file: `book_root = dirname(target)`.
    - If target is a directory: `book_root = target`.
+   - If `<book_root>/pipeline.json` exists and has `working_dir` set, use that
+     value for `working_dir`. Otherwise `working_dir = book_root` (initial state).
+   - **All subsequent steps in this algorithm operate on `working_dir`, not
+     `book_root`.** The `pipeline.json` file itself always lives at `book_root`,
+     but the state being classified can be in a subdirectory.
 3. If `book_root/pipeline.json` exists with `status: complete` AND `--force`
    was not passed → **return S5**.
-4. Else if `book_root/book.toml` AND `book_root/src/SUMMARY.md` both exist →
+4. Else if `working_dir/book.toml` AND `working_dir/src/SUMMARY.md` both exist →
    **return S4**.
-5. Else if `book_root/manifest.json` exists (the `split-textbooks` manifest):
+5. Else if `working_dir/manifest.json` exists (the `split-textbooks` manifest):
    - If `markdown_generated: true` → **return S3**.
    - Else if `status: complete` → **return S2**.
    - Else if `status: failed` → respect `failed_step`; resume there. Reclassify
      based on what files are actually present (fall through to step 6).
-6. Else count files at the top level of `book_root`:
+6. Else count files at the top level of `working_dir`:
    - ≥2 `.md` and 0 `.pdf` → **return S3**.
    - ≥2 `.pdf` matching `^\d{2}-[a-z0-9-]+\.pdf$` → **return S2**.
    - exactly one `.pdf` (or the original target itself was a `.pdf`) →

@@ -12,6 +12,7 @@ manifests written by `split-textbooks` and `pdf-to-mdbook`.
   "skill": "ingest-pipeline",
   "book_root": "/abs/path/to/book-root",
   "input_target": "/abs/path/to/book.pdf",
+  "working_dir": "/abs/path/to/book-root/book",
   "initial_state": "S1",
   "current_state": "S5",
   "status": "complete",
@@ -58,6 +59,7 @@ manifests written by `split-textbooks` and `pdf-to-mdbook`.
 | `skill` | string | Always `"ingest-pipeline"`. |
 | `book_root` | string (abs path) | Directory holding the book; never moves on rerun. |
 | `input_target` | string (abs path) | What the user invoked the engine with. May be a file (single PDF) or `book_root` itself. |
+| `working_dir` | string (abs path) | The directory where the current state lives. Equal to `book_root` initially; after `split-textbooks` (S1) success, updated to `<book_root>/<stem>/` (the slice subdirectory). All classification and subagent dispatch in subsequent phases use `working_dir`, not `book_root`. The `pipeline.json` file itself always stays at `book_root`. |
 | `initial_state` | enum `S0`–`S5` | State on first invocation; **never overwritten** on rerun. |
 | `current_state` | enum `S0`–`S5` | State on most recent invocation. Updated each run. |
 | `status` | enum `pending` \| `in_progress` \| `complete` \| `failed` | The marker `--force`-less reruns check. |
