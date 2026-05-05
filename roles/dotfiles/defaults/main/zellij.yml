@@ -121,6 +121,11 @@ zellij_ai_agents:
     pane_alias: "zpp"
     pane_name: "AI - Pi"
     command: "pi"
+  hermes:
+    alias: "zh"
+    pane_alias: "zhp"
+    pane_name: "AI - Hermes"
+    command: "hermes"
 # Match the television master picker's floating geometry so every floating
 # AI-agent pane (shell aliases in bash/zsh/nushell, TV picker open_floating
 # action) lines up with the picker the user just launched it from.
