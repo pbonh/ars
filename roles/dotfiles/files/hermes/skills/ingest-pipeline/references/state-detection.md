@@ -8,11 +8,16 @@ drives it forward to S5 by dispatching to existing skills.
 | #   | State              | Detection                                                                                                                             | Next action                                                                              |
 |-----|--------------------|---------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------|
 | S0  | Empty / unrelated  | Target absent, OR directory has no `*.pdf`, no `*.md`, and no manifest                                                                | Abort with diagnostic; no partial work.                                                  |
-| S1  | Single large PDF   | Target is a `.pdf` file, OR directory contains exactly one `.pdf` and zero `.md`                                                      | Run `split-textbooks` subagent → produces sliced PDFs + `manifest.json`. Reclassify (becomes S2). |
-| S2  | Pre-split PDFs     | Directory contains ≥2 `.pdf` files matching `^\d{2}-[a-z0-9-]+\.pdf$`, OR a `split-textbooks` `manifest.json` with `status: complete` | Run `pdf-to-mdbook` subagent (slice-dir mode). Reclassify (becomes S4).                  |
-| S3  | Pre-split markdown | Directory contains ≥2 `.md` and zero `book.toml`, OR `split-textbooks` `manifest.json` with `markdown_generated: true`                | Scaffold an mdBook directly (inline; no subagent): write `book.toml`, `src/SUMMARY.md`, copy files into `src/`. |
+| S1  | Single PDF         | Target is a `.pdf` file, OR directory contains exactly one `.pdf` and zero `.md`                                                      | Run `pdf-to-mdbook` subagent → produces an mdBook directory with `book.toml` and `src/SUMMARY.md`. Reclassify (becomes S4). |
+| S3  | Pre-split markdown | Directory contains ≥2 `.md` and zero `book.toml`                                                                                       | Scaffold an mdBook directly (inline; no subagent): write `book.toml`, `src/SUMMARY.md`, copy files into `src/`. |
 | S4  | Partial mdBook     | Directory contains both `book.toml` AND `src/SUMMARY.md` AND no `pipeline.json` with `status: complete`                               | Diagnose missing referenced files, fill stubs if needed, run `mdbook build`. On success → S5. |
 | S5  | Complete           | `pipeline.json` exists with `status: complete` AND mdBook builds cleanly                                                              | No-op unless `--force`. Print "already complete" and stop.                               |
+
+`S2` is intentionally absent — it was previously used for "pre-split PDFs"
+(output of the now-removed `split-textbooks` skill). State numbers are
+preserved for compatibility with on-disk `pipeline.json` files; the
+filesystem-truth rule means stale `current_state: "S2"` values reclassify
+deterministically on the next run.
 
 ## Algorithm
 
@@ -32,20 +37,16 @@ Run on every invocation, including reruns:
    was not passed → **return S5**.
 4. Else if `working_dir/book.toml` AND `working_dir/src/SUMMARY.md` both exist →
    **return S4**.
-5. Else if `working_dir/manifest.json` exists (the `split-textbooks` manifest):
-   - If `markdown_generated: true` → **return S3**.
-   - Else if `status: complete` → **return S2**.
-   - Else if `status: in_progress` → **return S1** with a note: prior split
-     run was interrupted; rerun `split-textbooks` to resume cleanly.
-     Append a `notes` entry to `pipeline.json` recording this.
-   - Else if `status: failed` → respect `failed_step`; resume there. Reclassify
-     based on what files are actually present (fall through to step 6).
-6. Else count files at the top level of `working_dir`:
+5. Else count files at the top level of `working_dir`:
    - ≥2 `.md` and 0 `.pdf` → **return S3**.
-   - ≥2 `.pdf` matching `^\d{2}-[a-z0-9-]+\.pdf$` → **return S2**.
    - exactly one `.pdf` (or the original target itself was a `.pdf`) →
      **return S1**.
-7. **Return S0** otherwise.
+6. **Return S0** otherwise.
+
+If a directory contains multiple unrelated `.pdf` files (i.e., several
+distinct books), this orchestrator does not split them apart — point the
+user at `ingest-pipeline-batch` for library sweeps, or have them merge with
+`pdfunite` first if the PDFs are chapters of one book.
 
 ## Filesystem-truth rule
 
@@ -58,18 +59,18 @@ Examples:
 
 | `pipeline.json` says | Filesystem shows                              | Resolution                                         |
 |----------------------|-----------------------------------------------|----------------------------------------------------|
-| `status: complete`   | `<stem>-mdbook/` directory missing            | Reclassify (probably S2 or S4). Reset to in_progress. |
-| `current_state: S2`  | `book.toml` present                           | Reclassify S4. Update `current_state` on next write. |
-| `status: in_progress`, last phase `split` `complete` | Slice files all present, no mdbook dir | S2 — resume at the mdbook phase.                  |
+| `status: complete`   | `<stem>-mdbook/` directory missing            | Reclassify (probably S1 or S4). Reset to in_progress. |
+| `current_state: S2`  | any contents                                  | S2 is no longer a live state. Reclassify per the algorithm above; record the reconciliation in `notes`. |
+| `status: in_progress`, last phase `mdbook` `complete` | mdbook dir present, build not yet run | S4 — resume at the build phase.                   |
 
 ## State transitions
 
 The classifier re-runs after every phase, giving "drive forward to S5" semantics:
 
 ```
-S1 ──split-textbooks──▶ S2 ──pdf-to-mdbook──▶ S4 ──mdbook build──▶ S5
-S3 ──scaffold inline───▶ S4 ──mdbook build──▶ S5
-S4 ──mdbook build──────▶ S5
+S1 ──pdf-to-mdbook──▶ S4 ──mdbook build──▶ S5
+S3 ──scaffold inline─▶ S4 ──mdbook build──▶ S5
+S4 ──mdbook build───▶ S5
 S0 ──abort
 ```
 

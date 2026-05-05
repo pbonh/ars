@@ -10,8 +10,7 @@
   "started_at": "2026-05-04T09:00:00Z",
   "updated_at": "2026-05-04T09:30:00Z",
   "phases": [
-    { "name": "split", "skill": "split-textbooks", "status": "complete", "manifest": "manifest.json", "started_at": "2026-05-04T09:00:00Z", "completed_at": "2026-05-04T09:10:00Z", "subagent_invocation_id": "sa-test-split" },
-    { "name": "mdbook", "skill": "pdf-to-mdbook", "status": "complete", "manifest": "book-mdbook/manifest.json", "started_at": "2026-05-04T09:10:00Z", "completed_at": "2026-05-04T09:29:00Z", "subagent_invocation_id": "sa-test-mdbook" },
+    { "name": "mdbook", "skill": "pdf-to-mdbook", "status": "complete", "manifest": "book-mdbook/manifest.json", "started_at": "2026-05-04T09:00:00Z", "completed_at": "2026-05-04T09:29:00Z", "subagent_invocation_id": "sa-test-mdbook" },
     { "name": "build", "skill": null, "status": "complete", "started_at": "2026-05-04T09:29:00Z", "completed_at": "2026-05-04T09:30:00Z" }
   ],
   "failed_phase": null,

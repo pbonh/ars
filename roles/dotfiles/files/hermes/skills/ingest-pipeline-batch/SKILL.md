@@ -1,7 +1,7 @@
 ---
 name: ingest-pipeline-batch
 description: Sweep a library directory and run ingest-pipeline on every book root that is not already complete. Use when the user asks to "process all books in <dir>", "ingest the library", or "batch convert PDFs to mdBooks".
-compatibility: Same as ingest-pipeline (poppler, qpdf, ocrmypdf, mdbook, jq) — invokes ingest-pipeline as a Hermes subagent per book.
+compatibility: Same as ingest-pipeline (poppler, mdbook, jq, plus pdf-to-mdbook's tesseract/Python deps) — invokes ingest-pipeline as a Hermes subagent per book.
 ---
 
 # Ingest Pipeline — Batch
@@ -31,7 +31,7 @@ and have the token budget for it.
 Run:
 
 ```bash
-command -v pdfinfo pdftotext qpdf ocrmypdf mdbook jq
+command -v pdfinfo pdftotext mdbook jq
 ```
 
 If any are missing, print install hints (same as `ingest-pipeline`) and
@@ -64,9 +64,6 @@ For every immediate subdirectory of `<library_root>`:
 A directory is a "book root" if **any** of the following are true:
 - It contains exactly one `.pdf` file at its top level.
 - It contains a `pipeline.json` file (already managed).
-- It contains an immediate subdirectory holding a `split-textbooks`
-  `manifest.json` (i.e., `<candidate>/*/manifest.json` exists with
-  `schema_version: 2` — mid-process from a standalone split run).
 - It contains both `book.toml` and `src/SUMMARY.md` (mid-process or done).
 
 Skip directories that match none of the above (likely user-managed

@@ -46,7 +46,6 @@ PY
 }
 
 mkdir -p "$FIX_DIR/s1-single-pdf" \
-         "$FIX_DIR/s2-pre-split-pdfs" \
          "$FIX_DIR/s5-complete" \
          "$FIX_DIR/stale-pipeline-json" \
          "$FIX_DIR/library/calculus" \
@@ -54,13 +53,9 @@ mkdir -p "$FIX_DIR/s1-single-pdf" \
          "$FIX_DIR/library/discrete-math"
 
 # Single-PDF fixtures
-generate_pdf "$FIX_DIR/s1-single-pdf/book.pdf" "Single Large PDF"
+generate_pdf "$FIX_DIR/s1-single-pdf/book.pdf" "Single PDF"
 generate_pdf "$FIX_DIR/s5-complete/book.pdf" "Complete Book"
 generate_pdf "$FIX_DIR/stale-pipeline-json/book.pdf" "Stale Pipeline JSON"
-
-# Slice fixtures (S2)
-generate_pdf "$FIX_DIR/s2-pre-split-pdfs/01-intro.pdf" "Chapter 1 — Introduction"
-generate_pdf "$FIX_DIR/s2-pre-split-pdfs/02-body.pdf" "Chapter 2 — Body"
 
 # Library fixtures
 generate_pdf "$FIX_DIR/library/calculus/book.pdf" "Calculus"

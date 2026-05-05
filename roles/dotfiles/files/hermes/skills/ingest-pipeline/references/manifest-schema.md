@@ -2,7 +2,7 @@
 
 `pipeline.json` is the orchestrator's manifest, written at the book root by
 `ingest-pipeline`. It is layered on top of (never replaces) the per-skill
-manifests written by `split-textbooks` and `pdf-to-mdbook`.
+manifest written by `pdf-to-mdbook`.
 
 ## Schema (schema_version: 1)
 
@@ -20,20 +20,11 @@ manifests written by `split-textbooks` and `pdf-to-mdbook`.
   "updated_at": "2026-05-04T10:47:33Z",
   "phases": [
     {
-      "name": "split",
-      "skill": "split-textbooks",
-      "status": "complete",
-      "manifest": "calculus/manifest.json",
-      "started_at": "2026-05-04T10:00:00Z",
-      "completed_at": "2026-05-04T10:18:02Z",
-      "subagent_invocation_id": "sa-7f3a"
-    },
-    {
       "name": "mdbook",
       "skill": "pdf-to-mdbook",
       "status": "complete",
-      "manifest": "calculus/calculus-mdbook/manifest.json",
-      "started_at": "2026-05-04T10:18:05Z",
+      "manifest": "calculus-mdbook/manifest.json",
+      "started_at": "2026-05-04T10:00:00Z",
       "completed_at": "2026-05-04T10:47:30Z",
       "subagent_invocation_id": "sa-9c12"
     },
@@ -59,20 +50,20 @@ manifests written by `split-textbooks` and `pdf-to-mdbook`.
 | `skill` | string | Always `"ingest-pipeline"`. |
 | `book_root` | string (abs path) | Directory holding the book; never moves on rerun. |
 | `input_target` | string (abs path) | What the user invoked the engine with. May be a file (single PDF) or `book_root` itself. |
-| `working_dir` | string (abs path) | The directory where the current state lives. Equal to `book_root` initially; after `split-textbooks` (S1) success, updated to `<book_root>/<stem>/` (the slice subdirectory). All classification and subagent dispatch in subsequent phases use `working_dir`, not `book_root`. The `pipeline.json` file itself always stays at `book_root`. |
-| `initial_state` | enum `S0`–`S5` | State on first invocation; **never overwritten** on rerun. |
-| `current_state` | enum `S0`–`S5` | State on most recent invocation. Updated each run. |
+| `working_dir` | string (abs path) | The directory where the current state lives. Equal to `book_root` initially; after `pdf-to-mdbook` (S1) success, updated to the mdbook output directory `<book_root>/<mdbook_dir>/`. All classification and subagent dispatch in subsequent phases use `working_dir`, not `book_root`. The `pipeline.json` file itself always stays at `book_root`. |
+| `initial_state` | enum `S0`, `S1`, `S3`, `S4`, `S5` | State on first invocation; **never overwritten** on rerun. (S2 is reserved/unused — see `state-detection.md`.) |
+| `current_state` | enum `S0`, `S1`, `S3`, `S4`, `S5` | State on most recent invocation. Updated each run. |
 | `status` | enum `pending` \| `in_progress` \| `complete` \| `failed` | The marker `--force`-less reruns check. |
 | `started_at` / `updated_at` | ISO 8601 UTC | Clock from the host. |
 | `phases` | array | **Append-only** log of work done. Reruns append; do not overwrite prior entries. |
-| `phases[].name` | enum `split` \| `mdbook` \| `scaffold` \| `build` | Which logical phase this entry represents. |
+| `phases[].name` | enum `mdbook` \| `scaffold` \| `build` | Which logical phase this entry represents. |
 | `phases[].skill` | string \| `null` | Name of the sub-skill invoked, or `null` for in-orchestrator inline work. |
 | `phases[].status` | enum `pending` \| `in_progress` \| `complete` \| `failed` | Phase-local status. |
-| `phases[].manifest` | string (relative path) \| absent | Path to the sub-skill's `manifest.json`, **always relative to `book_root`** (not `working_dir`). For example, after `split-textbooks` runs on `<book_root>/calculus.pdf`, the path is `"calculus/manifest.json"`. After `pdf-to-mdbook` runs on the slice subdirectory, the path is `"calculus/calculus-mdbook/manifest.json"`. Omitted when `phases[].skill` is `null` (inline phases produce no sub-skill manifest). |
+| `phases[].manifest` | string (relative path) \| absent | Path to the sub-skill's `manifest.json`, **always relative to `book_root`** (not `working_dir`). For example, after `pdf-to-mdbook` runs on `<book_root>/calculus.pdf` and writes `<book_root>/calculus-mdbook/`, the path is `"calculus-mdbook/manifest.json"`. Omitted when `phases[].skill` is `null` (inline phases produce no sub-skill manifest). |
 | `phases[].subagent_invocation_id` | string \| absent | Opaque ID returned by Hermes' subagent delegation. Retained for log retracing. Omitted when `phases[].skill` is `null` (inline phases). |
-| `failed_phase` | enum `split` \| `mdbook` \| `scaffold` \| `build` \| `null` | When `status: failed`, which phase tipped over. |
+| `failed_phase` | enum `mdbook` \| `scaffold` \| `build` \| `null` | When `status: failed`, which phase tipped over. |
 | `error_message` | string \| `null` | Free-form error from the failed phase. |
-| `notes` | array of strings | Free-form reconciliations (e.g., `"filesystem reclassified to S2 from S5; user deleted mdbook dir"`). |
+| `notes` | array of strings | Free-form reconciliations (e.g., `"filesystem reclassified to S1 from S5; user deleted mdbook dir"`). |
 
 ## Crash safety
 
@@ -98,7 +89,7 @@ Single file at the library root, written by `ingest-pipeline-batch`.
   "books": [
     { "root": "calculus", "status": "complete", "pipeline_json": "calculus/pipeline.json" },
     { "root": "probability", "status": "in_progress", "pipeline_json": "probability/pipeline.json" },
-    { "root": "discrete-math", "status": "failed", "failed_phase": "split", "pipeline_json": "discrete-math/pipeline.json" }
+    { "root": "discrete-math", "status": "failed", "failed_phase": "mdbook", "pipeline_json": "discrete-math/pipeline.json" }
   ]
 }
 ```

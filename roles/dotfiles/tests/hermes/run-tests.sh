@@ -70,8 +70,6 @@ run_fixture_checks() {
 
   # PDFs that must be valid
   check_pdf_valid "s1-single-pdf/book.pdf"            "$FIX/s1-single-pdf/book.pdf"
-  check_pdf_valid "s2 slice 1"                         "$FIX/s2-pre-split-pdfs/01-intro.pdf"
-  check_pdf_valid "s2 slice 2"                         "$FIX/s2-pre-split-pdfs/02-body.pdf"
   check_pdf_valid "s5-complete/book.pdf"               "$FIX/s5-complete/book.pdf"
   check_pdf_valid "stale-pipeline-json/book.pdf"       "$FIX/stale-pipeline-json/book.pdf"
   check_pdf_valid "library/calculus/book.pdf"          "$FIX/library/calculus/book.pdf"
@@ -81,7 +79,6 @@ run_fixture_checks() {
   check_pdf_corrupt "library/discrete-math/book.pdf"   "$FIX/library/discrete-math/book.pdf"
 
   # JSON files that must parse
-  check_json_valid "s2 manifest.json"                  "$FIX/s2-pre-split-pdfs/manifest.json"
   check_json_valid "s5 pipeline.json"                  "$FIX/s5-complete/pipeline.json"
   check_json_valid "stale-pipeline-json"               "$FIX/stale-pipeline-json/pipeline.json"
   check_json_valid "library/probability pipeline.json" "$FIX/library/probability/pipeline.json"
@@ -100,13 +97,6 @@ run_fixture_checks() {
     fail "s0-empty should be empty (no PDFs / markdown)"
   fi
 
-  # S2 manifest must say status: complete
-  if [ "$(jq -r '.status' "$FIX/s2-pre-split-pdfs/manifest.json")" = "complete" ]; then
-    pass "s2 manifest.json status == complete"
-  else
-    fail "s2 manifest.json status should be 'complete'"
-  fi
-
   # S5 pipeline.json must say status: complete
   if [ "$(jq -r '.status' "$FIX/s5-complete/pipeline.json")" = "complete" ]; then
     pass "s5 pipeline.json status == complete"
@@ -119,6 +109,26 @@ run_fixture_checks() {
     pass "stale-pipeline-json has no book-mdbook dir (intentional)"
   else
     fail "stale-pipeline-json should NOT have a book-mdbook dir"
+  fi
+
+  # No fixture pipeline.json may contain references to the retired
+  # split-textbooks phase.
+  for pj in "$FIX/s5-complete/pipeline.json" \
+            "$FIX/stale-pipeline-json/pipeline.json" \
+            "$FIX/library/probability/pipeline.json"; do
+    if jq -e 'any(.phases[]; .name == "split" or .skill == "split-textbooks")' \
+        "$pj" >/dev/null 2>&1; then
+      fail "pipeline.json references retired split phase: $pj"
+    else
+      pass "pipeline.json has no split phase: $pj"
+    fi
+  done
+
+  # No fixture may reference the deleted s2-pre-split-pdfs/ directory.
+  if [ ! -e "$FIX/s2-pre-split-pdfs" ]; then
+    pass "s2-pre-split-pdfs/ has been removed"
+  else
+    fail "s2-pre-split-pdfs/ should be deleted"
   fi
 }
 

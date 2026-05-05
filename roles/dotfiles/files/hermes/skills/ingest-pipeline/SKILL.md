@@ -1,15 +1,14 @@
 ---
 name: ingest-pipeline
-description: Drive any PDF/markdown directory to a buildable mdBook — handles large PDFs, pre-split PDFs, pre-split markdown, partial mdBooks; idempotent and resumable. Calls split-textbooks and pdf-to-mdbook as Hermes subagents. Use when the user asks to "ingest", "process a textbook", "build an mdBook from a directory", or "resume a partially processed book".
-compatibility: Requires poppler (pdfinfo, pdftotext), qpdf, ocrmypdf, mdbook, jq. Composes existing split-textbooks and pdf-to-mdbook skills via Hermes subagent delegation.
+description: Drive any PDF/markdown directory to a buildable mdBook — handles single PDFs, pre-split markdown, partial mdBooks; idempotent and resumable. Calls pdf-to-mdbook as a Hermes subagent for PDF inputs. Use when the user asks to "ingest", "process a textbook", "build an mdBook from a directory", or "resume a partially processed book".
+compatibility: Requires poppler (pdfinfo, pdftotext), mdbook, jq, plus the toolchain pdf-to-mdbook itself depends on (tesseract for OCR, Python with pdfplumber/PyPDF2). Composes the pdf-to-mdbook skill via Hermes subagent delegation.
 ---
 
 # Ingest Pipeline
 
 Drive any of the following inputs forward to a buildable mdBook:
 
-- A single large PDF.
-- A directory of already-split chapter PDFs.
+- A single PDF (text-based or scanned).
 - A directory of already-split markdown documents.
 - A partially-built mdBook directory (interrupted prior run).
 
@@ -33,12 +32,15 @@ The user provides:
 Run:
 
 ```bash
-command -v pdfinfo pdftotext qpdf ocrmypdf mdbook jq
+command -v pdfinfo pdftotext mdbook jq
 ```
 
 If any are missing, print install hints and abort:
-- macOS: `brew install poppler qpdf ocrmypdf mdbook jq`
-- Linux/devbox: `devbox add poppler qpdf ocrmypdf mdbook jq`
+- macOS: `brew install poppler mdbook jq`
+- Linux/devbox: `devbox add poppler mdbook jq`
+
+`pdf-to-mdbook` performs its own deeper Step 0 check for tesseract and Python
+deps when it's dispatched; we don't repeat that here.
 
 ## Step 1 — Resolve `book_root`, `input_target`, and `working_dir`
 
@@ -52,7 +54,8 @@ Determine `working_dir`:
 
 Record `input_target`, `book_root`, and `working_dir` for the manifest. The
 `pipeline.json` file always lives at `book_root`; `working_dir` may equal
-`book_root` (initial) or a subdirectory (after `split-textbooks` runs).
+`book_root` (initial) or the mdbook subdirectory produced by `pdf-to-mdbook`
+(after S1 advances the pipeline).
 
 ## Step 2 — Classify state
 
@@ -96,61 +99,30 @@ manifest. Nothing to ingest. (Add a PDF or markdown file and rerun.)
 
 Do **not** write `pipeline.json` — the directory is not "managed" yet.
 
-### S1 — Single large PDF
-
-Update `pipeline.json`:
-- Append a phase entry: `{ name: "split", skill: "split-textbooks", status: "pending", started_at: now }`
-- Set top-level `status: "in_progress"`.
-
-Invoke the `split-textbooks` skill via **subagent delegation** with:
-- Restricted toolset: `terminal`, `file`.
-- Single argument: `<book_root>/<pdf-filename>`.
-- Flags: `markdown: false` (we don't want markdown sidecars at this stage —
-  `pdf-to-mdbook` will produce its own).
-
-When the subagent returns:
-- On success → set the phase entry's `status: "complete"`, `completed_at: now`,
-  `manifest: "<stem>/manifest.json"` (relative to `book_root` — `split-textbooks`
-  output sits in a `<stem>/` subdirectory), `subagent_invocation_id: <returned id>`.
-  **Update `pipeline.json` `working_dir: "<book_root>/<stem>/"`** so subsequent
-  reclassification and dispatch operate on the slice subdirectory.
-  Reclassify (loop to Step 2). New state should be S2 (the classifier now
-  examines `working_dir` per `references/state-detection.md`).
-- On failure → set the phase entry's `status: "failed"`, copy the
-  sub-skill's `manifest.json` `error_message` into the pipeline-level
-  `error_message`, set `failed_phase: "split"`, set top-level `status: "failed"`,
-  stop.
-
-### S2 — Pre-split PDFs
+### S1 — Single PDF
 
 Update `pipeline.json`:
 - Append phase entry: `{ name: "mdbook", skill: "pdf-to-mdbook", status: "pending", started_at: now }`
-- Top-level `status: "in_progress"` (no change if already).
+- Set top-level `status: "in_progress"`.
 
-Invoke `pdf-to-mdbook` via subagent delegation with:
+Invoke `pdf-to-mdbook` via **subagent delegation** with:
 - Restricted toolset: `terminal`, `file`, `image` (for the vision pass).
-- Single argument: `<working_dir>` (the slice directory — equal to `<book_root>`
-  when the user entered at S2 with a pre-split directory; equal to
-  `<book_root>/<stem>/` when reached via the S1→S2 transition).
+- Single argument: `<book_root>/<pdf-filename>` (the input PDF — `pdf-to-mdbook`
+  resolves its own work directory and mdbook output directory alongside it).
 - Flags: `--vision <user's choice or auto>`. If `--force` was passed at the
   pipeline level, also pass `--force` to the subagent.
 
-`pdf-to-mdbook` Step 0.5 will detect slice-directory input automatically.
-
 When the subagent returns:
 - On success → phase `status: "complete"`, `manifest:
-  "<relpath_from_book_root>/<mdbook_dir>/manifest.json"` — i.e., the path
-  from `book_root` to the mdbook's manifest. Build it as: take the current
-  `working_dir`, strip the `book_root` prefix to get a relative segment
-  (empty string if `working_dir == book_root`), append `<mdbook_dir>`. Read
-  `mdbook_dir` from the sub-skill's own manifest (its `mdbook_dir` field).
-  All `phases[].manifest` paths are book_root-relative for uniformity.
-  `completed_at: now`. **Update `pipeline.json` `working_dir` to
-  `<working_dir>/<mdbook_dir>/`** so the next phase's classifier finds
-  `book.toml` and `src/SUMMARY.md` directly. Reclassify (loop to Step 2).
-  New state should be S4.
-- On failure → phase `status: "failed"`, `failed_phase: "mdbook"`, top-level
-  `status: "failed"`, populate `error_message`, stop.
+  "<mdbook_dir>/manifest.json"` (relative to `book_root` — read `mdbook_dir`
+  from the sub-skill's own manifest). `completed_at: now`,
+  `subagent_invocation_id: <returned id>`. **Update `pipeline.json`
+  `working_dir` to `<book_root>/<mdbook_dir>/`** so the next phase's
+  classifier finds `book.toml` and `src/SUMMARY.md` directly. Reclassify
+  (loop to Step 2). New state should be S4.
+- On failure → phase `status: "failed"`, copy the sub-skill's
+  `manifest.json` `error_message` into the pipeline-level `error_message`,
+  set `failed_phase: "mdbook"`, set top-level `status: "failed"`, stop.
 
 ### S3 — Pre-split markdown (inline scaffold)
 
@@ -214,7 +186,7 @@ Inline:
 
 1. The mdBook root is `working_dir` itself. By the time S4 fires, prior
    phases have advanced `working_dir` to point at the directory containing
-   `book.toml` and `src/SUMMARY.md` (either via S2's `pdf-to-mdbook` output
+   `book.toml` and `src/SUMMARY.md` (either via S1's `pdf-to-mdbook` output
    or S3's inline scaffold). If the user entered directly at S4 (a
    partial mdBook), `working_dir == book_root` and the user-supplied target
    was already that directory. Confirm `<working_dir>/book.toml` and
@@ -282,15 +254,14 @@ Whenever exiting (S5 success, S0 abort, or any phase failure):
 
 ## Failure handling
 
-The pattern matches `split-textbooks` and `pdf-to-mdbook`: every failure is
-recorded; never abort an enclosing batch; user retries with the same command.
+The pattern matches `pdf-to-mdbook`: every failure is recorded; never abort
+an enclosing batch; user retries with the same command.
 
 | Failure | Where | Behavior |
 |---------|-------|----------|
 | Required tool missing | Step 0 | Print install hints; abort. No `pipeline.json` written. |
 | State classifier returns S0 | Step 2 | Abort with diagnostic. No `pipeline.json` written. |
-| `split-textbooks` subagent fails | S1 phase | Phase failed, `failed_phase: "split"`. Stop. |
-| `pdf-to-mdbook` subagent fails | S2 phase | Phase failed, `failed_phase: "mdbook"`. Stop. |
+| `pdf-to-mdbook` subagent fails | S1 phase | Phase failed, `failed_phase: "mdbook"`. Stop. |
 | S3 scaffold error | S3 phase | `failed_phase: "scaffold"`. Stop. |
 | `mdbook build` fails after auto-fix | S4 phase | `failed_phase: "build"`. Stop. |
 | Filesystem inconsistent (book.toml without src/) | Step 2 reclassify | Treat as S4 with damage; record in `notes`; attempt repair. |
@@ -308,4 +279,4 @@ If event hooks are configured, the orchestrator emits:
 
 - The orchestrator does **not** call `wiki-ingest`. Hand-off to a wiki is a separate, explicit user action.
 - The orchestrator does **not** modify the input PDFs or markdown. All output goes under `book_root`.
-- For very large books, expect the S2 phase (vision pass on every page) to dominate runtime. Use `--vision never` if you have clean text layers and want a faster run.
+- For very large books, expect the S1 phase (`pdf-to-mdbook`'s vision pass on every page) to dominate runtime. Use `--vision never` if you have clean text layers and want a faster run.
