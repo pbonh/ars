@@ -1,5 +1,12 @@
 # State Detection Algorithm
 
+> **Implementation note.** This algorithm is the specification that
+> `scripts/run_pipeline.py` implements. The LLM agent does **not** run
+> the algorithm itself — it invokes the script and reads the script's
+> JSON action signal. Read this file when debugging the script or
+> proposing classifier changes; do not re-execute the steps by hand
+> from a SKILL.md run.
+
 `ingest-pipeline` classifies an input target into one of six states, then
 drives it forward to S5 by dispatching to existing skills.
 

@@ -1,5 +1,10 @@
 # `pipeline.json` Schema
 
+> **Implementation note.** All reads/writes of `pipeline.json` go through
+> `scripts/run_pipeline.py` (per-book) and `ingest-pipeline-batch/scripts/sweep.py`
+> (library-level `library.json`). The LLM agent does **not** write these
+> files directly. This document is the schema both scripts implement.
+
 `pipeline.json` is the orchestrator's manifest, written at the book root by
 `ingest-pipeline`. It is layered on top of (never replaces) the per-skill
 manifest written by `pdf-to-mdbook`.

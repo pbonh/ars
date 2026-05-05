@@ -6,277 +6,191 @@ compatibility: Requires poppler (pdfinfo, pdftotext), mdbook, jq, plus the toolc
 
 # Ingest Pipeline
 
-Drive any of the following inputs forward to a buildable mdBook:
+Drive any of these inputs forward to a buildable mdBook:
 
 - A single PDF (text-based or scanned).
 - A directory of already-split markdown documents.
 - A partially-built mdBook directory (interrupted prior run).
 
-The skill is **idempotent**: rerun on a partial directory resumes from where
-the prior run left off. Terminal state is `mdbook build` succeeded; wiki
-ingestion is a separate, manual follow-up.
+The skill is **idempotent and resumable**: rerun on a partial directory
+resumes from where the prior run left off. Terminal state is `mdbook build`
+succeeded; wiki ingestion is a separate, manual follow-up.
 
-**Required references:**
-- `references/state-detection.md` — six-state classifier algorithm.
-- `references/manifest-schema.md` — `pipeline.json` schema.
+## Architecture: thin LLM, fat script
+
+This skill keeps the LLM **decisive for judgment, supervisory for bookkeeping**.
+
+The deterministic state machine — path resolution, state classification,
+`pipeline.json` reads/writes, S3 inline scaffold, S4 mdbook build with one
+auto-fix round, S5 finalize — runs entirely in `scripts/run_pipeline.py`.
+That script never invokes a subagent and writes the manifest atomically
+after every state transition.
+
+The LLM agent's job is exactly two things:
+
+1. **Dispatch the `pdf-to-mdbook` subagent** when the script signals S1.
+   `pdf-to-mdbook` is where structure detection (TOC parse, font analysis,
+   vision review of rasterized TOC images) and any judgment-bearing PDF
+   work happens. That judgment is preserved in full.
+2. **Repair `mdbook build` errors** the deterministic auto-fix could not
+   handle. The script surfaces the captured stderr; the agent edits files
+   and re-runs the script.
+
+Everything else is one shell call followed by reading the JSON it printed.
+
+If the agent finds itself reasoning about file paths, manifest fields, or
+state classification rules, it is in the wrong mode — the script owns those.
+
+**Required references (read on demand, not preloaded):**
+- `references/state-detection.md` — the spec `run_pipeline.py` implements.
+- `references/manifest-schema.md` — the `pipeline.json` schema the script writes.
 
 ## Inputs
 
 The user provides:
 - **Absolute path** to a `.pdf` file OR a directory.
-- `--force` (optional) — Re-run from scratch even if `pipeline.json` says `status: complete`.
+- `--force` (optional) — Re-run from scratch even if `pipeline.json` says
+  `status: complete`.
 - `--vision <mode>` (optional) — Forwarded to `pdf-to-mdbook`; default `auto`.
 
-## Step 0 — Environment self-check
-
-Run:
+## Step 0 — Run the state machine
 
 ```bash
-command -v pdfinfo pdftotext mdbook jq
+python "$SKILL_DIR/scripts/run_pipeline.py" <abs_target> [--force] [--vision auto|never|always]
 ```
 
-If any are missing, print install hints and abort:
-- macOS: `brew install poppler mdbook jq`
-- Linux/devbox: `devbox add poppler mdbook jq`
+The script does the environment self-check (`pdfinfo`, `pdftotext`,
+`mdbook`, `jq`) and aborts with install hints if anything is missing — do
+not duplicate that check here.
 
-`pdf-to-mdbook` performs its own deeper Step 0 check for tesseract and Python
-deps when it's dispatched; we don't repeat that here.
+It prints **exactly one** JSON object on stdout. Read it; that object
+tells you what to do next.
 
-## Step 1 — Resolve `book_root`, `input_target`, and `working_dir`
+## Step 1 — Dispatch on the action signal
 
-Resolve the user-provided target to an absolute path. Determine `book_root`:
-- If target is a `.pdf` file → `book_root = dirname(target)`.
-- If target is a directory → `book_root = target`.
+The JSON's `action` field selects the next step. Treat anything not listed
+here as a script bug — do not improvise.
 
-Determine `working_dir`:
-- If `<book_root>/pipeline.json` exists and has `working_dir` set, load it.
-- Otherwise `working_dir = book_root` (initial state).
+### `action: "done"`
 
-Record `input_target`, `book_root`, and `working_dir` for the manifest. The
-`pipeline.json` file always lives at `book_root`; `working_dir` may equal
-`book_root` (initial) or the mdbook subdirectory produced by `pdf-to-mdbook`
-(after S1 advances the pipeline).
+Pipeline reached S5. Print the script's `message` to the user and stop.
+Nothing else to do.
 
-## Step 2 — Classify state
+### `action: "advanced"`
 
-Apply the algorithm in `references/state-detection.md`. The algorithm is the
-single source of truth — re-read it whenever you reclassify.
+A deterministic phase (S3 scaffold or S4 build) succeeded. Re-run the
+script (Step 0). The classifier will pick up the next state.
 
-The result is one of `S0` (empty/unrelated) through `S5` (complete). On the
-**first** classification of a run, record this as `initial_state`. On every
-classification, record this as `current_state`.
+### `action: "delegate_pdf_to_mdbook"`
 
-## Step 3 — Open or create `pipeline.json`
+The script identified an S1 (single PDF) input and is asking you to
+dispatch the `pdf-to-mdbook` subagent. The fields you receive:
 
-Path: `<book_root>/pipeline.json`.
+- `pdf` — absolute path to the PDF
+- `book_root` — absolute path the manifest lives at
+- `force` — boolean, forward as `--force` if true
+- `vision` — `auto` / `never` / `always`, forward as `--vision <value>`
+- `phase_index` — pass to `record-phase` so the right phase entry is updated
 
-- If the file exists, load it. Apply the **filesystem-truth rule** from
-  `references/manifest-schema.md`: if the manifest claims complete state but
-  the filesystem disagrees, append a `notes` entry, reclassify, and reset
-  `status: in_progress`.
-- If the file does not exist, create it with:
-  - `schema_version: 1`
-  - `skill: "ingest-pipeline"`
-  - `book_root`, `input_target`, `working_dir`, `initial_state`, `current_state`
-  - `status: "pending"`
-  - `started_at`, `updated_at` from the current UTC time
-  - `phases: []`
-  - `failed_phase: null`, `error_message: null`, `notes: []`
+Invoke `delegate_task` with **exactly these parameters** (no others —
+do not add `acp_command`, `provider`, `model`, or other fields):
 
-## Step 4 — Dispatch by state
-
-Run the action for the current state. Each action either advances state (and
-loops back to Step 2) or terminates the run.
-
-### S0 — Empty / unrelated
-
-Abort with a diagnostic listing what was checked and what was found:
-
-```
-ingest-pipeline: <book_root> contains no PDFs, no markdown, and no
-manifest. Nothing to ingest. (Add a PDF or markdown file and rerun.)
-```
-
-Do **not** write `pipeline.json` — the directory is not "managed" yet.
-
-### S1 — Single PDF
-
-Update `pipeline.json`:
-- Append phase entry: `{ name: "mdbook", skill: "pdf-to-mdbook", status: "pending", started_at: now }`
-- Set top-level `status: "in_progress"`.
-
-Invoke `pdf-to-mdbook` via **subagent delegation** with:
-- Restricted toolset: `terminal`, `file`, `image` (for the vision pass).
-- Single argument: `<book_root>/<pdf-filename>` (the input PDF — `pdf-to-mdbook`
-  resolves its own work directory and mdbook output directory alongside it).
-- Flags: `--vision <user's choice or auto>`. If `--force` was passed at the
-  pipeline level, also pass `--force` to the subagent.
+- `goal` — `"Convert <pdf> into an mdBook using the pdf-to-mdbook skill."`
+- `context` — Pass the absolute `pdf` path, `book_root`, `force` flag,
+  and `vision` mode. The subagent has no conversation history.
+- `toolsets` — `["terminal", "file", "vision"]`
+- `skills` — `["pdf-to-mdbook"]` (preload, avoids an in-subagent skill_view)
+- `max_iterations` — `60`
 
 When the subagent returns:
-- On success → phase `status: "complete"`, `manifest:
-  "<mdbook_dir>/manifest.json"` (relative to `book_root` — read `mdbook_dir`
-  from the sub-skill's own manifest). `completed_at: now`,
-  `subagent_invocation_id: <returned id>`. **Update `pipeline.json`
-  `working_dir` to `<book_root>/<mdbook_dir>/`** so the next phase's
-  classifier finds `book.toml` and `src/SUMMARY.md` directly. Reclassify
-  (loop to Step 2). New state should be S4.
-- On failure → phase `status: "failed"`, copy the sub-skill's
-  `manifest.json` `error_message` into the pipeline-level `error_message`,
-  set `failed_phase: "mdbook"`, set top-level `status: "failed"`, stop.
 
-### S3 — Pre-split markdown (inline scaffold)
+1. If it succeeded, read its `manifest.json` to find the mdbook output
+   directory (`<book_root>/<mdbook_dir>/`). Then call:
 
-Update `pipeline.json`:
-- Append phase entry: `{ name: "scaffold", skill: null, status: "pending", started_at: now }`
-
-Inline (no subagent — this is small):
-
-1. Compute `<stem>` from `book_root`'s basename.
-2. Compute output dir: `<book_root>/<stem>-mdbook/`.
-3. If output dir exists and `--force` not passed → abort with phase
-   `status: "failed"`, `failed_phase: "scaffold"`, message `"output dir exists; pass --force to overwrite"`.
-4. Otherwise create output dir tree:
-   ```
-   mkdir -p <out>/src/assets/images
-   ```
-5. Write `<out>/book.toml`:
-   ```toml
-   [book]
-   title = "<title-case of stem>"
-   authors = ["Unknown"]
-   language = "en"
-   multilingual = false
-   src = "src"
-
-   [build]
-   build-dir = "book"
-   create-missing = false
-   ```
-6. List the `.md` files at the top level of `<book_root>` (not recursive),
-   sort lexicographically.
-7. Copy each into `<out>/src/`. Preserve filenames.
-8. Write `<out>/src/SUMMARY.md`:
-   ```markdown
-   # Summary
-
-   [Introduction](README.md)
-
-   - [<title from filename 1>](<filename 1>)
-   - [<title from filename 2>](<filename 2>)
-   ...
-   ```
-   For the title, strip the leading `NN-` if present and Title-Case the slug
-   (replace hyphens with spaces).
-9. Write `<out>/src/README.md` (one-line description if missing):
-   ```markdown
-   # <Title>
-
-   Generated from pre-split markdown by ingest-pipeline.
-   ```
-
-Set the phase's `status: "complete"`, `completed_at: now`. Reclassify (loop
-to Step 2). New state should be S4.
-
-### S4 — Partial mdBook (inline build)
-
-Update `pipeline.json`:
-- Append phase entry: `{ name: "build", skill: null, status: "pending", started_at: now }`
-
-Inline:
-
-1. The mdBook root is `working_dir` itself. By the time S4 fires, prior
-   phases have advanced `working_dir` to point at the directory containing
-   `book.toml` and `src/SUMMARY.md` (either via S1's `pdf-to-mdbook` output
-   or S3's inline scaffold). If the user entered directly at S4 (a
-   partial mdBook), `working_dir == book_root` and the user-supplied target
-   was already that directory. Confirm `<working_dir>/book.toml` and
-   `<working_dir>/src/SUMMARY.md` exist; if not, set `failed_phase: "build"`,
-   error_message: "S4 entered but working_dir does not contain a valid
-   mdbook layout".
-2. Diagnose missing files referenced by `src/SUMMARY.md`:
    ```bash
-   grep -oE '\[.*\]\([^)]+\.md\)' <out>/src/SUMMARY.md | sed -E 's/.*\(([^)]+)\).*/\1/'
+   python "$SKILL_DIR/scripts/run_pipeline.py" record-phase <book_root> \
+       --phase mdbook --phase-index <idx> --status complete \
+       --manifest <mdbook_dir>/manifest.json \
+       --invocation-id <returned subagent id> \
+       --working-dir <abs path to mdbook output dir>
    ```
-   For each referenced filename, if it does not exist under `<out>/src/`,
-   create a stub file with content:
-   ```markdown
-   # <Title from SUMMARY.md link>
 
-   <!-- TODO: content -->
-   ```
-3. Run `mdbook build` from inside the mdBook root:
+2. If it failed, call:
+
    ```bash
-   cd <out> && mdbook build
+   python "$SKILL_DIR/scripts/run_pipeline.py" record-phase <book_root> \
+       --phase mdbook --phase-index <idx> --status failed \
+       --error "<short error message from subagent>"
    ```
-4. On non-zero exit, capture stderr. Try **exactly one** auto-fix round:
-   - Broken table syntax → reformat as fenced code block.
-   - Missing `README.md` → write a one-line stub.
-   - Then rerun `mdbook build` exactly once. If this rerun also fails, do
-     NOT attempt further fixes — proceed directly to the failure branch
-     (step 6).
-5. On success → phase `status: "complete"`. **Update top-level `pipeline.json`
-   `status: "complete"` and `current_state: "S5"` BEFORE reclassifying.** This
-   prevents a reclassification race where the classifier's S5 trigger
-   (`pipeline.json status: complete`) would otherwise see `in_progress` and
-   fall back through to S4 again. Then reclassify (loop to Step 2); the
-   classifier returns S5 deterministically.
-6. On failure → phase `status: "failed"`, `failed_phase: "build"`,
-   `error_message: <stderr first 500 chars>`, top-level `status: "failed"`, stop.
 
-### S5 — Complete
+   Then stop — `pipeline.json` `status` is now `failed` and the user must
+   inspect.
 
-Set top-level `status: "complete"`. Update `updated_at`. Print:
+3. After a successful `record-phase complete`, return to Step 0 (re-run
+   the script). The classifier will return S4 and the script will run
+   `mdbook build`.
 
-```
-ingest-pipeline: <book_root> is complete.
-- mdBook: <out>
-- pipeline.json: <book_root>/pipeline.json
+### `action: "need_judgment_build_fix"`
 
-To preview: mdbook serve <out>
-To re-run anyway: pass --force
-```
+`mdbook build` failed and the deterministic auto-fix did not repair it.
+Apply LLM judgment:
 
-Stop.
+- Read the `stderr` field (last 2000 chars of mdbook output).
+- Inspect files under `working_dir`. Common causes: a Markdown file
+  generates ill-formed HTML, a `[link](missing.md)` references a file
+  that wasn't stubbed, an unsupported `book.toml` field.
+- Edit the offending file(s) under `working_dir` to fix the root cause.
+  Do not delete content.
+- Re-run Step 0. If the script signals `need_judgment_build_fix` again,
+  iterate — but if you have not made meaningful progress in two attempts,
+  call `record-phase --phase build --status failed` and stop.
 
-## Step 5 — Reclassify and loop
+## Step 2 — Loop
 
-After every successful phase except S5, return to Step 2. The classifier may
-return the same state (idempotent) or advance to the next state. Stop only
-on S5 or on `status: failed`.
+After every action except `done` and `failed` `record-phase`, return to
+Step 0. The script enforces forward progress; it will not loop on the
+same state without producing a different action.
 
-## Step 6 — Finalize `pipeline.json`
+## Resume semantics
 
-Whenever exiting (S5 success, S0 abort, or any phase failure):
-- Set `updated_at: now`.
-- For S5: `status: "complete"`.
-- For abort/failure: `status: "failed"`, `failed_phase` and `error_message` populated.
-- Write the file with pretty JSON (`jq .` formatting).
+The script writes `pipeline.json` atomically after every transition. If
+this skill (or its parent batch sweep) is interrupted — Ctrl-C, iteration
+cap, subagent crash — the on-disk state is consistent. Re-running the
+skill on the same target will:
+
+- See the prior `pipeline.json`, apply the filesystem-truth rule (see
+  `references/manifest-schema.md`), and reclassify.
+- Skip work that is already complete.
+- Re-emit a `delegate_pdf_to_mdbook` signal if the mdbook phase did not
+  finish, or proceed to S4 if it did.
+
+You do **not** need to reason about "is this resume or rerun?" — the
+script's classification handles both.
 
 ## Failure handling
 
-The pattern matches `pdf-to-mdbook`: every failure is recorded; never abort
-an enclosing batch; user retries with the same command.
+Per-phase failures are isolated. The script writes `status: failed`,
+`failed_phase`, and `error_message` into `pipeline.json` and exits via
+the appropriate action signal. The batch wrapper (`ingest-pipeline-batch`)
+treats any non-complete result as "failed for this book; continue" and
+will not abort the sweep.
 
-| Failure | Where | Behavior |
-|---------|-------|----------|
-| Required tool missing | Step 0 | Print install hints; abort. No `pipeline.json` written. |
-| State classifier returns S0 | Step 2 | Abort with diagnostic. No `pipeline.json` written. |
-| `pdf-to-mdbook` subagent fails | S1 phase | Phase failed, `failed_phase: "mdbook"`. Stop. |
-| S3 scaffold error | S3 phase | `failed_phase: "scaffold"`. Stop. |
-| `mdbook build` fails after auto-fix | S4 phase | `failed_phase: "build"`. Stop. |
-| Filesystem inconsistent (book.toml without src/) | Step 2 reclassify | Treat as S4 with damage; record in `notes`; attempt repair. |
-| Subagent invocation timeout | Anywhere | Phase failed, `error_message: "subagent invocation failed: <details>"`. Stop. |
-| User Ctrl-C | Anywhere | `pipeline.json` left at `status: "in_progress"`. Rerun reconciles via filesystem-truth. |
-
-## Hooks (optional)
-
-If event hooks are configured, the orchestrator emits:
-- `pre_phase`: `{ phase, book_root, attempt }` before each subagent invocation or inline phase start.
-- `post_phase`: `{ phase, book_root, status, duration_ms, manifest? }` after each phase.
-- `pre_destructive`: `{ book_root, reason }` before any phase that would overwrite `status: complete` output (i.e., `--force` on a complete book). Refusing this hook aborts the run.
+| Failure                                | Source              | What you do                                                         |
+|----------------------------------------|---------------------|---------------------------------------------------------------------|
+| Required tool missing                  | Step 0 stderr       | Print install hints from script stderr; stop.                       |
+| `S0` (empty/unrelated dir)             | Step 0 exit 2       | Forward the script's diagnostic and stop.                           |
+| `pdf-to-mdbook` subagent failed        | Step 1 delegate     | `record-phase --status failed`; stop.                               |
+| `mdbook build` failed after LLM repair | Step 1 build_fix    | After 2 failed repair attempts, `record-phase --status failed`; stop. |
+| Subagent invocation timed out          | Step 1 delegate     | `record-phase --status failed --error "subagent timeout"`; stop.    |
 
 ## Notes
 
-- The orchestrator does **not** call `wiki-ingest`. Hand-off to a wiki is a separate, explicit user action.
-- The orchestrator does **not** modify the input PDFs or markdown. All output goes under `book_root`.
-- For very large books, expect the S1 phase (`pdf-to-mdbook`'s vision pass on every page) to dominate runtime. Use `--vision never` if you have clean text layers and want a faster run.
+- The skill does **not** call `wiki-ingest`. Hand-off to a wiki is a
+  separate, explicit user action.
+- The skill does **not** modify input PDFs or markdown. All output goes
+  under `book_root`.
+- For very large books, expect `pdf-to-mdbook`'s vision pass over TOC
+  rasters to dominate runtime. Use `--vision never` if you have clean
+  text layers and want a faster run.
+- A typical successful run is 3–5 LLM iterations: dispatch script,
+  delegate pdf-to-mdbook, record-phase, dispatch script, done.

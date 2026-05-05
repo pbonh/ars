@@ -7,157 +7,193 @@ compatibility: Same as ingest-pipeline (poppler, mdbook, jq, plus pdf-to-mdbook'
 # Ingest Pipeline — Batch
 
 Walk a library root, identify each book directory, and run `ingest-pipeline`
-on the ones that are not already complete. Idempotent across the whole
-library: complete books are skipped; failed books retry; in-progress books
-resume.
+on the ones not already complete. Idempotent across the whole library:
+complete books are skipped, failed books retry, in-progress books resume.
 
-Sequential by default. `--parallel N` opt-in for users who want concurrency
-and have the token budget for it.
+## Architecture: prescriptive dispatcher
 
-**Required reference:**
-- `references/manifest-schema.md` (sibling skill `ingest-pipeline`'s reference) — defines both the per-book `pipeline.json` schema (used by Step 3 and Step 4) and the `library.json` schema (used by Step 1, Step 4, Step 5).
+Like `ingest-pipeline` itself, this skill keeps the LLM out of the
+bookkeeping path. The deterministic library walk and `library.json`
+management run in `scripts/sweep.py`. The LLM agent's only jobs are:
+
+1. Run `sweep.py scan` to get the working set.
+2. Dispatch a per-book `ingest-pipeline` subagent for each entry, using
+   the **fixed parameter template in Step 3**. Do not vary the parameters
+   per book. Do not redesign the strategy mid-sweep.
+3. Run `sweep.py mark` after each subagent returns.
+4. Run `sweep.py finalize` at the end and print the summary.
+
+If the agent finds itself reasoning about token budgets, concurrency
+tuning, retry policies, or whether to bypass subagents and run scripts
+directly — that is the wrong mode. The dispatch loop below is fixed.
+
+**Required reference (read on demand):**
+- `../ingest-pipeline/references/manifest-schema.md` — defines both the
+  per-book `pipeline.json` and the `library.json` schemas.
 
 ## Inputs
 
 - **Absolute path** to a library root directory.
 - `--force` (optional) — Reprocess every book, even ones marked complete.
 - `--parallel <N>` (optional) — Up to N concurrent `ingest-pipeline`
-  subagents. Default: `1`.
-- `--vision <mode>` (optional) — Forwarded to each per-book `ingest-pipeline`
-  invocation; default `auto`.
+  subagents. Default: `1`. Recommend `1`–`3`; vision-heavy scanned books
+  burn tokens fast.
+- `--vision <mode>` (optional) — Forwarded to each per-book
+  `ingest-pipeline` invocation; default `auto`.
 
-## Step 0 — Environment self-check
-
-Run:
+## Step 1 — Scan the library
 
 ```bash
-command -v pdfinfo pdftotext mdbook jq
+python "$SKILL_DIR/scripts/sweep.py" scan <abs_library_root> [--force]
 ```
 
-If any are missing, print install hints (same as `ingest-pipeline`) and
-abort. The per-book engine will check again, but failing fast at the batch
-level avoids spawning N subagents that all immediately abort.
+The script verifies the path is a directory, walks it, identifies book
+roots (rule: contains exactly one `.pdf`, OR a `pipeline.json`, OR both
+`book.toml` and `src/SUMMARY.md`), refreshes `library.json`, and prints
+the working set as JSON. If the directory has no book roots, `working_set`
+is empty — print "no books found" and stop.
 
-## Step 1 — Load or create `library.json`
+The script does **not** include directories that only contain pre-split
+markdown without a manifest. If users have such directories, they should
+invoke `ingest-pipeline` on each individually; the batch wrapper is for
+PDF and pre-managed libraries.
 
-First, verify `<library_root>` exists and is a directory. If not, abort with
-a diagnostic: `"ingest-pipeline-batch: <library_root> is not a directory."`
-Do not write anything.
+## Step 2 — Per-book status update before dispatch
 
-Then, the `library.json` path: `<library_root>/library.json`.
+For every entry in `working_set`, immediately mark it `in_progress`:
 
-- If exists, load. Use it as the prior-run cache.
-- If missing, initialize:
-  ```json
-  {
-    "schema_version": 1,
-    "library_root": "<abs path>",
-    "last_swept_at": null,
-    "books": []
-  }
-  ```
+```bash
+python "$SKILL_DIR/scripts/sweep.py" mark <library_root> --root <root> --status in_progress
+```
 
-## Step 2 — Walk the library tree, identify book roots
+This makes progress visible to anyone reading `library.json` mid-sweep.
 
-For every immediate subdirectory of `<library_root>`:
+## Step 3 — Dispatch the per-book subagent (fixed template)
 
-A directory is a "book root" if **any** of the following are true:
-- It contains exactly one `.pdf` file at its top level.
-- It contains a `pipeline.json` file (already managed).
-- It contains both `book.toml` and `src/SUMMARY.md` (mid-process or done).
-
-Skip directories that match none of the above (likely user-managed
-non-book content).
-
-Build the working set: an array of `{ root, abs_path }` entries.
-
-## Step 3 — Filter complete books
-
-For each candidate book root, read `<root>/pipeline.json` if present:
-- If `status: "complete"` AND `--force` not passed → drop from working set
-  (will be reflected as `complete` in `library.json`).
-- Otherwise → keep in working set.
-
-Books with `status: "failed"` are retained — failure was logged, the user
-inspected, the rerun is the explicit "try again" signal.
-
-## Step 4 — Dispatch per-book engine
-
-Default sequential (`--parallel 1`):
-
-For each book in the working set, in lexicographic order by root name:
-
-1. Append a stub entry to `library.json` `books`: `{ root, status: "in_progress", pipeline_json: "<root>/pipeline.json" }`.
-2. Write `library.json` (so observers see progress).
-3. Invoke the `ingest-pipeline` skill via **subagent delegation** with:
-   - Restricted toolset: `terminal`, `file`, `image`.
-   - Argument: `<abs_path>`.
-   - Flags: `--vision <mode>`. If `--force` was passed at the batch level,
-     also pass `--force`.
-4. When the subagent returns, read `<root>/pipeline.json`:
-   - `status: "complete"` → update `library.json` book entry to
-     `status: "complete"`.
-   - `status: "failed"` → update to
-     `status: "failed", failed_phase: <from per-book>`. Continue with
-     the next book.
-   - any other state → update to `status: "in_progress"` (likely a
-     subagent crash mid-phase). Continue.
-
-`--parallel N > 1`:
-
-- Spawn up to N subagents concurrently, drawing from the working set as a
-  queue. Cap concurrency at N.
-- Use a small write-coalescing window for `library.json` updates: when
-  multiple subagents finish at once, batch the writes. Write at least every
-  5 seconds and on every state transition.
-
-## Step 5 — Finalize `library.json`
-
-Set `last_swept_at: now`. Sort `books` lexicographically by `root` for
-deterministic output. Write the file.
-
-Print a summary:
+For each entry in the working set (sequentially if `--parallel 1`,
+otherwise up to N at a time), invoke `delegate_task` with **exactly**
+these parameters. Do not add others. Do not omit any.
 
 ```
-ingest-pipeline-batch: swept <library_root>
-- Total books: <N>
-- Complete: <X>
-- Failed: <Y> (see <library_root>/library.json for details)
-- Skipped (already complete): <Z>
+delegate_task(
+    goal      = "Drive <root> to a complete mdBook using the ingest-pipeline skill.",
+    context   = """
+                Book directory (absolute): <abs_path>
+                Force flag: <true|false>           # forward as --force if true
+                Vision mode: <auto|never|always>   # forward as --vision <mode>
 
-Failed books:
-- <root>: <failed_phase> — <error_message>
-- ...
+                Run the ingest-pipeline skill against this directory. Follow the
+                skill's Step 0 / Step 1 loop exactly: invoke run_pipeline.py,
+                read the JSON action signal, dispatch pdf-to-mdbook on S1,
+                record-phase on return, repair build errors when surfaced.
+                Stop on `done` or any `failed` record-phase.
+                """,
+    toolsets  = ["terminal", "file", "vision"],
+    skills    = ["ingest-pipeline", "pdf-to-mdbook"],
+    max_iterations  = 80,
+    max_spawn_depth = 2,
+)
 ```
+
+Notes on each parameter:
+
+- `toolsets` — `vision` (not `image` — `image` is text-to-image generation,
+  the wrong toolset). The `vision` toolset is what `pdf-to-mdbook` needs
+  for its TOC structure-detection review.
+- `skills` — Preload both skills so the per-book subagent does not pay
+  a `skill_view` round-trip in its iteration budget. The `pdf-to-mdbook`
+  preload is critical: when the per-book agent itself delegates
+  `pdf-to-mdbook` (as a depth-2 subagent), Hermes' delegation system
+  benefits from already having the skill loaded.
+- `max_iterations: 80` — A typical book needs ~3–5 LLM iterations on the
+  per-book side; 80 leaves margin for build-fix loops on books with
+  difficult mdbook errors. Default 50 is too tight when a book triggers
+  a vision-review cycle plus a build repair.
+- `max_spawn_depth: 2` — Per-book subagent (depth 1) needs to itself
+  delegate `pdf-to-mdbook` (depth 2). Without this raise, the per-book
+  subagent runs in leaf mode and cannot delegate. (Hermes doc reference:
+  `developer-guide/agent-loop.md`, `guides/delegation-patterns.md`.)
+- **Forbidden parameters**: do not pass `acp_command`, `provider`, `model`,
+  or any other parameter not listed above. Earlier versions of this skill
+  invited the agent to reason about these — every such reasoning step is
+  wasted iterations. The defaults Hermes selects are correct.
+
+For `--parallel N > 1`, dispatch up to N entries in a single `delegate_task`
+call (Hermes accepts a list) or spawn multiple back-to-back; cap concurrency
+at N. `delegate_task` is **synchronous** — if the orchestrator turn is
+interrupted, all in-flight children are cancelled and their work is lost.
+The per-book script writes `pipeline.json` atomically so cancelled work
+resumes cleanly on next sweep.
+
+## Step 4 — Per-book status update after return
+
+When each subagent returns, read the corresponding `pipeline.json` to
+determine final status, then mark accordingly:
+
+```bash
+# On success:
+python "$SKILL_DIR/scripts/sweep.py" mark <library_root> --root <root> --status complete
+
+# On failure (read failed_phase + error_message from <root>/pipeline.json):
+python "$SKILL_DIR/scripts/sweep.py" mark <library_root> --root <root> \
+    --status failed --failed-phase <phase> --error "<message>"
+
+# Subagent crashed before pipeline.json reached a terminal state:
+python "$SKILL_DIR/scripts/sweep.py" mark <library_root> --root <root> --status in_progress
+```
+
+The third case is the iteration-cap-reached scenario: the subagent
+returned a summary, but `pipeline.json` is still `in_progress`. Leave it
+that way. The next sweep will resume from the consistent on-disk state.
+
+## Step 5 — Finalize
+
+After the working set is exhausted:
+
+```bash
+python "$SKILL_DIR/scripts/sweep.py" finalize <abs_library_root>
+```
+
+This sets `last_swept_at`, sorts books deterministically, and prints a
+summary. Print the summary to the user as-is.
+
+## Resume semantics
+
+`library.json` is a *summary*; the per-book `pipeline.json` files are the
+source of truth. A re-invocation of this skill against the same library
+root re-scans and:
+
+- Skips books with `pipeline.json` `status: complete` (unless `--force`).
+- Re-dispatches books with `status: failed` (the rerun is the explicit
+  retry signal).
+- Re-dispatches books with `status: in_progress` — `ingest-pipeline`'s
+  filesystem-truth rule reconciles the partial state cleanly.
+
+You do not need to reason about which case applies — `sweep.py scan`
+returns the correct working set.
 
 ## Failure handling
 
-Batch-level errors **never abort the whole sweep**. Per-book failures are
-isolated: one failed book gets its `library.json` entry marked `failed`, and
-the next book proceeds.
+Batch-level errors **never abort the sweep**. Per-book failures are
+isolated.
 
-| Failure | Where | Behavior |
-|---------|-------|----------|
-| Required tool missing | Step 0 | Print install hints; abort. No `library.json` written if it didn't exist. |
-| `library_root` does not exist or is not a directory | Step 1 | Abort with diagnostic. |
-| No book roots found (Step 2 returns empty) | Step 2 | Print "no books found in <library_root>" and exit 0 (not an error — just nothing to do). |
-| `ingest-pipeline` subagent fails for a book | Step 4 | Mark that book `status: "failed"` in `library.json`. Continue to next book. |
-| Subagent invocation infrastructure failure | Step 4 | Mark book `status: "failed"`, `error_message: "subagent invocation failed: <details>"`. Continue. |
-| User Ctrl-C | Anywhere | Books marked `in_progress` in `library.json` will be reconciled by the per-book engine on next sweep (filesystem-truth rule). |
-
-## Hooks (optional)
-
-If event hooks are configured:
-- `pre_book`: `{ root, abs_path }` before each `ingest-pipeline` invocation.
-- `post_book`: `{ root, abs_path, status, duration_ms }` after each.
-- `pre_sweep` / `post_sweep`: at the start and end of the whole batch.
+| Failure                                       | Where         | Behavior                                                                                  |
+|-----------------------------------------------|---------------|-------------------------------------------------------------------------------------------|
+| `library_root` not a directory                | `scan`        | Script exits 2 with diagnostic; stop.                                                     |
+| No book roots found                           | `scan`        | Working set empty; print "no books found" and exit 0.                                     |
+| `ingest-pipeline` subagent fails for a book   | Step 4 mark   | Mark `failed` with phase + message; continue.                                             |
+| Subagent infrastructure failure / timeout     | Step 4 mark   | Mark `failed` with `error_message: "subagent invocation failed: <details>"`; continue.    |
+| Subagent hits iteration cap                   | Step 4 mark   | Mark `in_progress`; user reruns to resume.                                                |
+| User Ctrl-C during sweep                      | anywhere      | All in-flight subagents are cancelled. Per-book `pipeline.json` files are consistent on disk; next sweep resumes. |
 
 ## Notes
 
 - The batch wrapper does **not** know how to ingest individual books — it
-  only dispatches. All real work happens inside `ingest-pipeline`.
-- `library.json` is a *summary* — it is regenerated each sweep from per-book
-  `pipeline.json` files. Do not rely on it as a primary store.
-- For very large libraries (50+ books), default `--parallel 1` may be slow
-  but predictable. Bump cautiously: vision-heavy scanned books burn tokens
-  fast.
+  only dispatches. All real work happens inside `ingest-pipeline`, which
+  in turn dispatches `pdf-to-mdbook` for the structure-bearing PDF work.
+- For very large libraries (50+ books), default `--parallel 1` is slow
+  but predictable. Bump cautiously.
+- A typical successful sweep dispatches one orchestrator-side LLM
+  iteration per book (one `delegate_task`, one `mark`), plus the per-book
+  subagent's own iterations (3–8 typical). The orchestrator does not
+  burn iterations on bookkeeping.
