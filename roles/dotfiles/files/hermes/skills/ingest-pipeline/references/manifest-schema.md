@@ -23,7 +23,7 @@ manifests written by `split-textbooks` and `pdf-to-mdbook`.
       "name": "split",
       "skill": "split-textbooks",
       "status": "complete",
-      "manifest": "manifest.json",
+      "manifest": "calculus/manifest.json",
       "started_at": "2026-05-04T10:00:00Z",
       "completed_at": "2026-05-04T10:18:02Z",
       "subagent_invocation_id": "sa-7f3a"
@@ -32,7 +32,7 @@ manifests written by `split-textbooks` and `pdf-to-mdbook`.
       "name": "mdbook",
       "skill": "pdf-to-mdbook",
       "status": "complete",
-      "manifest": "calculus-mdbook/manifest.json",
+      "manifest": "calculus/calculus-mdbook/manifest.json",
       "started_at": "2026-05-04T10:18:05Z",
       "completed_at": "2026-05-04T10:47:30Z",
       "subagent_invocation_id": "sa-9c12"
@@ -68,7 +68,7 @@ manifests written by `split-textbooks` and `pdf-to-mdbook`.
 | `phases[].name` | enum `split` \| `mdbook` \| `scaffold` \| `build` | Which logical phase this entry represents. |
 | `phases[].skill` | string \| `null` | Name of the sub-skill invoked, or `null` for in-orchestrator inline work. |
 | `phases[].status` | enum `pending` \| `in_progress` \| `complete` \| `failed` | Phase-local status. |
-| `phases[].manifest` | string (relative path) \| absent | Path to the sub-skill's `manifest.json` (relative to `book_root`). Omitted when `phases[].skill` is `null` (inline phases produce no sub-skill manifest). |
+| `phases[].manifest` | string (relative path) \| absent | Path to the sub-skill's `manifest.json`, **always relative to `book_root`** (not `working_dir`). For example, after `split-textbooks` runs on `<book_root>/calculus.pdf`, the path is `"calculus/manifest.json"`. After `pdf-to-mdbook` runs on the slice subdirectory, the path is `"calculus/calculus-mdbook/manifest.json"`. Omitted when `phases[].skill` is `null` (inline phases produce no sub-skill manifest). |
 | `phases[].subagent_invocation_id` | string \| absent | Opaque ID returned by Hermes' subagent delegation. Retained for log retracing. Omitted when `phases[].skill` is `null` (inline phases). |
 | `failed_phase` | enum `split` \| `mdbook` \| `scaffold` \| `build` \| `null` | When `status: failed`, which phase tipped over. |
 | `error_message` | string \| `null` | Free-form error from the failed phase. |

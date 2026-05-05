@@ -138,9 +138,13 @@ Invoke `pdf-to-mdbook` via subagent delegation with:
 `pdf-to-mdbook` Step 0.5 will detect slice-directory input automatically.
 
 When the subagent returns:
-- On success → phase `status: "complete"`, `manifest: "<mdbook_dir>/manifest.json"`
-  (read the actual mdbook output dir name from the sub-skill's manifest's
-  `mdbook_dir` field; relative to `working_dir`),
+- On success → phase `status: "complete"`, `manifest:
+  "<relpath_from_book_root>/<mdbook_dir>/manifest.json"` — i.e., the path
+  from `book_root` to the mdbook's manifest. Build it as: take the current
+  `working_dir`, strip the `book_root` prefix to get a relative segment
+  (empty string if `working_dir == book_root`), append `<mdbook_dir>`. Read
+  `mdbook_dir` from the sub-skill's own manifest (its `mdbook_dir` field).
+  All `phases[].manifest` paths are book_root-relative for uniformity.
   `completed_at: now`. **Update `pipeline.json` `working_dir` to
   `<working_dir>/<mdbook_dir>/`** so the next phase's classifier finds
   `book.toml` and `src/SUMMARY.md` directly. Reclassify (loop to Step 2).
@@ -208,8 +212,15 @@ Update `pipeline.json`:
 
 Inline:
 
-1. Find the mdBook root: a directory under `book_root` containing both
-   `book.toml` and `src/SUMMARY.md`.
+1. The mdBook root is `working_dir` itself. By the time S4 fires, prior
+   phases have advanced `working_dir` to point at the directory containing
+   `book.toml` and `src/SUMMARY.md` (either via S2's `pdf-to-mdbook` output
+   or S3's inline scaffold). If the user entered directly at S4 (a
+   partial mdBook), `working_dir == book_root` and the user-supplied target
+   was already that directory. Confirm `<working_dir>/book.toml` and
+   `<working_dir>/src/SUMMARY.md` exist; if not, set `failed_phase: "build"`,
+   error_message: "S4 entered but working_dir does not contain a valid
+   mdbook layout".
 2. Diagnose missing files referenced by `src/SUMMARY.md`:
    ```bash
    grep -oE '\[.*\]\([^)]+\.md\)' <out>/src/SUMMARY.md | sed -E 's/.*\(([^)]+)\).*/\1/'
