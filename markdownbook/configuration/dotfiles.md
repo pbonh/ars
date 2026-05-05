@@ -276,7 +276,9 @@ Two skills ship together:
 
 - `ingest-pipeline` — per-book engine.
 - `ingest-pipeline-batch` — library sweep; runs `ingest-pipeline` over
-  every book directory under a library root.
+  every book directory under a library root. Also maintains a
+  `library.json` summary at the library root tracking each book's
+  status across runs.
 
 Both skills are invoked from a Hermes session like other skills. The
 terminal state is `mdbook build` succeeding; wiki ingestion remains a
