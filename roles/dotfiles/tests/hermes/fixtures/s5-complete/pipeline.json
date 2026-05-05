@@ -3,6 +3,7 @@
   "skill": "ingest-pipeline",
   "book_root": "FIXTURE",
   "input_target": "FIXTURE/book.pdf",
+  "working_dir": "FIXTURE/book-mdbook",
   "initial_state": "S1",
   "current_state": "S5",
   "status": "complete",

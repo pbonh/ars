@@ -35,6 +35,9 @@ Run on every invocation, including reruns:
 5. Else if `working_dir/manifest.json` exists (the `split-textbooks` manifest):
    - If `markdown_generated: true` → **return S3**.
    - Else if `status: complete` → **return S2**.
+   - Else if `status: in_progress` → **return S1** with a note: prior split
+     run was interrupted; rerun `split-textbooks` to resume cleanly.
+     Append a `notes` entry to `pipeline.json` recording this.
    - Else if `status: failed` → respect `failed_step`; resume there. Reclassify
      based on what files are actually present (fall through to step 6).
 6. Else count files at the top level of `working_dir`:

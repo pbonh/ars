@@ -3,6 +3,7 @@
   "skill": "ingest-pipeline",
   "book_root": "FIXTURE/library/probability",
   "input_target": "FIXTURE/library/probability/book.pdf",
+  "working_dir": "FIXTURE/library/probability/probability-mdbook",
   "initial_state": "S1",
   "current_state": "S5",
   "status": "complete",
