@@ -251,3 +251,39 @@ Exclude specific tools:
 ```bash
 ansible-playbook ars.yml --skip-tags "install,neovim-config"
 ```
+
+## Hermes Skills
+
+The dotfiles role deploys [Hermes](https://hermes.sh) skill files to
+`~/.hermes/skills/`. Skills are conversational programs invoked from a
+Hermes session.
+
+### Ingest pipeline
+
+The `ingest-pipeline` skill ties `split-textbooks` and `pdf-to-mdbook`
+together into an end-to-end orchestrator. It accepts any of:
+
+- A single large PDF.
+- A directory of pre-split chapter PDFs.
+- A directory of pre-split markdown documents.
+- A partial mdBook directory (interrupted prior run).
+
+…and drives it forward to a buildable mdBook. State is persisted in
+`pipeline.json` per book; reruns resume from where the previous run
+stopped.
+
+Two skills ship together:
+
+- `ingest-pipeline` — per-book engine.
+- `ingest-pipeline-batch` — library sweep; runs `ingest-pipeline` over
+  every book directory under a library root.
+
+Both skills are invoked from a Hermes session like other skills. The
+terminal state is `mdbook build` succeeding; wiki ingestion remains a
+separate, manual `wiki-ingest` step.
+
+Tests live under `roles/dotfiles/tests/hermes/`. Run them with:
+
+    just test-hermes
+    just test-hermes-integration   # requires hermes CLI on PATH
+    just regenerate-hermes-fixtures # rebuilds synthetic PDFs
