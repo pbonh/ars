@@ -505,6 +505,145 @@ def font_analysis(pdf_path: str, sample_pages: int = 60) -> dict:
 # --- Step 5: Cross-validate ---
 
 
+def refine_offset_via_body_scan(pdf_path: str, entries: list[dict],
+                                total_pages: int,
+                                exclude_pages: set[int] | None = None,
+                                page_cache: dict[int, str] | None = None,
+                                ) -> tuple[int, int]:
+    """Recover from a wrong initial offset by scanning the whole body.
+
+    For each entry, find every body page where the title fuzzy-matches
+    (running headers repeat the title on every page of a chapter, so
+    each entry typically yields many matches at the *true* offset and
+    few at any wrong offset). Build a histogram of
+    (actual_page - printed_page) across all (entry, page) match pairs;
+    the mode is the true offset.
+
+    Forward references ("see Chapter 14") in early chapters produce
+    wildly negative offsets but only one match per reference, so they
+    don't outvote the running-header consensus.
+
+    Returns ``(offset, support_score)``. support_score is the histogram
+    bucket size for the winning offset. 0 means nothing matched.
+    """
+    exclude_pages = exclude_pages or set()
+    arabic = [e for e in entries if e["page_kind"] == "arabic"]
+    if not arabic:
+        return 0, 0
+
+    body_pages = [p for p in range(1, total_pages + 1)
+                  if p not in exclude_pages]
+    body_texts = page_cache if page_cache is not None else {}
+
+    # Build a histogram of (offset → count) across ALL matches.
+    offset_counts: collections.Counter = collections.Counter()
+    # Also remember per-entry support so we can report how many
+    # *distinct* entries voted for the winning offset (a stronger
+    # signal than raw match count, since one chatty chapter could
+    # dominate the histogram otherwise).
+    offset_entries: dict[int, set[int]] = collections.defaultdict(set)
+
+    for e_idx, e in enumerate(arabic):
+        for p in body_pages:
+            if p not in body_texts:
+                body_texts[p] = pdftotext_page(pdf_path, p, layout=False)[:1500]
+            if fuzzy_contains(body_texts[p], e["title"]):
+                off = p - e["printed_page"]
+                offset_counts[off] += 1
+                offset_entries[off].add(e_idx)
+
+    if not offset_counts:
+        return 0, 0
+
+    # Reject offsets that would push entries out of the valid page
+    # range — those are nonsensical no matter how many entries vote
+    # for them (forward references in early-book content can produce
+    # large negative offsets that "validate" 8 chapters all at the
+    # same impossible position).
+    def offset_is_plausible(off: int) -> bool:
+        out_of_range = sum(
+            1 for e in arabic
+            if not (1 <= e["printed_page"] + off <= total_pages)
+        )
+        return out_of_range / len(arabic) < 0.1
+
+    plausible = {o: c for o, c in offset_counts.items()
+                 if offset_is_plausible(o)}
+    if not plausible:
+        return 0, 0
+
+    # Pick the offset that's supported by the most distinct entries
+    # (tie-break by total match count). This rewards offsets that
+    # multiple chapters agree on, not a single chapter that's mentioned
+    # 50 times.
+    best_offset = max(
+        plausible,
+        key=lambda o: (len(offset_entries[o]), offset_counts[o]),
+    )
+    return best_offset, len(offset_entries[best_offset])
+
+
+def snap_entries_to_body_titles(pdf_path: str, items: list[dict],
+                                total_pages: int,
+                                exclude_pages: set[int] | None = None,
+                                window: int = 50,
+                                page_cache: dict[int, str] | None = None,
+                                ) -> int:
+    """Snap each L1 item's ``page`` to the nearest body page where its
+    title actually appears. Mutates items in place. Returns moved count.
+
+    The search starts at the item's predicted page and walks outward,
+    but the *predicted page is itself adjusted* by the running median
+    of prior snap deltas. Books with Part-separator pages drift the
+    true offset away from the global estimate as you move through the
+    book; carrying a running adjustment lets later chapters benefit
+    from the corrections found for earlier chapters.
+
+    A page-text cache (shared with prior body scans) avoids re-reading.
+    """
+    exclude_pages = exclude_pages or set()
+    if page_cache is None:
+        page_cache = {}
+
+    def page_text(p: int) -> str:
+        if p not in page_cache:
+            page_cache[p] = pdftotext_page(pdf_path, p, layout=False)[:1500]
+        return page_cache[p]
+
+    moved = 0
+    deltas: list[int] = []
+    # Process in page order so the running adjustment grows monotonically.
+    items_sorted = sorted(items, key=lambda x: x["page"])
+    for it in items_sorted:
+        if it.get("source") not in {"toc", "toc-no-offset", "font-analysis"}:
+            continue
+        if it.get("level", 1) > 1:
+            continue
+        # Apply running adjustment from prior snaps (median is robust to
+        # one outlier; mean would let a single bad snap drag everything).
+        if deltas:
+            sorted_d = sorted(deltas[-5:])
+            adj = sorted_d[len(sorted_d) // 2]
+        else:
+            adj = 0
+        adjusted = it["page"] + adj
+        candidates: list[int] = []
+        for d in range(0, window + 1):
+            for cand in (adjusted - d, adjusted + d) if d else (adjusted,):
+                if 1 <= cand <= total_pages and cand not in exclude_pages \
+                        and cand not in candidates:
+                    candidates.append(cand)
+        for cand in candidates:
+            if fuzzy_contains(page_text(cand), it["title"]):
+                if cand != it["page"]:
+                    it["snapped_from"] = it["page"]
+                    deltas.append(cand - it["page"])
+                    it["page"] = cand
+                    moved += 1
+                break
+    return moved
+
+
 def cross_validate(pdf_path: str, entries: list[dict], offset: int,
                    total_pages: int,
                    exclude_pages: set[int] | None = None) -> list[dict]:
@@ -796,12 +935,59 @@ def main():
               f"{n_headings} heading-sized line(s) detected", file=sys.stderr)
 
     # Step 5: Cross-validate TOC entries
+    # Shared body-text cache reused across body-scan, snap, and any
+    # follow-up cross-validations so each page is read at most once.
+    body_page_cache: dict[int, str] = {}
     issues: list[dict] = []
     if toc_entries and offset_count >= 1:
         issues = cross_validate(args.pdf, toc_entries, offset, total_pages,
                                 exclude_pages=set(toc_pages))
         if issues:
             print(f"  {len(issues)} cross-validation issue(s)", file=sys.stderr)
+
+        # Step 5b: If most chapter-level entries failed to validate at the
+        # estimated offset, the offset itself is probably wrong. Recover
+        # by scanning the whole body for first-occurrences and re-deriving.
+        l1_arabic = [e for e in toc_entries
+                     if e["page_kind"] == "arabic" and e.get("level", 1) == 1]
+        l1_critical = [
+            i for i in issues
+            if i["issue"] != "found-on-neighbor"
+            and any(e["title"] == i["title"] and e.get("level", 1) == 1
+                    for e in toc_entries)
+        ]
+        if l1_arabic and len(l1_critical) / len(l1_arabic) >= 0.5:
+            print(f"  >=50% of chapter-level entries failed to validate at "
+                  f"offset {offset:+d} — refining via full-body scan...",
+                  file=sys.stderr)
+            refined_offset, refined_count = refine_offset_via_body_scan(
+                args.pdf, toc_entries, total_pages,
+                exclude_pages=set(toc_pages),
+                page_cache=body_page_cache,
+            )
+            print(f"    body-scan: offset={refined_offset:+d} from "
+                  f"{refined_count} entry(ies)", file=sys.stderr)
+            if refined_count >= max(3, offset_count) and refined_offset != offset:
+                refined_issues = cross_validate(
+                    args.pdf, toc_entries, refined_offset, total_pages,
+                    exclude_pages=set(toc_pages),
+                )
+                refined_l1_critical = [
+                    i for i in refined_issues
+                    if i["issue"] != "found-on-neighbor"
+                    and any(e["title"] == i["title"] and e.get("level", 1) == 1
+                            for e in toc_entries)
+                ]
+                if len(refined_l1_critical) < len(l1_critical):
+                    print(f"  refined: offset {offset:+d} ({len(l1_critical)} "
+                          f"L1 issues) → {refined_offset:+d} "
+                          f"({len(refined_l1_critical)} L1 issues, "
+                          f"{refined_count} entries agree)",
+                          file=sys.stderr)
+                    offset = refined_offset
+                    offset_count = refined_count
+                    offset_method = f"body-scan-refined-{refined_count}-entries"
+                    issues = refined_issues
 
     # Step 6: Rasterize TOC pages for review
     toc_images: list[str] = []
@@ -818,6 +1004,50 @@ def main():
         toc_entries, offset, offset_count,
         font_data.get("headings", []), issues, total_pages
     )
+
+    # Step 7b: Per-chapter anchoring. Books with Part separators have
+    # varying offsets across chapters; a single global offset puts each
+    # chapter slightly off. Snap each L1 entry to the nearest body page
+    # whose text actually contains the title (within ±15 pages).
+    if items and toc_entries:
+        snapped = snap_entries_to_body_titles(
+            args.pdf, items, total_pages,
+            exclude_pages=set(toc_pages),
+            page_cache=body_page_cache,
+        )
+        if snapped:
+            print(f"  per-chapter anchoring snapped {snapped} entry(ies) "
+                  f"to actual body positions", file=sys.stderr)
+            # Re-run cross-validation against the snapped pages so the
+            # review accurately reflects post-snap quality.
+            snapped_issues = cross_validate(
+                args.pdf,
+                [{**e, "printed_page": next(
+                    (it["page"] for it in items if it["title"] == e["title"]),
+                    e["printed_page"] + offset,
+                )} for e in toc_entries],
+                0, total_pages, exclude_pages=set(toc_pages),
+            )
+            review["issues"] = snapped_issues
+            l1_total = sum(1 for e in toc_entries if e.get("level", 1) == 1)
+            l1_critical = sum(
+                1 for i in snapped_issues
+                if i["issue"] != "found-on-neighbor"
+                and any(e["title"] == i["title"] and e.get("level", 1) == 1
+                        for e in toc_entries)
+            )
+            review["summary"] = (
+                f"Detected {len(items)} entries from printed TOC. "
+                f"Page offset {offset:+d} ({offset_method}). "
+                f"Per-chapter anchoring snapped {snapped} entry(ies). "
+                f"Chapter-level issues after snap: {l1_critical}/{l1_total}."
+            )
+            # If anchoring resolved most issues, upgrade confidence.
+            if l1_total and l1_critical / l1_total < 0.1:
+                review["confidence"] = "high"
+                review["needs_review"] = False
+            elif l1_total and l1_critical / l1_total < 0.25:
+                review["confidence"] = "medium"
 
     # Outputs
     outline = {
