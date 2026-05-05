@@ -54,7 +54,17 @@ PDF
 [6] mdbook build         ─ Serve locally via mdbook serve
 ```
 
-All intermediates live under a working directory (default `./pdf-to-mdbook-work/`). Final mdBook is under `./<slug>-book/`.
+All intermediates live under a working directory and the final mdBook lives in a sibling output directory. **Place both alongside the source PDF**, not in the current working directory:
+
+```bash
+PDF=/path/to/some/dir/MyBook.pdf
+PDF_DIR=$(dirname "$PDF")
+SLUG=my-book
+WORK="$PDF_DIR/.pdf-to-mdbook-work-$SLUG"   # leading dot keeps it tidy
+OUT="$PDF_DIR/$SLUG-book"
+```
+
+This way the mdBook ends up next to the PDF (so the user finds it where they expect) and re-running on a different PDF in a different directory doesn't collide with prior work. Use these variables for every script's `--out` / `--pages` / `--outline` arguments below.
 
 ## Step 1 — Triage (always do this first)
 
@@ -97,8 +107,13 @@ URL, sidebar entry, and search result. This step gets careful attention.
 python scripts/extract_outline.py path/to/input.pdf --out work/outline.json
 ```
 
-If the PDF has bookmarks, this is the authoritative chapter structure
-— use it as-is. The output looks like:
+If the PDF has *useful* bookmarks, this is the authoritative chapter
+structure — use it as-is. The script also rejects auto-generated
+"garbage" outlines (titles that look like filenames such as `01.pdf`
+or `appG.pdf`, common in concatenated/scanned PDFs); when that
+happens you'll see a message saying it fell back, and you should run
+`detect_structure.py` next as in 2b. The output for a real outline
+looks like:
 
 ```json
 {
@@ -262,27 +277,33 @@ If the build fails, the most common causes are:
 
 ## Working directory layout
 
+Both the work tree and the final mdBook live alongside the source PDF (not in the agent's CWD):
+
 ```
-./
+<dir-containing-pdf>/
 ├── input.pdf
-├── pdf-to-mdbook-work/           ← intermediates; safe to delete
+├── .pdf-to-mdbook-work-<slug>/   ← intermediates; safe to delete
 │   ├── triage.json
 │   ├── outline.json
+│   ├── outline_review.json       ← only when detect_structure ran
 │   ├── pages/
 │   │   ├── manifest.json
 │   │   ├── page_0001.md
 │   │   ├── page_0002.md
+│   │   ├── images/               ← OCR image-fallback PNGs (when used)
 │   │   └── ...
 │   └── chapters/
 │       ├── SUMMARY.md            ← draft
 │       ├── preface.md
 │       ├── chapter-1.md
+│       ├── images/               ← carried through from pages/
 │       └── ...
 └── <slug>-book/                  ← final mdBook
     ├── book.toml
     ├── src/
     │   ├── SUMMARY.md
     │   ├── preface.md
+    │   ├── images/               ← carried through; referenced by chapter MDs
     │   └── ...
     └── book/                     ← built HTML (after `mdbook build`)
 ```

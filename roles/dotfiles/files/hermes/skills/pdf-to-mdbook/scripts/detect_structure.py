@@ -112,6 +112,33 @@ TOC_LINE_TAIL = re.compile(
 )
 TOC_DOT_RUN = re.compile(r"\.{4,}|(?:\.\s){3,}")
 
+# Headers that mark the start of a section that LOOKS like a TOC but
+# isn't (lists of figures/tables/algorithms, indices). Used to trim a
+# detected TOC run when it accidentally swallows them.
+NON_TOC_HEADING = re.compile(
+    r"^\s*(?:list\s+of\s+(?:figures?|tables?|algorithms?|symbols?|"
+    r"abbreviations?|notations?|illustrations?|exhibits?|equations?|"
+    r"acronyms?)|index|glossary|nomenclature|bibliography|references?)\b",
+    re.IGNORECASE,
+)
+
+
+def is_non_toc_section_start(text: str) -> bool:
+    """True if the page's first meaningful line looks like 'List of
+    Figures', 'Index', etc. — sections that share TOC layout but are
+    distinct documents and should not be glued to the main contents."""
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        # Skip bare running headers (e.g. roman numeral page numbers)
+        if re.fullmatch(r"[ivxlcdmIVXLCDM]{1,8}", stripped):
+            continue
+        if re.fullmatch(r"\d{1,4}", stripped):
+            continue
+        return bool(NON_TOC_HEADING.match(stripped))
+    return False
+
 
 def page_toc_score(text: str) -> tuple[float, int]:
     """Return (fraction-of-toc-like-lines, line-count)."""
@@ -147,8 +174,10 @@ def detect_toc_pages(pdf_path: str, page_count: int,
     """
     scan_limit = min(max_scan, page_count)
     scores: dict[int, tuple[float, int]] = {}
+    texts: dict[int, str] = {}
     for p in range(1, scan_limit + 1):
         text = pdftotext_page(pdf_path, p, layout=True)
+        texts[p] = text
         scores[p] = page_toc_score(text)
 
     seeds = [p for p, (s, n) in scores.items()
@@ -178,7 +207,17 @@ def detect_toc_pages(pdf_path: str, page_count: int,
         longest.insert(0, longest[0] - 1)
     while soft_ok(longest[-1] + 1):
         longest.append(longest[-1] + 1)
-    return longest
+
+    # Trim the run at the first page that starts with "List of Figures",
+    # "Index", etc. Those layouts mimic TOC formatting but represent a
+    # different document section; gluing them onto the main contents
+    # produces hundreds of bogus outline entries.
+    trimmed: list[int] = []
+    for p in longest:
+        if p != longest[0] and is_non_toc_section_start(texts[p]):
+            break
+        trimmed.append(p)
+    return trimmed
 
 
 # --- Step 2: Parse TOC text into entries ---
@@ -199,6 +238,19 @@ TOC_PATTERNS = [
         r"^(\s*)(\S.{2,}?)\s{2,}"
         r"(\d{1,4}|[ivxlcdmIVXLCDM]+)"
         r"\b[.\s]*$"
+    ),
+    # "Chapter 10 Transferred-Electron Devices 510" — high-specificity
+    # structural entries (Chapter/Part/Section/Appendix). These can
+    # have just one space before the page number when the title is
+    # long enough to consume the line. Single space is too permissive
+    # in general but safe here because the line has to start with one
+    # of these structural keywords.
+    re.compile(
+        r"^(\s*)((?:chapter|part|section|appendix|appendices)"
+        r"\s+[\dIVXLCDMA-Z][\w\d.]*\b[^\d\n]*?)\s+"
+        r"(\d{1,4}|[ivxlcdmIVXLCDM]+)"
+        r"\b[.\s]*$",
+        re.IGNORECASE,
     ),
 ]
 
@@ -239,6 +291,16 @@ def parse_toc_lines(text_blocks: list[str]) -> list[dict]:
                     break
                 # Avoid lines that are mostly digits
                 if sum(c.isdigit() for c in title) > len(title) * 0.5:
+                    break
+                # Drop running-header / TOC self-reference lines (the
+                # word "CONTENTS" with a roman/arabic page number
+                # appears on every TOC page and gets parsed as a fake
+                # entry otherwise).
+                if re.fullmatch(
+                    r"(?:contents|table\s+of\s+contents|toc|index|"
+                    r"bibliography|references?|glossary|nomenclature)",
+                    title.lower().strip(".").strip(),
+                ):
                     break
                 # Convert page
                 if page_str.isdigit():

@@ -38,6 +38,21 @@ def slugify(title: str, max_len: int = 60) -> str:
     return slug or "section"
 
 
+# Bookmarks generated from filenames during PDF concatenation are
+# common in scanned/republished books and look like ``01.pdf``,
+# ``appG.pdf``, or ``chapter02.pdf``. Treat them as missing-outline so
+# the agent falls back to detect_structure.py instead of trying to
+# build a book whose chapter titles are filenames.
+GARBAGE_TITLE = re.compile(
+    r"^(?:[\w\-]+\.pdf|page[_\- ]?\d+|booktext|untitled[_\- ]?\d*)$",
+    re.IGNORECASE,
+)
+
+
+def is_garbage_title(t: str) -> bool:
+    return bool(GARBAGE_TITLE.match(t.strip()))
+
+
 def get_page_number(reader: PdfReader, dest) -> int | None:
     """Convert a Destination to a 1-indexed PDF page number."""
     try:
@@ -101,15 +116,38 @@ def main():
     items = [it for it in items if it["page"] is not None]
     items.sort(key=lambda it: (it["page"], it["level"]))
 
-    result = {
-        "has_outline": len(items) > 0,
-        "items": items,
-        "source": "pdf-bookmarks" if items else "none",
-    }
+    # Reject outlines whose titles are auto-generated filenames or
+    # placeholders. These come from scanners/concatenators and are
+    # never useful chapter titles. The agent should fall through to
+    # detect_structure.py for a real outline.
+    garbage_count = sum(1 for it in items if is_garbage_title(it["title"]))
+    garbage = items and garbage_count / len(items) > 0.5
+    if garbage:
+        result = {
+            "has_outline": False,
+            "items": [],
+            "source": "none",
+            "rejected_garbage_outline": {
+                "count": len(items),
+                "garbage_titles": garbage_count,
+                "sample": [it["title"] for it in items[:5]],
+            },
+        }
+    else:
+        result = {
+            "has_outline": len(items) > 0,
+            "items": items,
+            "source": "pdf-bookmarks" if items else "none",
+        }
 
     Path(args.out).write_text(json.dumps(result, indent=2))
     print(f"Wrote {args.out}")
-    if items:
+    if garbage:
+        print(f"Rejected {len(items)} outline items: titles look like "
+              f"auto-generated filenames "
+              f"(e.g. {result['rejected_garbage_outline']['sample'][:3]}). "
+              f"Falling back: run detect_structure.py next.")
+    elif items:
         print(f"Found {len(items)} outline items "
               f"({sum(1 for i in items if i['level'] == 1)} top-level)")
         for it in items[:8]:
