@@ -141,6 +141,18 @@ TOC_LINE_TAIL = re.compile(
     re.IGNORECASE,
 )
 TOC_DOT_RUN = re.compile(r"\.{4,}|(?:\.\s){3,}")
+# OCR'd separator: a slash or comma between title and page number, used
+# when the printed TOC had a right-aligned column that tesseract
+# collapsed onto the title line.
+TOC_OCR_SEP_TAIL = re.compile(
+    r"\s+[/,]\s*(?:\d{1,4}|[ivxlcdmIVXLCDM]+)\s*$",
+    re.IGNORECASE,
+)
+# Section-numbered TOC line opener like "5.8 ", "6 ", "6.2.1 ". When
+# combined with a trailing page number, that's a strong TOC signal even
+# without dot-leaders or wide-space separators (which OCR often collapses
+# to a single space, defeating the dot-leader / 3-space heuristics).
+TOC_NUMERIC_PREFIX = re.compile(r"^\s*\d+(?:\.\d+)*\.?\s+\S")
 
 # Headers that mark the start of a section that LOOKS like a TOC but
 # isn't (lists of figures/tables/algorithms, indices). Used to trim a
@@ -179,9 +191,18 @@ def page_toc_score(text: str) -> tuple[float, int]:
     for l in lines:
         # Strong signal: line has both a long dot run and ends in a number.
         # Weaker signal: line ends in a number with multiple spaces before it.
+        # Also strong: line has a slash/comma separator before a trailing
+        # number — common OCR artifact for right-aligned TOC pages.
         ends_in_num = bool(TOC_LINE_TAIL.search(l))
         has_dots = bool(TOC_DOT_RUN.search(l))
-        if ends_in_num and (has_dots or re.search(r"\s{3,}\S", l)):
+        has_ocr_sep = bool(TOC_OCR_SEP_TAIL.search(l))
+        has_section_num = bool(TOC_NUMERIC_PREFIX.match(l))
+        if ends_in_num and (
+            has_dots
+            or has_ocr_sep
+            or has_section_num
+            or re.search(r"\s{3,}\S", l)
+        ):
             matches += 1
     return matches / len(lines), len(lines)
 
@@ -276,6 +297,17 @@ TOC_PATTERNS = [
     # produced for `computer-methods-for-circuit-analysis-and-design`.
     re.compile(
         r"^(\s*)(\S.{2,}?)\s*[/,]\s*"
+        r"(\d{1,4}|[ivxlcdmIVXLCDM]+)"
+        r"\b[.\s]*$"
+    ),
+    # "5.8 References 225" / "6 Resource Sharing and Binding 229"
+    # — section-numbered entry with the page on the same line,
+    # single-space-separated. Common when OCR collapsed a
+    # right-aligned page-number column onto the title row.
+    # Anchored to a section-number prefix so it doesn't match
+    # arbitrary "title number" body sentences.
+    re.compile(
+        r"^(\s*)((?:\d+(?:\.\d+)*\.?)\s+\S.*?)\s+"
         r"(\d{1,4}|[ivxlcdmIVXLCDM]+)"
         r"\b[.\s]*$"
     ),
@@ -548,11 +580,25 @@ def font_analysis(pdf_path: str, sample_pages: int = 60) -> dict:
 # --- Step 4b: Body-heading scan (third-tier fallback) ---
 
 
-# Strict structural heading: "CHAPTER 3", "Part IV", "Appendix B", etc.
+# Strict structural heading: "CHAPTER 3", "Part IV", "Appendix B",
+# "Chapter 5: Sensitivities", "CHAPTER 1 NETWORK ANALYSIS".
+#
+# We deliberately require the trailing title (if present) to be ALL-CAPS
+# (allowing digits, spaces, and safe punctuation). That rejects body
+# prose like "Chapter 13. In order to solve…" or "Appendix D and other
+# codes…" which the previous loose pattern accepted. Real chapter
+# headings in OCR'd or scanned books almost always come out all-caps,
+# whereas referential prose preserves sentence case.
 BODY_STRUCTURAL_HEADING = re.compile(
-    r"^\s*(?P<kw>chapter|part|book|section|appendix|appendices)"
-    r"\s+(?P<num>\d+|[ivxlcdm]+|[A-Z])\b[^\d\n]{0,120}$",
-    re.IGNORECASE,
+    # Keyword is case-insensitive ("CHAPTER" / "Chapter" / "chapter"
+    # are all valid heading openers). The optional trailing title is
+    # NOT case-insensitive — it must be uppercase. Without that
+    # constraint we match body prose like "Part II is dedicated to
+    # architectural-level synthesis…" because IGNORECASE on the
+    # whole pattern silently turned `[A-Z]` into `[A-Za-z]`.
+    r"^\s*(?i:chapter|part|book|section|appendix|appendices)"
+    r"\s+(?:\d+|[IVXLCDMivxlcdm]+|[A-Z])\b"
+    r"(?:[\s:.\-—]+[A-Z][A-Z\s.\d&'\"\-—()]{1,80})?\s*$"
 )
 
 # Single-word front/back-matter headings that authors use as
@@ -567,7 +613,7 @@ BODY_SINGLETON_HEADINGS = {
 
 
 def _collect_running_headers(pages_text: dict[int, str]) -> set[str]:
-    """Lines repeating on >25% of pages — likely running headers, not chapters."""
+    """Lines repeating on >15% of pages — likely running headers, not chapters."""
     counter: collections.Counter = collections.Counter()
     n = len(pages_text)
     for txt in pages_text.values():
@@ -579,8 +625,48 @@ def _collect_running_headers(pages_text: dict[int, str]) -> set[str]:
             seen_on_page.add(stripped.lower())
         for s in seen_on_page:
             counter[s] += 1
-    threshold = max(3, n * 0.25)
+    threshold = max(3, n * 0.15)
     return {s for s, c in counter.items() if c >= threshold}
+
+
+def _looks_like_title_line(line: str) -> bool:
+    """Short title-case phrase with no terminal punctuation.
+
+    Used to catch chapter starts in books like rust-book where chapters
+    open with `Getting Started` / `Common Programming Concepts` / etc.
+    on the first line of the page, no chapter-number prefix.
+    """
+    stripped = line.strip()
+    if not (3 <= len(stripped) <= 60):
+        return False
+    # Reject anything that ends like a sentence (continuation prose) or
+    # a TOC entry (trailing page number).
+    if stripped[-1] in ".,;:!?":
+        return False
+    if re.search(r"\d{1,4}\s*$", stripped):
+        return False
+    # Reject lines containing markdown / formatting noise.
+    if any(c in stripped for c in "[](){}<>|`"):
+        return False
+    words = stripped.split()
+    if not words:
+        return False
+    # First char must be an uppercase letter (or a quote/dash before one).
+    head = stripped.lstrip("\"'“”‘’—–-")
+    if not head or not head[0].isupper():
+        return False
+    # Title-case heuristic: among ≥4-letter words, most should start with
+    # uppercase. This rejects sentence fragments like "Let's jump into
+    # Rust by working through a hands-on project together" (only "Let's"
+    # and "Rust" capitalized) while accepting "Common Programming
+    # Concepts" / "Understanding Ownership".
+    long_words = [w for w in words if len(w) >= 4]
+    if not long_words:
+        # Single short title like "Macros" — accept if it has only 1
+        # word and that word is capitalized + alphabetic.
+        return len(words) == 1 and words[0].isalpha() and words[0][0].isupper()
+    capped = sum(1 for w in long_words if w[0].isupper())
+    return capped / len(long_words) >= 0.6
 
 
 def detect_body_headings(pdf_path: str, total_pages: int,
@@ -638,20 +724,33 @@ def detect_body_headings(pdf_path: str, total_pages: int,
             continue
         # First ~10 non-empty lines per page.
         lines = [l.rstrip() for l in text.splitlines() if l.strip()][:10]
+        first_line = lines[0].strip() if lines else ""
+
+        # 1. Strict structural heading anywhere in the first 10 lines.
+        matched = False
         for line in lines:
             stripped = line.strip()
             if len(stripped) > 120:
                 continue
-
-            m = BODY_STRUCTURAL_HEADING.match(stripped)
-            if m:
+            if BODY_STRUCTURAL_HEADING.match(stripped):
                 add(stripped, page, level=1)
+                matched = True
                 break
-
             low = stripped.lower().rstrip(":.").strip()
             if low in BODY_SINGLETON_HEADINGS:
                 add(stripped, page, level=1)
+                matched = True
                 break
+        if matched:
+            continue
+
+        # 2. Chapter-start heuristic for books without numbered headings:
+        # the first non-empty line of the page is a short title-case
+        # phrase with no terminal punctuation, and the page has body
+        # text below it (i.e. it's not a title-only spread).
+        if first_line and _looks_like_title_line(first_line):
+            if len(lines) >= 2:
+                add(first_line, page, level=1)
 
     return items
 
@@ -987,16 +1086,20 @@ def reconcile_signals(toc_entries: list[dict], offset: int,
         )
         return items, review
 
-    # Path C: Font analysis fallback
+    # Path C: Font analysis fallback. Only commit to font results if
+    # there are at least 3 deduped headings AND the result has more
+    # entries than the body-heading fallback would produce. Otherwise
+    # fall through to Path D — a font-analysis pass with one or two
+    # bogus matches (a stray figure caption, a page number rendered in
+    # a slightly larger font) is worse than nothing.
+    font_items: list[dict] = []
     if font_headings:
-        # Take only top-2 levels, deduped
         candidate = [h for h in font_headings if h.get("level", 4) <= 2]
-        items = []
         seen_pages = set()
         for h in candidate:
             if h["page"] in seen_pages:
                 continue
-            items.append({
+            font_items.append({
                 "title": h["text"],
                 "level": h["level"],
                 "page": h["page"],
@@ -1005,15 +1108,20 @@ def reconcile_signals(toc_entries: list[dict], offset: int,
                 "confidence": "medium",
             })
             seen_pages.add(h["page"])
+
+    body_items_count = len(body_headings or [])
+    use_font = font_items and len(font_items) >= 3 and \
+        len(font_items) >= body_items_count
+    if use_font:
         review["method"] = "font-analysis"
-        review["confidence"] = "medium" if len(items) >= 3 else "low"
+        review["confidence"] = "medium"
         review["needs_review"] = True
         review["summary"] = (
-            f"No printed TOC found. Detected {len(items)} candidate "
+            f"No printed TOC found. Detected {len(font_items)} candidate "
             f"chapter heading(s) by font-size analysis. Review carefully "
             f"— this method has higher false-positive rates."
         )
-        return items, review
+        return font_items, review
 
     # Path D: Body-heading fallback (scanned/no-TOC books like rust-book).
     # Requires at least 3 distinct chapter-like headings to avoid
@@ -1073,6 +1181,15 @@ def run_self_test() -> None:
         ("Chapter 5 Sensitivities / 152", "Chapter 5 Sensitivities", 152),
         ("Frequency Domain Analysis , 234",
          "Frequency Domain Analysis", 234),
+        # Section-numbered, single-space-separated trailing page —
+        # the format `synthesis-and-optimization-of-digital-circuits`
+        # OCR'd into.
+        ("5.8 References 225", "5.8 References", 225),
+        ("6 Resource Sharing and Binding 229",
+         "6 Resource Sharing and Binding", 229),
+        ("6.2.1 Resource Sharing in Non-Hierarchical Sequencing Graphs 233",
+         "6.2.1 Resource Sharing in Non-Hierarchical Sequencing Graphs",
+         233),
     ]
     failures: list[str] = []
     for line, expected_title, expected_page in cases:
@@ -1280,13 +1397,13 @@ def main():
             print(f"  rasterized {len(toc_images)} TOC page(s) for review",
                   file=sys.stderr)
 
-    # Step 6b: Body-heading scan — third-tier fallback used when both
-    # TOC parsing and font analysis fail. Only worth running when we
-    # have a pages_dir (cheap text reads).
+    # Step 6b: Body-heading scan — third-tier fallback used when no
+    # strong TOC offset was established. We always run it (when
+    # pages_dir is available) so reconcile_signals can fall back to
+    # body-headings if font-analysis turns out to be weak. Cost is one
+    # cached read per page.
     body_heading_items: list[dict] = []
-    if pages_dir is not None and (
-        not toc_entries or offset_count < 1
-    ) and len(font_data.get("headings", [])) < 3:
+    if pages_dir is not None and (not toc_entries or offset_count < 1):
         print("Scanning body for chapter-like headings...", file=sys.stderr)
         body_heading_items = detect_body_headings(
             args.pdf, total_pages, pages_dir,
