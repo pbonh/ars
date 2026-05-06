@@ -6,6 +6,7 @@ zellij_shell_cmd: "{{ interactive_shell_cmd }}"
 zellij_nvim_app: "{{ nvim_default_profile }}"
 zellij_config_dir: "{{ xdg_config_dir }}/zellij"
 zellij_config_file: "{{ zellij_config_dir }}/config.yaml"
+zellij_theme: "tokyo-night-dark"
 zellij_themes_dir: "{{ zellij_config_dir }}/themes"
 zellij_layout_dir: "{{ zellij_config_dir }}/layouts"
 zellij_env_variables:
