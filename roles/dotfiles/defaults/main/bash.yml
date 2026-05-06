@@ -260,6 +260,84 @@ bash_zellij_aliases: |
   alias {{ agent_config.alias }}='zellij_{{ agent_name }}_pane'
   alias {{ agent_config.pane_alias }}='zellij_{{ agent_name }}_tab'
   {% endfor %}
+bash_hermes_aliases: |
+  hcron-ls() {
+    hermes cron list "$@"
+  }
+  hcron-status() {
+    hermes cron status "$@"
+  }
+  hcron-run() {
+    if [ -z "$1" ]; then
+      echo "usage: hcron-run <job_id>" >&2
+      return 2
+    fi
+    hermes cron run "$@"
+  }
+  hcron-pause() {
+    if [ -z "$1" ]; then
+      echo "usage: hcron-pause <job_id>" >&2
+      return 2
+    fi
+    hermes cron pause "$@"
+  }
+  hcron-resume() {
+    if [ -z "$1" ]; then
+      echo "usage: hcron-resume <job_id>" >&2
+      return 2
+    fi
+    hermes cron resume "$@"
+  }
+  hcron-edit() {
+    if [ -z "$1" ]; then
+      echo "usage: hcron-edit <job_id> [hermes cron edit args...]" >&2
+      return 2
+    fi
+    hermes cron edit "$@"
+  }
+  hcron-rm() {
+    if [ -z "$1" ]; then
+      echo "usage: hcron-rm <job_id>" >&2
+      return 2
+    fi
+    hermes cron remove "$@"
+  }
+  hcron-pdf-add() {
+    if [ "$#" -lt 2 ]; then
+      echo "usage: hcron-pdf-add <schedule> <library_path> [parallel=2] [vision=auto]" >&2
+      return 2
+    fi
+    local schedule="$1"
+    local library_path="$2"
+    local parallel="${3:-2}"
+    local vision="${4:-auto}"
+    local job_name="pdf-batch-$(basename "$library_path")"
+    hermes cron create "$schedule" \
+      "Run ingest-pipeline-batch on ${library_path} with --parallel ${parallel} --vision ${vision}." \
+      --name "$job_name" \
+      --skill ingest-pipeline-batch \
+      --skill ingest-pipeline \
+      --skill pdf-to-mdbook
+  }
+  hcron-pdf-ls() {
+    hermes cron list | grep -E '(^|[[:space:]])pdf-batch-' || true
+  }
+  hcron-wiki-add() {
+    if [ "$#" -lt 2 ]; then
+      echo "usage: hcron-wiki-add <schedule> <wiki_path>" >&2
+      return 2
+    fi
+    local schedule="$1"
+    local wiki_path="$2"
+    local job_name="wiki-ingest-$(basename "$wiki_path")"
+    hermes cron create "$schedule" \
+      "Run wiki-ingest on ${wiki_path}. Process raw/ sources sequentially, one at a time." \
+      --name "$job_name" \
+      --skill wiki-ingest
+  }
+  hcron-wiki-ls() {
+    hermes cron list | grep -E '(^|[[:space:]])wiki-ingest-' || true
+  }
 bash_ssh_setup_plain: |
   env={{ dotfiles_user_home }}/.ssh/agent.env
   agent_load_env () { test -f "$env" && . "$env" >| /dev/null ; }

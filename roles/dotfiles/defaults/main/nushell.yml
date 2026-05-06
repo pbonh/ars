@@ -176,3 +176,46 @@ nushell_zellij_aliases: |
     zellij_open_tool_pane "{{ agent_config.pane_name }}" "{{ agent_config.command }}" ...$args
   }
   {% endfor %}
+nushell_hermes_aliases: |
+  def hcron-ls [...args] {
+    hermes cron list ...$args
+  }
+  def hcron-status [...args] {
+    hermes cron status ...$args
+  }
+  def hcron-run [job_id: string] {
+    hermes cron run $job_id
+  }
+  def hcron-pause [job_id: string] {
+    hermes cron pause $job_id
+  }
+  def hcron-resume [job_id: string] {
+    hermes cron resume $job_id
+  }
+  def hcron-edit [job_id: string, ...args] {
+    hermes cron edit $job_id ...$args
+  }
+  def hcron-rm [job_id: string] {
+    hermes cron remove $job_id
+  }
+  def hcron-pdf-add [
+    schedule: string,
+    library_path: string,
+    parallel: int = 2,
+    vision: string = "auto",
+  ] {
+    let job_name = $"pdf-batch-($library_path | path basename)"
+    let prompt = $"Run ingest-pipeline-batch on ($library_path) with --parallel ($parallel) --vision ($vision)."
+    hermes cron create $schedule $prompt --name $job_name --skill ingest-pipeline-batch --skill ingest-pipeline --skill pdf-to-mdbook
+  }
+  def hcron-pdf-ls [] {
+    try { hermes cron list | ^grep -E '(^|[[:space:]])pdf-batch-' }
+  }
+  def hcron-wiki-add [schedule: string, wiki_path: string] {
+    let job_name = $"wiki-ingest-($wiki_path | path basename)"
+    let prompt = $"Run wiki-ingest on ($wiki_path). Process raw/ sources sequentially, one at a time."
+    hermes cron create $schedule $prompt --name $job_name --skill wiki-ingest
+  }
+  def hcron-wiki-ls [] {
+    try { hermes cron list | ^grep -E '(^|[[:space:]])wiki-ingest-' }
+  }
