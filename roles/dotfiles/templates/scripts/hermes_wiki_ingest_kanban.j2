@@ -99,7 +99,7 @@ say "stable_keys=$STABLE_KEYS wait=$WAIT"
 
 # ----- Phase 1: fan-out one task per PDF ------------------------------------
 mapfile -d '' -t PDFS < <(find "$LIBRARY" -maxdepth 4 -type f -name '*.pdf' -not -path '*/.*' -print0)
-say "discovered ${#PDFS[@]} PDFs"
+say "discovered {% raw %}${#PDFS[@]}{% endraw %} PDFs"
 
 PDF_IDS=()
 for pdf in "${PDFS[@]}"; do
@@ -120,7 +120,7 @@ for pdf in "${PDFS[@]}"; do
   PDF_IDS+=("$id")
   say "queued $base → $id"
 done
-say "queued ${#PDF_IDS[@]} PDF tasks"
+say "queued {% raw %}${#PDF_IDS[@]}{% endraw %} PDF tasks"
 
 # ----- Phase 2: wiki-ingest waits on every PDF task -------------------------
 INGEST_PARENTS=()
@@ -134,7 +134,7 @@ INGEST_ID="$(hermes kanban create "wiki-ingest into $WIKI" \
               --body "Ingest sources from $WIKI/raw/. Prefer mdBook outputs; skip sources already represented in wiki/summaries/." \
               "${INGEST_PARENTS[@]}" \
               --json | {{ nix_bin }}/jq -r .id)"
-say "queued wiki-ingest → $INGEST_ID  (waits on ${#PDF_IDS[@]} parents)"
+say "queued wiki-ingest → $INGEST_ID  (waits on {% raw %}${#PDF_IDS[@]}{% endraw %} parents)"
 
 # ----- Phase 3: wiki-lint waits on wiki-ingest ------------------------------
 LINT_ID="$(hermes kanban create "wiki-lint $WIKI" \
