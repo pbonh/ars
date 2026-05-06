@@ -30,21 +30,30 @@ PDF
 [1] triage.py            ─ ~30 lines of JSON. Decide pipeline.
  │
  ▼
-[2a] extract_outline.py  ─ Bookmarks → outline.json (preferred)
-     │
-     │   if has_outline: false
-     ▼
-[2b] detect_structure.py ─ Multi-signal detection: TOC parse + offset
-                           detection + cross-validation + font analysis.
-                           Writes outline.json + outline_review.json
-                           + rasterized TOC images for vision review.
+[2a] extract_outline.py  ─ Bookmarks → outline.json (preferred).
+ │                          Sets has_outline: true|false in outline.json.
  │
  ▼
 [3a] extract_text_pages.py    OR    [3b] ocr_pages.py
      (text PDFs)                         (scanned / mixed)
- │                                        │
- ├────────────────┬───────────────────────┘
-                  ▼
+ │
+ │  ── if (2a) wrote has_outline: true, skip (2b) ──
+ │  ── else: ──────────────────────────────────────┐
+ │                                                 ▼
+ │           [2b] detect_structure.py --pages-dir <work>/pages
+ │                ─ Multi-signal detection: TOC parse + offset
+ │                  detection + cross-validation + font analysis,
+ │                  plus a body-heading scan for books without
+ │                  a printed TOC. Reads page text from the .md
+ │                  files in --pages-dir, so it works on scanned
+ │                  PDFs whose text layer is empty.
+ │                  Exits non-zero (with rasterized first-25-page
+ │                  images) when no signal yields ≥3 usable
+ │                  entries, forcing vision review instead of
+ │                  silently producing a 1-chapter book.
+ │                                                 │
+ │ ◄───────────────────────────────────────────────┘
+ ▼
 [4] assemble_chapters.py ─ Group pages by outline → chapters/*.md + draft SUMMARY.md
  │
  ▼
@@ -53,6 +62,14 @@ PDF
  ▼
 [6] mdbook build         ─ Serve locally via mdbook serve
 ```
+
+**Why structure detection runs after page extraction now**: scanned PDFs
+have no text layer, so `pdftotext` returns empty pages. `detect_structure.py`
+needs page text to find the printed TOC; the OCR'd `.md` files produced by
+`ocr_pages.py` are exactly that text. Running detection second (with
+`--pages-dir`) lets the same code path handle text-PDFs and scanned PDFs
+uniformly. If bookmarks already gave a usable outline (Step 2a), Step 2b
+is skipped entirely.
 
 All intermediates live under a working directory and the final mdBook lives in a sibling output directory. **Place both alongside the source PDF**, not in the current working directory:
 
@@ -101,6 +118,13 @@ Do NOT skip triage. The cost is one tool call and ~30 lines of context, and it d
 Structure is the spine of the book — it's referenced by every link,
 URL, sidebar entry, and search result. This step gets careful attention.
 
+**Order matters.** Try bookmarks (Step 2a) first. If they're usable, you
+have your outline and you can skip ahead to Step 3 / Step 4. If bookmarks
+fail or the PDF has none, **run page extraction (Step 3) before TOC
+detection (Step 2b)** — Step 2b reads page text from the extracted `.md`
+files via `--pages-dir`, which is the only way to find a printed TOC on a
+scanned PDF.
+
 ### 2a. Try bookmarks first (cheap, authoritative when present)
 
 ```bash
@@ -128,17 +152,31 @@ looks like:
 
 Skip to step 3.
 
-### 2b. No bookmarks → run intelligent multi-signal detection
+### 2b. No bookmarks → run page extraction (Step 3) first, then multi-signal detection
 
 ```bash
-python scripts/detect_structure.py path/to/input.pdf --out work/
+# Run Step 3 (extract_text_pages.py or ocr_pages.py) first, then:
+python scripts/detect_structure.py path/to/input.pdf \
+    --out work/ \
+    --pages-dir work/pages
+```
+
+The `--pages-dir` flag is **required** for scanned PDFs (where
+`pdftotext` would return empty) and recommended for text PDFs too (it's
+faster than re-running `pdftotext` per page). If you forget it on a
+scanned PDF the script bails immediately with:
+
+```
+detect_structure: this PDF appears to be scanned (no extractable text on first 3 pages).
+Run ocr_pages.py first, then re-invoke with --pages-dir <work>/pages.
 ```
 
 This script combines several signals:
 
 1. **Printed TOC detection** — scans the first 30 pages for layout
    patterns that look like a table of contents (lines ending in page
-   numbers, dot leaders, hierarchical indent).
+   numbers, dot leaders, hierarchical indent, or OCR'd
+   slash/comma separators).
 2. **TOC parsing** — extracts entries with title, level, and *printed*
    page number.
 3. **Page-offset estimation** — searches the body for the first
@@ -149,8 +187,21 @@ This script combines several signals:
    appears on its predicted PDF page.
 5. **Font-size analysis** — fallback when no TOC exists; finds
    heading-sized text across the document.
-6. **Rasterized TOC images** — written to `work/toc-images/` so you
+6. **Body-heading scan** — third-tier fallback for books with no
+   printed TOC and a flat font hierarchy (e.g. web-rendered PDFs like
+   the rust-book). Scans the first ~10 lines of every page for
+   structural headings (`Chapter N`, `Part N`, `Appendix X`) and
+   common stand-alone titles (`Foreword`, `Preface`, `Introduction`,
+   `Conclusion`, `Index`, …). Only runs when `--pages-dir` was given.
+7. **Rasterized TOC images** — written to `work/toc-images/` so you
    can verify with vision when confidence is low.
+
+**Hard failure when nothing works.** If no signal yields ≥3 plausible
+chapter entries the script writes `outline.json` with `has_outline:
+false`, rasterizes the first ~25 pages into `work/toc-images/`, and
+exits non-zero. The caller must then take the vision-review path
+described in Step 2c — the script will not silently produce a
+single-chapter book.
 
 It writes `work/outline.json` (compatible with `assemble_chapters.py`)
 plus `work/outline_review.json`:
@@ -185,16 +236,24 @@ plus `work/outline_review.json`:
 
 ### 2c. No TOC and font-analysis is unreliable → vision-first
 
-If `outline_review.json` reports `method: "none"` or `method:
-"font-analysis"` with low confidence, fall back to vision:
+When `detect_structure.py` exits non-zero (or `outline_review.json`
+reports `method: "none"` and `outline.json` has `has_outline: false`),
+the only path forward is vision:
 
-1. Rasterize the first ~25 pages of the PDF: `pdftoppm -jpeg -r 120
-   -f 1 -l 25 input.pdf /tmp/scan` (the script also does this for
-   detected TOC pages — re-use them if they exist).
+1. The script has already rasterized the first ~25 pages into
+   `work/toc-images/` for you — view them directly. If you want
+   higher-resolution renders, re-run `pdftoppm -jpeg -r 120 -f 1 -l 25
+   input.pdf /tmp/scan`.
 2. View the resulting images and look for a printed TOC manually.
 3. Hand-write `work/outline.json` based on what you see; see
    **reference/structure.md** for the schema and tips on mapping
    printed page numbers to PDF page numbers.
+
+This path also catches `method: "body-headings"` or `method:
+"font-analysis"` results with low confidence — `outline.json` is
+populated in those cases (so the script exits 0), but the entries are
+flagged for review and you should still spot-check the rasterized images
+before proceeding to assembly.
 
 ### Always confirm with the user
 
@@ -319,7 +378,8 @@ Read these only when their topic comes up in the workflow. None are needed for t
 
 ## Things to remember
 
-- **Confirm the outline before extracting.** If you had to generate it heuristically, show the user the chapter list and pause for confirmation. Re-running step 4+ after the outline changes is cheap; re-OCRing a 600-page book because chapters were wrong is not.
+- **Confirm the outline before assembling.** If you had to generate it heuristically (anything other than bookmarks), show the user the chapter list and pause for confirmation. Re-running step 4+ after the outline changes is cheap; re-running structure detection after assembly produced the wrong cuts is not.
+- **For scanned PDFs (or any PDF without bookmarks), extract pages BEFORE running `detect_structure.py`** and pass `--pages-dir <work>/pages`. The script enforces this with a clear error if you forget.
 - **Don't read extracted page files.** The manifest tells you everything you need to know about extraction quality. Open a page file only to diagnose a specific reported problem.
 - **For long OCR jobs, run them in the background** and continue conversation. The OCR script is resumable and writes progress to `work/pages/manifest.json` as it goes.
 - **Keep the work directory.** It's the difference between "fix one chapter" and "re-do the whole book."

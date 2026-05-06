@@ -38,15 +38,21 @@ import sys
 import unicodedata
 from pathlib import Path
 
-try:
-    from pypdf import PdfReader
-except ImportError:
-    print("ERROR: pypdf not installed. Run: pip install pypdf --break-system-packages",
-          file=sys.stderr)
-    sys.exit(2)
+def _require_pypdf():
+    try:
+        from pypdf import PdfReader  # noqa: F401
+        return PdfReader
+    except ImportError:
+        print(
+            "ERROR: pypdf not installed. Run: pip install pypdf "
+            "--break-system-packages",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+
 
 try:
-    import pdfplumber
+    import pdfplumber  # noqa: F401
     HAS_PDFPLUMBER = True
 except ImportError:
     HAS_PDFPLUMBER = False
@@ -98,6 +104,30 @@ def pdftotext_page(pdf_path: str, page: int, layout: bool = True) -> str:
         return r.stdout
     except (subprocess.CalledProcessError, FileNotFoundError):
         return ""
+
+
+def read_page_text(pdf_path: str, page: int,
+                   pages_dir: Path | None = None,
+                   layout: bool = True) -> str:
+    """Return text for ``page`` (1-indexed).
+
+    When ``pages_dir`` is provided and ``pages_dir/page_NNNN.md`` exists,
+    read it directly. This lets the structure-detection pass consume
+    OCR output (or pre-extracted layout text) for scanned PDFs whose
+    text layer is empty. Otherwise fall back to ``pdftotext``.
+
+    The OCR path renders an image-fallback comment for tesseract-zero
+    pages; that comment is harmless for TOC scoring (it is short and
+    contains no page-number tail), so we don't strip it here.
+    """
+    if pages_dir is not None:
+        candidate = pages_dir / f"page_{page:04d}.md"
+        if candidate.exists():
+            try:
+                return candidate.read_text()
+            except OSError:
+                pass
+    return pdftotext_page(pdf_path, page, layout=layout)
 
 
 # --- Step 1: Detect TOC pages ---
@@ -159,7 +189,8 @@ def page_toc_score(text: str) -> tuple[float, int]:
 def detect_toc_pages(pdf_path: str, page_count: int,
                      max_scan: int = 30,
                      threshold: float = 0.35,
-                     extend_threshold: float = 0.20) -> list[int]:
+                     extend_threshold: float = 0.20,
+                     pages_dir: Path | None = None) -> list[int]:
     """Return PDF page numbers (1-indexed) of the most likely TOC run.
 
     Two-pass detection:
@@ -176,7 +207,7 @@ def detect_toc_pages(pdf_path: str, page_count: int,
     scores: dict[int, tuple[float, int]] = {}
     texts: dict[int, str] = {}
     for p in range(1, scan_limit + 1):
-        text = pdftotext_page(pdf_path, p, layout=True)
+        text = read_page_text(pdf_path, p, pages_dir=pages_dir, layout=True)
         texts[p] = text
         scores[p] = page_toc_score(text)
 
@@ -236,6 +267,15 @@ TOC_PATTERNS = [
     # "Title    23" — no dots, 2+ spaces before page
     re.compile(
         r"^(\s*)(\S.{2,}?)\s{2,}"
+        r"(\d{1,4}|[ivxlcdmIVXLCDM]+)"
+        r"\b[.\s]*$"
+    ),
+    # "Title / 23" or "Title , 23" — OCR commonly collapses a
+    # right-aligned page number onto the title line with a stray
+    # punctuation separator. The slash form is what tesseract
+    # produced for `computer-methods-for-circuit-analysis-and-design`.
+    re.compile(
+        r"^(\s*)(\S.{2,}?)\s*[/,]\s*"
         r"(\d{1,4}|[ivxlcdmIVXLCDM]+)"
         r"\b[.\s]*$"
     ),
@@ -342,12 +382,14 @@ def assign_levels(entries: list[dict], max_levels: int = 4) -> None:
 
 
 def get_page_count(pdf_path: str) -> int:
+    PdfReader = _require_pypdf()
     return len(PdfReader(pdf_path).pages)
 
 
 def estimate_page_offset(pdf_path: str, entries: list[dict],
                          total_pages: int,
-                         exclude_pages: set[int] | None = None
+                         exclude_pages: set[int] | None = None,
+                         pages_dir: Path | None = None,
                          ) -> tuple[int, str, int]:
     """Try to match the first few entries against PDF pages.
 
@@ -397,7 +439,8 @@ def estimate_page_offset(pdf_path: str, entries: list[dict],
                     scan_pages.append(cand)
 
         for pdf_page in scan_pages[:80]:  # cap effort per probe
-            text = pdftotext_page(pdf_path, pdf_page, layout=False)[:1500]
+            text = read_page_text(pdf_path, pdf_page,
+                                  pages_dir=pages_dir, layout=False)[:1500]
             if fuzzy_contains(text, target):
                 offsets.append(pdf_page - printed)
                 break
@@ -502,6 +545,117 @@ def font_analysis(pdf_path: str, sample_pages: int = 60) -> dict:
     }
 
 
+# --- Step 4b: Body-heading scan (third-tier fallback) ---
+
+
+# Strict structural heading: "CHAPTER 3", "Part IV", "Appendix B", etc.
+BODY_STRUCTURAL_HEADING = re.compile(
+    r"^\s*(?P<kw>chapter|part|book|section|appendix|appendices)"
+    r"\s+(?P<num>\d+|[ivxlcdm]+|[A-Z])\b[^\d\n]{0,120}$",
+    re.IGNORECASE,
+)
+
+# Single-word front/back-matter headings that authors use as
+# stand-alone chapter titles. Matched against a stripped first
+# non-empty line.
+BODY_SINGLETON_HEADINGS = {
+    "foreword", "preface", "introduction", "acknowledgments",
+    "acknowledgements", "conclusion", "epilogue", "afterword",
+    "index", "bibliography", "references", "glossary",
+    "nomenclature", "appendix", "appendices", "abstract",
+}
+
+
+def _collect_running_headers(pages_text: dict[int, str]) -> set[str]:
+    """Lines repeating on >25% of pages — likely running headers, not chapters."""
+    counter: collections.Counter = collections.Counter()
+    n = len(pages_text)
+    for txt in pages_text.values():
+        seen_on_page: set[str] = set()
+        for line in txt.splitlines()[:6]:
+            stripped = line.strip()
+            if not stripped or len(stripped) > 80:
+                continue
+            seen_on_page.add(stripped.lower())
+        for s in seen_on_page:
+            counter[s] += 1
+    threshold = max(3, n * 0.25)
+    return {s for s, c in counter.items() if c >= threshold}
+
+
+def detect_body_headings(pdf_path: str, total_pages: int,
+                         pages_dir: Path | None,
+                         page_cache: dict[int, str] | None = None,
+                         ) -> list[dict]:
+    """Scan body pages for chapter-like headings.
+
+    Third-tier fallback used when both TOC parsing and font analysis
+    failed. Only runs when ``pages_dir`` is available, since otherwise
+    a per-page ``pdftotext`` call across a 600-page book is too slow
+    and rarely productive (text PDFs without bookmarks usually have a
+    real TOC; books that lack one are typically web-rendered like the
+    rust-book).
+    """
+    if pages_dir is None:
+        return []
+
+    if page_cache is None:
+        page_cache = {}
+
+    # First pass: load text for every page (cheap when reading from .md
+    # files on disk).
+    pages_text: dict[int, str] = {}
+    for p in range(1, total_pages + 1):
+        if p in page_cache:
+            pages_text[p] = page_cache[p]
+            continue
+        text = read_page_text(pdf_path, p, pages_dir=pages_dir, layout=False)
+        page_cache[p] = text
+        pages_text[p] = text
+
+    running = _collect_running_headers(pages_text)
+
+    items: list[dict] = []
+    seen_titles: set[str] = set()
+
+    def add(title: str, page: int, level: int) -> None:
+        key = title.lower().strip()
+        if key in seen_titles:
+            return
+        if key in running:
+            return
+        seen_titles.add(key)
+        items.append({
+            "title": title.strip(),
+            "level": level,
+            "page": page,
+            "slug": slugify(title),
+        })
+
+    for page in range(1, total_pages + 1):
+        text = pages_text.get(page, "")
+        if not text:
+            continue
+        # First ~10 non-empty lines per page.
+        lines = [l.rstrip() for l in text.splitlines() if l.strip()][:10]
+        for line in lines:
+            stripped = line.strip()
+            if len(stripped) > 120:
+                continue
+
+            m = BODY_STRUCTURAL_HEADING.match(stripped)
+            if m:
+                add(stripped, page, level=1)
+                break
+
+            low = stripped.lower().rstrip(":.").strip()
+            if low in BODY_SINGLETON_HEADINGS:
+                add(stripped, page, level=1)
+                break
+
+    return items
+
+
 # --- Step 5: Cross-validate ---
 
 
@@ -509,6 +663,7 @@ def refine_offset_via_body_scan(pdf_path: str, entries: list[dict],
                                 total_pages: int,
                                 exclude_pages: set[int] | None = None,
                                 page_cache: dict[int, str] | None = None,
+                                pages_dir: Path | None = None,
                                 ) -> tuple[int, int]:
     """Recover from a wrong initial offset by scanning the whole body.
 
@@ -546,7 +701,9 @@ def refine_offset_via_body_scan(pdf_path: str, entries: list[dict],
     for e_idx, e in enumerate(arabic):
         for p in body_pages:
             if p not in body_texts:
-                body_texts[p] = pdftotext_page(pdf_path, p, layout=False)[:1500]
+                body_texts[p] = read_page_text(
+                    pdf_path, p, pages_dir=pages_dir, layout=False
+                )[:1500]
             if fuzzy_contains(body_texts[p], e["title"]):
                 off = p - e["printed_page"]
                 offset_counts[off] += 1
@@ -588,6 +745,7 @@ def snap_entries_to_body_titles(pdf_path: str, items: list[dict],
                                 exclude_pages: set[int] | None = None,
                                 window: int = 50,
                                 page_cache: dict[int, str] | None = None,
+                                pages_dir: Path | None = None,
                                 ) -> int:
     """Snap each L1 item's ``page`` to the nearest body page where its
     title actually appears. Mutates items in place. Returns moved count.
@@ -607,7 +765,9 @@ def snap_entries_to_body_titles(pdf_path: str, items: list[dict],
 
     def page_text(p: int) -> str:
         if p not in page_cache:
-            page_cache[p] = pdftotext_page(pdf_path, p, layout=False)[:1500]
+            page_cache[p] = read_page_text(
+                pdf_path, p, pages_dir=pages_dir, layout=False
+            )[:1500]
         return page_cache[p]
 
     moved = 0
@@ -646,7 +806,8 @@ def snap_entries_to_body_titles(pdf_path: str, items: list[dict],
 
 def cross_validate(pdf_path: str, entries: list[dict], offset: int,
                    total_pages: int,
-                   exclude_pages: set[int] | None = None) -> list[dict]:
+                   exclude_pages: set[int] | None = None,
+                   pages_dir: Path | None = None) -> list[dict]:
     """For each entry, check the title appears on/near its predicted page.
 
     Excludes TOC pages from neighbor-checking so a TOC entry doesn't
@@ -669,7 +830,8 @@ def cross_validate(pdf_path: str, entries: list[dict], offset: int,
             p = predicted + delta
             if not (1 <= p <= total_pages) or p in exclude_pages:
                 continue
-            text = pdftotext_page(pdf_path, p, layout=False)[:1500]
+            text = read_page_text(pdf_path, p,
+                                  pages_dir=pages_dir, layout=False)[:1500]
             if fuzzy_contains(text, e["title"]):
                 found_on = p
                 break
@@ -724,7 +886,9 @@ def reconcile_signals(toc_entries: list[dict], offset: int,
                       offset_match_count: int,
                       font_headings: list[dict],
                       cross_val_issues: list[dict],
-                      total_pages: int) -> tuple[list[dict], dict]:
+                      total_pages: int,
+                      body_headings: list[dict] | None = None,
+                      ) -> tuple[list[dict], dict]:
     """Build final entries + a review summary describing confidence."""
     review: dict = {
         "method": None,
@@ -851,22 +1015,93 @@ def reconcile_signals(toc_entries: list[dict], offset: int,
         )
         return items, review
 
-    # Path D: Nothing worked
+    # Path D: Body-heading fallback (scanned/no-TOC books like rust-book).
+    # Requires at least 3 distinct chapter-like headings to avoid
+    # producing a near-degenerate outline.
+    if body_headings and len(body_headings) >= 3:
+        items = []
+        for h in body_headings:
+            items.append({
+                "title": h["title"],
+                "level": h.get("level", 1),
+                "page": h["page"],
+                "slug": h.get("slug") or slugify(h["title"]),
+                "source": "body-headings",
+                "confidence": "low",
+            })
+        review["method"] = "body-headings"
+        review["confidence"] = "low"
+        review["needs_review"] = True
+        review["summary"] = (
+            f"No printed TOC and no font-size signal. Detected "
+            f"{len(items)} chapter-like heading(s) by scanning the first "
+            f"few lines of every page. Review carefully — body-heading "
+            f"detection has false positives, especially on books that "
+            f"reuse 'Introduction'/'Conclusion' inside chapters."
+        )
+        return items, review
+
+    # Path E: Nothing worked. Refuse to emit a single-chapter outline.
+    # The caller will see has_outline:false plus exit-2 and must take
+    # the vision-review path documented in SKILL.md §2c.
     review["method"] = "none"
     review["confidence"] = "none"
     review["summary"] = (
-        "No bookmarks, no parseable TOC, no font-size signal. "
-        "Falling back to single-chapter outline. Recommend rasterizing "
-        "the first 25 pages and hand-writing outline.json."
+        "No bookmarks, no parseable TOC, no font-size signal, no body "
+        "headings. Cannot infer chapter structure automatically. "
+        "Rasterize the first ~25 pages and hand-write outline.json "
+        "(see SKILL.md §2c)."
     )
-    return [{
-        "title": "Document",
-        "level": 1,
-        "page": 1,
-        "slug": "document",
-        "source": "fallback-single-chapter",
-        "confidence": "none",
-    }], review
+    review["next_action"] = "vision-review"
+    return [], review
+
+
+# --- Self-test (TOC pattern smoke tests) ---
+
+
+def run_self_test() -> None:
+    """Smoke-test the TOC line patterns. Run with --self-test."""
+    cases: list[tuple[str, str, int]] = [
+        # (line, expected title, expected page)
+        ("    1.1 Setup ......... 11", "1.1 Setup", 11),
+        ("Chapter 10 Transferred-Electron Devices 510",
+         "Chapter 10 Transferred-Electron Devices", 510),
+        ("    Preface          vii", "Preface", 7),  # roman vii → 7
+        # OCR'd separators (slash / comma stand in for right-aligned
+        # page numbers that tesseract collapsed onto the title line).
+        ("1. FUNDAMENTAL CONCEPTS / 1", "1. FUNDAMENTAL CONCEPTS", 1),
+        ("Chapter 5 Sensitivities / 152", "Chapter 5 Sensitivities", 152),
+        ("Frequency Domain Analysis , 234",
+         "Frequency Domain Analysis", 234),
+    ]
+    failures: list[str] = []
+    for line, expected_title, expected_page in cases:
+        entries = parse_toc_lines([line])
+        if len(entries) != 1:
+            failures.append(
+                f"{line!r}: expected 1 entry, got {len(entries)}"
+            )
+            continue
+        e = entries[0]
+        # Title comparison: parse_toc_lines normalizes whitespace and
+        # strips trailing dots, so compare loosely.
+        got_title = re.sub(r"\s+", " ", e["title"]).strip()
+        want_title = re.sub(r"\s+", " ", expected_title).strip()
+        if got_title != want_title:
+            failures.append(
+                f"{line!r}: title {got_title!r} != {want_title!r}"
+            )
+        if e["printed_page"] != expected_page:
+            failures.append(
+                f"{line!r}: page {e['printed_page']} != {expected_page}"
+            )
+
+    if failures:
+        print("self-test FAILED:", file=sys.stderr)
+        for f in failures:
+            print(f"  {f}", file=sys.stderr)
+        sys.exit(1)
+    print(f"self-test passed ({len(cases)} cases)")
 
 
 # --- Main ---
@@ -882,11 +1117,31 @@ def main():
                     help="Max pages to scan looking for TOC (default: 30)")
     ap.add_argument("--toc-threshold", type=float, default=0.35,
                     help="Min line-ends-in-pagenum fraction to flag a TOC page")
+    ap.add_argument("--pages-dir", default=None,
+                    help="Directory of page_NNNN.md files (from "
+                         "extract_text_pages.py / ocr_pages.py). When given, "
+                         "all text reads come from these files instead of "
+                         "calling pdftotext on the PDF — required for scanned "
+                         "PDFs whose text layer is empty.")
+    ap.add_argument("--self-test", action="store_true",
+                    help="Run TOC-pattern smoke tests and exit.")
     args = ap.parse_args()
+
+    if args.self_test:
+        run_self_test()
+        return
 
     if not os.path.exists(args.pdf):
         print(f"ERROR: {args.pdf} not found", file=sys.stderr)
         sys.exit(1)
+
+    pages_dir: Path | None = None
+    if args.pages_dir:
+        pages_dir = Path(args.pages_dir)
+        if not pages_dir.is_dir():
+            print(f"ERROR: --pages-dir {pages_dir} is not a directory",
+                  file=sys.stderr)
+            sys.exit(2)
 
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -894,11 +1149,31 @@ def main():
     total_pages = get_page_count(args.pdf)
     print(f"Document: {total_pages} pages", file=sys.stderr)
 
+    # Scanned-PDF early bail: if pdftotext returns ~nothing on the first
+    # 3 pages and the caller did not provide pre-extracted pages, we
+    # cannot do TOC scanning (no text to scan). Tell the caller to OCR
+    # first instead of producing a degenerate outline.
+    if pages_dir is None:
+        sample_chars = sum(
+            len(pdftotext_page(args.pdf, p, layout=False))
+            for p in range(1, min(3, total_pages) + 1)
+        )
+        if sample_chars < 50:
+            print(
+                "detect_structure: this PDF appears to be scanned (no "
+                "extractable text on first 3 pages).\n"
+                "Run ocr_pages.py first, then re-invoke with "
+                "--pages-dir <work>/pages.",
+                file=sys.stderr,
+            )
+            sys.exit(2)
+
     # Step 1: Detect TOC pages
     print("Scanning for printed table of contents...", file=sys.stderr)
     toc_pages = detect_toc_pages(args.pdf, total_pages,
                                  max_scan=args.max_scan,
-                                 threshold=args.toc_threshold)
+                                 threshold=args.toc_threshold,
+                                 pages_dir=pages_dir)
     if toc_pages:
         print(f"  candidate TOC pages: {toc_pages}", file=sys.stderr)
     else:
@@ -907,8 +1182,10 @@ def main():
     # Step 2: Parse TOC
     toc_entries: list[dict] = []
     if toc_pages:
-        toc_text_blocks = [pdftotext_page(args.pdf, p, layout=True)
-                           for p in toc_pages]
+        toc_text_blocks = [
+            read_page_text(args.pdf, p, pages_dir=pages_dir, layout=True)
+            for p in toc_pages
+        ]
         toc_entries = parse_toc_lines(toc_text_blocks)
         assign_levels(toc_entries)
         print(f"  parsed {len(toc_entries)} TOC entries", file=sys.stderr)
@@ -922,6 +1199,7 @@ def main():
         offset, offset_method, offset_count = estimate_page_offset(
             args.pdf, toc_entries, total_pages,
             exclude_pages=set(toc_pages),
+            pages_dir=pages_dir,
         )
         print(f"  offset={offset:+d} ({offset_method})", file=sys.stderr)
 
@@ -941,7 +1219,8 @@ def main():
     issues: list[dict] = []
     if toc_entries and offset_count >= 1:
         issues = cross_validate(args.pdf, toc_entries, offset, total_pages,
-                                exclude_pages=set(toc_pages))
+                                exclude_pages=set(toc_pages),
+                                pages_dir=pages_dir)
         if issues:
             print(f"  {len(issues)} cross-validation issue(s)", file=sys.stderr)
 
@@ -964,6 +1243,7 @@ def main():
                 args.pdf, toc_entries, total_pages,
                 exclude_pages=set(toc_pages),
                 page_cache=body_page_cache,
+                pages_dir=pages_dir,
             )
             print(f"    body-scan: offset={refined_offset:+d} from "
                   f"{refined_count} entry(ies)", file=sys.stderr)
@@ -971,6 +1251,7 @@ def main():
                 refined_issues = cross_validate(
                     args.pdf, toc_entries, refined_offset, total_pages,
                     exclude_pages=set(toc_pages),
+                    pages_dir=pages_dir,
                 )
                 refined_l1_critical = [
                     i for i in refined_issues
@@ -999,10 +1280,26 @@ def main():
             print(f"  rasterized {len(toc_images)} TOC page(s) for review",
                   file=sys.stderr)
 
+    # Step 6b: Body-heading scan — third-tier fallback used when both
+    # TOC parsing and font analysis fail. Only worth running when we
+    # have a pages_dir (cheap text reads).
+    body_heading_items: list[dict] = []
+    if pages_dir is not None and (
+        not toc_entries or offset_count < 1
+    ) and len(font_data.get("headings", [])) < 3:
+        print("Scanning body for chapter-like headings...", file=sys.stderr)
+        body_heading_items = detect_body_headings(
+            args.pdf, total_pages, pages_dir,
+            page_cache=body_page_cache,
+        )
+        print(f"  detected {len(body_heading_items)} body heading(s)",
+              file=sys.stderr)
+
     # Step 7: Reconcile
     items, review = reconcile_signals(
         toc_entries, offset, offset_count,
-        font_data.get("headings", []), issues, total_pages
+        font_data.get("headings", []), issues, total_pages,
+        body_headings=body_heading_items,
     )
 
     # Step 7b: Per-chapter anchoring. Books with Part separators have
@@ -1014,6 +1311,7 @@ def main():
             args.pdf, items, total_pages,
             exclude_pages=set(toc_pages),
             page_cache=body_page_cache,
+            pages_dir=pages_dir,
         )
         if snapped:
             print(f"  per-chapter anchoring snapped {snapped} entry(ies) "
@@ -1027,6 +1325,7 @@ def main():
                     e["printed_page"] + offset,
                 )} for e in toc_entries],
                 0, total_pages, exclude_pages=set(toc_pages),
+                pages_dir=pages_dir,
             )
             review["issues"] = snapped_issues
             l1_total = sum(1 for e in toc_entries if e.get("level", 1) == 1)
@@ -1058,8 +1357,21 @@ def main():
     }
     (out_dir / "outline.json").write_text(json.dumps(outline, indent=2))
 
+    # If detection failed entirely, rasterize the first ~25 pages so the
+    # caller can drop straight into the vision-review path.
+    review_images: list[str] = list(toc_images)
+    if not items:
+        first_pages = list(range(1, min(25, total_pages) + 1))
+        extra = rasterize_pages(
+            args.pdf, first_pages, out_dir / "toc-images", dpi=150
+        )
+        if extra:
+            print(f"  rasterized first {len(extra)} pages for vision review",
+                  file=sys.stderr)
+            review_images = sorted(set(review_images) | set(extra))
+
     review["toc_pages_pdf"] = toc_pages
-    review["rasterized_toc_pages"] = toc_images
+    review["rasterized_toc_pages"] = review_images
     review["font_body_size"] = font_data.get("body_size")
     review["items_count"] = len(items)
     (out_dir / "outline_review.json").write_text(json.dumps(review, indent=2))
@@ -1073,11 +1385,23 @@ def main():
     print(f"\nWrote:")
     print(f"  {out_dir / 'outline.json'}")
     print(f"  {out_dir / 'outline_review.json'}")
-    if toc_images:
-        print(f"  {len(toc_images)} TOC images in {out_dir / 'toc-images'}/")
+    if review_images:
+        print(f"  {len(review_images)} review image(s) in {out_dir / 'toc-images'}/")
+    if not items:
+        print(
+            "\n✗ STRUCTURE DETECTION FAILED. No bookmarks, no usable TOC, "
+            "no font signal, no body headings.",
+            file=sys.stderr,
+        )
+        print(
+            f"  → View the rasterized images in {out_dir / 'toc-images'}/ "
+            "and hand-write outline.json (see SKILL.md §2c).",
+            file=sys.stderr,
+        )
+        sys.exit(2)
     if review.get("needs_review"):
         print("\n⚠ NEEDS REVIEW. Open outline_review.json for details.")
-        if toc_images:
+        if review_images:
             print(f"  → View the TOC images in {out_dir / 'toc-images'}/")
             print("    and edit outline.json to reflect what you see.")
     else:
