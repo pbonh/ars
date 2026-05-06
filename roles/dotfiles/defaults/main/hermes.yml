@@ -10,7 +10,7 @@ hermes_skills_dir: "{{ hermes_home_dir }}/skills"
 # ── API Keys ──────────────────────────────────────────────────────────────
 hermes_fireworks_api_key: "{{ fireworks_api_key | default('') }}"
 # hermes_openrouter_api_key: ""
-# hermes_anthropic_api_key: ""
+hermes_anthropic_api_key: "{{ claude_anthropic_api_key | default('') }}"
 
 # ── Model configuration ──────────────────────────────────────────────────
 # Default model: switched via /model custom:fireworks:<model_id>
@@ -58,6 +58,7 @@ hermes_config:
 # Written to ~/.hermes/.env — Hermes reads this for API keys
 hermes_env_vars:
   FIREWORKS_API_KEY: "{{ hermes_fireworks_api_key }}"
+  ANTHROPIC_API_KEY: "{{ hermes_anthropic_api_key }}"
 
 # ── Wiki skills (from hermes_wiki_example/) ──────────────────────────────
 hermes_skills:
