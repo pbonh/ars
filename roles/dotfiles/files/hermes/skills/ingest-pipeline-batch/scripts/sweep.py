@@ -9,8 +9,12 @@ LLM reads the working set and dispatches per-book ingest-pipeline
 subagents.
 
 Subcommands:
-  scan <library_root> [--force]
+  scan <library_root> [--force] [--wiki-root <abs_wiki_root>]
       Walk the tree, refresh library.json, print the working set as JSON.
+      With --wiki-root, a book counts as complete only if both
+      pipeline.json and wiki.json report status:complete; books whose
+      pipeline finished but whose wiki chain is incomplete are returned in
+      the working set with `wiki_pending: true`.
 
   mark <library_root> --root <book_root_basename> --status <pending|in_progress|complete|failed> [--failed-phase X] [--error MSG]
       Update one book entry in library.json. Called by the orchestrator
@@ -45,6 +49,7 @@ from pathlib import Path
 
 LIBRARY_FILENAME = "library.json"
 PIPELINE_FILENAME = "pipeline.json"
+WIKI_FILENAME = "wiki.json"
 
 
 def now_iso() -> str:
@@ -112,6 +117,19 @@ def read_pipeline_status(book_dir: Path) -> tuple[str | None, str | None, str | 
     return m.get("status"), m.get("failed_phase"), m.get("error_message")
 
 
+def read_wiki_status(book_dir: Path) -> tuple[str | None, str | None, str | None]:
+    """Return (status, failed_phase, error_message) from wiki.json, or all None."""
+    p = book_dir / WIKI_FILENAME
+    if not p.exists():
+        return None, None, None
+    try:
+        with p.open() as f:
+            m = json.load(f)
+    except json.JSONDecodeError:
+        return None, None, "wiki.json is malformed"
+    return m.get("status"), m.get("failed_phase"), m.get("error_message")
+
+
 def find_book_entry(lib: dict, root_name: str) -> dict | None:
     for b in lib["books"]:
         if b["root"] == root_name:
@@ -152,10 +170,26 @@ def cmd_scan(args: argparse.Namespace) -> None:
             "pipeline_json": f"{d.name}/{PIPELINE_FILENAME}",
         }
         if status == "complete" and not args.force:
-            entry["status"] = "complete"
+            wiki_status = None
+            if args.wiki_root is not None:
+                wiki_status, _, _ = read_wiki_status(d)
+            if args.wiki_root is None or wiki_status == "complete":
+                entry["status"] = "complete"
+                upsert_book_entry(lib, entry)
+                complete += 1
+                skipped_complete += 1
+                continue
+            # Pipeline done, wiki chain still pending → re-dispatch.
+            entry["status"] = "in_progress"
+            entry["pipeline_complete"] = True
             upsert_book_entry(lib, entry)
-            complete += 1
-            skipped_complete += 1
+            working_set.append({
+                "root": d.name,
+                "abs_path": str(d),
+                "prior_status": status,
+                "prior_failed_phase": None,
+                "wiki_pending": True,
+            })
             continue
 
         if status == "failed":
@@ -249,6 +283,7 @@ def main() -> None:
     scan_p = sub.add_parser("scan", help="Walk the library, refresh library.json, print the working set.")
     scan_p.add_argument("library_root")
     scan_p.add_argument("--force", action="store_true", help="Include books with status:complete in the working set.")
+    scan_p.add_argument("--wiki-root", default=None, help="Wiki root (parent of raw/ and wiki/). When set, a book is only complete if both pipeline.json and wiki.json report complete.")
 
     mark_p = sub.add_parser("mark", help="Update one book entry in library.json.")
     mark_p.add_argument("library_root")
