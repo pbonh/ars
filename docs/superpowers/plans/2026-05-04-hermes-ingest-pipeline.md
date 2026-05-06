@@ -1065,7 +1065,7 @@ run_hermes_invocation() {
   cp -a "$FIX/s1-single-pdf/." "$work/"
 
   echo "running ingest-pipeline against $work …"
-  if hermes -p "Run the ingest-pipeline skill on the directory $work. Use --vision never. Do not invoke any other skills beyond what the orchestrator dispatches." >/tmp/ingest-pipeline-test.log 2>&1; then
+  if hermes -z "Run the ingest-pipeline skill on the directory $work. Use --vision never. Do not invoke any other skills beyond what the orchestrator dispatches." >/tmp/ingest-pipeline-test.log 2>&1; then
     if [ -f "$work/pipeline.json" ] && [ "$(jq -r '.status' "$work/pipeline.json")" = "complete" ]; then
       pass "Hermes drove s1 fixture to status: complete"
     else

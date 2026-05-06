@@ -290,7 +290,7 @@ navi_cheats:
       args: []
     chat_oneshot_with_skill:
       description: "Hermes | One-shot non-interactive query with a skill preloaded"
-      cmd: "cd <target_dir> && hermes -s <hermes_skill> -q \"<hermes_prompt>\""
+      cmd: "cd <target_dir> && hermes -s <hermes_skill> -z \"<hermes_prompt>\""
       args: []
 
     # ---- Cron: scheduled tasks --------------------------------------------
@@ -523,11 +523,11 @@ navi_cheats:
     # ---- Wiki pipeline: launch DIRECT (no kanban) -------------------------
     wiki_ingest_library_direct:
       description: "Hermes Wiki | Ingest a directory of PDFs straight into a wiki (no kanban, current shell)"
-      cmd: "cd <library_dir> && hermes -s ingest-pipeline-batch -q \"Sweep this directory and ingest each PDF, then ingest the resulting mdBooks into the wiki at <wiki_dir> and lint after each book.\""
+      cmd: "cd <library_dir> && hermes -s ingest-pipeline-batch -z \"Sweep this directory and ingest each PDF, then ingest the resulting mdBooks into the wiki at <wiki_dir> and lint after each book.\""
       args: []
     wiki_ingest_pdf_direct:
       description: "Hermes Wiki | Convert a single PDF to mdBook (no kanban, current shell)"
-      cmd: "hermes -s ingest-pipeline -q \"Run the ingest-pipeline on <pdf_file>; produce a buildable mdBook.\""
+      cmd: "hermes -s ingest-pipeline -z \"Run the ingest-pipeline on <pdf_file>; produce a buildable mdBook.\""
       args: []
     wiki_chat:
       description: "Hermes Wiki | Open interactive chat scoped to a wiki (loads wiki skill)"
@@ -535,11 +535,11 @@ navi_cheats:
       args: []
     wiki_lint_direct:
       description: "Hermes Wiki | Run wiki-lint on a wiki (no kanban, current shell)"
-      cmd: "cd <wiki_dir> && hermes -s wiki-lint -q \"Audit this wiki for orphans, stale pages, dead links, and contradictions; fix what's safe and report the rest.\""
+      cmd: "cd <wiki_dir> && hermes -s wiki-lint -z \"Audit this wiki for orphans, stale pages, dead links, and contradictions; fix what's safe and report the rest.\""
       args: []
     wiki_query_direct:
       description: "Hermes Wiki | Ask a question over a wiki with citations (no kanban)"
-      cmd: "cd <wiki_dir> && hermes -s wiki-query -q \"<wiki_question>\""
+      cmd: "cd <wiki_dir> && hermes -s wiki-query -z \"<wiki_question>\""
       args: []
 
     # ---- Wiki pipeline: launch VIA KANBAN (durable, retryable, audit trail)

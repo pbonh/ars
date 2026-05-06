@@ -92,7 +92,7 @@ if ((${#WORK[@]})); then
         base="$(basename "${pdf%.pdf}")"
         log="$logdir/convert-$base.log"
         printf "[%s] start: %s\n" "$(date -u +%H:%M:%SZ)" "$base" >&2
-        if hermes -s ingest-pipeline -q "Process this PDF with the ingest-pipeline skill: $pdf $force --vision $vision" >"$log" 2>&1; then
+        if hermes -s ingest-pipeline -z "Process this PDF with the ingest-pipeline skill: $pdf $force --vision $vision" >"$log" 2>&1; then
           printf "[%s] done:  %s\n" "$(date -u +%H:%M:%SZ)" "$base" >&2
         else
           printf "[%s] FAIL: %s — %s\n" "$(date -u +%H:%M:%SZ)" "$base" "$log" >&2
@@ -109,14 +109,14 @@ else
 fi
 
 say "phase 2/3: wiki-ingest"
-if ( cd "$WIKI" && hermes -s wiki-ingest -q "Ingest sources from $WIKI/raw/ into this wiki. Use the triage script first; prefer mdBook outputs over raw PDFs; skip sources already represented in wiki/summaries/." ) >"$LOG_DIR/wiki-ingest.log" 2>&1; then
+if ( cd "$WIKI" && hermes -s wiki-ingest -z "Ingest sources from $WIKI/raw/ into this wiki. Use the triage script first; prefer mdBook outputs over raw PDFs; skip sources already represented in wiki/summaries/." ) >"$LOG_DIR/wiki-ingest.log" 2>&1; then
   say "wiki-ingest ok ($LOG_DIR/wiki-ingest.log)"
 else
   say "wiki-ingest FAILED ($LOG_DIR/wiki-ingest.log)"; exit 1
 fi
 
 say "phase 3/3: wiki-lint"
-if ( cd "$WIKI" && hermes -s wiki-lint -q "Audit this wiki: orphans, stale pages, dead links, contradictions, low-confidence pages. Auto-fix what is safe; report the rest." ) >"$LOG_DIR/wiki-lint.log" 2>&1; then
+if ( cd "$WIKI" && hermes -s wiki-lint -z "Audit this wiki: orphans, stale pages, dead links, contradictions, low-confidence pages. Auto-fix what is safe; report the rest." ) >"$LOG_DIR/wiki-lint.log" 2>&1; then
   say "wiki-lint ok ($LOG_DIR/wiki-lint.log)"
 else
   say "wiki-lint FAILED ($LOG_DIR/wiki-lint.log)"; exit 1
