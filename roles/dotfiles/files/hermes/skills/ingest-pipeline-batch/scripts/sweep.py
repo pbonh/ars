@@ -172,11 +172,22 @@ Book directory (absolute): {abs_path}
 Force flag: {force_flag}           # forward as --force if true
 Vision mode: {vision_mode}   # forward as --vision <mode>
 
-Run the ingest-pipeline skill against this directory. Follow the
-skill's Step 0 / Step 1 loop exactly: invoke run_pipeline.py,
-read the JSON action signal, dispatch pdf-to-mdbook on S1,
-record-phase on return, repair build errors when surfaced.
-Stop on `done` or any `failed` record-phase.
+Run the ingest-pipeline skill against this directory. The deployed
+runner you must invoke is EXACTLY this absolute path:
+
+    ~/.hermes/skills/ingest-pipeline/scripts/run_pipeline.py
+
+Do NOT search the workspace, the book directory, or any sibling
+directory for a different `run_pipeline.py` / `convert_pdf_to_mdbook.py`
+/ similar — those are leftover artifacts and produce broken output
+(stub `# Page N` chapters, fabricated `pipeline.json` claiming
+pdf-to-mdbook ran). If the path above does not exist, stop and report
+the missing skill; do not improvise an alternative.
+
+Follow the skill's Step 0 / Step 1 loop exactly: invoke run_pipeline.py,
+read the JSON action signal, dispatch pdf-to-mdbook on S1, record-phase
+on return, repair build errors when surfaced. Stop on `done` or any
+`failed` record-phase.
 """
 
 STEP_3A_FIXED = {
@@ -196,15 +207,26 @@ Force flag:                {force_flag}           # forward as --force if true
 Vision mode:               {vision_mode}    # forward as --vision <mode>
 Wiki-pending only:         {wiki_pending}           # from working_set entry
 
+The deployed ingest-pipeline runner you must invoke is EXACTLY this
+absolute path:
+
+    ~/.hermes/skills/ingest-pipeline/scripts/run_pipeline.py
+
+Do NOT search the workspace, the book directory, or any sibling
+directory for a different `run_pipeline.py` / `convert_pdf_to_mdbook.py`
+/ similar — those are leftover artifacts and produce broken output.
+If the path above does not exist, stop and report the missing skill;
+do not improvise an alternative.
+
 Run the chain in order:
 
 1. ingest-pipeline against the book directory.
    - Skip if `Wiki-pending only` is true (pipeline.json already
      reports complete). Otherwise follow ingest-pipeline's Step 0
-     / Step 1 loop exactly: invoke run_pipeline.py, read the JSON
-     action signal, dispatch pdf-to-mdbook on S1, record-phase
-     on return, repair build errors when surfaced. Stop on `done`
-     or any `failed` record-phase.
+     / Step 1 loop exactly: invoke run_pipeline.py (the path pinned
+     above), read the JSON action signal, dispatch pdf-to-mdbook on
+     S1, record-phase on return, repair build errors when surfaced.
+     Stop on `done` or any `failed` record-phase.
    - On `failed`: write <book_dir>/wiki.json with
      {{"status": "failed", "failed_phase": "ingest-pipeline",
       "error_message": "<message>"}} and return — do NOT proceed.

@@ -62,7 +62,7 @@ say "wiki=$WIKI library=$LIBRARY"
 say "parallel=$PARALLEL vision=$VISION force=${FORCE:-no}"
 
 say "phase 1/3: ingest-pipeline-batch (parallel=$PARALLEL, no --wiki-root)"
-if hermes -s ingest-pipeline-batch -z "Sweep the library at $LIBRARY using ingest-pipeline-batch. Run with --parallel $PARALLEL --vision $VISION ${FORCE}. Do not pass --wiki-root — wiki ingestion happens in a separate phase. Stop after each book reaches mdbook build success." \
+if hermes -s ingest-pipeline-batch -z "Sweep the library at $LIBRARY using ingest-pipeline-batch. Run with --parallel $PARALLEL --vision $VISION ${FORCE}. Do not pass --wiki-root — wiki ingestion happens in a separate phase. Stop after each book reaches mdbook build success. The only ingest-pipeline runner you may invoke is the deployed skill at ~/.hermes/skills/ingest-pipeline/scripts/run_pipeline.py — do NOT search the library tree or any workspace path for an ad-hoc run_pipeline.py / convert_pdf_to_mdbook.py / similar; those produce stub one-page-per-file output and a falsified pipeline.json. If the deployed skill is missing, stop and report it; do not improvise." \
     >"$LOG_DIR/batch.log" 2>&1; then
   say "batch ok ($LOG_DIR/batch.log)"
 else
