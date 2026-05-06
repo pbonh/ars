@@ -72,16 +72,53 @@ def main():
     ap.add_argument("--chapters", required=True,
                     help="Directory of chapter Markdown files")
     ap.add_argument("--summary", required=True, help="Path to SUMMARY.md draft")
-    ap.add_argument("--out", required=True, help="Output mdBook directory")
+    ap.add_argument("--out",
+                    help="Output mdBook directory. When omitted, "
+                         "computed as <dirname(--pdf)>/<slug>-book/.")
+    ap.add_argument("--pdf",
+                    help="Source PDF path. Used to derive --out when not "
+                         "given and to refuse writing into a PDF directory.")
+    ap.add_argument("--slug",
+                    help="Book slug. Used with --pdf to derive --out.")
     ap.add_argument("--mathjax", action="store_true", default=True,
                     help="Enable MathJax (default: on)")
     ap.add_argument("--no-mathjax", dest="mathjax", action="store_false",
                     help="Disable MathJax")
+    ap.add_argument("--work",
+                    help="Work directory (containing outline.json, "
+                         "outline_review.json, quality_warnings.json). "
+                         "When provided, these are copied into the book "
+                         "root for post-hoc inspection.")
     args = ap.parse_args()
 
     chapters_dir = Path(args.chapters).resolve()
     summary_path = Path(args.summary).resolve()
-    out_dir = Path(args.out).resolve()
+
+    # Derive --out when missing (preferred entry point: --pdf + --slug).
+    if args.out:
+        out_dir = Path(args.out).resolve()
+    elif args.pdf and args.slug:
+        out_dir = (Path(args.pdf).resolve().parent / f"{args.slug}-book")
+    else:
+        print("ERROR: pass --out, or both --pdf and --slug to derive it.",
+              file=sys.stderr)
+        sys.exit(1)
+
+    # Refuse to write directly into a directory containing PDFs. The
+    # whole point of the <slug>-book/ subdir convention is to keep the
+    # final book files separate from the source PDF — without it, a
+    # later cleanup or re-run can mix the two sets.
+    out_check_dir = out_dir if out_dir.exists() else out_dir.parent
+    if out_check_dir.is_dir():
+        pdfs = list(out_check_dir.glob("*.pdf")) + list(out_check_dir.glob("*.PDF"))
+        if pdfs and out_dir == out_check_dir:
+            print(
+                f"init_mdbook: refusing to write into a directory containing "
+                f"PDFs ({out_dir}). Pass --out <pdf-dir>/<slug>-book/ instead, "
+                f"or supply --pdf and --slug to auto-derive it.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
 
     if not chapters_dir.is_dir():
         print(f"ERROR: --chapters dir not found: {chapters_dir}", file=sys.stderr)
@@ -128,6 +165,19 @@ def main():
 
     # Place SUMMARY.md
     shutil.copy(summary_path, src_dir / "SUMMARY.md")
+
+    # Copy outline artifacts into the book root (next to book.toml, NOT
+    # inside src/) so the orchestrator and any post-hoc audit can see
+    # exactly which outline produced this book and how confident the
+    # detector was.
+    artifact_files = ["outline.json", "outline_review.json",
+                      "quality_warnings.json", "figures_manifest.json"]
+    if args.work:
+        work_dir = Path(args.work).resolve()
+        for name in artifact_files:
+            src = work_dir / name
+            if src.exists():
+                shutil.copy(src, out_dir / name)
 
     print(f"Initialized mdBook at {out_dir}")
     print(f"  book.toml          → {out_dir / 'book.toml'}")

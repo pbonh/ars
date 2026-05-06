@@ -61,7 +61,33 @@ except ImportError:
 # --- Utility ---
 
 
+_LIGATURE_FALLBACK = {
+    "ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl",
+    "ﬃ": "ffi", "ﬄ": "ffl", "ﬅ": "ft", "ﬆ": "st",
+}
+
+
+def sanitize_title(title: str) -> str:
+    """Normalize raw heading text for outline.json.
+
+    Mirrors ``extract_outline.sanitize_title``: applies NFKC, expands
+    leftover ligatures, neutralizes ``\\r``/``\\t`` (which truncate titles
+    when used as filenames), strips control chars, and collapses
+    whitespace.
+    """
+    if not title:
+        return ""
+    s = unicodedata.normalize("NFKC", title)
+    for k, v in _LIGATURE_FALLBACK.items():
+        s = s.replace(k, v)
+    s = s.replace("\r", " ").replace("\t", " ")
+    s = re.sub(r"[\x00-\x08\x0b-\x1f\x7f]", "", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
 def slugify(title: str, max_len: int = 60) -> str:
+    title = sanitize_title(title)
     nfkd = unicodedata.normalize("NFKD", title)
     ascii_only = nfkd.encode("ascii", "ignore").decode("ascii")
     slug = re.sub(r"[^a-z0-9]+", "-", ascii_only.lower()).strip("-")
@@ -356,7 +382,7 @@ def parse_toc_lines(text_blocks: list[str]) -> list[dict]:
                 if not m:
                     continue
                 indent_str = m.group(1)
-                title = m.group(2).strip().rstrip(".").strip()
+                title = sanitize_title(m.group(2).strip().rstrip("."))
                 page_str = m.group(3)
                 # Avoid junk like a single character + page number
                 if len(title) < 3:
@@ -549,7 +575,7 @@ def font_analysis(pdf_path: str, sample_pages: int = 60) -> dict:
                 avg_size = sum(c.get("size", 0) for c in line) / len(line)
                 if avg_size < threshold:
                     continue
-                text = "".join(c.get("text", "") for c in line).strip()
+                text = sanitize_title("".join(c.get("text", "") for c in line))
                 if not (3 <= len(text) <= 120):
                     continue
                 if text.lower() in {"contents", "table of contents", "index"}:
@@ -705,14 +731,17 @@ def detect_body_headings(pdf_path: str, total_pages: int,
     seen_titles: set[str] = set()
 
     def add(title: str, page: int, level: int) -> None:
-        key = title.lower().strip()
+        title = sanitize_title(title)
+        if not title:
+            return
+        key = title.lower()
         if key in seen_titles:
             return
         if key in running:
             return
         seen_titles.add(key)
         items.append({
-            "title": title.strip(),
+            "title": title,
             "level": level,
             "page": page,
             "slug": slugify(title),

@@ -54,10 +54,14 @@ PDF
  │                                                 │
  │ ◄───────────────────────────────────────────────┘
  ▼
-[4] assemble_chapters.py ─ Group pages by outline → chapters/*.md + draft SUMMARY.md
+[3.5] extract_figures.py ─ Embedded raster + vector figures (optional but recommended)
  │
  ▼
-[5] init_mdbook.py       ─ book.toml + src/ scaffold
+[4] assemble_chapters.py ─ Group pages by outline → chapters/*.md + draft SUMMARY.md
+ │                          + quality_warnings.json (when --work given)
+ │
+ ▼
+[5] init_mdbook.py       ─ book.toml + src/ scaffold + outline.json carry-through
  │
  ▼
 [6] mdbook build         ─ Serve locally via mdbook serve
@@ -293,16 +297,39 @@ OCR is slow (~1–3 sec/page on Tesseract). The script streams progress and is r
 
 **Sample first.** Before running on the whole book, run on 2–3 sample pages and view the output. If quality is poor, see **reference/ocr.md** for: better DPI, multi-language packs, deskewing with `unpaper`, or escalating to vision OCR for selected pages.
 
+## Step 3.5 — Extract figures (optional but recommended)
+
+```bash
+python scripts/extract_figures.py path/to/input.pdf \
+    --out work/pages/images
+```
+
+Combines `pdfimages -all` (poppler) for embedded raster art with PyMuPDF
+for vector figures. Outputs `figure_pNNNN_M.{png,jpg,...}` plus
+`work/pages/figures_manifest.json`. `assemble_chapters.py` looks for
+this manifest and inserts `![](images/figure_pNNNN_M.ext)` after each
+matched `Figure N.M` caption in chapter text; unmatched figures from
+the chapter's page range are appended at the end of the chapter.
+
+Skip this step only when you've confirmed the PDF has no figures of
+interest (a pure-prose book). Skipping is non-destructive — chapters
+will simply lack image references, matching the previous behavior.
+
 ## Step 4 — Assemble chapters
 
 ```bash
 python scripts/assemble_chapters.py \
     --pages work/pages \
     --outline work/outline.json \
-    --out work/chapters
+    --out work/chapters \
+    --work work
 ```
 
-For each outline item, the script concatenates the page-files spanning that chapter, runs cleanup (de-hyphenation, header/footer stripping, blank-line collapse, heading normalization), and writes `work/chapters/<slug>.md`. It also writes a **draft `SUMMARY.md`** with the correct mdBook hierarchy.
+For each outline item, the script concatenates the page-files spanning that chapter, runs cleanup (Unicode-aware de-hyphenation, fingerprint-based header/footer stripping, blank-line collapse, ligature normalization, figure insertion), and writes `work/chapters/<slug>.md`. It also writes a **draft `SUMMARY.md`** with the correct mdBook hierarchy (section-number prefixes like `5.3` are honored even when bookmark levels disagree).
+
+`--work` is optional but enables `quality_warnings.json` (chapters that are predominantly OCR fallback markers), which `init_mdbook.py` carries into the final book root for the orchestrator's quality gate.
+
+The script **refuses to silently produce a single-chapter book**. If `outline.json` has fewer than 3 entries and `--detect-headings` finds nothing, it exits with code 2 and asks you to fix the outline. Pass `--allow-single-chapter` only when you're sure the source is a real single-essay PDF.
 
 After it runs, **spot-check**: open one or two chapter files and the SUMMARY.md. Fix obvious cleanup issues if needed (see **reference/markdown.md** for common artifacts and how to handle them). Don't read every chapter — that defeats the point.
 
@@ -314,10 +341,16 @@ python scripts/init_mdbook.py \
     --author "Author Name" \
     --chapters work/chapters \
     --summary work/chapters/SUMMARY.md \
-    --out ./book-output
+    --pdf path/to/input.pdf \
+    --slug my-book \
+    --work work
 ```
 
-This writes `book.toml`, copies chapter Markdown into `src/`, places `SUMMARY.md` in `src/`, and configures sensible defaults (search on, MathJax on, copy code button on). See **reference/mdbook.md** for what gets configured and how to adjust it.
+When you pass `--pdf` and `--slug`, `--out` is auto-derived as `<dirname(--pdf)>/<slug>-book/`. You can pass `--out` explicitly instead — but the script **refuses** to write into a directory that contains PDFs, since that mixes source and output.
+
+`--work` carries the artifact files (`outline.json`, `outline_review.json`, `quality_warnings.json`, `figures_manifest.json`) into the book root next to `book.toml`, so post-hoc inspection is possible without rerunning the pipeline.
+
+The script writes `book.toml`, copies chapter Markdown into `src/`, places `SUMMARY.md` in `src/`, and configures sensible defaults (search on, MathJax on, copy code button on). See **reference/mdbook.md** for what gets configured and how to adjust it.
 
 ## Step 6 — Build
 
@@ -334,6 +367,35 @@ If the build fails, the most common causes are:
 
 `scripts/build.sh ./book-output` wraps `mdbook build` and surfaces these errors with line-pointers.
 
+### Verification (run this before declaring the book complete)
+
+After `mdbook build` succeeds, spot-check the book against the same
+output-quality gates the orchestrator uses:
+
+- No `‐ ` (U+2010 + space) anywhere in `src/*.md` — dehyphenation
+  should have caught Unicode hyphens.
+- No `ﬀ ﬁ ﬂ ﬃ ﬄ ﬅ ﬆ` ligatures in `src/SUMMARY.md` — title
+  sanitization handles these.
+- No `(cid:` substrings in any `src/*.md` — those signal font-mapping
+  failures; rerun `extract_text_pages.py` to trigger PyMuPDF fallback,
+  or fall back to `ocr_pages.py` for affected pages.
+- No `\r` or trailing whitespace in chapter `# Title` headings.
+- Median word length per chapter file ≤ 8 (eyeball or use
+  `awk '{for(i=1;i<=NF;i++) print length($i)}' file.md | sort -n | …`).
+  Higher signals space-collapse — re-extract those pages.
+- `outline.json` exists at the book's root (carried over by
+  `init_mdbook.py --work`).
+- For books with bookmarked outlines, SUMMARY hierarchy matches
+  section-number prefixes (e.g., `5.3` nests under `5`).
+- `ls src/*.md | wc -l` equals the SUMMARY entry count exactly — no
+  orphan files. `assemble_chapters.py` enforces this and exits 3 on
+  mismatch, but rerun it after any manual edits.
+- For figure-heavy books: `src/images/` exists with at least some
+  `figure_*.png`; chapters reference them.
+- `quality_warnings.json` (in the book root) is empty or absent.
+  Non-empty means the orchestrator should mark `status: needs_review`
+  rather than `complete`.
+
 ## Working directory layout
 
 Both the work tree and the final mdBook live alongside the source PDF (not in the agent's CWD):
@@ -347,9 +409,10 @@ Both the work tree and the final mdBook live alongside the source PDF (not in th
 │   ├── outline_review.json       ← only when detect_structure ran
 │   ├── pages/
 │   │   ├── manifest.json
+│   │   ├── figures_manifest.json ← only when extract_figures.py ran
 │   │   ├── page_0001.md
 │   │   ├── page_0002.md
-│   │   ├── images/               ← OCR image-fallback PNGs (when used)
+│   │   ├── images/               ← extracted figures + OCR fallback PNGs
 │   │   └── ...
 │   └── chapters/
 │       ├── SUMMARY.md            ← draft
@@ -359,6 +422,10 @@ Both the work tree and the final mdBook live alongside the source PDF (not in th
 │       └── ...
 └── <slug>-book/                  ← final mdBook
     ├── book.toml
+    ├── outline.json              ← carried over by init_mdbook --work
+    ├── outline_review.json       ← when detect_structure ran
+    ├── quality_warnings.json     ← when assemble_chapters --work was used
+    ├── figures_manifest.json     ← when extract_figures.py ran
     ├── src/
     │   ├── SUMMARY.md
     │   ├── preface.md

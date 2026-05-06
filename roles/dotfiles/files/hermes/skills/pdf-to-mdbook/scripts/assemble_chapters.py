@@ -44,6 +44,20 @@ def normalize_ligatures(text: str) -> str:
     return text
 
 
+# PDFs use a wide range of hyphen-like glyphs. We treat all of them as
+# soft-break candidates: ASCII '-', U+2010 HYPHEN, U+2011 NON-BREAKING
+# HYPHEN, U+2212 MINUS SIGN, U+00AD SOFT HYPHEN.
+_HYPHEN_CHARS = "-‐‑−­"
+_HYPHEN_CLASS = f"[{_HYPHEN_CHARS}]"
+_DEHYPHENATE_RE = re.compile(rf"(\w){_HYPHEN_CLASS}\n[ \t]*\n?[ \t]*([a-z])")
+_INLINE_SOFT_HYPHEN_RE = re.compile(r"­")
+
+# Leading section-number prefix in a title — '5.3', '2.2.1', etc.
+# Used both for SUMMARY-level derivation and as a precise cut anchor
+# when splitting a shared page between two chapters.
+_SECTION_NUMBER_RE = re.compile(r"^(\d+(?:\.\d+)+)\b")
+
+
 def dehyphenate(text: str) -> str:
     """Join 'compre-\\nhensive' → 'comprehensive'.
 
@@ -52,8 +66,14 @@ def dehyphenate(text: str) -> str:
     the second part starts with uppercase (likely a real compound or
     proper noun). Allow arbitrary intervening whitespace (including a
     blank line) so this catches both line-break and page-break splits.
+    Recognizes ASCII and Unicode hyphens (U+2010, U+2011, U+2212) plus
+    soft hyphens (U+00AD).
     """
-    return re.sub(r"(\w)-\n[ \t]*\n?[ \t]*([a-z])", r"\1\2", text)
+    # Soft hyphens are non-printing by definition — strip mid-word
+    # occurrences before any line-rejoin pass so 'pro­vide' doesn't
+    # survive as 'pro vide'.
+    text = _INLINE_SOFT_HYPHEN_RE.sub("", text)
+    return _DEHYPHENATE_RE.sub(r"\1\2", text)
 
 
 def collapse_blanklines(text: str) -> str:
@@ -61,9 +81,27 @@ def collapse_blanklines(text: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", text)
 
 
+_EDGE_WINDOW = 6
+
+
+def _header_fingerprint(line: str) -> str:
+    """Hash key for header detection.
+
+    Recto/verso pages alternate header position and page number, so
+    ``44 BOOK TITLE`` and ``BOOK TITLE 45`` should hash to the same
+    ``BOOK TITLE`` for the frequency tally. Strips leading/trailing
+    page-number-likes and lowercases.
+    """
+    s = re.sub(r"\s+", " ", line).strip()
+    s = re.sub(r"^\d+\s+", "", s)
+    s = re.sub(r"\s+\d+$", "", s)
+    return s.lower()
+
+
 def strip_repeated_lines(pages_text: list[str], frac: float = 0.5) -> list[str]:
-    """Find lines (top 3 + bottom 3 of each page) that recur on >frac of
-    pages and remove them. Catches running headers and footers."""
+    """Find lines (top _EDGE_WINDOW + bottom _EDGE_WINDOW of each page) that
+    recur on >frac of pages and remove them. Catches running headers and
+    footers, including ones that share text but alternate page numbers."""
     if not pages_text:
         return pages_text
 
@@ -72,31 +110,35 @@ def strip_repeated_lines(pages_text: list[str], frac: float = 0.5) -> list[str]:
 
     for page in pages_text:
         lines = page.splitlines()
-        # Take meaningful (non-empty, not pure-numeric-page-number-only) lines
-        # from the top 3 and bottom 3
-        top = [l.strip() for l in lines[:3] if l.strip()]
-        bot = [l.strip() for l in lines[-3:] if l.strip()]
-        for l in set(top + bot):
-            # Don't dedupe pure page numbers as "running headers" — handle
-            # them separately below
+        # Inspect the outer EDGE_WINDOW lines on each side. Many books
+        # render a blank line + chapter banner + blank line at the top,
+        # so a 3-line window misses the banner.
+        top = [l.strip() for l in lines[:_EDGE_WINDOW] if l.strip()]
+        bot = [l.strip() for l in lines[-_EDGE_WINDOW:] if l.strip()]
+        seen: set[str] = set()
+        for l in top + bot:
             if re.fullmatch(r"\d{1,4}", l):
                 continue
-            if 3 <= len(l) <= 80:
-                candidates[l] += 1
+            if not (3 <= len(l) <= 80):
+                continue
+            fp = _header_fingerprint(l)
+            if not fp or fp in seen:
+                continue
+            seen.add(fp)
+            candidates[fp] += 1
 
     threshold = frac * page_count
-    repeated = {line for line, count in candidates.items() if count >= threshold}
+    repeated_fps = {fp for fp, count in candidates.items() if count >= threshold}
 
-    # Also strip standalone numeric lines (page numbers) anywhere in top 3 / bot 3
     cleaned_pages = []
     for page in pages_text:
         lines = page.splitlines()
         new = []
         for i, l in enumerate(lines):
             stripped = l.strip()
-            in_edge = i < 3 or i >= len(lines) - 3
+            in_edge = i < _EDGE_WINDOW or i >= len(lines) - _EDGE_WINDOW
             if in_edge:
-                if stripped in repeated:
+                if _header_fingerprint(stripped) in repeated_fps:
                     continue
                 if re.fullmatch(r"\d{1,4}", stripped):
                     continue
@@ -118,6 +160,76 @@ def normalize_chapter_heading(chapter_md: str, title: str) -> str:
 
 
 # --- Outline handling ---
+
+
+def _levenshtein(a: str, b: str, cap: int = 4) -> int:
+    """Bounded edit distance. Returns ``cap`` once the threshold is exceeded.
+
+    We only care about merging titles that are 'almost identical'
+    (slugifier variants, stray whitespace), so capping at a small value
+    keeps the cost flat for the long-prose case.
+    """
+    if a == b:
+        return 0
+    la, lb = len(a), len(b)
+    if abs(la - lb) >= cap:
+        return cap
+    if la > lb:
+        a, b, la, lb = b, a, lb, la
+    prev = list(range(lb + 1))
+    for i, ca in enumerate(a, 1):
+        cur = [i] + [0] * lb
+        best = cur[0]
+        for j, cb in enumerate(b, 1):
+            ins = cur[j - 1] + 1
+            dele = prev[j] + 1
+            sub = prev[j - 1] + (0 if ca == cb else 1)
+            cur[j] = min(ins, dele, sub)
+            best = min(best, cur[j])
+        if best >= cap:
+            return cap
+        prev = cur
+    return min(prev[lb], cap)
+
+
+def dedupe_outline(items: list[dict]) -> tuple[list[dict], list[dict]]:
+    """Merge near-duplicate adjacent outline items.
+
+    Returns ``(deduped_items, dropped_items)``. Two items are merged
+    when their titles are within edit-distance 3 of each other OR they
+    target the same start page. The survivor keeps the longer/cleaner
+    title; the duplicate's slug is recorded under ``aliases`` so a
+    later cross-check can detect orphan files written with the
+    abandoned slug.
+    """
+    if not items:
+        return [], []
+    sorted_items = sorted(items, key=lambda x: (x.get("page") or 0,
+                                                x.get("level", 1)))
+    keep: list[dict] = []
+    dropped: list[dict] = []
+    for it in sorted_items:
+        if not keep:
+            keep.append(it)
+            continue
+        prev = keep[-1]
+        same_page = it.get("page") == prev.get("page")
+        title_a = (it.get("title") or "").strip().lower()
+        title_b = (prev.get("title") or "").strip().lower()
+        close = title_a and title_b and _levenshtein(title_a, title_b) < 3
+        if same_page or close:
+            # Pick the longer/cleaner title; merge slugs.
+            survivor, loser = (prev, it) if len(prev["title"]) >= len(it["title"]) \
+                else (it, prev)
+            keep[-1] = survivor
+            aliases = list(set(prev.get("aliases", [])
+                               + it.get("aliases", [])
+                               + [loser.get("slug")]))
+            keep[-1]["aliases"] = [a for a in aliases if a]
+            dropped.append(loser)
+            continue
+        keep.append(it)
+    return keep, dropped
 
 
 def slugify(title: str, max_len: int = 60) -> str:
@@ -151,10 +263,16 @@ def load_outline(path: str) -> list[dict]:
 def detect_headings(pages_dir: Path, manifest: dict) -> list[dict]:
     """Heuristic chapter detection from page contents."""
     items = []
+    # Mirrors detect_structure.BODY_STRUCTURAL_HEADING: tight pattern
+    # that rejects body prose like ``Chapter 13. In order to solve…``
+    # by requiring the optional title to be uppercase (typical of
+    # OCR'd / scanned headings) and anchoring at end-of-line. The
+    # previous loose ``.*$`` swallowed full sentences after the chapter
+    # number, producing dozens of bogus chapters.
     chapter_re = re.compile(
-        r"^\s*(?:CHAPTER|Chapter|PART|Part|BOOK|Book)\s+(?:[IVXLCDM]+|\d+|\w+)"
-        r"\b.*$",
-        re.MULTILINE,
+        r"^\s*(?i:chapter|part|book|section|appendix|appendices)"
+        r"\s+(?:\d+|[IVXLCDMivxlcdm]+|[A-Z])\b"
+        r"(?:[\s:.\-—]+[A-Z][A-Z\s.\d&'\"\-—()]{1,80})?\s*$",
     )
     used = set()
     for entry in manifest["pages"]:
@@ -179,6 +297,143 @@ def detect_headings(pages_dir: Path, manifest: dict) -> list[dict]:
 
 
 # --- Assembly ---
+
+
+def _title_match_pattern(title: str) -> re.Pattern | None:
+    """Build a forgiving line-anchored regex for cutting at a chapter title.
+
+    Prefers an exact section-number prefix when present (e.g. ``5.3``
+    or ``2.2.1``) since those are the most reliable signal. Otherwise
+    matches the first 3-4 significant words of the title. Returns
+    ``None`` when nothing usable can be derived.
+    """
+    title = (title or "").strip()
+    if not title:
+        return None
+    sec_m = _SECTION_NUMBER_RE.match(title)
+    if sec_m:
+        prefix = re.escape(sec_m.group(1))
+        return re.compile(rf"(?m)^[\s ]*{prefix}\b")
+    # Use the first 3-4 words; require ≥10 chars total to avoid
+    # matching short stop-words like "the" alone.
+    tokens = [t for t in re.split(r"\s+", title) if t]
+    head = tokens[:4]
+    if not head:
+        return None
+    head_str = " ".join(head)
+    if len(head_str) < 10:
+        head = tokens[:6]
+        head_str = " ".join(head)
+        if len(head_str) < 8:
+            return None
+    pat = r"\s+".join(re.escape(t) for t in head)
+    return re.compile(rf"(?m)^[\s ]*{pat}", re.IGNORECASE)
+
+
+def _split_shared_page(page_text: str, next_item: dict) -> tuple[str, str] | None:
+    """Cut a shared page at the next chapter's title.
+
+    Returns ``(head_for_prev, tail_for_next)`` or ``None`` if no
+    confident split point is found. We're conservative — if the title
+    pattern doesn't match cleanly, we fall back to letting the caller
+    keep the existing whole-page assignment.
+    """
+    pat = _title_match_pattern(next_item.get("title", ""))
+    if pat is None:
+        return None
+    m = pat.search(page_text)
+    if not m:
+        return None
+    cut = m.start()
+    head = page_text[:cut]
+    tail = page_text[cut:]
+    # Refuse to split when the head is essentially empty — that means
+    # the title is at the top of the page, so the whole page already
+    # belongs to ``next_item`` (the existing behavior is correct).
+    if not head.strip():
+        return None
+    return head, tail
+
+
+_FIG_CAPTION_RE = re.compile(
+    r"^(?P<prefix>\s*)Fig(?:ure)?\.?\s+(?P<num>\d+(?:\.\d+)?)\b.*$",
+    re.MULTILINE,
+)
+
+
+def load_figures_manifest(pages_dir: Path) -> dict[int, list[dict]]:
+    """Return a {page: [figure_record, ...]} map from figures_manifest.json.
+
+    Looks alongside ``manifest.json`` in ``pages_dir``. Returns an
+    empty mapping if the manifest is absent (figures step is optional).
+    """
+    path = pages_dir / "figures_manifest.json"
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text())
+    except (json.JSONDecodeError, OSError):
+        return {}
+    by_page: dict[int, list[dict]] = {}
+    for fig in data.get("figures", []):
+        p = fig.get("page")
+        if p is None:
+            continue
+        by_page.setdefault(p, []).append(fig)
+    for figs in by_page.values():
+        figs.sort(key=lambda f: f.get("index", 0))
+    return by_page
+
+
+def insert_figure_references(chapter_text: str, page_range: tuple[int, int],
+                             figures_by_page: dict[int, list[dict]]) -> str:
+    """Splice ``![](images/figure_pNNNN_M.ext)`` after caption lines.
+
+    Strategy:
+      1. For each caption line ``Figure 3.1 — ...`` matched in the
+         chapter, attach the next unused figure record from the
+         caption's page (or surrounding pages in the chapter range).
+      2. Any unmatched figures from the chapter's page range are
+         appended at the end of the chapter so they aren't lost.
+    """
+    if not figures_by_page:
+        return chapter_text
+
+    used: set[str] = set()
+
+    def take_figure(page: int) -> dict | None:
+        for fig in figures_by_page.get(page, []):
+            if fig["file"] not in used:
+                used.add(fig["file"])
+                return fig
+        return None
+
+    def replacer(match: re.Match) -> str:
+        # Caption page is unknown without a positional map; instead,
+        # look at all pages in range in order, returning the first
+        # unused figure. This is approximate but works for chapters
+        # that have one figure per caption in reading order.
+        for p in range(page_range[0], page_range[1] + 1):
+            fig = take_figure(p)
+            if fig is not None:
+                return f"{match.group(0)}\n\n![](images/{fig['file']})"
+        return match.group(0)
+
+    new_text = _FIG_CAPTION_RE.sub(replacer, chapter_text)
+
+    # Append leftovers — figures present on chapter pages that no
+    # caption claimed. Better to surface them than lose them.
+    leftovers: list[dict] = []
+    for p in range(page_range[0], page_range[1] + 1):
+        for fig in figures_by_page.get(p, []):
+            if fig["file"] not in used:
+                used.add(fig["file"])
+                leftovers.append(fig)
+    if leftovers:
+        tail = "\n\n" + "\n\n".join(
+            f"![](images/{f['file']})" for f in leftovers)
+        new_text = new_text + tail
+    return new_text
 
 
 def assemble(outline: list[dict], pages_dir: Path, manifest: dict,
@@ -211,18 +466,54 @@ def assemble(outline: list[dict], pages_dir: Path, manifest: dict,
             end = start
         ranges.append({"item": item, "start": start, "end": end})
 
+    # Pre-load page texts so we can rewrite shared pages in place.
+    page_lookup: dict[int, str] = {}
+    for entry in manifest["pages"]:
+        page_lookup[entry["page"]] = (pages_dir / entry["file"]).read_text()
+
+    # When two consecutive chapters share a PDF page (start_B == end_A,
+    # i.e. chapter B begins mid-page), cut the shared page at B's
+    # title. The head stays with A; the tail (heading + body) goes to
+    # B. Falls back to the original whole-page behavior when the
+    # title pattern doesn't match — better to leak a paragraph than to
+    # mangle a chapter on a bad guess.
+    chapter_text: dict[int, list[str]] = {i: [] for i in range(len(ranges))}
+    for i, r in enumerate(ranges):
+        for p in range(r["start"], r["end"] + 1):
+            text = page_lookup.get(p, "")
+            chapter_text[i].append(text)
+
+    for i in range(len(ranges) - 1):
+        cur = ranges[i]
+        nxt = ranges[i + 1]
+        if cur["end"] != nxt["start"]:
+            continue
+        # The shared page is the last page of `cur` and first of `nxt`.
+        shared_page_text = page_lookup.get(cur["end"], "")
+        split = _split_shared_page(shared_page_text, nxt["item"])
+        if split is None:
+            continue
+        head, tail = split
+        # Replace the last page-slot of `cur` with the head, and the
+        # first page-slot of `nxt` with the tail.
+        if chapter_text[i]:
+            chapter_text[i][-1] = head
+        if chapter_text[i + 1]:
+            chapter_text[i + 1][0] = tail
+        else:
+            chapter_text[i + 1] = [tail]
+        print(f"  split shared page {cur['end']} between "
+              f"{cur['item'].get('slug')!r} and {nxt['item'].get('slug')!r}",
+              file=sys.stderr)
+
+    figures_by_page = load_figures_manifest(pages_dir)
+
     out_dir.mkdir(parents=True, exist_ok=True)
     written = []
 
-    for r in ranges:
+    for i, r in enumerate(ranges):
         item = r["item"]
-        # Gather page texts in range
-        page_texts = []
-        for entry in manifest["pages"]:
-            p = entry["page"]
-            if r["start"] <= p <= r["end"]:
-                content = (pages_dir / entry["file"]).read_text()
-                page_texts.append(content)
+        page_texts = chapter_text.get(i, [])
 
         # Cleanup pipeline
         page_texts = strip_repeated_lines(page_texts, frac=header_strip_frac)
@@ -231,6 +522,8 @@ def assemble(outline: list[dict], pages_dir: Path, manifest: dict,
         joined = dehyphenate(joined)
         joined = collapse_blanklines(joined)
         joined = normalize_chapter_heading(joined, item["title"])
+        joined = insert_figure_references(joined, (r["start"], r["end"]),
+                                          figures_by_page)
 
         out_path = out_dir / f"{item['slug']}.md"
         out_path.write_text(joined)
@@ -247,15 +540,52 @@ def assemble(outline: list[dict], pages_dir: Path, manifest: dict,
 # --- SUMMARY.md generation ---
 
 
+def _section_number_level(title: str) -> int | None:
+    """Derive nesting level from a leading section number ('5.3' → 2).
+
+    Bookmark levels frequently disagree with section numbering — the
+    title prefix is the more trustworthy signal. Returns None when the
+    title doesn't open with a multi-segment numeric prefix.
+    """
+    m = _SECTION_NUMBER_RE.match(title)
+    if not m:
+        return None
+    return m.group(1).count(".") + 1
+
+
+def derive_summary_levels(items: list[dict]) -> list[int]:
+    """Return per-item display levels for SUMMARY indentation.
+
+    For each item: prefer the level derived from a leading section
+    number (e.g. ``5.3`` → 2) when more specific than the bookmark
+    level. Then enforce monotone-with-siblings: if item N's title
+    prefix is ``5.3`` and item N-1's prefix is ``5.2``, item N must be
+    at the same level as N-1.
+    """
+    derived: list[int | None] = [_section_number_level(it["title"]) for it in items]
+    levels: list[int] = []
+    for i, it in enumerate(items):
+        bm = max(1, int(it.get("level", 1) or 1))
+        d = derived[i]
+        lvl = bm if d is None else max(bm, d)
+        # Match a sibling immediately above (same numeric depth) — if
+        # the bookmark put us deeper or shallower than our sibling, the
+        # section number wins.
+        if d is not None and i > 0 and derived[i - 1] is not None:
+            prev_d = derived[i - 1]
+            if d == prev_d:
+                lvl = levels[-1]
+        levels.append(lvl)
+    return levels
+
+
 def write_summary(items: list[dict], out_path: Path, title: str):
     """Write a draft SUMMARY.md respecting mdBook's strict format."""
     lines = [f"# {title}", ""]
 
-    # Find prefix items (level 1, before any deeper structure starts).
-    # To keep it simple, emit all items as numbered chapters with
-    # appropriate nesting.
-    for item in items:
-        indent = "  " * (item["level"] - 1)
+    levels = derive_summary_levels(items)
+    for item, lvl in zip(items, levels):
+        indent = "  " * (lvl - 1)
         lines.append(f"{indent}- [{item['title']}]({item['file']})")
 
     out_path.write_text("\n".join(lines) + "\n")
@@ -278,6 +608,15 @@ def main():
     ap.add_argument("--header-strip-frac", type=float, default=0.5,
                     help="Fraction of pages on which a top/bottom line must "
                          "appear to be stripped (default: 0.5)")
+    ap.add_argument("--allow-single-chapter", action="store_true",
+                    help="Permit producing a one-chapter book when no "
+                         "outline is available and heading detection finds "
+                         "nothing. Only use for true single-essay PDFs — "
+                         "the default refuses to emit a flat book silently.")
+    ap.add_argument("--work",
+                    help="Optional work directory. When provided, a "
+                         "quality_warnings.json file is written here for "
+                         "the orchestrator's output-quality gate.")
     args = ap.parse_args()
 
     pages_dir = Path(args.pages)
@@ -299,12 +638,39 @@ def main():
         if outline:
             print(f"  detected {len(outline)} chapters", file=sys.stderr)
         else:
-            print("  no chapters detected; using single-chapter fallback",
-                  file=sys.stderr)
+            print("  no chapters detected", file=sys.stderr)
+
+    # Refuse to silently produce a one-chapter book. Either the caller
+    # has an outline, --detect-headings produced ≥3 entries, or they
+    # explicitly opted into single-chapter mode for a real single-essay
+    # PDF. Otherwise we'd glue every page into one giant `Document`
+    # chapter and the orchestrator would mark it complete.
+    if len(outline) < 3 and not args.allow_single_chapter:
+        print(
+            "assemble_chapters: outline has "
+            f"{len(outline)} chapter(s) and --detect-headings produced "
+            "no usable structure. Refusing to write a single-chapter "
+            "book. Re-run with --allow-single-chapter to override, or "
+            "fix the outline (rerun extract_outline.py / "
+            "detect_structure.py).",
+            file=sys.stderr,
+        )
+        sys.exit(2)
 
     if not outline:
-        print("WARNING: no outline; producing single-chapter book.",
+        print("WARNING: no outline; producing single-chapter book "
+              "(--allow-single-chapter set).",
               file=sys.stderr)
+
+    if outline:
+        outline, dropped = dedupe_outline(outline)
+        if dropped:
+            print(f"Deduped outline: dropped {len(dropped)} near-duplicate "
+                  f"item(s). Survivors: {len(outline)}",
+                  file=sys.stderr)
+            for d in dropped[:5]:
+                print(f"  dropped: {d.get('slug')!r} (title={d.get('title')!r})",
+                      file=sys.stderr)
 
     out_dir = Path(args.out)
     written = assemble(outline, pages_dir, manifest, out_dir,
@@ -320,8 +686,59 @@ def main():
         shutil.copytree(pages_images, out_images, dirs_exist_ok=True)
         print(f"Copied OCR fallback images → {out_images}", file=sys.stderr)
 
+    # Quality warnings: chapters that are predominantly OCR fallback
+    # markers with very little real text. The orchestrator reads this
+    # before flipping status: complete.
+    quality_warnings: list[dict] = []
+    for w in written:
+        chapter_path = out_dir / w["file"]
+        if not chapter_path.exists():
+            continue
+        text = chapter_path.read_text()
+        fallback_count = text.count("<!-- ocr-fallback -->")
+        if fallback_count == 0:
+            continue
+        # Words of real text — strip the fallback markers and any
+        # heading line, then count whitespace-separated tokens.
+        stripped = text.replace("<!-- ocr-fallback -->", "")
+        readable_words = sum(1 for tok in stripped.split() if tok.strip())
+        if readable_words < 200 * fallback_count:
+            quality_warnings.append({
+                "chapter": Path(w["file"]).stem,
+                "file": w["file"],
+                "issue": "predominantly OCR fallback",
+                "fallback_count": fallback_count,
+                "readable_words": readable_words,
+            })
+
+    if args.work:
+        work_dir = Path(args.work)
+        work_dir.mkdir(parents=True, exist_ok=True)
+        warn_path = work_dir / "quality_warnings.json"
+        warn_path.write_text(json.dumps(
+            {"warnings": quality_warnings}, indent=2))
+        if quality_warnings:
+            print(f"Wrote {warn_path} with {len(quality_warnings)} warning(s)",
+                  file=sys.stderr)
+
     summary_path = out_dir / "SUMMARY.md"
     write_summary(written, summary_path, args.title)
+
+    # Sanity-check: every .md in chapters dir (except SUMMARY.md) must
+    # be referenced in `written`. An orphan means dedupe disagreed with
+    # the per-chapter writer or a previous run left stale files.
+    written_files = {w["file"] for w in written}
+    on_disk = {p.name for p in out_dir.glob("*.md") if p.name != "SUMMARY.md"}
+    orphans = on_disk - written_files
+    if orphans:
+        print(f"\nERROR: {len(orphans)} orphan .md file(s) in {out_dir} "
+              f"not referenced in SUMMARY.md: {sorted(orphans)[:5]}"
+              f"{' ...' if len(orphans) > 5 else ''}",
+              file=sys.stderr)
+        print("  This usually means a previous run wrote different slugs. "
+              "Delete the chapters directory and rerun.",
+              file=sys.stderr)
+        sys.exit(3)
 
     print(f"\nWrote {len(written)} chapter file(s) to {out_dir}")
     print(f"Draft SUMMARY: {summary_path}")

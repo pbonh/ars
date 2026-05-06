@@ -16,6 +16,8 @@ Usage:
 import argparse
 import json
 import os
+import re
+import statistics
 import subprocess
 import sys
 from pathlib import Path
@@ -27,6 +29,12 @@ except ImportError:
     HAS_PDFPLUMBER = False
 
 try:
+    import fitz  # PyMuPDF
+    HAS_PYMUPDF = True
+except ImportError:
+    HAS_PYMUPDF = False
+
+try:
     from pypdf import PdfReader
 except ImportError:
     print("ERROR: pypdf not installed. Run: pip install pypdf --break-system-packages",
@@ -35,6 +43,53 @@ except ImportError:
 
 
 LOW_TEXT_THRESHOLD = 100  # chars below which page is flagged needs_ocr
+
+# Quality-gate thresholds. cid_count > 5 catches font-mapping failures
+# (raw "(cid:139)" glyphs). median_word_length > 12 catches space-collapse
+# (pdftotext occasionally drops all spaces, producing one giant token).
+CID_THRESHOLD = 5
+MEDIAN_WORD_LEN_THRESHOLD = 12
+
+_CID_RE = re.compile(r"\(cid:\d+\)")
+
+
+def _quality_signals(text: str) -> tuple[int, float]:
+    """Return (cid_count, median_word_length) for quality gating."""
+    cid_count = len(_CID_RE.findall(text))
+    words = [w for w in text.split() if w]
+    if not words:
+        return cid_count, 0.0
+    lens = [len(w) for w in words]
+    return cid_count, float(statistics.median(lens))
+
+
+def _classify_quality(text: str, threshold_chars: int) -> tuple[str, dict]:
+    """Bucket the page's extraction quality. Returns (label, signals)."""
+    cid_count, mwl = _quality_signals(text)
+    chars = len(text)
+    poor = (
+        cid_count > CID_THRESHOLD
+        or mwl > MEDIAN_WORD_LEN_THRESHOLD
+        # Tiny pages: only flag as poor if not effectively blank-by-design
+        # (a true blank page yields chars==0; sub-threshold but non-trivial
+        # text usually means extraction faltered).
+        or (10 < chars < threshold_chars)
+    )
+    label = "poor" if poor else "good"
+    return label, {"cid_count": cid_count, "median_word_length": mwl}
+
+
+def _extract_with_pymupdf(pdf_path: str, page_idx: int) -> str:
+    """Fallback page extraction via PyMuPDF (different font logic)."""
+    if not HAS_PYMUPDF:
+        return ""
+    try:
+        with fitz.open(pdf_path) as doc:
+            if page_idx >= len(doc):
+                return ""
+            return doc[page_idx].get_text("text") or ""
+    except Exception:
+        return ""
 
 
 def have_pdftotext() -> bool:
@@ -127,37 +182,69 @@ def main():
 
     pages_meta: list[dict] = []
 
+    def finalize_page(p: int, text: str, primary_engine: str) -> dict:
+        """Quality-gate the page text; retry with PyMuPDF if poor."""
+        quality, signals = _classify_quality(text, args.threshold)
+        used_engine = primary_engine
+        fallback_used = False
+        if quality == "poor" and HAS_PYMUPDF:
+            alt = _extract_with_pymupdf(args.pdf, p - 1)
+            if alt:
+                alt_quality, alt_signals = _classify_quality(alt, args.threshold)
+                # Accept the fallback when it's no worse on either signal —
+                # PyMuPDF's font logic differs from pdftotext's, so it
+                # often recovers space-collapse and (cid:) cases.
+                if alt_quality == "good" or (
+                    alt_signals["cid_count"] < signals["cid_count"]
+                    or alt_signals["median_word_length"] < signals["median_word_length"]
+                ):
+                    text = alt
+                    quality, signals = alt_quality, alt_signals
+                    used_engine = "pymupdf"
+                    fallback_used = True
+        fname = out_dir / f"page_{p:04d}.md"
+        fname.write_text(text)
+        chars = len(text)
+        # Re-classify after potential fallback for the final manifest record.
+        # needs_ocr fires when text density is below threshold OR quality
+        # remained poor after fallback (font-mapping failures + space
+        # collapse aren't recoverable without a re-render).
+        needs_ocr = chars < args.threshold or quality == "poor"
+        return {
+            "page": p,
+            "file": fname.name,
+            "chars": chars,
+            "needs_ocr": needs_ocr,
+            "extraction_quality": quality,
+            "cid_count": signals["cid_count"],
+            "median_word_length": signals["median_word_length"],
+            "engine_used": used_engine,
+            "pymupdf_fallback": fallback_used,
+        }
+
     if engine == "pdfplumber":
         with pdfplumber.open(args.pdf) as pdf_obj:
             for p in range(start, end + 1):
                 text = extract_with_pdfplumber(pdf_obj, p - 1)
-                fname = out_dir / f"page_{p:04d}.md"
-                fname.write_text(text)
-                chars = len(text)
-                pages_meta.append({
-                    "page": p,
-                    "file": fname.name,
-                    "chars": chars,
-                    "needs_ocr": chars < args.threshold,
-                })
+                pages_meta.append(finalize_page(p, text, "pdfplumber"))
                 if p % 25 == 0 or p == end:
-                    print(f"  page {p}/{end}  ({chars} chars)", file=sys.stderr)
+                    last = pages_meta[-1]
+                    print(f"  page {p}/{end}  ({last['chars']} chars, "
+                          f"{last['extraction_quality']})", file=sys.stderr)
     else:  # pdftotext
         for p in range(start, end + 1):
             text = extract_with_pdftotext(args.pdf, p, args.layout)
-            fname = out_dir / f"page_{p:04d}.md"
-            fname.write_text(text)
-            chars = len(text)
-            pages_meta.append({
-                "page": p,
-                "file": fname.name,
-                "chars": chars,
-                "needs_ocr": chars < args.threshold,
-            })
+            pages_meta.append(finalize_page(p, text, "pdftotext"))
             if p % 25 == 0 or p == end:
-                print(f"  page {p}/{end}  ({chars} chars)", file=sys.stderr)
+                last = pages_meta[-1]
+                print(f"  page {p}/{end}  ({last['chars']} chars, "
+                      f"{last['extraction_quality']})", file=sys.stderr)
 
     needs_ocr = [m["page"] for m in pages_meta if m["needs_ocr"]]
+    poor_pages = [m["page"] for m in pages_meta
+                  if m.get("extraction_quality") == "poor"]
+    fallback_pages = [m["page"] for m in pages_meta
+                      if m.get("pymupdf_fallback")]
     manifest = {
         "pdf": os.path.abspath(args.pdf),
         "engine": engine,
@@ -170,6 +257,10 @@ def main():
             "extracted": len(pages_meta),
             "needs_ocr_count": len(needs_ocr),
             "needs_ocr_pages": needs_ocr,
+            "poor_quality_count": len(poor_pages),
+            "poor_quality_pages": poor_pages,
+            "pymupdf_fallback_count": len(fallback_pages),
+            "pymupdf_fallback_pages": fallback_pages,
             "total_chars": sum(m["chars"] for m in pages_meta),
             "avg_chars_per_page": (
                 sum(m["chars"] for m in pages_meta) // max(1, len(pages_meta))
@@ -184,11 +275,21 @@ def main():
     s = manifest["summary"]
     print(f"  extracted={s['extracted']}  "
           f"avg_chars={s['avg_chars_per_page']}  "
-          f"needs_ocr={s['needs_ocr_count']}")
+          f"needs_ocr={s['needs_ocr_count']}  "
+          f"poor_quality={s['poor_quality_count']}  "
+          f"pymupdf_fallback={s['pymupdf_fallback_count']}")
     if needs_ocr:
         preview = ", ".join(str(p) for p in needs_ocr[:10])
         more = f" ... +{len(needs_ocr) - 10} more" if len(needs_ocr) > 10 else ""
         print(f"  needs_ocr pages: {preview}{more}")
+    if poor_pages:
+        preview = ", ".join(str(p) for p in poor_pages[:10])
+        more = f" ... +{len(poor_pages) - 10} more" if len(poor_pages) > 10 else ""
+        print(f"  poor_quality pages: {preview}{more}")
+    if not HAS_PYMUPDF:
+        print("  (PyMuPDF not installed — install for fallback on poor pages: "
+              "pip install pymupdf --break-system-packages)",
+              file=sys.stderr)
 
 
 if __name__ == "__main__":

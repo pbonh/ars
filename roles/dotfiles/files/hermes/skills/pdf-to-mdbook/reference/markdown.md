@@ -9,27 +9,42 @@ check a chapter and see one of the artifacts below.
 
 **De-hyphenation across line breaks.** PDFs break words at line ends
 with hyphens that aren't real hyphens. The script joins
-`compre-\nhensive` into `comprehensive`. It uses a small dictionary
-check to avoid joining real hyphenated compounds (`well-\nknown` stays
-`well-known`, not `wellknown`).
+`compre-\nhensive` into `comprehensive`. The match is regex-only and
+recognizes ASCII `-`, U+2010 (`‐`), U+2011 (`‑`), and U+2212 (`−`),
+plus a pre-pass that strips inline U+00AD soft hyphens. The follow-on
+character must be lowercase, so `well-\nKnown` stays `well-Known`.
+There is no dictionary lookup — real compounds joined to lowercase
+continuations (`well-\nknown` → `wellknown`) will be over-joined; if
+that bites a specific book, fix in the chapter file post-build.
 
-**Repeated header/footer stripping.** It scans the first and last 3
-lines of every page in a chapter, finds substrings that appear on more
-than 60% of pages, and strips them. Catches running headers ("Chapter
-3 — Foundations") and page numbers.
+**Repeated header/footer stripping.** It inspects the first and last 6
+lines of every page in a chapter, fingerprints each line by stripping
+leading and trailing page numbers (so `44 BOOK TITLE` and `BOOK TITLE
+45` collapse to the same fingerprint), and removes any line whose
+fingerprint appears on ≥50% of pages. This catches running headers,
+page numbers, and recto/verso variants of the same banner.
 
 **Blank-line collapse.** Sequences of 3+ blank lines collapse to 2
 (paragraph break). This fixes the "everything is double-spaced after
 extraction" problem.
 
-**Heading normalization.** Lines that look like headings (short, all-
-caps or title-case, no terminal punctuation, vertical whitespace
-around them) get prefixed with `##` or `###` based on relative
-prominence within the chapter.
+**Title-style chapter heading.** The first line of each chapter file
+is forced to a single `# Title` heading derived from the outline.
+There is **no** general "looks like a heading → make it h2/h3" pass —
+mid-chapter headings come through with whatever level the source PDF
+had (often none). For a polished structure, edit the chapter file to
+add `##`/`###` markers where appropriate.
 
-**Smart-quote and ligature cleanup.** Curly quotes stay (they look
-nice), but `ﬁ` and `ﬂ` ligatures get expanded to `fi`/`fl` (mdBook's
-search index handles them better unsplit).
+**Ligature normalization.** `ﬀ ﬁ ﬂ ﬃ ﬄ ﬅ ﬆ` are expanded to their
+ASCII equivalents (`fi`, `ffi`, …) before downstream processing, both
+in the page text and in outline titles. Curly quotes are left alone.
+There is **no** smart-quote conversion.
+
+**Title sanitization.** Outline titles run through a sanitizer that
+applies NFKC, drops control chars (`\r`, `\t`, etc.), and collapses
+whitespace before slugs and SUMMARY entries are generated. This
+prevents `Part III\rApplications` from rendering as `PartIIIApplications`
+or being truncated at the `\r`.
 
 ## Common artifacts the cleanup misses
 
@@ -91,11 +106,23 @@ For equations OCR mangled, three escalation steps:
 
 ### Figures and images
 
-`extract_text_pages.py` does NOT extract images. When a chapter
-references a figure ("see Figure 3.1 below"), there's nothing visual
-in the Markdown.
+`extract_text_pages.py` does NOT extract images, but
+`extract_figures.py` does. Run it between extraction and assembly:
 
-To pull figures from the original PDF:
+```bash
+python scripts/extract_figures.py path/to/input.pdf \
+    --out work/pages/images
+```
+
+It combines `pdfimages -all` (poppler) for raster art with PyMuPDF for
+vector-rendered figures, names outputs `figure_pNNNN_M.ext`, and
+writes `work/pages/figures_manifest.json`. `assemble_chapters.py`
+picks up that manifest automatically: any line matching
+`Fig(ure)? N.M` in chapter text gets the next unused figure inserted
+right below it, and unmatched figures from the chapter's page range
+are appended at the end of the chapter so they aren't dropped.
+
+If you'd rather pull figures by hand:
 
 ```bash
 # Extract all images from the chapter's page range

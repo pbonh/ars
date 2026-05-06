@@ -27,8 +27,36 @@ except ImportError:
     sys.exit(2)
 
 
+# Stand-in mapping for ligatures NFKC misses. NFKC handles fi/fl, but
+# we keep an explicit fallback so titles never carry "Deﬁnition" etc.
+_LIGATURE_FALLBACK = {
+    "ﬀ": "ff", "ﬁ": "fi", "ﬂ": "fl",
+    "ﬃ": "ffi", "ﬄ": "ffl", "ﬅ": "ft", "ﬆ": "st",
+}
+
+
+def sanitize_title(title: str) -> str:
+    """Normalize a raw outline/heading title for downstream use.
+
+    Bookmarks frequently embed ligatures (``Deﬁnition``), control chars
+    (``Part III\\rApplications``), and stray whitespace. Apply this to
+    every title written into ``outline.json`` so SUMMARY entries and
+    chapter ``# Title`` lines never expose the raw glyphs.
+    """
+    if not title:
+        return ""
+    s = unicodedata.normalize("NFKC", title)
+    for k, v in _LIGATURE_FALLBACK.items():
+        s = s.replace(k, v)
+    s = s.replace("\r", " ").replace("\t", " ")
+    s = re.sub(r"[\x00-\x08\x0b-\x1f\x7f]", "", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
 def slugify(title: str, max_len: int = 60) -> str:
     """Turn 'Chapter 3: The Beginning!' into 'chapter-3-the-beginning'."""
+    title = sanitize_title(title)
     nfkd = unicodedata.normalize("NFKD", title)
     ascii_only = nfkd.encode("ascii", "ignore").decode("ascii")
     lower = ascii_only.lower()
@@ -71,7 +99,7 @@ def walk_outline(reader: PdfReader, node, level: int, out: list,
         if isinstance(item, list):
             walk_outline(reader, item, level + 1, out, used_slugs)
         elif isinstance(item, Destination):
-            title = (item.title or "").strip()
+            title = sanitize_title(item.title or "")
             if not title:
                 continue
             page = get_page_number(reader, item)
