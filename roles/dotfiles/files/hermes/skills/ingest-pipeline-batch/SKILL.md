@@ -18,10 +18,11 @@ management run in `scripts/sweep.py`. The LLM agent's only jobs are:
 
 1. Run `sweep.py scan` to get the working set (forward `--wiki-root` if
    given so books needing only the wiki side re-enter the working set).
-2. Dispatch a per-book subagent for each entry, using the **fixed
-   parameter template in Step 3** — Step 3a without `--wiki-root`,
-   Step 3b with it. Do not vary the parameters per book. Do not redesign
-   the strategy mid-sweep.
+2. Dispatch a per-book subagent for each entry. The exact
+   `delegate_task` kwargs come from `sweep.py dispatch` (Step 3) —
+   the orchestrator forwards the JSON verbatim and never constructs,
+   augments, or omits keys. Do not vary the parameters per book. Do
+   not redesign the strategy mid-sweep.
 3. Run `sweep.py mark` after each subagent returns. With `--wiki-root`,
    read `wiki.json` (Step 4b) before marking; without it, read
    `pipeline.json` (Step 4a).
@@ -68,8 +69,10 @@ is empty — print "no books found" and stop.
 When `--wiki-root` is forwarded, sweep.py also re-checks each book's
 per-book `wiki.json` sentinel: a book with `pipeline.json:complete` but
 no `wiki.json:complete` re-enters the working set with `wiki_pending:
-true`. The orchestrator uses that flag to skip the ingest-pipeline phase
-in the per-book dispatch and start at wiki-ingest.
+true` and is persisted with the same flag in `library.json`. The Step 3
+`dispatch` command reads that flag and renders the Step 3b context with
+`Wiki-pending only: true`, telling the per-book subagent to skip
+ingest-pipeline and start at wiki-ingest.
 
 The script does **not** include directories that only contain pre-split
 markdown without a manifest. If users have such directories, they should
@@ -86,127 +89,62 @@ python "$SKILL_DIR/scripts/sweep.py" mark <library_root> --root <root> --status 
 
 This makes progress visible to anyone reading `library.json` mid-sweep.
 
-## Step 3 — Dispatch the per-book subagent (fixed template)
+## Step 3 — Dispatch the per-book subagent (kwargs from `sweep.py dispatch`)
 
-For each entry in the working set (sequentially if `--parallel 1`,
-otherwise up to N at a time), invoke `delegate_task` with **exactly**
-these parameters. Do not add others. Do not omit any.
+For each entry in the working set, get the exact `delegate_task` kwargs
+from `sweep.py dispatch` and forward them verbatim to `delegate_task`.
+Do not transcribe, edit, augment, or drop keys — the script owns the
+template. It picks Step 3a (no `--wiki-root`) vs Step 3b (with
+`--wiki-root`) automatically and reads `wiki_pending` from `library.json`
+(persisted by `sweep.py scan`).
 
-Two templates: pick by whether `--wiki-root` was provided.
-
-### Step 3a — Without `--wiki-root` (mdBook-only path)
-
-```
-delegate_task(
-    goal      = "Drive <root> to a complete mdBook using the ingest-pipeline skill.",
-    context   = """
-                Book directory (absolute): <abs_path>
-                Force flag: <true|false>           # forward as --force if true
-                Vision mode: <auto|never|always>   # forward as --vision <mode>
-
-                Run the ingest-pipeline skill against this directory. Follow the
-                skill's Step 0 / Step 1 loop exactly: invoke run_pipeline.py,
-                read the JSON action signal, dispatch pdf-to-mdbook on S1,
-                record-phase on return, repair build errors when surfaced.
-                Stop on `done` or any `failed` record-phase.
-                """,
-    toolsets  = ["terminal", "file", "vision"],
-    skills    = ["ingest-pipeline", "pdf-to-mdbook"],
-    max_iterations  = 80,
-    max_spawn_depth = 2,
-)
+```bash
+python "$SKILL_DIR/scripts/sweep.py" dispatch <abs_library_root> \
+    --root <book_root_basename> \
+    [--wiki-root <abs_wiki_root>] \
+    [--vision <auto|never|always>] [--force]
 ```
 
-### Step 3b — With `--wiki-root` (chained path)
+Output is a JSON object whose keys are exactly the kwargs to forward:
 
-```
-delegate_task(
-    goal      = "Drive <root> through ingest-pipeline → wiki-ingest → wiki-lint.",
-    context   = """
-                Book directory (absolute): <abs_path>
-                Wiki root (absolute):      <abs_wiki_root>
-                Force flag:                <true|false>           # forward as --force if true
-                Vision mode:               <auto|never|always>    # forward as --vision <mode>
-                Wiki-pending only:         <true|false>           # from working_set entry
-
-                Run the chain in order:
-
-                1. ingest-pipeline against the book directory.
-                   - Skip if `Wiki-pending only` is true (pipeline.json already
-                     reports complete). Otherwise follow ingest-pipeline's Step 0
-                     / Step 1 loop exactly: invoke run_pipeline.py, read the JSON
-                     action signal, dispatch pdf-to-mdbook on S1, record-phase
-                     on return, repair build errors when surfaced. Stop on `done`
-                     or any `failed` record-phase.
-                   - On `failed`: write <book_dir>/wiki.json with
-                     {"status": "failed", "failed_phase": "ingest-pipeline",
-                      "error_message": "<message>"} and return — do NOT proceed.
-
-                2. wiki-ingest against <abs_wiki_root>.
-                   - Run the skill's Step 0 triage. wiki-ingest naturally skips
-                     sources whose wiki/summaries/<slug>.md already exists, so
-                     only the freshly-completed source (or any unprocessed
-                     siblings sharing this wiki root) will be ingested. Process
-                     to completion.
-                   - On any failure: write <book_dir>/wiki.json with
-                     {"status": "failed", "failed_phase": "wiki-ingest",
-                      "error_message": "<message>"} and return.
-
-                3. wiki-lint against <abs_wiki_root>.
-                   - Run the full lint workflow (read pages → run checks →
-                     auto-fix → update statistics → update dashboard/analytics
-                     → append to log → report).
-                   - On any failure: write <book_dir>/wiki.json with
-                     {"status": "failed", "failed_phase": "wiki-lint",
-                      "error_message": "<message>"} and return.
-
-                4. On success of all three, write <book_dir>/wiki.json with
-                   {"status": "complete",
-                    "summary_path": "<abs_wiki_root>/wiki/summaries/<slug>.md",
-                    "linted_at": "<iso8601 utc>"}.
-
-                Return a one-line summary of which phase finished last.
-                """,
-    toolsets  = ["terminal", "file", "vision"],
-    skills    = ["ingest-pipeline", "pdf-to-mdbook", "wiki-ingest", "wiki-lint"],
-    max_iterations  = 150,
-    max_spawn_depth = 2,
-)
+```json
+{
+  "goal": "...",
+  "context": "...",
+  "toolsets": ["terminal", "file", "vision"],
+  "skills": ["ingest-pipeline", "pdf-to-mdbook", "..."],
+  "max_iterations": 80,
+  "max_spawn_depth": 2
+}
 ```
 
-Notes on each parameter:
+| Path                | `max_iterations` | `max_spawn_depth` | `skills` extras           |
+|---------------------|------------------|-------------------|---------------------------|
+| Step 3a (no wiki)   | 80               | 2                 | —                         |
+| Step 3b (with wiki) | 150              | 2                 | `wiki-ingest`, `wiki-lint` |
 
-- `toolsets` — `vision` (not `image` — `image` is text-to-image generation,
-  the wrong toolset). The `vision` toolset is what `pdf-to-mdbook` needs
-  for its TOC structure-detection review.
-- `skills` — Preload all skills the per-book agent will use so it does
-  not pay `skill_view` round-trips in its iteration budget. The
-  `pdf-to-mdbook` preload is critical: when the per-book agent itself
-  delegates `pdf-to-mdbook` (as a depth-2 subagent), Hermes' delegation
-  system benefits from already having the skill loaded. In Step 3b the
-  preload extends to `wiki-ingest` and `wiki-lint`, both of which the
-  per-book agent invokes inline (not via further delegation).
-- `max_iterations` — `80` for Step 3a; `150` for Step 3b. A typical book
-  needs ~3–5 LLM iterations on the per-book side; 80 leaves margin for
-  build-fix loops on books with difficult mdbook errors. The Step 3b
-  bump covers wiki-ingest's chapter-at-a-time read pass plus wiki-lint's
-  page-by-page audit, which together can run another 30–60 iterations on
-  a populated wiki. Default 50 is too tight in either case.
-- `max_spawn_depth: 2` — Per-book subagent (depth 1) needs to itself
-  delegate `pdf-to-mdbook` (depth 2). Without this raise, the per-book
-  subagent runs in leaf mode and cannot delegate. (Hermes doc reference:
-  `developer-guide/agent-loop.md`, `guides/delegation-patterns.md`.)
-- **Forbidden parameters**: do not pass `acp_command`, `provider`, `model`,
-  or any other parameter not listed above. Earlier versions of this skill
-  invited the agent to reason about these — every such reasoning step is
-  wasted iterations. The defaults Hermes selects are correct.
+**Forbidden parameters** — do not pass `acp_command`, `provider`,
+`model`, or any key not present in the `dispatch` JSON. If you find
+yourself reasoning about delegation parameters (token budgets, spawn
+depth, retry policies), stop — the script owns them and the values
+it emits are correct. Earlier versions of this skill invited that
+reasoning, and every such step is a wasted iteration.
 
-For `--parallel N > 1`, dispatch up to N entries in a single `delegate_task`
-call (Hermes accepts a list) or spawn multiple back-to-back; cap concurrency
-at N. `delegate_task` is **synchronous** — if the orchestrator turn is
-interrupted, all in-flight children are cancelled and their work is lost.
-The per-book script writes `pipeline.json` atomically so cancelled work
-resumes cleanly on next sweep.
+**Why `dispatch` instead of an inline template:** a prior incident
+saw the orchestrator skim past the inline template, build the
+`delegate_task` call from memory, and silently omit `max_iterations`
+and `max_spawn_depth`. The per-book subagent ran under Hermes'
+defaults (~50 iter / leaf mode), capped before reaching `wiki-lint`,
+and burned a book. Sourcing the kwargs from a script removes the
+transcription step entirely.
+
+For `--parallel N > 1`, call `dispatch` once per book and pass the
+list of payloads to a single `delegate_task` invocation (Hermes
+accepts a list) or spawn multiple back-to-back; cap concurrency at N.
+`delegate_task` is **synchronous** — if the orchestrator turn is
+interrupted, all in-flight children are cancelled and their work is
+lost. The per-book script writes `pipeline.json` atomically so
+cancelled work resumes cleanly on next sweep.
 
 `--parallel > 1` is **rejected** when `--wiki-root` is set. Concurrent
 per-book agents would race on `wiki/index.md`, `wiki/log.md`, and the
@@ -219,7 +157,29 @@ refuse with: "wiki-root chain requires --parallel 1; rerun without
 
 When each subagent returns, read the relevant on-disk truth files to
 determine final status, then mark accordingly. Which file you read
-depends on whether `--wiki-root` was set.
+depends on whether `--wiki-root` was set. **First** run the Step 4.0
+sanity check below to detect the default-cap trap before treating any
+return as authoritative.
+
+### Step 4.0 — Sanity-check the subagent return
+
+Before reading on-disk truth files, inspect the `delegate_task` return:
+
+- If `exit_reason == "max_iterations"` AND `iterations_used` is well
+  below the prescribed cap — concretely, `< 60` for Step 3a or `< 100`
+  for Step 3b — the orchestrator silently dispatched with Hermes'
+  built-in defaults (~50 iter, leaf mode) instead of the script-provided
+  values. The subagent's work is partial but not corrupt.
+
+  Recovery: re-run `sweep.py dispatch` for this book (it will return
+  the same prescribed kwargs) and re-invoke `delegate_task` once with
+  the fresh JSON. Move on to Step 4a/4b only after the retry returns.
+  Do **not** mark the first attempt — its `pipeline.json` state is
+  consistent and the retry resumes from it cleanly.
+
+If iteration counts are at or near the prescribed cap (≥ 80 for
+Step 3a, ≥ 150 for Step 3b), the book genuinely needed more budget;
+proceed straight to Step 4a/4b.
 
 ### Step 4a — Without `--wiki-root` (read `pipeline.json`)
 
@@ -324,6 +284,7 @@ isolated.
 | Chain returns without `wiki.json` (Step 3b)   | Step 4b mark  | Mark `failed` with `failed_phase: wiki-chain-incomplete`; next sweep retries.             |
 | Subagent infrastructure failure / timeout     | Step 4 mark   | Mark `failed` with `error_message: "subagent invocation failed: <details>"`; continue.    |
 | Subagent hits iteration cap                   | Step 4 mark   | Mark `in_progress`; user reruns to resume.                                                |
+| Cap hit with `iterations_used` below prescribed cap | Step 4.0 | Default-cap trap — orchestrator omitted `max_iterations`. Re-run `sweep.py dispatch` and re-invoke `delegate_task` once before marking. |
 | User Ctrl-C during sweep                      | anywhere      | All in-flight subagents are cancelled. Per-book `pipeline.json` files are consistent on disk; next sweep resumes. |
 
 ## Notes
