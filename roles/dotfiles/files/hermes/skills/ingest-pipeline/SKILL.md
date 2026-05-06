@@ -93,14 +93,27 @@ dispatch the `pdf-to-mdbook` subagent. The fields you receive:
 - `phase_index` — pass to `record-phase` so the right phase entry is updated
 
 Invoke `delegate_task` with **exactly these parameters** (no others —
-do not add `acp_command`, `provider`, `model`, or other fields):
+do not add `acp_command`, `acp_args`, `role`, `provider`, `model`,
+`max_iterations`, `max_spawn_depth`, or `skills`):
 
 - `goal` — `"Convert <pdf> into an mdBook using the pdf-to-mdbook skill."`
 - `context` — Pass the absolute `pdf` path, `book_root`, `force` flag,
   and `vision` mode. The subagent has no conversation history.
 - `toolsets` — `["terminal", "file", "vision"]`
-- `skills` — `["pdf-to-mdbook"]` (preload, avoids an in-subagent skill_view)
-- `max_iterations` — `60`
+
+Notes:
+- The Hermes v0.12+ `delegate_task` schema does not accept `skills`,
+  `max_iterations`, or `max_spawn_depth`. They are not real per-call
+  kwargs — `max_iterations` is silently dropped (config-authoritative),
+  `max_spawn_depth` is config-only, and `skills` was never a parameter.
+  Iteration budget lives in `~/.hermes/config.yaml` as
+  `delegation.max_iterations` (the dotfiles role sets this to 150).
+- `role` is omitted (defaults to `leaf`) because `pdf-to-mdbook` does
+  not delegate further. If this skill is invoked from inside another
+  delegated agent (e.g. `ingest-pipeline-batch`'s per-book subagent),
+  the parent must have been dispatched with `role: "orchestrator"` and
+  `delegation.max_spawn_depth >= 2` for this nested call to land at
+  all — otherwise it returns "Delegation depth limit reached".
 
 When the subagent returns:
 

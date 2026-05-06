@@ -157,7 +157,13 @@ def upsert_book_entry(lib: dict, entry: dict) -> None:
 # These constants own the per-book delegate_task kwargs. SKILL.md no
 # longer carries inline templates — it instructs the orchestrator to
 # call `dispatch` and forward the JSON verbatim. If you change a goal
-# string, context body, iteration cap, or skills preload, do it here.
+# string, context body, or role, do it here.
+#
+# Iteration budget and spawn depth are NOT per-call kwargs in Hermes
+# v0.12+. They live in ~/.hermes/config.yaml as
+#   delegation.max_iterations: 150
+#   delegation.max_spawn_depth: 2
+# (See ingest-pipeline-batch SKILL.md "Configuration prerequisites".)
 
 STEP_3A_GOAL = "Drive {root} to a complete mdBook using the ingest-pipeline skill."
 
@@ -175,9 +181,10 @@ Stop on `done` or any `failed` record-phase.
 
 STEP_3A_FIXED = {
     "toolsets": ["terminal", "file", "vision"],
-    "skills": ["ingest-pipeline", "pdf-to-mdbook"],
-    "max_iterations": 80,
-    "max_spawn_depth": 2,
+    # Per-book agent runs ingest-pipeline, which delegates pdf-to-mdbook.
+    # role="orchestrator" is required for that nested delegation; the
+    # depth itself is bounded by delegation.max_spawn_depth in config.yaml.
+    "role": "orchestrator",
 }
 
 STEP_3B_GOAL = "Drive {root} through ingest-pipeline → wiki-ingest → wiki-lint."
@@ -230,9 +237,9 @@ Return a one-line summary of which phase finished last.
 
 STEP_3B_FIXED = {
     "toolsets": ["terminal", "file", "vision"],
-    "skills": ["ingest-pipeline", "pdf-to-mdbook", "wiki-ingest", "wiki-lint"],
-    "max_iterations": 150,
-    "max_spawn_depth": 2,
+    # Same orchestrator requirement as Step 3a — the per-book agent
+    # delegates pdf-to-mdbook during the ingest-pipeline phase.
+    "role": "orchestrator",
 }
 
 

@@ -54,6 +54,41 @@ directly — that is the wrong mode. The dispatch loop below is fixed.
   agents would race on those files. If the user passes `--parallel >1`
   alongside `--wiki-root`, refuse before calling `sweep.py`.
 
+## Configuration prerequisites
+
+Hermes' iteration budget and spawn depth are **global config**, not
+per-call kwargs. Before this skill can run end-to-end, `~/.hermes/config.yaml`
+must contain:
+
+```yaml
+delegation:
+  max_iterations: 150
+  max_spawn_depth: 2
+```
+
+Why these values:
+- `max_iterations: 150` — the wiki-chain path (Step 3b) regularly burns
+  80–120 iterations (ingest-pipeline ≈ 5, wiki-ingest ≈ 20–40 chapters,
+  wiki-lint ≈ 30–60 page audit). Hermes' built-in default of 50 caps
+  the per-book agent before `wiki-lint` even starts. The mdBook-only
+  path (Step 3a) needs only ~80 but the cap is global, so 150 covers both.
+- `max_spawn_depth: 2` — the per-book agent (depth 1) must delegate
+  `pdf-to-mdbook` (depth 2). The default of 1 makes children leaves and
+  blocks that nested delegation outright.
+
+If you see per-book agents capping at ~45 iterations, or `pdf-to-mdbook`
+delegations failing with "Delegation depth limit reached", the config
+is missing or stale. Apply via the dotfiles role
+(`roles/dotfiles/defaults/main/hermes.yml` → `hermes_config.delegation`)
+and re-run the playbook, or hand-edit `~/.hermes/config.yaml`.
+
+The `delegate_task` schema itself does **not** accept `max_iterations`,
+`max_spawn_depth`, or `skills` as kwargs (verified against
+`tools/delegate_tool.py:DELEGATE_TASK_SCHEMA`). Anything passed in
+those keys is silently dropped or rejected. The only per-call levers
+this skill uses are `goal`, `context`, `toolsets`, and
+`role: "orchestrator"` (set by `sweep.py dispatch`).
+
 ## Step 1 — Scan the library
 
 ```bash
@@ -112,31 +147,34 @@ Output is a JSON object whose keys are exactly the kwargs to forward:
   "goal": "...",
   "context": "...",
   "toolsets": ["terminal", "file", "vision"],
-  "skills": ["ingest-pipeline", "pdf-to-mdbook", "..."],
-  "max_iterations": 80,
-  "max_spawn_depth": 2
+  "role": "orchestrator"
 }
 ```
 
-| Path                | `max_iterations` | `max_spawn_depth` | `skills` extras           |
-|---------------------|------------------|-------------------|---------------------------|
-| Step 3a (no wiki)   | 80               | 2                 | —                         |
-| Step 3b (with wiki) | 150              | 2                 | `wiki-ingest`, `wiki-lint` |
+The two paths differ only in `goal` and `context`; `toolsets` and
+`role` are identical. The orchestrator role is required so the
+per-book agent retains `delegate_task` for the nested `pdf-to-mdbook`
+dispatch — it is **not** a license to redesign anything mid-flight.
 
-**Forbidden parameters** — do not pass `acp_command`, `provider`,
-`model`, or any key not present in the `dispatch` JSON. If you find
-yourself reasoning about delegation parameters (token budgets, spawn
-depth, retry policies), stop — the script owns them and the values
-it emits are correct. Earlier versions of this skill invited that
-reasoning, and every such step is a wasted iteration.
+**Forbidden parameters** — do not pass `acp_command`, `acp_args`,
+`provider`, `model`, `max_iterations`, `max_spawn_depth`, or `skills`.
+The first four are not used by this skill. The last three are
+**not real `delegate_task` kwargs** in Hermes v0.12+ — `max_iterations`
+is silently dropped (config-authoritative), `max_spawn_depth` is
+config-only, and `skills` was never a parameter. They live in
+`~/.hermes/config.yaml` (see Configuration prerequisites). If you find
+yourself reasoning about delegation parameters, stop — the script owns
+the per-call surface and config owns the rest.
 
-**Why `dispatch` instead of an inline template:** a prior incident
-saw the orchestrator skim past the inline template, build the
-`delegate_task` call from memory, and silently omit `max_iterations`
-and `max_spawn_depth`. The per-book subagent ran under Hermes'
-defaults (~50 iter / leaf mode), capped before reaching `wiki-lint`,
-and burned a book. Sourcing the kwargs from a script removes the
-transcription step entirely.
+**Why `dispatch` instead of an inline template:** a prior incident saw
+the orchestrator skim past the inline template, build the `delegate_task`
+call from memory, and silently include phantom kwargs. The per-book
+subagent ran under Hermes' defaults (~50 iter / leaf mode), capped
+before reaching `wiki-lint`, and burned a book. The deeper bug — the
+template documented kwargs that don't exist in the schema — was masked
+because Hermes ignores unknown keys. Sourcing the call from a script
+removes both transcription drift and the phantom-kwarg trap: the JSON
+matches the public schema exactly.
 
 For `--parallel N > 1`, call `dispatch` once per book and pass the
 list of payloads to a single `delegate_task` invocation (Hermes
@@ -165,21 +203,31 @@ return as authoritative.
 
 Before reading on-disk truth files, inspect the `delegate_task` return:
 
-- If `exit_reason == "max_iterations"` AND `iterations_used` is well
-  below the prescribed cap — concretely, `< 60` for Step 3a or `< 100`
-  for Step 3b — the orchestrator silently dispatched with Hermes'
-  built-in defaults (~50 iter, leaf mode) instead of the script-provided
-  values. The subagent's work is partial but not corrupt.
+- **Iteration cap below configured budget** — if `exit_reason ==
+  "max_iterations"` AND `iterations_used` is around 50 (well below the
+  expected `delegation.max_iterations: 150` from
+  Configuration prerequisites), the runtime is enforcing Hermes' built-in
+  default of 50, not the configured value. Either `~/.hermes/config.yaml`
+  is missing the `delegation` block or the running Hermes process has a
+  stale config snapshot.
 
-  Recovery: re-run `sweep.py dispatch` for this book (it will return
-  the same prescribed kwargs) and re-invoke `delegate_task` once with
-  the fresh JSON. Move on to Step 4a/4b only after the retry returns.
-  Do **not** mark the first attempt — its `pipeline.json` state is
-  consistent and the retry resumes from it cleanly.
+  Recovery: stop the sweep and surface the misconfiguration to the user.
+  Do not retry the book — additional retries will hit the same wall.
+  Suggested message: "per-book subagent capped at ~50 iterations; set
+  `delegation.max_iterations: 150` in `~/.hermes/config.yaml` (or apply
+  the dotfiles role) and rerun."
 
-If iteration counts are at or near the prescribed cap (≥ 80 for
-Step 3a, ≥ 150 for Step 3b), the book genuinely needed more budget;
-proceed straight to Step 4a/4b.
+- **Depth-limit error** — if the subagent's summary mentions
+  "Delegation depth limit reached" or `pipeline.json` reports
+  `failed_phase: pdf-to-mdbook` with an error citing depth, the
+  per-book agent could not delegate `pdf-to-mdbook`. Same root cause
+  bucket: surface the `delegation.max_spawn_depth: 2` requirement and
+  stop.
+
+- **Cap reached at the configured budget** — if `iterations_used` is at
+  or near 150, the book genuinely needed more than the budget allows;
+  treat it as a real cap-hit and proceed to Step 4a/4b (the third case
+  there marks `in_progress` so the next sweep resumes).
 
 ### Step 4a — Without `--wiki-root` (read `pipeline.json`)
 
@@ -284,7 +332,8 @@ isolated.
 | Chain returns without `wiki.json` (Step 3b)   | Step 4b mark  | Mark `failed` with `failed_phase: wiki-chain-incomplete`; next sweep retries.             |
 | Subagent infrastructure failure / timeout     | Step 4 mark   | Mark `failed` with `error_message: "subagent invocation failed: <details>"`; continue.    |
 | Subagent hits iteration cap                   | Step 4 mark   | Mark `in_progress`; user reruns to resume.                                                |
-| Cap hit with `iterations_used` below prescribed cap | Step 4.0 | Default-cap trap — orchestrator omitted `max_iterations`. Re-run `sweep.py dispatch` and re-invoke `delegate_task` once before marking. |
+| Cap hit at ~50 iterations (config not applied)| Step 4.0 | `delegation.max_iterations` missing from `~/.hermes/config.yaml`. Stop the sweep, surface the misconfiguration, do not retry. |
+| `pdf-to-mdbook` delegation rejected by depth | Step 4.0 | `delegation.max_spawn_depth` not set to ≥ 2. Stop the sweep, surface the misconfiguration. |
 | User Ctrl-C during sweep                      | anywhere      | All in-flight subagents are cancelled. Per-book `pipeline.json` files are consistent on disk; next sweep resumes. |
 
 ## Notes

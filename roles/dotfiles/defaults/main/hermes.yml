@@ -45,6 +45,14 @@ hermes_config:
     streaming: true
     show_reasoning: true
   custom_providers: "{{ hermes_custom_providers }}"
+  # Sized for ingest-pipeline-batch with --wiki-root: the per-book agent
+  # runs ingest-pipeline → wiki-ingest → wiki-lint and needs ~150 iter on
+  # populated wikis. max_spawn_depth=2 lets the per-book agent (depth 1)
+  # delegate pdf-to-mdbook (depth 2). See:
+  # roles/dotfiles/files/hermes/skills/ingest-pipeline-batch/SKILL.md
+  delegation:
+    max_iterations: 150
+    max_spawn_depth: 2
 
 # ── .env contents (secrets) ──────────────────────────────────────────────
 # Written to ~/.hermes/.env — Hermes reads this for API keys
