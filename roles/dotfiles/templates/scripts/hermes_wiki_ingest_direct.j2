@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+#
+# hermes_wiki_ingest_direct
+#
+# One-shot pipeline (no kanban):
+#   1. Parallel pdf-to-mdbook conversions  (xargs -P, one hermes session per PDF)
+#   2. Sequential wiki-ingest               (one hermes session in the wiki)
+#   3. Sequential wiki-lint                 (one hermes session in the wiki)
+#
+# Each phase is idempotent:
+#   - PDFs whose sibling <stem>-mdbook/book.toml already exists are skipped
+#     (override with --force).
+#   - wiki-ingest skips sources already represented in wiki/summaries/.
+#   - wiki-lint is naturally re-runnable.
+#
+# Usage:
+#   hermes_wiki_ingest_direct <wiki_root> [--jobs N] [--vision MODE] [--force]
+#
+# Defaults: --jobs 2 (matches ingest-pipeline-batch's recommendation; LLM
+# rate limits make $(nproc) usually too aggressive), --vision auto.
+#
+# PDFs are read from <wiki_root>/raw/ — that is the directory wiki-ingest
+# walks. Symlink an external library in if your PDFs live elsewhere.
+#
+# Examples:
+#   # 2-way parallel conversion, then sequential ingest + lint
+#   hermes_wiki_ingest_direct ~/wiki
+
+set -Eeuo pipefail
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \?//' >&2; exit 2; }
+
+[[ $# -ge 1 ]] || usage
+WIKI="$(realpath "$1")"; shift
+JOBS=2
+VISION="auto"
+FORCE=""
+
+while (($#)); do
+  case "$1" in
+    --jobs|-j) JOBS="$2"; shift 2 ;;
+    --vision)  VISION="$2"; shift 2 ;;
+    --force)   FORCE="--force"; shift ;;
+    -h|--help) usage ;;
+    *) printf 'unknown arg: %s\n' "$1" >&2; usage ;;
+  esac
+done
+
+LIBRARY="$WIKI/raw"
+[[ -d "$WIKI"    ]] || { echo "wiki not found: $WIKI (run wiki-bootstrap first)" >&2; exit 1; }
+[[ -d "$LIBRARY" ]] || { echo "raw/ not found in wiki: $LIBRARY" >&2; exit 1; }
+command -v hermes >/dev/null || { echo "hermes not on PATH" >&2; exit 1; }
+
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+LOG_DIR="${HERMES_INGEST_LOG_DIR:-$HOME/.hermes/logs/wiki-ingest-direct}/$RUN_ID"
+mkdir -p "$LOG_DIR"
+SUMMARY="$LOG_DIR/summary.log"
+
+say() { printf '[%s] %s\n' "$(date -u +%H:%M:%SZ)" "$*" | tee -a "$SUMMARY" >&2; }
+
+say "wiki=$WIKI"
+say "library=$LIBRARY"
+say "jobs=$JOBS vision=$VISION force=${FORCE:-no}"
+say "logs at $LOG_DIR"
+
+mapfile -d '' -t PDFS < <(find "$LIBRARY" -maxdepth 4 -type f -name '*.pdf' -not -path '*/.*' -print0)
+say "discovered ${#PDFS[@]} PDFs"
+
+WORK=()
+SKIPPED=0
+for pdf in "${PDFS[@]}"; do
+  marker="${pdf%.pdf}-mdbook/book.toml"
+  if [[ -z "$FORCE" && -f "$marker" ]]; then
+    ((SKIPPED++))
+    continue
+  fi
+  WORK+=("$pdf")
+done
+say "to convert: ${#WORK[@]}  (skipped already-complete: $SKIPPED)"
+
+CONVERT_RC=0
+if ((${#WORK[@]})); then
+  say "phase 1/3: parallel ingest-pipeline (jobs=$JOBS)"
+  set +e
+  # shellcheck disable=SC2016  # single-quoted child script is intentional;
+  # positional args ($1..$4) are filled by the trailing arguments at xargs
+  # child-invocation time, not by the parent shell.
+  printf '%s\0' "${WORK[@]}" \
+    | xargs -0 -n1 -P"$JOBS" -I{} bash -c '
+        pdf="$1"; vision="$2"; force="$3"; logdir="$4"
+        base="$(basename "${pdf%.pdf}")"
+        log="$logdir/convert-$base.log"
+        printf "[%s] start: %s\n" "$(date -u +%H:%M:%SZ)" "$base" >&2
+        if hermes -s ingest-pipeline -q "Process this PDF with the ingest-pipeline skill: $pdf $force --vision $vision" >"$log" 2>&1; then
+          printf "[%s] done:  %s\n" "$(date -u +%H:%M:%SZ)" "$base" >&2
+        else
+          printf "[%s] FAIL: %s — %s\n" "$(date -u +%H:%M:%SZ)" "$base" "$log" >&2
+          exit 1
+        fi
+      ' _ {} "$VISION" "$FORCE" "$LOG_DIR"
+  CONVERT_RC=$?
+  set -e
+  if ((CONVERT_RC != 0)); then
+    say "WARN: at least one conversion failed (xargs rc=$CONVERT_RC). Continuing with what succeeded — wiki-ingest will skip missing books."
+  fi
+else
+  say "phase 1/3: skipped (nothing to convert)"
+fi
+
+say "phase 2/3: wiki-ingest"
+if ( cd "$WIKI" && hermes -s wiki-ingest -q "Ingest sources from $WIKI/raw/ into this wiki. Use the triage script first; prefer mdBook outputs over raw PDFs; skip sources already represented in wiki/summaries/." ) >"$LOG_DIR/wiki-ingest.log" 2>&1; then
+  say "wiki-ingest ok ($LOG_DIR/wiki-ingest.log)"
+else
+  say "wiki-ingest FAILED ($LOG_DIR/wiki-ingest.log)"; exit 1
+fi
+
+say "phase 3/3: wiki-lint"
+if ( cd "$WIKI" && hermes -s wiki-lint -q "Audit this wiki: orphans, stale pages, dead links, contradictions, low-confidence pages. Auto-fix what is safe; report the rest." ) >"$LOG_DIR/wiki-lint.log" 2>&1; then
+  say "wiki-lint ok ($LOG_DIR/wiki-lint.log)"
+else
+  say "wiki-lint FAILED ($LOG_DIR/wiki-lint.log)"; exit 1
+fi
+
+say "complete. summary: $SUMMARY"

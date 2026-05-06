@@ -238,6 +238,337 @@ navi_cheats:
         - "ollama"
         - "run"
         - "<ollama_models>"
+  # ---------------------------------------------------------------------------
+  # Hermes Agent — long-running work via cron + kanban, plus the wiki pipeline.
+  #
+  # Mental model:
+  #   - Cron     = scheduled fresh-session jobs (skill optional, agent or no-agent).
+  #   - Kanban   = durable SQLite task board; a profile worker picks up each task.
+  #   - Skills   = the unit of behaviour either launcher loads.
+  #
+  # Wiki pipeline cheats come in pairs:
+  #   - *_direct       = launch hermes here-and-now (no kanban) on a chosen dir.
+  #   - *_via_kanban   = drop a durable task on the board; dispatcher runs it.
+  #
+  # Variables (defined in navi_cmd_variables.hermes):
+  #   <wiki_dir>       — pick a wiki root under $CWD (AGENTS.md or wiki/ subdir).
+  #   <library_dir>    — pick a $CWD subdir that contains PDFs.
+  #   <pdf_file>       — pick a PDF under $CWD.
+  #   <hermes_skill>   — pick an installed hermes skill.
+  #   <hermes_kanban_task_id> / <hermes_cron_job_id> — pick from live state.
+  # ---------------------------------------------------------------------------
+  hermes:
+    # ---- Gateway (hosts the cron scheduler and kanban dispatcher) ----------
+    gateway_start:
+      description: "Hermes | Start gateway in foreground (hosts cron + kanban dispatchers)"
+      cmd: "hermes"
+      args:
+        - "gateway"
+        - "start"
+    gateway_install_user:
+      description: "Hermes | Install gateway as user systemd service"
+      cmd: "hermes"
+      args:
+        - "gateway"
+        - "install"
+    gateway_install_system:
+      description: "Hermes | Install gateway as system-wide service (Linux servers)"
+      cmd: "sudo hermes"
+      args:
+        - "gateway"
+        - "install"
+        - "--system"
+
+    # ---- Interactive launch scoped to a directory --------------------------
+    chat_in_dir:
+      description: "Hermes | Open interactive chat after cd-ing into a chosen directory"
+      cmd: "cd <target_dir> && hermes"
+      args: []
+    chat_in_dir_with_skill:
+      description: "Hermes | Open interactive chat in a directory with a skill preloaded"
+      cmd: "cd <target_dir> && hermes -s <hermes_skill>"
+      args: []
+    chat_oneshot_with_skill:
+      description: "Hermes | One-shot non-interactive query with a skill preloaded"
+      cmd: "cd <target_dir> && hermes -s <hermes_skill> -q \"<hermes_prompt>\""
+      args: []
+
+    # ---- Cron: scheduled tasks --------------------------------------------
+    cron_list:
+      description: "Hermes Cron | List scheduled jobs"
+      cmd: "hermes"
+      args:
+        - "cron"
+        - "list"
+    cron_status:
+      description: "Hermes Cron | Show scheduler status"
+      cmd: "hermes"
+      args:
+        - "cron"
+        - "status"
+    cron_create_with_skill:
+      description: "Hermes Cron | Create recurring job with a skill (e.g. 'every 1h', '0 9 * * *')"
+      cmd: "hermes cron create \"<cron_schedule>\" \"<hermes_prompt>\" --skill <hermes_skill> --name \"<cron_job_name>\""
+      args: []
+    cron_create_in_workdir:
+      description: "Hermes Cron | Create job pinned to a workdir (loads AGENTS.md, runs tools there)"
+      cmd: "hermes cron create \"<cron_schedule>\" \"<hermes_prompt>\" --workdir <target_dir> --skill <hermes_skill> --name \"<cron_job_name>\""
+      args: []
+    cron_create_no_agent:
+      description: "Hermes Cron | Create script-only watchdog job (no LLM, stdout delivered verbatim)"
+      cmd: "hermes cron create \"<cron_schedule>\" --no-agent --script <cron_script> --deliver <cron_deliver_target> --name \"<cron_job_name>\""
+      args: []
+    cron_pause:
+      description: "Hermes Cron | Pause a scheduled job"
+      cmd: "hermes"
+      args:
+        - "cron"
+        - "pause"
+        - "<hermes_cron_job_id>"
+    cron_resume:
+      description: "Hermes Cron | Resume a paused job"
+      cmd: "hermes"
+      args:
+        - "cron"
+        - "resume"
+        - "<hermes_cron_job_id>"
+    cron_run_now:
+      description: "Hermes Cron | Trigger a job on the next scheduler tick"
+      cmd: "hermes"
+      args:
+        - "cron"
+        - "run"
+        - "<hermes_cron_job_id>"
+    cron_remove:
+      description: "Hermes Cron | Delete a scheduled job"
+      cmd: "hermes"
+      args:
+        - "cron"
+        - "remove"
+        - "<hermes_cron_job_id>"
+    cron_edit_schedule:
+      description: "Hermes Cron | Change a job's schedule"
+      cmd: "hermes cron edit <hermes_cron_job_id> --schedule \"<cron_schedule>\""
+      args: []
+
+    # ---- Kanban: durable task board ---------------------------------------
+    kanban_init:
+      description: "Hermes Kanban | Initialise board (~/.hermes/kanban.db)"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "init"
+    kanban_list:
+      description: "Hermes Kanban | List tasks on the active board"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "list"
+    kanban_list_mine:
+      description: "Hermes Kanban | List only the current profile's tasks"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "list"
+        - "--mine"
+    kanban_stats:
+      description: "Hermes Kanban | Per-status / per-assignee task counts"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "stats"
+    kanban_watch:
+      description: "Hermes Kanban | Stream board events live"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "watch"
+    kanban_show:
+      description: "Hermes Kanban | Show a task's full detail (body, comments, runs)"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "show"
+        - "<hermes_kanban_task_id>"
+    kanban_runs:
+      description: "Hermes Kanban | Show attempt history for a task"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "runs"
+        - "<hermes_kanban_task_id>"
+    kanban_log:
+      description: "Hermes Kanban | Tail worker log for a task"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "log"
+        - "<hermes_kanban_task_id>"
+    kanban_assignees:
+      description: "Hermes Kanban | List profiles + per-assignee task counts"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "assignees"
+    kanban_dispatch_now:
+      description: "Hermes Kanban | Nudge dispatcher (skip the 60s tick)"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "dispatch"
+    kanban_create_simple:
+      description: "Hermes Kanban | Create a task assigned to a profile (scratch workspace)"
+      cmd: "hermes kanban create \"<kanban_task_title>\" --assignee <hermes_assignee> --skill <hermes_skill>"
+      args: []
+    kanban_create_in_dir:
+      description: "Hermes Kanban | Create a task whose workspace is an existing directory"
+      cmd: "hermes kanban create \"<kanban_task_title>\" --assignee <hermes_assignee> --skill <hermes_skill> --workspace dir:<target_dir>"
+      args: []
+    kanban_create_idempotent:
+      description: "Hermes Kanban | Create dedup-keyed task (safe for retried automation/webhooks)"
+      cmd: "hermes kanban create \"<kanban_task_title>\" --assignee <hermes_assignee> --skill <hermes_skill> --idempotency-key \"<kanban_idempotency_key>\""
+      args: []
+    kanban_assign:
+      description: "Hermes Kanban | (Re)assign a task to a profile"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "assign"
+        - "<hermes_kanban_task_id>"
+        - "<hermes_assignee>"
+    kanban_link:
+      description: "Hermes Kanban | Add parent → child dependency (child promotes when parent done)"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "link"
+        - "<hermes_kanban_parent_id>"
+        - "<hermes_kanban_child_id>"
+    kanban_unlink:
+      description: "Hermes Kanban | Remove a parent → child dependency"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "unlink"
+        - "<hermes_kanban_parent_id>"
+        - "<hermes_kanban_child_id>"
+    kanban_block:
+      description: "Hermes Kanban | Block a task with a reason (escalate to human)"
+      cmd: "hermes kanban block <hermes_kanban_task_id> \"<kanban_block_reason>\""
+      args: []
+    kanban_unblock:
+      description: "Hermes Kanban | Unblock a task (returns it to ready)"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "unblock"
+        - "<hermes_kanban_task_id>"
+    kanban_complete:
+      description: "Hermes Kanban | Manually complete a task with a result line"
+      cmd: "hermes kanban complete <hermes_kanban_task_id> --result \"<kanban_result>\""
+      args: []
+    kanban_archive:
+      description: "Hermes Kanban | Archive a task (hidden from default board)"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "archive"
+        - "<hermes_kanban_task_id>"
+    kanban_comment:
+      description: "Hermes Kanban | Append a comment to a task thread"
+      cmd: "hermes kanban comment <hermes_kanban_task_id> \"<kanban_comment>\""
+      args: []
+    kanban_tail:
+      description: "Hermes Kanban | Follow a single task's event stream"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "tail"
+        - "<hermes_kanban_task_id>"
+    kanban_context:
+      description: "Hermes Kanban | Show the worker_context a worker would see"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "context"
+        - "<hermes_kanban_task_id>"
+    kanban_gc:
+      description: "Hermes Kanban | Garbage-collect old workspaces, events, logs"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "gc"
+
+    # ---- Kanban: multi-board management -----------------------------------
+    kanban_boards_list:
+      description: "Hermes Kanban | List boards on disk"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "boards"
+        - "list"
+    kanban_boards_switch:
+      description: "Hermes Kanban | Switch the active board"
+      cmd: "hermes"
+      args:
+        - "kanban"
+        - "boards"
+        - "switch"
+        - "<hermes_board>"
+    kanban_boards_create:
+      description: "Hermes Kanban | Create a new board (per-project isolation)"
+      cmd: "hermes kanban boards create <kanban_board_slug> --name \"<kanban_board_name>\" --switch"
+      args: []
+
+    # ---- Wiki pipeline: launch DIRECT (no kanban) -------------------------
+    wiki_ingest_library_direct:
+      description: "Hermes Wiki | Ingest a directory of PDFs straight into a wiki (no kanban, current shell)"
+      cmd: "cd <library_dir> && hermes -s ingest-pipeline-batch -q \"Sweep this directory and ingest each PDF, then ingest the resulting mdBooks into the wiki at <wiki_dir> and lint after each book.\""
+      args: []
+    wiki_ingest_pdf_direct:
+      description: "Hermes Wiki | Convert a single PDF to mdBook (no kanban, current shell)"
+      cmd: "hermes -s ingest-pipeline -q \"Run the ingest-pipeline on <pdf_file>; produce a buildable mdBook.\""
+      args: []
+    wiki_chat:
+      description: "Hermes Wiki | Open interactive chat scoped to a wiki (loads wiki skill)"
+      cmd: "cd <wiki_dir> && hermes -s wiki"
+      args: []
+    wiki_lint_direct:
+      description: "Hermes Wiki | Run wiki-lint on a wiki (no kanban, current shell)"
+      cmd: "cd <wiki_dir> && hermes -s wiki-lint -q \"Audit this wiki for orphans, stale pages, dead links, and contradictions; fix what's safe and report the rest.\""
+      args: []
+    wiki_query_direct:
+      description: "Hermes Wiki | Ask a question over a wiki with citations (no kanban)"
+      cmd: "cd <wiki_dir> && hermes -s wiki-query -q \"<wiki_question>\""
+      args: []
+
+    # ---- Wiki pipeline: launch VIA KANBAN (durable, retryable, audit trail)
+    wiki_ingest_library_kanban:
+      description: "Hermes Wiki | Drop a kanban task to ingest a PDF directory into a wiki"
+      cmd: "hermes kanban create \"ingest library <library_dir> into wiki <wiki_dir>\" --assignee ingester --skill ingest-pipeline-batch --workspace dir:<library_dir> --idempotency-key \"ingest-lib-$(date -u +%Y-%m-%d)\""
+      args: []
+    wiki_ingest_pdf_kanban:
+      description: "Hermes Wiki | Drop a kanban task to ingest a single PDF (idempotency keyed by sha1)"
+      cmd: "hermes kanban create \"ingest $(basename '<pdf_file>')\" --assignee ingester --skill ingest-pipeline --workspace dir:<wiki_dir> --idempotency-key \"ingest-pdf-$(sha1sum '<pdf_file>' | cut -d' ' -f1)\""
+      args: []
+    wiki_lint_kanban:
+      description: "Hermes Wiki | Drop a kanban task to lint a wiki (workspace pinned to wiki dir)"
+      cmd: "hermes kanban create \"lint wiki <wiki_dir>\" --assignee curator --skill wiki-lint --workspace dir:<wiki_dir> --idempotency-key \"lint-$(date -u +%Y-%m-%d-%H)\""
+      args: []
+    wiki_bootstrap_kanban:
+      description: "Hermes Wiki | Drop a kanban task to bootstrap a fresh wiki at a directory"
+      cmd: "hermes kanban create \"bootstrap wiki at <wiki_dir>\" --assignee curator --skill wiki-bootstrap --workspace dir:<wiki_dir>"
+      args: []
+
+    # ---- Wiki pipeline: scheduled (cron + workdir) ------------------------
+    wiki_cron_lint:
+      description: "Hermes Wiki | Schedule wiki-lint to run periodically against a wiki"
+      cmd: "hermes cron create \"<cron_schedule>\" \"Run wiki-lint on this wiki; auto-fix what's safe.\" --workdir <wiki_dir> --skill wiki-lint --name \"wiki-lint-<wiki_dir>\""
+      args: []
+    wiki_cron_ingest_library:
+      description: "Hermes Wiki | Schedule periodic ingest sweep of a PDF library into a wiki"
+      cmd: "hermes cron create \"<cron_schedule>\" \"Sweep this library and ingest each PDF; then ingest into the wiki at <wiki_dir> and lint.\" --workdir <library_dir> --skill ingest-pipeline-batch --name \"wiki-ingest-<wiki_dir>\""
+      args: []
 navi_cmd_variables:
   files:
     cwd_files:
@@ -264,6 +595,55 @@ navi_cmd_variables:
     project_all:
       description: "Get Project Files"
       cmd: "echo \"<cwd_all>\" | xargs"
+  # ---------------------------------------------------------------------------
+  # Hermes pickers — back the <placeholder> variables in the hermes cheats
+  # with live state where possible, so you fzf-pick instead of typing ids.
+  # All commands degrade gracefully: if hermes/jq isn't installed the picker
+  # will be empty and navi just prompts for free-text input.
+  # ---------------------------------------------------------------------------
+  hermes:
+    target_dir:
+      description: "Pick a directory under $PWD (3 levels deep)"
+      cmd: "find . -maxdepth 3 -type d -not -path '*/.*' 2>/dev/null"
+    library_dir:
+      description: "Pick a $PWD subdirectory that contains at least one PDF"
+      cmd: "find . -maxdepth 4 -type f -name '*.pdf' -not -path '*/.*' -printf '%h\\n' 2>/dev/null | sort -u"
+    wiki_dir:
+      description: "Pick a wiki root under $PWD (has AGENTS.md or wiki/ subdir)"
+      cmd: "{ find . -maxdepth 4 -name AGENTS.md -not -path '*/.*' -printf '%h\\n' 2>/dev/null; find . -maxdepth 4 -type d -name wiki -not -path '*/.*' -printf '%h\\n' 2>/dev/null; } | sort -u"
+    pdf_file:
+      description: "Pick a PDF file under $PWD"
+      cmd: "find . -type f -name '*.pdf' -not -path '*/.*' 2>/dev/null"
+    hermes_skill:
+      description: "Pick an installed Hermes skill"
+      cmd: "hermes skills list 2>/dev/null | awk 'NR>1 && NF {print $1}'"
+    hermes_assignee:
+      description: "Pick a Hermes profile (kanban assignee)"
+      cmd: "hermes kanban assignees --json 2>/dev/null | jq -r '.[].name' 2>/dev/null"
+    hermes_kanban_task_id:
+      description: "Pick a Hermes kanban task id"
+      cmd: "hermes kanban list --json 2>/dev/null | jq -r '.[] | \"\\(.id)\\t\\(.status)\\t\\(.assignee // \"-\")\\t\\(.title)\"' 2>/dev/null --- --column 1 --delimiter '\\t'"
+    hermes_kanban_parent_id:
+      description: "Pick the parent kanban task id"
+      cmd: "hermes kanban list --json 2>/dev/null | jq -r '.[] | \"\\(.id)\\t\\(.title)\"' 2>/dev/null --- --column 1 --delimiter '\\t'"
+    hermes_kanban_child_id:
+      description: "Pick the child kanban task id"
+      cmd: "hermes kanban list --json 2>/dev/null | jq -r '.[] | \"\\(.id)\\t\\(.title)\"' 2>/dev/null --- --column 1 --delimiter '\\t'"
+    hermes_cron_job_id:
+      description: "Pick a Hermes cron job id"
+      cmd: "hermes cron list --json 2>/dev/null | jq -r '.[] | \"\\(.id)\\t\\(.name // .schedule)\\t\\(.prompt // \"\" | .[0:60])\"' 2>/dev/null --- --column 1 --delimiter '\\t'"
+    hermes_board:
+      description: "Pick a Hermes kanban board slug"
+      cmd: "hermes kanban boards list --json 2>/dev/null | jq -r '.[].slug' 2>/dev/null"
+    cron_schedule:
+      description: "Common cron schedules (or type your own)"
+      cmd: "printf '%s\\n' 'every 30m' 'every 1h' 'every 6h' 'every 1d' '0 9 * * *' '0 */6 * * *' '0 9 * * 1-5' '30 8 1 * *' '30m' '2h' '1d'"
+    cron_deliver_target:
+      description: "Cron delivery target (origin/local/telegram/discord/...)"
+      cmd: "printf '%s\\n' origin local telegram discord slack signal matrix mattermost email sms"
+    cron_script:
+      description: "Pick a script under ~/.hermes/scripts/"
+      cmd: "ls ~/.hermes/scripts/ 2>/dev/null"
 
 # # -----------------------------------------------------------------------------
 # # Navi Examples

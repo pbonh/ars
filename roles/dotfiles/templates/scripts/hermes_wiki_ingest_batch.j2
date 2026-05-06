@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+#
+# hermes_wiki_ingest_batch
+#
+# One-shot pipeline that delegates parallel pdf-to-mdbook to the existing
+# `ingest-pipeline-batch` skill (its own state machine handles per-book
+# resumability via library.json/pipeline.json), then runs wiki-ingest and
+# wiki-lint sequentially.
+#
+# Why not pass --wiki-root to the batch skill? Because the skill enforces
+# --parallel 1 when --wiki-root is set (wiki writes serialize on
+# index.md/log.md/dashboard.md/analytics.md). For "parallel convert, then
+# sequential ingest+lint" we want the parallel path the skill exposes when
+# --wiki-root is omitted — and we drive ingest+lint ourselves at the end.
+#
+# Idempotency:
+#   - The batch skill's library.json skips books with status:complete.
+#   - wiki-ingest/wiki-lint are idempotent in their own right.
+#   - Re-running the script is safe; pass --force to reprocess everything.
+#
+# Usage:
+#   hermes_wiki_ingest_batch <wiki_root> [--parallel N] [--vision MODE] [--force]
+#
+# Defaults: --parallel 2 (skill recommends 1–3; vision burns tokens fast).
+#
+# Examples:
+#   # 3-way parallel conversion via the orchestrator skill, then ingest+lint
+#   hermes_wiki_ingest_batch ~/wiki --parallel 3
+
+set -Eeuo pipefail
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \?//' >&2; exit 2; }
+
+[[ $# -ge 1 ]] || usage
+WIKI="$(realpath "$1")"; shift
+PARALLEL=2
+VISION="auto"
+FORCE=""
+
+while (($#)); do
+  case "$1" in
+    --parallel|-P) PARALLEL="$2"; shift 2 ;;
+    --vision)      VISION="$2";   shift 2 ;;
+    --force)       FORCE="--force"; shift ;;
+    -h|--help)     usage ;;
+    *) printf 'unknown arg: %s\n' "$1" >&2; usage ;;
+  esac
+done
+
+LIBRARY="$WIKI/raw"
+[[ -d "$WIKI"    ]] || { echo "wiki not found: $WIKI" >&2; exit 1; }
+[[ -d "$LIBRARY" ]] || { echo "raw/ not found in wiki: $LIBRARY" >&2; exit 1; }
+command -v hermes >/dev/null || { echo "hermes not on PATH" >&2; exit 1; }
+
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+LOG_DIR="${HERMES_INGEST_LOG_DIR:-$HOME/.hermes/logs/wiki-ingest-batch}/$RUN_ID"
+mkdir -p "$LOG_DIR"
+SUMMARY="$LOG_DIR/summary.log"
+say() { printf '[%s] %s\n' "$(date -u +%H:%M:%SZ)" "$*" | tee -a "$SUMMARY" >&2; }
+
+say "wiki=$WIKI library=$LIBRARY"
+say "parallel=$PARALLEL vision=$VISION force=${FORCE:-no}"
+
+say "phase 1/3: ingest-pipeline-batch (parallel=$PARALLEL, no --wiki-root)"
+if hermes -s ingest-pipeline-batch -q "Sweep the library at $LIBRARY using ingest-pipeline-batch. Run with --parallel $PARALLEL --vision $VISION ${FORCE}. Do not pass --wiki-root — wiki ingestion happens in a separate phase. Stop after each book reaches mdbook build success." \
+    >"$LOG_DIR/batch.log" 2>&1; then
+  say "batch ok ($LOG_DIR/batch.log)"
+else
+  say "batch FAILED ($LOG_DIR/batch.log) — wiki-ingest will only see books that completed."
+fi
+
+say "phase 2/3: wiki-ingest"
+if ( cd "$WIKI" && hermes -s wiki-ingest -q "Ingest sources from $WIKI/raw/. Prefer mdBook outputs over raw PDFs; skip sources already represented in wiki/summaries/." ) >"$LOG_DIR/wiki-ingest.log" 2>&1; then
+  say "wiki-ingest ok ($LOG_DIR/wiki-ingest.log)"
+else
+  say "wiki-ingest FAILED ($LOG_DIR/wiki-ingest.log)"; exit 1
+fi
+
+say "phase 3/3: wiki-lint"
+if ( cd "$WIKI" && hermes -s wiki-lint -q "Audit this wiki: orphans, stale pages, dead links, contradictions, low-confidence pages. Auto-fix what is safe; report the rest." ) >"$LOG_DIR/wiki-lint.log" 2>&1; then
+  say "wiki-lint ok ($LOG_DIR/wiki-lint.log)"
+else
+  say "wiki-lint FAILED ($LOG_DIR/wiki-lint.log)"; exit 1
+fi
+
+say "complete. summary: $SUMMARY"

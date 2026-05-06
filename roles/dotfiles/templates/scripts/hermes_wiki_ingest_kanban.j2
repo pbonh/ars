@@ -1,0 +1,167 @@
+#!/usr/bin/env bash
+#
+# hermes_wiki_ingest_kanban
+#
+# One-shot pipeline driven by the kanban board (durable, retryable, board-visible):
+#   1. Fan-out — one ingest-pipeline task per PDF (siblings, run in parallel
+#      by the dispatcher).
+#   2. wiki-ingest task with --parent for every PDF task. Auto-promotes when
+#      every PDF parent is `done`.
+#   3. wiki-lint task with --parent <wiki-ingest task>. Auto-promotes when
+#      ingest is done.
+#
+# Idempotency:
+#   - Per-PDF tasks use --idempotency-key "ingest-pdf-<sha1(pdf)>". Re-running
+#     this script returns the existing task id for unchanged PDFs (no
+#     duplicates). Modify a PDF and its sha1 changes, so a fresh task is queued.
+#   - wiki-ingest and wiki-lint use a per-run key by default so each script
+#     invocation actually re-runs them; pass --stable-keys to dedupe those too
+#     (one ingest+lint per wiki path, ever — useful for CI/cron contexts).
+#
+# Usage:
+#   hermes_wiki_ingest_kanban <wiki_root>
+#       [--ingester PROFILE]   # default: ingester
+#       [--curator  PROFILE]   # default: curator
+#       [--vision   MODE]      # default: auto
+#       [--force]              # bypass shell idempotency check, queue every PDF
+#       [--stable-keys]        # idempotency keys also stable for ingest/lint
+#       [--wait]               # block until the wiki-lint task reaches a terminal status
+#
+# Examples:
+#   # Queue and detach (default — follow with `hermes kanban watch`)
+#   hermes_wiki_ingest_kanban ~/wiki
+#
+#   # Queue and block until wiki-lint reaches a terminal status
+#   hermes_wiki_ingest_kanban ~/wiki --wait
+#
+#   # Idempotent ingest+lint keys too — safe to invoke from cron
+#   hermes_wiki_ingest_kanban ~/wiki --stable-keys
+#
+# Requires: hermes gateway running (hosts the dispatcher). Without it the
+# tasks queue but nothing claims them. Script warns and continues.
+
+set -Eeuo pipefail
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \?//' >&2; exit 2; }
+
+[[ $# -ge 1 ]] || usage
+WIKI="$(realpath "$1")"; shift
+INGESTER="ingester"
+CURATOR="curator"
+VISION="auto"
+FORCE=""
+STABLE_KEYS=0
+WAIT=0
+
+while (($#)); do
+  case "$1" in
+    --ingester)    INGESTER="$2"; shift 2 ;;
+    --curator)     CURATOR="$2";  shift 2 ;;
+    --vision)      VISION="$2";   shift 2 ;;
+    --force)       FORCE=1;       shift ;;
+    --stable-keys) STABLE_KEYS=1; shift ;;
+    --wait)        WAIT=1;        shift ;;
+    -h|--help)     usage ;;
+    *) printf 'unknown arg: %s\n' "$1" >&2; usage ;;
+  esac
+done
+
+LIBRARY="$WIKI/raw"
+[[ -d "$WIKI"    ]] || { echo "wiki not found: $WIKI" >&2; exit 1; }
+[[ -d "$LIBRARY" ]] || { echo "raw/ not found in wiki: $LIBRARY" >&2; exit 1; }
+command -v hermes >/dev/null || { echo "hermes not on PATH" >&2; exit 1; }
+
+# Soft-warn if the gateway isn't running. `kanban dispatch --dry-run` is the
+# cheapest probe — it succeeds against a live gateway and errors otherwise.
+if ! hermes kanban dispatch --dry-run >/dev/null 2>&1; then
+  echo "WARN: gateway dispatcher does not look reachable. Tasks will queue but won't run until 'hermes gateway start' is up." >&2
+fi
+
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+LOG_DIR="${HERMES_INGEST_LOG_DIR:-$HOME/.hermes/logs/wiki-ingest-kanban}/$RUN_ID"
+mkdir -p "$LOG_DIR"
+SUMMARY="$LOG_DIR/summary.log"
+say() { printf '[%s] %s\n' "$(date -u +%H:%M:%SZ)" "$*" | tee -a "$SUMMARY" >&2; }
+
+# Stable hash of an absolute path, suitable as the tail of an idempotency key.
+WIKI_SHA="$(printf '%s' "$WIKI" | sha1sum | cut -c1-12)"
+if ((STABLE_KEYS)); then
+  INGEST_KEY="wiki-ingest-$WIKI_SHA"
+  LINT_KEY="wiki-lint-$WIKI_SHA"
+else
+  INGEST_KEY="wiki-ingest-$WIKI_SHA-$RUN_ID"
+  LINT_KEY="wiki-lint-$WIKI_SHA-$RUN_ID"
+fi
+
+say "wiki=$WIKI library=$LIBRARY"
+say "ingester=$INGESTER curator=$CURATOR vision=$VISION"
+say "stable_keys=$STABLE_KEYS wait=$WAIT"
+
+# ----- Phase 1: fan-out one task per PDF ------------------------------------
+mapfile -d '' -t PDFS < <(find "$LIBRARY" -maxdepth 4 -type f -name '*.pdf' -not -path '*/.*' -print0)
+say "discovered ${#PDFS[@]} PDFs"
+
+PDF_IDS=()
+for pdf in "${PDFS[@]}"; do
+  base="$(basename "${pdf%.pdf}")"
+  marker="${pdf%.pdf}-mdbook/book.toml"
+  if [[ -z "$FORCE" && -f "$marker" ]]; then
+    say "skip (already converted): $base"
+    continue
+  fi
+  pdf_sha="$(sha1sum "$pdf" | cut -c1-16)"
+  id="$(hermes kanban create "convert $base to mdBook" \
+          --assignee "$INGESTER" \
+          --skill ingest-pipeline \
+          --workspace "dir:$(dirname "$pdf")" \
+          --idempotency-key "ingest-pdf-$pdf_sha" \
+          --body "Run the ingest-pipeline skill on $pdf with --vision $VISION." \
+          --json | {{ nix_bin }}/jq -r .id)"
+  PDF_IDS+=("$id")
+  say "queued $base → $id"
+done
+say "queued ${#PDF_IDS[@]} PDF tasks"
+
+# ----- Phase 2: wiki-ingest waits on every PDF task -------------------------
+INGEST_PARENTS=()
+for id in "${PDF_IDS[@]}"; do INGEST_PARENTS+=(--parent "$id"); done
+
+INGEST_ID="$(hermes kanban create "wiki-ingest into $WIKI" \
+              --assignee "$CURATOR" \
+              --skill wiki-ingest \
+              --workspace "dir:$WIKI" \
+              --idempotency-key "$INGEST_KEY" \
+              --body "Ingest sources from $WIKI/raw/. Prefer mdBook outputs; skip sources already represented in wiki/summaries/." \
+              "${INGEST_PARENTS[@]}" \
+              --json | {{ nix_bin }}/jq -r .id)"
+say "queued wiki-ingest → $INGEST_ID  (waits on ${#PDF_IDS[@]} parents)"
+
+# ----- Phase 3: wiki-lint waits on wiki-ingest ------------------------------
+LINT_ID="$(hermes kanban create "wiki-lint $WIKI" \
+            --assignee "$CURATOR" \
+            --skill wiki-lint \
+            --workspace "dir:$WIKI" \
+            --idempotency-key "$LINT_KEY" \
+            --parent "$INGEST_ID" \
+            --body "Audit the wiki: orphans, stale pages, dead links, contradictions. Auto-fix what is safe; report the rest." \
+            --json | {{ nix_bin }}/jq -r .id)"
+say "queued wiki-lint → $LINT_ID"
+
+# Nudge the dispatcher so we don't sit on the 60s tick.
+hermes kanban dispatch >/dev/null 2>&1 || true
+
+if ((!WAIT)); then
+  say "queued. follow with:  hermes kanban watch    or    hermes kanban tail $LINT_ID"
+  exit 0
+fi
+
+say "waiting for $LINT_ID (poll every 10s) — Ctrl-C to detach (tasks keep running)"
+while :; do
+  status="$(hermes kanban show "$LINT_ID" --json 2>/dev/null | {{ nix_bin }}/jq -r .status 2>/dev/null || echo unknown)"
+  say "lint status: $status"
+  case "$status" in
+    done|archived|blocked|gave_up|crashed|timed_out) break ;;
+  esac
+  sleep 10
+done
+say "terminal status: $status. summary at $SUMMARY"
