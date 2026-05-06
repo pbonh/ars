@@ -127,7 +127,11 @@ def strip_repeated_lines(pages_text: list[str], frac: float = 0.5) -> list[str]:
             seen.add(fp)
             candidates[fp] += 1
 
-    threshold = frac * page_count
+    # Require count ≥ 2 always: a "running header" must, by definition,
+    # actually repeat. The `frac` knob only kicks in once the chapter
+    # has enough pages for it to be meaningful (otherwise threshold=1
+    # would strip every unique body line on a tiny chapter).
+    threshold = max(2, frac * page_count)
     repeated_fps = {fp for fp, count in candidates.items() if count >= threshold}
 
     cleaned_pages = []
@@ -217,7 +221,7 @@ def dedupe_outline(items: list[dict]) -> tuple[list[dict], list[dict]]:
         title_a = (it.get("title") or "").strip().lower()
         title_b = (prev.get("title") or "").strip().lower()
         close = title_a and title_b and _levenshtein(title_a, title_b) < 3
-        if same_page or close:
+        if close:
             # Pick the longer/cleaner title; merge slugs.
             survivor, loser = (prev, it) if len(prev["title"]) >= len(it["title"]) \
                 else (it, prev)
@@ -312,8 +316,20 @@ def _title_match_pattern(title: str) -> re.Pattern | None:
         return None
     sec_m = _SECTION_NUMBER_RE.match(title)
     if sec_m:
-        prefix = re.escape(sec_m.group(1))
-        return re.compile(rf"(?m)^[\s ]*{prefix}\b")
+        prefix = sec_m.group(1)
+        # Anchor with the first 1-2 words AFTER the section number so
+        # we don't cut at `(see 5.1)`, a citation, or a stray TOC echo
+        # in body text. Real headings have the title body on the same
+        # line as the number.
+        body_tokens = [t for t in re.split(r"\s+", title[len(prefix):].strip())
+                       if t][:2]
+        if body_tokens:
+            body_pat = r"\s+".join(re.escape(t) for t in body_tokens)
+            return re.compile(
+                rf"(?m)^\s*{re.escape(prefix)}\s+{body_pat}\b",
+                re.IGNORECASE,
+            )
+        return re.compile(rf"(?m)^\s*{re.escape(prefix)}\b")
     # Use the first 3-4 words; require ≥10 chars total to avoid
     # matching short stop-words like "the" alone.
     tokens = [t for t in re.split(r"\s+", title) if t]
@@ -327,7 +343,7 @@ def _title_match_pattern(title: str) -> re.Pattern | None:
         if len(head_str) < 8:
             return None
     pat = r"\s+".join(re.escape(t) for t in head)
-    return re.compile(rf"(?m)^[\s ]*{pat}", re.IGNORECASE)
+    return re.compile(rf"(?m)^\s*{pat}", re.IGNORECASE)
 
 
 def _split_shared_page(page_text: str, next_item: dict) -> tuple[str, str] | None:
@@ -483,27 +499,51 @@ def assemble(outline: list[dict], pages_dir: Path, manifest: dict,
             text = page_lookup.get(p, "")
             chapter_text[i].append(text)
 
-    for i in range(len(ranges) - 1):
-        cur = ranges[i]
-        nxt = ranges[i + 1]
-        if cur["end"] != nxt["start"]:
+    # Boundary cleanup. Bookmarks frequently point at the *page* a
+    # chapter starts on, even when the chapter's heading appears
+    # mid-page (preceded by the previous chapter's tail). Scan each
+    # boundary: look at chapter B's first page for B's title, and if
+    # any non-trivial content precedes the title, that content is
+    # actually chapter A's tail — reassign it.
+    #
+    # Two range shapes are handled by the same code:
+    #   1. Non-overlapping ranges (A.end == B.start - 1, the common
+    #      case). A doesn't yet include B.start; the head is appended
+    #      to A as an extra page slot.
+    #   2. Same-bookmark ranges (A.end == B.start, e.g. parent + first
+    #      child both point at the same page). A and B both have the
+    #      page; the head replaces A's last slot and the tail replaces
+    #      B's first slot.
+    for i in range(1, len(ranges)):
+        A = ranges[i - 1]
+        B = ranges[i]
+        b_first = B["start"]
+        b_first_text = page_lookup.get(b_first, "")
+        if not b_first_text:
             continue
-        # The shared page is the last page of `cur` and first of `nxt`.
-        shared_page_text = page_lookup.get(cur["end"], "")
-        split = _split_shared_page(shared_page_text, nxt["item"])
+        split = _split_shared_page(b_first_text, B["item"])
         if split is None:
             continue
         head, tail = split
-        # Replace the last page-slot of `cur` with the head, and the
-        # first page-slot of `nxt` with the tail.
-        if chapter_text[i]:
-            chapter_text[i][-1] = head
-        if chapter_text[i + 1]:
-            chapter_text[i + 1][0] = tail
+        # Hand the head to chapter A.
+        if A["end"] == b_first:
+            # A already includes this page (same-bookmark case).
+            if chapter_text[i - 1]:
+                chapter_text[i - 1][-1] = head
+            else:
+                chapter_text[i - 1] = [head]
         else:
-            chapter_text[i + 1] = [tail]
-        print(f"  split shared page {cur['end']} between "
-              f"{cur['item'].get('slug')!r} and {nxt['item'].get('slug')!r}",
+            # A's range stops before this page; extend A by appending
+            # the head as an extra slot.
+            chapter_text[i - 1].append(head)
+        # Replace B's first page with the tail (heading + body).
+        if chapter_text[i]:
+            chapter_text[i][0] = tail
+        else:
+            chapter_text[i] = [tail]
+        print(f"  reassigned mid-page tail at PDF page {b_first}: "
+              f"{A['item'].get('slug')!r} ← head, "
+              f"{B['item'].get('slug')!r} ← tail",
               file=sys.stderr)
 
     figures_by_page = load_figures_manifest(pages_dir)
@@ -592,9 +632,250 @@ def write_summary(items: list[dict], out_path: Path, title: str):
     print(f"Wrote {out_path}", file=sys.stderr)
 
 
+# --- Self-test ---
+
+
+def _assert(cond: bool, label: str, failures: list[str], detail: str = "") -> None:
+    if not cond:
+        msg = label
+        if detail:
+            msg += f" — {detail}"
+        failures.append(msg)
+
+
+def run_self_test() -> None:
+    """Smoke-test the cleanup pipeline. Run with --self-test.
+
+    These cases pin the most regression-prone behaviors:
+      - mid-page boundary handling (the 5.1 defect)
+      - inline-citation false-positive guard
+      - Unicode / soft-hyphen dehyphenation
+      - recto/verso header fingerprinting
+      - section-number-aware SUMMARY levels
+      - outline dedupe of slug-variant titles
+      - strip_repeated_lines preserves unique body lines on small chapters
+      - end-to-end assemble() on a synthetic 3-chapter book with the
+        mid-page boundary shape we just had to fix
+    """
+    import json
+    import shutil
+    import tempfile
+
+    failures: list[str] = []
+
+    # 1. _split_shared_page — mid-page heading splits cleanly.
+    page_with_spillover = (
+        "graphs for a given determinant. One simple way to construct.\n\n"
+        "5.1 Terms-Detecting Logic for a Determinant\n\n"
+        "The DDD graph is introduced.\n"
+    )
+    split = _split_shared_page(
+        page_with_spillover,
+        {"title": "5.1 Terms-Detecting Logic for a Determinant"},
+    )
+    _assert(split is not None, "split_shared_page: mid-page heading", failures)
+    if split is not None:
+        head, tail = split
+        _assert("graphs for a given determinant" in head,
+                "split: head contains spillover prose", failures,
+                detail=repr(head[:60]))
+        _assert(tail.lstrip().startswith("5.1 Terms-Detecting"),
+                "split: tail starts at heading", failures,
+                detail=repr(tail[:40]))
+
+    # 2. Title at top of page → no split (clean boundary).
+    page_clean_top = (
+        "5.1 Terms-Detecting Logic for a Determinant\n\n"
+        "The DDD graph is introduced.\n"
+    )
+    _assert(
+        _split_shared_page(page_clean_top,
+                           {"title": "5.1 Terms-Detecting Logic for a Determinant"})
+        is None,
+        "split_shared_page: title at top → no split", failures,
+    )
+
+    # 3. Inline citation only ("see Section 5.1") → no split.
+    page_citation_only = (
+        "See section 5.1 for details, then continue.\n"
+        "Body text continues here.\n"
+    )
+    _assert(
+        _split_shared_page(
+            page_citation_only,
+            {"title": "5.1 Terms-Detecting Logic for a Determinant"},
+        ) is None,
+        "split_shared_page: inline citation does not trigger split",
+        failures,
+    )
+
+    # 4. Plain (non-section-numbered) title splits when present mid-page.
+    page_plain_split = (
+        "End of previous section paragraph.\n\n"
+        "Introduction to the New Topic\n\n"
+        "Body of new topic.\n"
+    )
+    res = _split_shared_page(page_plain_split,
+                             {"title": "Introduction to the New Topic"})
+    _assert(res is not None, "split_shared_page: plain title mid-page", failures)
+    if res is not None:
+        _assert(res[1].lstrip().startswith("Introduction to the New Topic"),
+                "split: plain-title tail starts at heading", failures)
+
+    # 5. dehyphenate — Unicode hyphens + soft-hyphen pre-pass.
+    cases = [
+        ("pro‐\nvide later", "provide later"),       # U+2010 HYPHEN
+        ("build‑\ning", "building"),                  # U+2011 NB-HYPHEN
+        ("multi−\nple", "multiple"),                  # U+2212 MINUS
+        ("pro­vide", "provide"),                      # U+00AD soft hyphen
+        ("compre-\nhensive", "comprehensive"),             # ASCII (regression)
+        ("Bob-\nGreen", "Bob-\nGreen"),                    # uppercase: keep
+    ]
+    for src, want in cases:
+        got = dehyphenate(src)
+        _assert(got == want, f"dehyphenate({src!r})", failures,
+                detail=f"got {got!r}, want {want!r}")
+
+    # 6. _header_fingerprint — recto/verso variants collapse.
+    fp_a = _header_fingerprint("44 BOOK TITLE")
+    fp_b = _header_fingerprint("BOOK TITLE 45")
+    _assert(fp_a == fp_b, "header_fingerprint: recto/verso collapse",
+            failures, detail=f"{fp_a!r} vs {fp_b!r}")
+
+    # 7. derive_summary_levels — section number wins over bookmark level.
+    items = [
+        {"title": "5.1 Foo", "level": 2},
+        {"title": "5.2 Bar", "level": 2},
+        {"title": "5.3 Baz", "level": 6},   # bad bookmark level
+        {"title": "Chapter 6", "level": 1},
+    ]
+    levels = derive_summary_levels(items)
+    _assert(levels[:3] == [2, 2, 2],
+            "derive_summary_levels: 5.1/5.2/5.3 share level 2",
+            failures, detail=str(levels))
+    _assert(levels[3] == 1, "derive_summary_levels: chapter 6 → level 1",
+            failures, detail=str(levels))
+
+    # 8. dedupe_outline — slugifier variants merge.
+    deduped, dropped = dedupe_outline([
+        {"title": "AHDLs and MS-HDLs", "page": 10, "level": 1,
+         "slug": "ahdls-ms-hdls"},
+        {"title": "AHDLs and MS HDLs", "page": 10, "level": 1,
+         "slug": "ahdls-and-ms-hdls"},
+        {"title": "Chapter 2", "page": 20, "level": 1, "slug": "chapter-2"},
+    ])
+    _assert(len(deduped) == 2 and len(dropped) == 1,
+            "dedupe_outline: collapses near-duplicate adjacent items",
+            failures,
+            detail=f"keep={[i['slug'] for i in deduped]} "
+                   f"drop={[i['slug'] for i in dropped]}")
+
+    # 9. strip_repeated_lines — unique body lines on small chapter survive.
+    pages = ["# Chapter 1\n\nFirst chapter body.\n",
+             "More chapter 1 body.\n"]
+    out = strip_repeated_lines(pages, frac=0.5)
+    joined = "\n".join(out)
+    _assert("First chapter body." in joined and "More chapter 1 body." in joined,
+            "strip_repeated_lines: small-chapter unique lines preserved",
+            failures, detail=repr(out))
+
+    # 10. End-to-end assemble() on a synthetic 3-chapter book where
+    #     section 5.1 starts mid-page on page 105 and section 5.2 starts
+    #     mid-page on page 108. Both ends must come out clean.
+    tmp = Path(tempfile.mkdtemp(prefix="assemble-self-test-"))
+    try:
+        pages_text = {
+            100: "# Chapter 5\n\nChapter 5 introduction begins.\n",
+            101: "More intro about DDDs.\n",
+            102: "Continuation of intro.\n",
+            103: "Approaching the section.\n",
+            104: "Chapter 5 intro is wrapping up.\n",
+            105: ("graphs for a given determinant. Spillover prose.\n\n"
+                  "5.1 Terms-Detecting Logic for a Determinant\n\n"
+                  "The DDD graph is introduced.\n"),
+            106: "More 5.1 body.\n",
+            107: "End of 5.1 page 107.\n",
+            108: ("We simply compare the row/column index of the elements.\n"
+                  "Final 5.1 prose ending here.\n\n"
+                  "5.2 Implicit Symbolic Term Generation\n\n"
+                  "5.2 body begins.\n"),
+            109: "More 5.2 body.\n",
+            110: "End of 5.2.\n",
+        }
+        pages_dir = tmp / "pages"
+        pages_dir.mkdir()
+        manifest = {"pages": []}
+        for p, t in pages_text.items():
+            (pages_dir / f"page_{p:04d}.md").write_text(t)
+            manifest["pages"].append({"page": p, "file": f"page_{p:04d}.md",
+                                      "chars": len(t)})
+        (pages_dir / "manifest.json").write_text(json.dumps(manifest))
+        outline = [
+            {"title": "Chapter 5 Implicit Symbolic Generation",
+             "level": 1, "page": 100, "slug": "chapter-5"},
+            {"title": "5.1 Terms-Detecting Logic for a Determinant",
+             "level": 2, "page": 105, "slug": "5-1-terms"},
+            {"title": "5.2 Implicit Symbolic Term Generation",
+             "level": 2, "page": 108, "slug": "5-2-implicit"},
+        ]
+        out_dir = tmp / "out"
+        written = assemble(outline, pages_dir, manifest, out_dir,
+                           header_strip_frac=0.5)
+        files = {w["slug"]: (out_dir / w["file"]).read_text() for w in written}
+
+        # chapter-5 must absorb the spillover head from page 105.
+        ch5 = files.get("chapter-5", "")
+        _assert("Spillover prose" in ch5,
+                "assemble: chapter 5 absorbs page-105 head", failures,
+                detail=repr(ch5[-80:]))
+        _assert("5.1 Terms-Detecting" not in ch5,
+                "assemble: 5.1 heading does NOT leak into chapter 5",
+                failures)
+
+        # 5.1 must NOT carry the chapter-5 spillover, AND must include
+        # its own tail that spilled onto page 108 (before 5.2).
+        s51 = files.get("5-1-terms", "")
+        _assert("Spillover prose" not in s51,
+                "assemble: 5.1 does NOT start with chapter-5 spillover",
+                failures, detail=repr(s51[:120]))
+        _assert("Final 5.1 prose ending here." in s51,
+                "assemble: 5.1 reclaims its tail from page 108", failures,
+                detail=repr(s51[-120:]))
+        _assert("5.2 Implicit" not in s51,
+                "assemble: 5.2 heading does NOT bleed into 5.1", failures)
+
+        # 5.2 starts cleanly at its heading.
+        s52 = files.get("5-2-implicit", "")
+        _assert(s52.lstrip().startswith("# 5.2 Implicit"),
+                "assemble: 5.2 starts at its heading", failures,
+                detail=repr(s52[:80]))
+        _assert("Final 5.1 prose" not in s52,
+                "assemble: 5.1 tail does NOT leak into 5.2", failures)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+    if failures:
+        print("self-test FAILED:", file=sys.stderr)
+        for f in failures:
+            print(f"  {f}", file=sys.stderr)
+        sys.exit(1)
+    print("self-test passed")
+
+
 def main():
+    # Handle --self-test before argparse so the user doesn't need to
+    # invent dummy values for --pages / --out just to run the smoke
+    # tests. Mirrors detect_structure's --self-test convention but
+    # avoids that script's awkwardness of requiring placeholder args.
+    if "--self-test" in sys.argv[1:]:
+        run_self_test()
+        return
+
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--self-test", action="store_true",
+                    help="Run the smoke tests and exit. Does not need "
+                         "--pages or --out.")
     ap.add_argument("--pages", required=True,
                     help="Page directory (containing manifest.json + page_NNNN.md)")
     ap.add_argument("--outline",

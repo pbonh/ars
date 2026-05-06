@@ -396,6 +396,24 @@ output-quality gates the orchestrator uses:
   Non-empty means the orchestrator should mark `status: needs_review`
   rather than `complete`.
 
+### Smoke test
+
+Before shipping a change to the cleanup pipeline (especially anything
+in `assemble_chapters.py`), run:
+
+```bash
+python scripts/assemble_chapters.py --self-test
+python scripts/detect_structure.py /dev/null --out /tmp/_ds --self-test
+```
+
+`assemble_chapters.py --self-test` runs in-process unit checks plus
+one end-to-end `assemble()` against a synthetic 3-chapter book whose
+section 5.1 starts mid-page on page 105 and section 5.2 starts mid-
+page on page 108 — the exact shape that produced the
+`5-1-terms-detecting-logic-for-a-determinant.md` defect. It exits
+non-zero (with specific assertion labels) on regression. Cheap
+enough to wire into CI or a pre-commit hook.
+
 ## Working directory layout
 
 Both the work tree and the final mdBook live alongside the source PDF (not in the agent's CWD):
