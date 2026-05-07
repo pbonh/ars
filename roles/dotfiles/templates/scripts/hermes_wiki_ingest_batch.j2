@@ -2,85 +2,236 @@
 #
 # hermes_wiki_ingest_batch
 #
-# One-shot pipeline that delegates parallel pdf-to-mdbook to the existing
-# `ingest-pipeline-batch` skill (its own state machine handles per-book
-# resumability via library.json/pipeline.json), then runs wiki-ingest and
-# wiki-lint sequentially.
+# Three-phase pipeline that turns a wiki's raw/ tree into a populated
+# knowledge graph:
+#
+#   Phase 1 — pdf-to-mdbook (parallel, ingest-pipeline-batch skill)
+#   Phase 2 — wiki-ingest + wiki-lint, sequential, ONE chapter at a time
+#   Phase 3 — final wiki-lint sweep over the whole graph
+#
+# Phase 2 is deliberately serial. The wiki is a knowledge graph: each
+# chapter creates/updates summary, concept, and entity pages plus their
+# back-links. Running lint after every chapter catches contradictions and
+# orphan links while they are cheap to fix; running it only at the end
+# means the graph is messy by the time anyone notices. We also process
+# books in deterministic slug order and chapters in the SUMMARY.md order
+# emitted by the source mdBook, so a crash or interrupt resumes at the
+# next chapter without redoing work.
+#
+# The chapter list comes from the wiki-ingest skill's triage script
+# (--enumerate-chapters), so the source-of-truth for "what counts as a
+# chapter" stays in one place.
 #
 # Why not pass --wiki-root to the batch skill? Because the skill enforces
 # --parallel 1 when --wiki-root is set (wiki writes serialize on
-# index.md/log.md/dashboard.md/analytics.md). For "parallel convert, then
-# sequential ingest+lint" we want the parallel path the skill exposes when
-# --wiki-root is omitted — and we drive ingest+lint ourselves at the end.
+# index.md / log.md / dashboard.md / analytics.md). For "parallel convert,
+# then sequential ingest+lint" we want the parallel path the skill
+# exposes when --wiki-root is omitted — and we drive ingest+lint here.
 #
-# Idempotency:
-#   - The batch skill's library.json skips books with status:complete.
-#   - wiki-ingest/wiki-lint are idempotent in their own right.
-#   - Re-running the script is safe; pass --force to reprocess everything.
+# Idempotency / resumability:
+#   - Phase 1: the batch skill's library.json skips books with status:complete.
+#   - Phase 2: <wiki>/wiki/.ingest-state.tsv records each completed
+#     "<slug>\t<rel_path>" pair; previously-done chapters are skipped.
+#   - Phase 3 (final lint) is idempotent.
+#   - --force reprocesses everything (clears the state file too).
 #
 # Usage:
-#   hermes_wiki_ingest_batch <wiki_root> [--parallel N] [--vision MODE] [--force]
+#   hermes_wiki_ingest_batch <wiki_root> [options]
 #
-# Defaults: --parallel 2 (skill recommends 1–3; vision burns tokens fast).
+# Options:
+#   --parallel N        pdf-to-mdbook fan-out (phase 1 only). Default 2.
+#   --vision MODE       vision mode passed to ingest-pipeline-batch. Default auto.
+#   --force             reprocess everything (clears phase-2 state file too).
+#   --lint-every N      run wiki-lint every N chapters. Default 1 (every chapter).
+#   --skip-batch        skip phase 1 (pdf-to-mdbook).
+#   --skip-ingest       skip phase 2 (per-chapter ingest+lint loop).
+#   --skip-final-lint   skip phase 3 (whole-graph lint sweep).
+#   -h | --help         this help.
 #
 # Examples:
-#   # 3-way parallel conversion via the orchestrator skill, then ingest+lint
+#   # Default flow: parallel convert, then per-chapter ingest+lint, then final lint.
 #   hermes_wiki_ingest_batch ~/wiki --parallel 3
+#
+#   # Already converted; just do ingest+lint over the wiki.
+#   hermes_wiki_ingest_batch ~/wiki --skip-batch
+#
+#   # Lint every 5 chapters instead of every chapter (cheaper, looser graph).
+#   hermes_wiki_ingest_batch ~/wiki --lint-every 5
 
 set -Eeuo pipefail
 
 usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \?//' >&2; exit 2; }
 
 [[ $# -ge 1 ]] || usage
+case "$1" in -h|--help) usage ;; esac
 WIKI="$(realpath "$1")"; shift
 PARALLEL=2
 VISION="auto"
 FORCE=""
+LINT_EVERY=1
+SKIP_BATCH=""
+SKIP_INGEST=""
+SKIP_FINAL_LINT=""
 
 while (($#)); do
   case "$1" in
-    --parallel|-P) PARALLEL="$2"; shift 2 ;;
-    --vision)      VISION="$2";   shift 2 ;;
-    --force)       FORCE="--force"; shift ;;
-    -h|--help)     usage ;;
+    --parallel|-P)     PARALLEL="$2"; shift 2 ;;
+    --vision)          VISION="$2";   shift 2 ;;
+    --force)           FORCE="--force"; shift ;;
+    --lint-every)      LINT_EVERY="$2"; shift 2 ;;
+    --skip-batch)      SKIP_BATCH=1; shift ;;
+    --skip-ingest)     SKIP_INGEST=1; shift ;;
+    --skip-final-lint) SKIP_FINAL_LINT=1; shift ;;
+    -h|--help)         usage ;;
     *) printf 'unknown arg: %s\n' "$1" >&2; usage ;;
   esac
 done
 
 LIBRARY="$WIKI/raw"
+STATE="$WIKI/wiki/.ingest-state.tsv"
+TRIAGE="$HOME/.hermes/skills/wiki-ingest/scripts/triage_source.py"
+
 [[ -d "$WIKI"    ]] || { echo "wiki not found: $WIKI" >&2; exit 1; }
 [[ -d "$LIBRARY" ]] || { echo "raw/ not found in wiki: $LIBRARY" >&2; exit 1; }
-command -v hermes >/dev/null || { echo "hermes not on PATH" >&2; exit 1; }
+[[ -f "$TRIAGE"  ]] || { echo "wiki-ingest triage script missing: $TRIAGE" >&2; exit 1; }
+command -v hermes  >/dev/null || { echo "hermes not on PATH"  >&2; exit 1; }
+command -v python3 >/dev/null || { echo "python3 not on PATH" >&2; exit 1; }
+
+[[ "$LINT_EVERY" =~ ^[0-9]+$ ]] && (( LINT_EVERY >= 1 )) || {
+  echo "--lint-every must be a positive integer" >&2; exit 2; }
+
+mkdir -p "$WIKI/wiki"
+if [[ -n "$FORCE" && -f "$STATE" ]]; then : > "$STATE"; fi
+[[ -f "$STATE" ]] || : > "$STATE"
 
 RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$$"
 LOG_DIR="${HERMES_INGEST_LOG_DIR:-$HOME/.hermes/logs/wiki-ingest-batch}/$RUN_ID"
 mkdir -p "$LOG_DIR"
 SUMMARY="$LOG_DIR/summary.log"
-say() { printf '[%s] %s\n' "$(date -u +%H:%M:%SZ)" "$*" | tee -a "$SUMMARY" >&2; }
+say()  { printf '[%s] %s\n' "$(date -u +%H:%M:%SZ)" "$*" | tee -a "$SUMMARY" >&2; }
 
 say "wiki=$WIKI library=$LIBRARY"
-say "parallel=$PARALLEL vision=$VISION force=${FORCE:-no}"
+say "parallel=$PARALLEL vision=$VISION force=${FORCE:-no} lint-every=$LINT_EVERY"
+say "state=$STATE log_dir=$LOG_DIR"
 
-say "phase 1/3: ingest-pipeline-batch (parallel=$PARALLEL, no --wiki-root)"
-if hermes -s ingest-pipeline-batch -z "Sweep the library at $LIBRARY using ingest-pipeline-batch. Run with --parallel $PARALLEL --vision $VISION ${FORCE}. Do not pass --wiki-root — wiki ingestion happens in a separate phase. Stop after each book reaches mdbook build success. The only ingest-pipeline runner you may invoke is the deployed skill at ~/.hermes/skills/ingest-pipeline/scripts/run_pipeline.py — do NOT search the library tree or any workspace path for an ad-hoc run_pipeline.py / convert_pdf_to_mdbook.py / similar; those produce stub one-page-per-file output and a falsified pipeline.json. If the deployed skill is missing, stop and report it; do not improvise." \
-    >"$LOG_DIR/batch.log" 2>&1; then
-  say "batch ok ($LOG_DIR/batch.log)"
+# ---------- Phase 1: pdf-to-mdbook ----------
+if [[ -z "$SKIP_BATCH" ]]; then
+  say "phase 1/3: ingest-pipeline-batch (parallel=$PARALLEL, no --wiki-root)"
+  if hermes -s ingest-pipeline-batch -z "Sweep the library at $LIBRARY using ingest-pipeline-batch. Run with --parallel $PARALLEL --vision $VISION ${FORCE}. Do not pass --wiki-root — wiki ingestion happens in a separate phase. Stop after each book reaches mdbook build success. The only ingest-pipeline runner you may invoke is the deployed skill at ~/.hermes/skills/ingest-pipeline/scripts/run_pipeline.py — do NOT search the library tree or any workspace path for an ad-hoc run_pipeline.py / convert_pdf_to_mdbook.py / similar; those produce stub one-page-per-file output and a falsified pipeline.json. If the deployed skill is missing, stop and report it; do not improvise." \
+      >"$LOG_DIR/batch.log" 2>&1; then
+    say "batch ok ($LOG_DIR/batch.log)"
+  else
+    say "batch FAILED ($LOG_DIR/batch.log) — phase 2 will only see books that completed."
+  fi
 else
-  say "batch FAILED ($LOG_DIR/batch.log) — wiki-ingest will only see books that completed."
+  say "phase 1/3: SKIPPED (--skip-batch)"
 fi
 
-say "phase 2/3: wiki-ingest"
-if ( cd "$WIKI" && hermes -s wiki-ingest -z "Ingest sources from $WIKI/raw/. Prefer mdBook outputs over raw PDFs; skip sources already represented in wiki/summaries/." ) >"$LOG_DIR/wiki-ingest.log" 2>&1; then
-  say "wiki-ingest ok ($LOG_DIR/wiki-ingest.log)"
+# ---------- Phase 2: per-chapter ingest + lint, strictly sequential ----------
+if [[ -z "$SKIP_INGEST" ]]; then
+  say "phase 2/3: per-chapter ingest+lint (sequential, lint every $LINT_EVERY chapter[s])"
+
+  CHAPTERS_TSV="$LOG_DIR/chapters.tsv"
+  if ! python3 "$TRIAGE" "$WIKI" --enumerate-chapters >"$CHAPTERS_TSV" 2>"$LOG_DIR/triage.err"; then
+    say "triage FAILED — see $LOG_DIR/triage.err"; exit 1
+  fi
+  TOTAL=$(wc -l < "$CHAPTERS_TSV" | tr -d ' ')
+  say "triage emitted $TOTAL ingest unit(s)"
+
+  CUR_BOOK=""
+  IDX=0
+  CHAPTERS_THIS_BOOK=0
+  CHAPTERS_DONE=0
+  CHAPTERS_SKIPPED=0
+  LINT_COUNTER=0
+
+  # awk -F is fine here — the TSV is generated by us with no embedded tabs/newlines.
+  while IFS=$'\t' read -r SLUG KIND REL TITLE; do
+    [[ -z "$SLUG" ]] && continue
+    IDX=$((IDX + 1))
+
+    if [[ "$SLUG" != "$CUR_BOOK" ]]; then
+      if [[ -n "$CUR_BOOK" ]]; then
+        say "  └─ book complete: $CUR_BOOK ($CHAPTERS_THIS_BOOK chapter[s])"
+      fi
+      CUR_BOOK="$SLUG"
+      CHAPTERS_THIS_BOOK=0
+      say "▶ book: $SLUG (kind=$KIND)"
+    fi
+    CHAPTERS_THIS_BOOK=$((CHAPTERS_THIS_BOOK + 1))
+
+    KEY="${SLUG}"$'\t'"${REL}"
+    if grep -Fxq -- "$KEY" "$STATE" 2>/dev/null; then
+      CHAPTERS_SKIPPED=$((CHAPTERS_SKIPPED + 1))
+      say "  · [$IDX/$TOTAL] skip (already in state): $REL"
+      continue
+    fi
+
+    LABEL="$REL"
+    [[ "$REL" == "-" ]] && LABEL="(whole source)"
+    say "  · [$IDX/$TOTAL] ingest: $LABEL — $TITLE"
+
+    case "$KIND" in
+      mdbook)
+        INGEST_PROMPT="Ingest exactly ONE chapter from ONE book. Do not touch any other chapter or any other book in this turn.
+
+Book slug: $SLUG
+Chapter rel_path (under <mdbook_root>/src/): $REL
+Chapter title: $TITLE
+
+Use the wiki-ingest workflow scoped to this single chapter. Run triage with --source pointing at raw/$SLUG to get the chapter list and metadata, then read ONLY $REL. Update wiki/summaries/$SLUG.md (creating it if needed), and create or update concept/entity pages for items introduced in this chapter. Update wiki/index.md and append a chapter-scoped entry to wiki/log.md (one log entry per chapter, not per book). Do not parallelize. Do not start another chapter."
+        ;;
+      *)
+        INGEST_PROMPT="Ingest exactly ONE source. Do not touch any other source in this turn.
+
+Source slug: $SLUG
+Source kind: $KIND (no mdBook available — fallback path)
+
+Use the wiki-ingest workflow scoped to this single source. Run triage with --source pointing at raw/$SLUG, read the source per its kind, and produce the summary, concepts, entities, log entry, and index update for this source only. Do not parallelize. Do not start another source."
+        ;;
+    esac
+
+    INGEST_LOG="$LOG_DIR/ingest-${IDX}.log"
+    if ( cd "$WIKI" && hermes -s wiki-ingest -z "$INGEST_PROMPT" ) >"$INGEST_LOG" 2>&1; then
+      printf '%s\t%s\n' "$SLUG" "$REL" >> "$STATE"
+      CHAPTERS_DONE=$((CHAPTERS_DONE + 1))
+      LINT_COUNTER=$((LINT_COUNTER + 1))
+      say "  · [$IDX/$TOTAL] ok ($INGEST_LOG)"
+    else
+      say "  ! [$IDX/$TOTAL] FAILED ($INGEST_LOG) — leaving in state as 'not done'; continuing"
+      continue
+    fi
+
+    if (( LINT_COUNTER >= LINT_EVERY )); then
+      LINT_COUNTER=0
+      LINT_LOG="$LOG_DIR/lint-${IDX}.log"
+      LINT_PROMPT="Audit the wiki after the most recent chapter ingest ($SLUG :: $LABEL). Auto-fix safe issues (orphans, dead links, broken back-links, stale index counts, contradictions). Report the rest. Keep this scoped to a quick incremental sweep — the next chapter is queued."
+      if ( cd "$WIKI" && hermes -s wiki-lint -z "$LINT_PROMPT" ) >"$LINT_LOG" 2>&1; then
+        say "  · lint ok ($LINT_LOG)"
+      else
+        say "  ! lint FAILED ($LINT_LOG) — continuing"
+      fi
+    fi
+  done < "$CHAPTERS_TSV"
+
+  if [[ -n "$CUR_BOOK" ]]; then
+    say "  └─ book complete: $CUR_BOOK ($CHAPTERS_THIS_BOOK chapter[s])"
+  fi
+  say "phase 2 done: $CHAPTERS_DONE ingested, $CHAPTERS_SKIPPED skipped (already in state), $((TOTAL - CHAPTERS_DONE - CHAPTERS_SKIPPED)) other"
 else
-  say "wiki-ingest FAILED ($LOG_DIR/wiki-ingest.log)"; exit 1
+  say "phase 2/3: SKIPPED (--skip-ingest)"
 fi
 
-say "phase 3/3: wiki-lint"
-if ( cd "$WIKI" && hermes -s wiki-lint -z "Audit this wiki: orphans, stale pages, dead links, contradictions, low-confidence pages. Auto-fix what is safe; report the rest." ) >"$LOG_DIR/wiki-lint.log" 2>&1; then
-  say "wiki-lint ok ($LOG_DIR/wiki-lint.log)"
+# ---------- Phase 3: final lint sweep ----------
+if [[ -z "$SKIP_FINAL_LINT" ]]; then
+  say "phase 3/3: final wiki-lint sweep"
+  if ( cd "$WIKI" && hermes -s wiki-lint -z "Final audit of this wiki: orphans, stale pages, dead links, contradictions, low-confidence pages, index/statistics drift. Auto-fix what is safe; report the rest." ) >"$LOG_DIR/wiki-lint-final.log" 2>&1; then
+    say "final lint ok ($LOG_DIR/wiki-lint-final.log)"
+  else
+    say "final lint FAILED ($LOG_DIR/wiki-lint-final.log)"; exit 1
+  fi
 else
-  say "wiki-lint FAILED ($LOG_DIR/wiki-lint.log)"; exit 1
+  say "phase 3/3: SKIPPED (--skip-final-lint)"
 fi
 
 say "complete. summary: $SUMMARY"

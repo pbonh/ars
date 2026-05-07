@@ -314,10 +314,42 @@ def _dedupe_mdbook_outputs(sources: list[dict]) -> list[dict]:
     return sources
 
 
+def _emit_chapter_tsv(sources: list[dict]) -> None:
+    """Emit one TSV row per ingest unit, sorted by (slug, chapter index).
+
+    Columns: slug<TAB>kind<TAB>rel_path<TAB>title
+
+    For mdbook sources: one row per chapter (rel_path = chapter file under src/).
+    For markdown/text/pdf sources: one row, rel_path = "-" (whole source is the unit).
+    Sources of kind mdbook-output / other are omitted entirely.
+    """
+    skip_kinds = {"mdbook-output", "other"}
+    for s in sorted(sources, key=lambda x: x.get("slug", "")):
+        kind = s.get("kind", "")
+        if kind in skip_kinds:
+            continue
+        slug = s.get("slug", "")
+        if kind == "mdbook":
+            for ch in s.get("chapters", []) or []:
+                if not ch.get("exists"):
+                    continue
+                rel = ch.get("rel_path", "")
+                title = (ch.get("title") or "").replace("\t", " ").replace("\n", " ")
+                sys.stdout.write(f"{slug}\t{kind}\t{rel}\t{title}\n")
+        else:
+            sys.stdout.write(f"{slug}\t{kind}\t-\t\n")
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.split("\n")[1])
     p.add_argument("wiki_root", help="Path to the wiki root directory (the one containing raw/).")
     p.add_argument("--source", default=None, help="Triage only this single entry under raw/ (path).")
+    p.add_argument(
+        "--enumerate-chapters",
+        action="store_true",
+        help="Emit TSV (slug, kind, rel_path, title) — one row per chapter for mdbook sources, "
+             "one row per source otherwise. For driving per-chapter ingest loops from bash.",
+    )
     args = p.parse_args()
 
     wiki_root = Path(args.wiki_root).resolve()
@@ -341,6 +373,10 @@ def main() -> None:
         entries = sorted(p for p in raw_dir.iterdir() if not p.name.startswith("."))
         sources = [triage_one(e, summaries_dir) for e in entries]
         sources = _dedupe_mdbook_outputs(sources)
+
+    if args.enumerate_chapters:
+        _emit_chapter_tsv(sources)
+        return
 
     by_kind: dict[str, int] = {}
     for s in sources:
