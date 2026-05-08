@@ -9,6 +9,31 @@ Audit wiki health. Fix what can be fixed automatically, report what needs human 
 
 ## Lint Workflow
 
+### Scoped lint hints
+
+If the calling prompt contains a line of the form
+
+```
+Scope this audit primarily to: <comma-separated wiki/* paths>
+```
+
+(typically passed by the `hermes_wiki_ingest_batch` orchestrator, which captures
+the prior ingest agent's `Files touched:` report) then **do not** read every page
+in `wiki/index.md`. Instead:
+
+1. Read each listed file plus any pages it directly `[[links]]` to.
+2. Run all standard checks (Step 2) against that set.
+3. Still update `wiki/index.md` and `wiki/log.md` statistics globally — but only
+   from filenames/frontmatter, not by re-reading every page body.
+4. Skip the exhaustive whole-graph re-read in Step 1.
+
+This keeps per-chapter lint cost roughly constant as the wiki grows; without it
+each lint pass scales linearly with total page count and dominates batch
+ingest wall-clock.
+
+If the prompt does not contain that directive, fall back to the full workflow
+below.
+
 ### 1. Read all wiki pages
 
 Load `wiki/index.md` for the page catalog. Read every page listed (or spot-check for large wikis, prioritizing stale/low-confidence pages).

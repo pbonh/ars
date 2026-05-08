@@ -106,21 +106,34 @@ def _parse_toml_list(raw: str) -> list[str]:
 
 
 SUMMARY_LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+\.md)\)")
+# Match a line that looks like a SUMMARY.md bullet so we can recover its
+# leading-space indent. mdBook uses 2-space indents to denote nesting:
+# top-level chapters at column 0, sub-sections at 2, sub-subs at 4, etc.
+_SUMMARY_BULLET_RE = re.compile(r"^(?P<indent> *)[-*]\s+\[(?P<title>[^\]]+)\]\((?P<ref>[^)]+\.md)\)")
 
 
 def parse_summary(summary_md: Path, src_root: Path) -> list[dict]:
-    """Parse src/SUMMARY.md → list of {title, path (abs), missing} chapter entries."""
+    """Parse src/SUMMARY.md → list of chapter entries.
+
+    Each entry: {title, path (abs), rel_path, exists, level}.
+    `level` is the SUMMARY.md indent depth (0 = top-level, 1 = first nested,
+    etc.), derived from leading spaces // 2.
+    """
     chapters: list[dict] = []
     if not summary_md.is_file():
         return chapters
-    text = summary_md.read_text()
-    for title, ref in SUMMARY_LINK_RE.findall(text):
+    for line in summary_md.read_text().splitlines():
+        m = _SUMMARY_BULLET_RE.match(line)
+        if not m:
+            continue
+        ref = m.group("ref")
         target = (src_root / ref).resolve()
         chapters.append({
-            "title": title,
+            "title": m.group("title"),
             "path": str(target),
             "rel_path": ref,
             "exists": target.is_file(),
+            "level": len(m.group("indent")) // 2,
         })
     return chapters
 
@@ -187,7 +200,7 @@ def find_mdbook_for_dir(d: Path) -> tuple[Path | None, str, Path | None]:
 
 # ---------- per-entry triage ----------
 
-def triage_file(raw_path: Path, summaries_dir: Path) -> dict:
+def triage_file(raw_path: Path, summaries_dir: Path, group_size: int = 8) -> dict:
     stem = raw_path.stem
     record: dict = {
         "raw_path": str(raw_path),
@@ -204,7 +217,7 @@ def triage_file(raw_path: Path, summaries_dir: Path) -> dict:
             record["kind"] = "mdbook"
             record["mdbook_root"] = str(mdbook_root)
             record["detection"] = method
-            record.update(_mdbook_metadata(mdbook_root))
+            record.update(_mdbook_metadata(mdbook_root, group_size=group_size))
         else:
             record["kind"] = "pdf"
             record["fallback_reason"] = "no sibling -mdbook directory; no pipeline.json with status:complete"
@@ -220,7 +233,7 @@ def triage_file(raw_path: Path, summaries_dir: Path) -> dict:
     return record
 
 
-def triage_dir(raw_path: Path, summaries_dir: Path) -> dict:
+def triage_dir(raw_path: Path, summaries_dir: Path, group_size: int = 8) -> dict:
     stem = raw_path.name
     record: dict = {
         "raw_path": str(raw_path),
@@ -235,7 +248,7 @@ def triage_dir(raw_path: Path, summaries_dir: Path) -> dict:
         record["kind"] = "mdbook"
         record["mdbook_root"] = str(mdbook_root)
         record["detection"] = method
-        record.update(_mdbook_metadata(mdbook_root))
+        record.update(_mdbook_metadata(mdbook_root, group_size=group_size))
     elif pdf_inside is not None:
         record["kind"] = "pdf"
         record["pdf_path"] = str(pdf_inside)
@@ -246,7 +259,128 @@ def triage_dir(raw_path: Path, summaries_dir: Path) -> dict:
     return record
 
 
-def _mdbook_metadata(mdbook_root: Path) -> dict:
+# Hard ceiling on how many sub-section files we ask wiki-ingest to read in a
+# single agent turn. Some pdf-to-mdbook outputs use indent-0 "Part I" entries
+# that span 50-100+ chapters of a book; one agent turn can't comfortably hold
+# that. When a group exceeds the cap, it's split into part-N records that
+# each instruct the agent to *extend* the same chapter section (see the
+# orchestrator's prompt template).
+_MAX_SUB_PATHS_PER_GROUP = 12
+
+
+def _split_oversized_group(group: dict) -> list[dict]:
+    """If `group` has more sub_paths than the ceiling, return a list of
+    smaller groups carrying part-N suffixes; otherwise return [group] unchanged.
+
+    The first part keeps the original rel_path so resume keys stay stable.
+    Subsequent parts use the first sub_path of that part as their rel_path.
+    """
+    n = len(group["sub_paths"])
+    if n <= _MAX_SUB_PATHS_PER_GROUP:
+        return [group]
+
+    # First part: original rel_path + first 12 sub_paths
+    parts: list[dict] = []
+    chunks: list[tuple[list[str], list[str]]] = []
+    paths = group["sub_paths"]
+    titles = group["sub_titles"]
+    chunks.append((paths[:_MAX_SUB_PATHS_PER_GROUP], titles[:_MAX_SUB_PATHS_PER_GROUP]))
+    i = _MAX_SUB_PATHS_PER_GROUP
+    while i < n:
+        chunks.append((paths[i:i + _MAX_SUB_PATHS_PER_GROUP],
+                       titles[i:i + _MAX_SUB_PATHS_PER_GROUP]))
+        i += _MAX_SUB_PATHS_PER_GROUP
+
+    total_parts = len(chunks)
+    for idx, (sp, st) in enumerate(chunks, 1):
+        if idx == 1:
+            parts.append({
+                "title": f"{group['title']} (part 1/{total_parts})",
+                "rel_path": group["rel_path"],
+                "sub_paths": sp,
+                "sub_titles": st,
+            })
+        else:
+            # Use the first sub_path as this part's "lead" rel_path so the
+            # state-file resume key is unique.
+            head_rel = sp[0]
+            head_title = st[0]
+            parts.append({
+                "title": f"{group['title']} (part {idx}/{total_parts}) — starting at {head_title}",
+                "rel_path": head_rel,
+                "sub_paths": sp[1:],
+                "sub_titles": st[1:],
+            })
+    return parts
+
+
+def _build_chapter_groups(chapters: list[dict], group_size: int = 8) -> list[dict]:
+    """Group chapters by SUMMARY.md indentation.
+
+    A "group" is one indent-0 entry plus every consecutive entry with level >= 1
+    that follows it (until the next indent-0 entry). Groups are the unit a
+    chapter-level orchestrator hands to wiki-ingest in a single agent turn.
+
+    Groups with more than _MAX_SUB_PATHS_PER_GROUP sub-sections are split into
+    part-N records whose titles include "(part i/N)" — the orchestrator's
+    prompt instructs the agent to *extend* the existing chapter section in
+    parts 2..N rather than start a new one.
+
+    Flat-SUMMARY fallback: if every entry is level 0 AND there are more than
+    60 of them (i.e. pdf-to-mdbook didn't preserve hierarchy), chunk
+    consecutive entries into groups of `group_size` so a degenerate book
+    doesn't regress to one-row-per-section.
+    """
+    if not chapters:
+        return []
+
+    has_nesting = any(c["level"] > 0 for c in chapters)
+    if not has_nesting and len(chapters) > 60:
+        groups: list[dict] = []
+        i = 0
+        while i < len(chapters):
+            chunk = chapters[i:i + group_size]
+            head = chunk[0]
+            tail = chunk[1:]
+            groups.append({
+                "title": head["title"] if len(chunk) == 1
+                         else f"{head['title']} (+ {len(tail)} more)",
+                "rel_path": head["rel_path"],
+                "sub_paths": [c["rel_path"] for c in tail],
+                "sub_titles": [c["title"] for c in tail],
+            })
+            i += group_size
+        return groups
+
+    groups: list[dict] = []
+    current: dict | None = None
+    for c in chapters:
+        if c["level"] == 0:
+            if current is not None:
+                groups.extend(_split_oversized_group(current))
+            current = {
+                "title": c["title"],
+                "rel_path": c["rel_path"],
+                "sub_paths": [],
+                "sub_titles": [],
+            }
+        else:
+            if current is None:
+                current = {
+                    "title": c["title"],
+                    "rel_path": c["rel_path"],
+                    "sub_paths": [],
+                    "sub_titles": [],
+                }
+            else:
+                current["sub_paths"].append(c["rel_path"])
+                current["sub_titles"].append(c["title"])
+    if current is not None:
+        groups.extend(_split_oversized_group(current))
+    return groups
+
+
+def _mdbook_metadata(mdbook_root: Path, group_size: int = 8) -> dict:
     meta = read_book_toml(mdbook_root / "book.toml")
     chapters = parse_summary(mdbook_root / "src" / "SUMMARY.md", mdbook_root / "src")
     out = {
@@ -255,6 +389,7 @@ def _mdbook_metadata(mdbook_root: Path) -> dict:
         "language": meta.get("language", "en"),
         "chapter_count": len(chapters),
         "chapters": chapters,
+        "chapter_groups": _build_chapter_groups(chapters, group_size=group_size),
     }
     missing = [c for c in chapters if not c["exists"]]
     if missing:
@@ -269,11 +404,11 @@ def _slug(stem: str) -> str:
 
 # ---------- main ----------
 
-def triage_one(raw_entry: Path, summaries_dir: Path) -> dict:
+def triage_one(raw_entry: Path, summaries_dir: Path, group_size: int = 8) -> dict:
     if raw_entry.is_file():
-        return triage_file(raw_entry, summaries_dir)
+        return triage_file(raw_entry, summaries_dir, group_size=group_size)
     if raw_entry.is_dir():
-        return triage_dir(raw_entry, summaries_dir)
+        return triage_dir(raw_entry, summaries_dir, group_size=group_size)
     return {
         "raw_path": str(raw_entry),
         "stem": raw_entry.name,
@@ -314,13 +449,18 @@ def _dedupe_mdbook_outputs(sources: list[dict]) -> list[dict]:
     return sources
 
 
-def _emit_chapter_tsv(sources: list[dict]) -> None:
-    """Emit one TSV row per ingest unit, sorted by (slug, chapter index).
+def _emit_chapter_jsonl(sources: list[dict]) -> None:
+    """Emit one JSON record per ingest unit, sorted by slug then group order.
 
-    Columns: slug<TAB>kind<TAB>rel_path<TAB>title
+    Each record:
+      {"slug": ..., "kind": "mdbook"|"markdown"|"text"|"pdf",
+       "rel_path": <chapter file or "-">, "title": ...,
+       "sub_paths": [<sub-section rel_paths>], "sub_titles": [...]}
 
-    For mdbook sources: one row per chapter (rel_path = chapter file under src/).
-    For markdown/text/pdf sources: one row, rel_path = "-" (whole source is the unit).
+    For mdbook sources, one record per chapter group (built by
+    `_build_chapter_groups` from SUMMARY.md indentation, with --group-size
+    fallback for flat tables of contents). For markdown / text / pdf
+    sources: one record per source, rel_path = "-", sub_paths empty.
     Sources of kind mdbook-output / other are omitted entirely.
     """
     skip_kinds = {"mdbook-output", "other"}
@@ -330,14 +470,26 @@ def _emit_chapter_tsv(sources: list[dict]) -> None:
             continue
         slug = s.get("slug", "")
         if kind == "mdbook":
-            for ch in s.get("chapters", []) or []:
-                if not ch.get("exists"):
-                    continue
-                rel = ch.get("rel_path", "")
-                title = (ch.get("title") or "").replace("\t", " ").replace("\n", " ")
-                sys.stdout.write(f"{slug}\t{kind}\t{rel}\t{title}\n")
+            for grp in s.get("chapter_groups", []) or []:
+                rec = {
+                    "slug": slug,
+                    "kind": kind,
+                    "rel_path": grp["rel_path"],
+                    "title": grp["title"],
+                    "sub_paths": list(grp.get("sub_paths", [])),
+                    "sub_titles": list(grp.get("sub_titles", [])),
+                }
+                sys.stdout.write(json.dumps(rec, ensure_ascii=False) + "\n")
         else:
-            sys.stdout.write(f"{slug}\t{kind}\t-\t\n")
+            rec = {
+                "slug": slug,
+                "kind": kind,
+                "rel_path": "-",
+                "title": "",
+                "sub_paths": [],
+                "sub_titles": [],
+            }
+            sys.stdout.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
 
 def main() -> None:
@@ -347,10 +499,21 @@ def main() -> None:
     p.add_argument(
         "--enumerate-chapters",
         action="store_true",
-        help="Emit TSV (slug, kind, rel_path, title) — one row per chapter for mdbook sources, "
-             "one row per source otherwise. For driving per-chapter ingest loops from bash.",
+        help="Emit JSON Lines — one record per chapter group for mdbook sources "
+             "(top-level SUMMARY.md entry plus all of its sub-section rel_paths), "
+             "one record per source otherwise. For driving per-chapter ingest loops "
+             "from bash. Each line: {slug, kind, rel_path, title, sub_paths, sub_titles}.",
+    )
+    p.add_argument(
+        "--group-size",
+        type=int,
+        default=8,
+        help="Chunk size used as a fallback when SUMMARY.md is flat (no indentation) "
+             "and has more than 60 entries. Default 8.",
     )
     args = p.parse_args()
+    if args.group_size < 1:
+        fatal("--group-size must be >= 1")
 
     wiki_root = Path(args.wiki_root).resolve()
     if not wiki_root.is_dir():
@@ -368,14 +531,14 @@ def main() -> None:
             entry.relative_to(raw_dir)
         except ValueError:
             fatal(f"--source {entry} is not inside {raw_dir}")
-        sources = [triage_one(entry, summaries_dir)]
+        sources = [triage_one(entry, summaries_dir, group_size=args.group_size)]
     else:
         entries = sorted(p for p in raw_dir.iterdir() if not p.name.startswith("."))
-        sources = [triage_one(e, summaries_dir) for e in entries]
+        sources = [triage_one(e, summaries_dir, group_size=args.group_size) for e in entries]
         sources = _dedupe_mdbook_outputs(sources)
 
     if args.enumerate_chapters:
-        _emit_chapter_tsv(sources)
+        _emit_chapter_jsonl(sources)
         return
 
     by_kind: dict[str, int] = {}
