@@ -265,7 +265,12 @@ def triage_dir(raw_path: Path, summaries_dir: Path, group_size: int = 8) -> dict
 # that. When a group exceeds the cap, it's split into part-N records that
 # each instruct the agent to *extend* the same chapter section (see the
 # orchestrator's prompt template).
-_MAX_SUB_PATHS_PER_GROUP = 12
+#
+# Note: the orchestrator's per-part file count is (rel_path + sub_paths), so
+# part 1 of an oversized group sees this many + 1 files. Empirically a
+# 13-file part 1 (cap=12) was enough to exhaust even a large-context model on
+# a dense chapter, so the cap is set conservatively.
+_MAX_SUB_PATHS_PER_GROUP = 6
 
 
 def _split_oversized_group(group: dict) -> list[dict]:
