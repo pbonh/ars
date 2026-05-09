@@ -16,9 +16,18 @@
 #
 # Usage:
 #   hermes_wiki_ingest_direct <wiki_root> [--jobs N] [--vision MODE] [--force]
+#       [--model M] [--provider P]
+#       [--batch-model M] [--batch-provider P]
+#       [--ingest-model M] [--ingest-provider P]
+#       [--lint-model M] [--lint-provider P]
 #
 # Defaults: --jobs 2 (matches ingest-pipeline-batch's recommendation; LLM
 # rate limits make $(nproc) usually too aggressive), --vision auto.
+#
+# Model/provider flags inject HERMES_INFERENCE_MODEL / HERMES_INFERENCE_PROVIDER
+# only for the phase that uses them — phases without explicit flags fall back
+# to whatever ~/.hermes/config.yaml configures. --model/--provider apply to
+# every phase as a default; --<phase>-* override.
 #
 # PDFs are read from <wiki_root>/raw/ — that is the directory wiki-ingest
 # walks. Symlink an external library in if your PDFs live elsewhere.
@@ -26,6 +35,11 @@
 # Examples:
 #   # 2-way parallel conversion, then sequential ingest + lint
 #   hermes_wiki_ingest_direct ~/wiki
+#
+#   # Strong model for ingest, cheap one for lint:
+#   hermes_wiki_ingest_direct ~/wiki \
+#     --ingest-model anthropic/claude-sonnet-4.6 \
+#     --lint-model anthropic/claude-haiku-4.5
 
 set -Eeuo pipefail
 
@@ -36,16 +50,41 @@ WIKI="$(realpath "$1")"; shift
 JOBS=2
 VISION="auto"
 FORCE=""
+MODEL=""
+PROVIDER=""
+BATCH_MODEL=""
+BATCH_PROVIDER=""
+INGEST_MODEL=""
+INGEST_PROVIDER=""
+LINT_MODEL=""
+LINT_PROVIDER=""
 
 while (($#)); do
   case "$1" in
-    --jobs|-j) JOBS="$2"; shift 2 ;;
-    --vision)  VISION="$2"; shift 2 ;;
-    --force)   FORCE="--force"; shift ;;
-    -h|--help) usage ;;
+    --jobs|-j)          JOBS="$2"; shift 2 ;;
+    --vision)           VISION="$2"; shift 2 ;;
+    --force)            FORCE="--force"; shift ;;
+    --model)            MODEL="$2"; shift 2 ;;
+    --provider)         PROVIDER="$2"; shift 2 ;;
+    --batch-model)      BATCH_MODEL="$2"; shift 2 ;;
+    --batch-provider)   BATCH_PROVIDER="$2"; shift 2 ;;
+    --ingest-model)     INGEST_MODEL="$2"; shift 2 ;;
+    --ingest-provider)  INGEST_PROVIDER="$2"; shift 2 ;;
+    --lint-model)       LINT_MODEL="$2"; shift 2 ;;
+    --lint-provider)    LINT_PROVIDER="$2"; shift 2 ;;
+    -h|--help)          usage ;;
     *) printf 'unknown arg: %s\n' "$1" >&2; usage ;;
   esac
 done
+
+# --model / --provider are defaults; per-phase flags override.
+BATCH_MODEL="${BATCH_MODEL:-$MODEL}"
+INGEST_MODEL="${INGEST_MODEL:-$MODEL}"
+LINT_MODEL="${LINT_MODEL:-$MODEL}"
+BATCH_PROVIDER="${BATCH_PROVIDER:-$PROVIDER}"
+INGEST_PROVIDER="${INGEST_PROVIDER:-$PROVIDER}"
+LINT_PROVIDER="${LINT_PROVIDER:-$PROVIDER}"
+export BATCH_MODEL BATCH_PROVIDER INGEST_MODEL INGEST_PROVIDER LINT_MODEL LINT_PROVIDER
 
 LIBRARY="$WIKI/raw"
 [[ -d "$WIKI"    ]] || { echo "wiki not found: $WIKI (run wiki-bootstrap first)" >&2; exit 1; }
@@ -59,9 +98,29 @@ SUMMARY="$LOG_DIR/summary.log"
 
 say() { printf '[%s] %s\n' "$(date -u +%H:%M:%SZ)" "$*" | tee -a "$SUMMARY" >&2; }
 
+# Run hermes for one phase (batch|ingest|lint), injecting the phase's
+# HERMES_INFERENCE_MODEL / HERMES_INFERENCE_PROVIDER if set; otherwise
+# defers to whatever ~/.hermes/config.yaml configures. Exported below so
+# the xargs child shell in phase 1 can use it too.
+hermes_phase() {
+  local phase="$1"; shift
+  local m_var="${phase^^}_MODEL"
+  local p_var="${phase^^}_PROVIDER"
+  local m="${!m_var:-}"
+  local p="${!p_var:-}"
+  if [[ -n "$m$p" ]]; then
+    env ${m:+HERMES_INFERENCE_MODEL="$m"} ${p:+HERMES_INFERENCE_PROVIDER="$p"} hermes "$@"
+  else
+    hermes "$@"
+  fi
+}
+export -f hermes_phase
+
 say "wiki=$WIKI"
 say "library=$LIBRARY"
 say "jobs=$JOBS vision=$VISION force=${FORCE:-no}"
+say "models: batch=${BATCH_MODEL:-default} ingest=${INGEST_MODEL:-default} lint=${LINT_MODEL:-default}"
+say "providers: batch=${BATCH_PROVIDER:-default} ingest=${INGEST_PROVIDER:-default} lint=${LINT_PROVIDER:-default}"
 say "logs at $LOG_DIR"
 
 mapfile -d '' -t PDFS < <(find "$LIBRARY" -maxdepth 4 -type f -name '*.pdf' -not -path '*/.*' -print0)
@@ -92,7 +151,7 @@ if ((${#WORK[@]})); then
         base="$(basename "${pdf%.pdf}")"
         log="$logdir/convert-$base.log"
         printf "[%s] start: %s\n" "$(date -u +%H:%M:%SZ)" "$base" >&2
-        if hermes -s ingest-pipeline -z "Process this PDF with the ingest-pipeline skill: $pdf $force --vision $vision" >"$log" 2>&1; then
+        if hermes_phase batch -s ingest-pipeline -z "Process this PDF with the ingest-pipeline skill: $pdf $force --vision $vision" >"$log" 2>&1; then
           printf "[%s] done:  %s\n" "$(date -u +%H:%M:%SZ)" "$base" >&2
         else
           printf "[%s] FAIL: %s — %s\n" "$(date -u +%H:%M:%SZ)" "$base" "$log" >&2
@@ -109,14 +168,14 @@ else
 fi
 
 say "phase 2/3: wiki-ingest"
-if ( cd "$WIKI" && hermes -s wiki-ingest -z "Ingest sources from $WIKI/raw/ into this wiki. Use the triage script first; prefer mdBook outputs over raw PDFs; skip sources already represented in wiki/summaries/." ) >"$LOG_DIR/wiki-ingest.log" 2>&1; then
+if ( cd "$WIKI" && hermes_phase ingest -s wiki-ingest -z "Ingest sources from $WIKI/raw/ into this wiki. Use the triage script first; prefer mdBook outputs over raw PDFs; skip sources already represented in wiki/summaries/." ) >"$LOG_DIR/wiki-ingest.log" 2>&1; then
   say "wiki-ingest ok ($LOG_DIR/wiki-ingest.log)"
 else
   say "wiki-ingest FAILED ($LOG_DIR/wiki-ingest.log)"; exit 1
 fi
 
 say "phase 3/3: wiki-lint"
-if ( cd "$WIKI" && hermes -s wiki-lint -z "Audit this wiki: orphans, stale pages, dead links, contradictions, low-confidence pages. Auto-fix what is safe; report the rest." ) >"$LOG_DIR/wiki-lint.log" 2>&1; then
+if ( cd "$WIKI" && hermes_phase lint -s wiki-lint -z "Audit this wiki: orphans, stale pages, dead links, contradictions, low-confidence pages. Auto-fix what is safe; report the rest." ) >"$LOG_DIR/wiki-lint.log" 2>&1; then
   say "wiki-lint ok ($LOG_DIR/wiki-lint.log)"
 else
   say "wiki-lint FAILED ($LOG_DIR/wiki-lint.log)"; exit 1

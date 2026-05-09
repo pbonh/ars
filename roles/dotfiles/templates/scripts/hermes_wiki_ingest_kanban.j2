@@ -20,12 +20,20 @@
 #
 # Usage:
 #   hermes_wiki_ingest_kanban <wiki_root>
-#       [--ingester PROFILE]   # default: ingester
-#       [--curator  PROFILE]   # default: curator
+#       [--ingester PROFILE]   # default: ingester  (alias for --batch-model)
+#       [--curator  PROFILE]   # default: curator   (alias for both --ingest-model and --lint-model)
 #       [--vision   MODE]      # default: auto
 #       [--force]              # bypass shell idempotency check, queue every PDF
 #       [--stable-keys]        # idempotency keys also stable for ingest/lint
 #       [--wait]               # block until the wiki-lint task reaches a terminal status
+#       [--model M]            # default assignee for every phase
+#       [--batch-model M]      # assignee for ingest-pipeline tasks (overrides --ingester)
+#       [--ingest-model M]     # assignee for the wiki-ingest task
+#       [--lint-model M]       # assignee for the wiki-lint task
+#       [--provider P] [--batch-provider P] [--ingest-provider P] [--lint-provider P]
+#                              # accepted for parity with the direct/batch scripts but inert —
+#                              # kanban dispatch routes via assignee, which already encodes
+#                              # provider+model in hermes config.
 #
 # Examples:
 #   # Queue and detach (default — follow with `hermes kanban watch`)
@@ -36,6 +44,12 @@
 #
 #   # Idempotent ingest+lint keys too — safe to invoke from cron
 #   hermes_wiki_ingest_kanban ~/wiki --stable-keys
+#
+#   # Override every phase's assignee with a single model:
+#   hermes_wiki_ingest_kanban ~/wiki --model strong-agent
+#
+#   # Strong agent for ingest, cheap one for lint:
+#   hermes_wiki_ingest_kanban ~/wiki --ingest-model strong-agent --lint-model cheap-agent
 #
 # Requires: hermes gateway running (hosts the dispatcher). Without it the
 # tasks queue but nothing claims them. Script warns and continues.
@@ -52,19 +66,48 @@ VISION="auto"
 FORCE=""
 STABLE_KEYS=0
 WAIT=0
+MODEL=""
+PROVIDER=""
+BATCH_MODEL=""
+BATCH_PROVIDER=""
+INGEST_MODEL=""
+INGEST_PROVIDER=""
+LINT_MODEL=""
+LINT_PROVIDER=""
 
 while (($#)); do
   case "$1" in
-    --ingester)    INGESTER="$2"; shift 2 ;;
-    --curator)     CURATOR="$2";  shift 2 ;;
-    --vision)      VISION="$2";   shift 2 ;;
-    --force)       FORCE=1;       shift ;;
-    --stable-keys) STABLE_KEYS=1; shift ;;
-    --wait)        WAIT=1;        shift ;;
-    -h|--help)     usage ;;
+    --ingester)         INGESTER="$2"; shift 2 ;;
+    --curator)          CURATOR="$2";  shift 2 ;;
+    --vision)           VISION="$2";   shift 2 ;;
+    --force)            FORCE=1;       shift ;;
+    --stable-keys)      STABLE_KEYS=1; shift ;;
+    --wait)             WAIT=1;        shift ;;
+    --model)            MODEL="$2"; shift 2 ;;
+    --provider)         PROVIDER="$2"; shift 2 ;;
+    --batch-model)      BATCH_MODEL="$2"; shift 2 ;;
+    --batch-provider)   BATCH_PROVIDER="$2"; shift 2 ;;
+    --ingest-model)     INGEST_MODEL="$2"; shift 2 ;;
+    --ingest-provider)  INGEST_PROVIDER="$2"; shift 2 ;;
+    --lint-model)       LINT_MODEL="$2"; shift 2 ;;
+    --lint-provider)    LINT_PROVIDER="$2"; shift 2 ;;
+    -h|--help)          usage ;;
     *) printf 'unknown arg: %s\n' "$1" >&2; usage ;;
   esac
 done
+
+# Resolve per-task assignees: new --<phase>-model wins over --model wins over
+# the legacy --ingester/--curator names.
+INGESTER="${BATCH_MODEL:-${MODEL:-$INGESTER}}"
+WIKI_INGEST_ASSIGNEE="${INGEST_MODEL:-${MODEL:-$CURATOR}}"
+WIKI_LINT_ASSIGNEE="${LINT_MODEL:-${MODEL:-$CURATOR}}"
+
+# Provider flags are accepted for parity with the direct/batch scripts but
+# don't apply to kanban dispatch — the assignee already names a configured
+# agent (provider+model). Note this once so callers aren't confused.
+if [[ -n "$PROVIDER$BATCH_PROVIDER$INGEST_PROVIDER$LINT_PROVIDER" ]]; then
+  printf 'note: --provider flags are inert on kanban (assignee selects provider).\n' >&2
+fi
 
 LIBRARY="$WIKI/raw"
 [[ -d "$WIKI"    ]] || { echo "wiki not found: $WIKI" >&2; exit 1; }
@@ -95,6 +138,7 @@ fi
 
 say "wiki=$WIKI library=$LIBRARY"
 say "ingester=$INGESTER curator=$CURATOR vision=$VISION"
+say "assignees: batch=$INGESTER ingest=$WIKI_INGEST_ASSIGNEE lint=$WIKI_LINT_ASSIGNEE"
 say "stable_keys=$STABLE_KEYS wait=$WAIT"
 
 # ----- Phase 1: fan-out one task per PDF ------------------------------------
@@ -127,7 +171,7 @@ INGEST_PARENTS=()
 for id in "${PDF_IDS[@]}"; do INGEST_PARENTS+=(--parent "$id"); done
 
 INGEST_ID="$(hermes kanban create "wiki-ingest into $WIKI" \
-              --assignee "$CURATOR" \
+              --assignee "$WIKI_INGEST_ASSIGNEE" \
               --skill wiki-ingest \
               --workspace "dir:$WIKI" \
               --idempotency-key "$INGEST_KEY" \
@@ -138,7 +182,7 @@ say "queued wiki-ingest → $INGEST_ID  (waits on {% raw %}${#PDF_IDS[@]}{% endr
 
 # ----- Phase 3: wiki-lint waits on wiki-ingest ------------------------------
 LINT_ID="$(hermes kanban create "wiki-lint $WIKI" \
-            --assignee "$CURATOR" \
+            --assignee "$WIKI_LINT_ASSIGNEE" \
             --skill wiki-lint \
             --workspace "dir:$WIKI" \
             --idempotency-key "$LINT_KEY" \

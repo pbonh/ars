@@ -46,6 +46,14 @@
 #   --skip-batch        skip phase 1 (pdf-to-mdbook).
 #   --skip-ingest       skip phase 2 (per-chapter ingest+lint loop).
 #   --skip-final-lint   skip phase 3 (whole-graph lint sweep).
+#   --model M           default model for all phases (HERMES_INFERENCE_MODEL).
+#   --provider P        default provider for all phases (HERMES_INFERENCE_PROVIDER).
+#   --batch-model M     override --model for phase 1 (ingest-pipeline-batch).
+#   --batch-provider P  override --provider for phase 1.
+#   --ingest-model M    override --model for wiki-ingest calls.
+#   --ingest-provider P override --provider for wiki-ingest calls.
+#   --lint-model M      override --model for wiki-lint (per-chapter and final).
+#   --lint-provider P   override --provider for wiki-lint.
 #   -h | --help         this help.
 #
 # Examples:
@@ -57,6 +65,11 @@
 #
 #   # Lint every 5 chapters instead of every chapter (cheaper, looser graph).
 #   hermes_wiki_ingest_batch ~/wiki --lint-every 5
+#
+#   # Strong model for ingest, cheap one for lint:
+#   hermes_wiki_ingest_batch ~/wiki \
+#     --ingest-model anthropic/claude-sonnet-4.6 \
+#     --lint-model anthropic/claude-haiku-4.5
 
 set -Eeuo pipefail
 
@@ -72,20 +85,44 @@ LINT_EVERY=1
 SKIP_BATCH=""
 SKIP_INGEST=""
 SKIP_FINAL_LINT=""
+MODEL=""
+PROVIDER=""
+BATCH_MODEL=""
+BATCH_PROVIDER=""
+INGEST_MODEL=""
+INGEST_PROVIDER=""
+LINT_MODEL=""
+LINT_PROVIDER=""
 
 while (($#)); do
   case "$1" in
-    --parallel|-P)     PARALLEL="$2"; shift 2 ;;
-    --vision)          VISION="$2";   shift 2 ;;
-    --force)           FORCE="--force"; shift ;;
-    --lint-every)      LINT_EVERY="$2"; shift 2 ;;
-    --skip-batch)      SKIP_BATCH=1; shift ;;
-    --skip-ingest)     SKIP_INGEST=1; shift ;;
-    --skip-final-lint) SKIP_FINAL_LINT=1; shift ;;
-    -h|--help)         usage ;;
+    --parallel|-P)      PARALLEL="$2"; shift 2 ;;
+    --vision)           VISION="$2";   shift 2 ;;
+    --force)            FORCE="--force"; shift ;;
+    --lint-every)       LINT_EVERY="$2"; shift 2 ;;
+    --skip-batch)       SKIP_BATCH=1; shift ;;
+    --skip-ingest)      SKIP_INGEST=1; shift ;;
+    --skip-final-lint)  SKIP_FINAL_LINT=1; shift ;;
+    --model)            MODEL="$2"; shift 2 ;;
+    --provider)         PROVIDER="$2"; shift 2 ;;
+    --batch-model)      BATCH_MODEL="$2"; shift 2 ;;
+    --batch-provider)   BATCH_PROVIDER="$2"; shift 2 ;;
+    --ingest-model)     INGEST_MODEL="$2"; shift 2 ;;
+    --ingest-provider)  INGEST_PROVIDER="$2"; shift 2 ;;
+    --lint-model)       LINT_MODEL="$2"; shift 2 ;;
+    --lint-provider)    LINT_PROVIDER="$2"; shift 2 ;;
+    -h|--help)          usage ;;
     *) printf 'unknown arg: %s\n' "$1" >&2; usage ;;
   esac
 done
+
+# --model / --provider are defaults; per-phase flags override.
+BATCH_MODEL="${BATCH_MODEL:-$MODEL}"
+INGEST_MODEL="${INGEST_MODEL:-$MODEL}"
+LINT_MODEL="${LINT_MODEL:-$MODEL}"
+BATCH_PROVIDER="${BATCH_PROVIDER:-$PROVIDER}"
+INGEST_PROVIDER="${INGEST_PROVIDER:-$PROVIDER}"
+LINT_PROVIDER="${LINT_PROVIDER:-$PROVIDER}"
 
 LIBRARY="$WIKI/raw"
 STATE="$WIKI/wiki/.ingest-state.tsv"
@@ -110,14 +147,32 @@ mkdir -p "$LOG_DIR"
 SUMMARY="$LOG_DIR/summary.log"
 say()  { printf '[%s] %s\n' "$(date -u +%H:%M:%SZ)" "$*" | tee -a "$SUMMARY" >&2; }
 
+# Run hermes for one phase (batch|ingest|lint), injecting the phase's
+# HERMES_INFERENCE_MODEL / HERMES_INFERENCE_PROVIDER if set; otherwise
+# defers to whatever ~/.hermes/config.yaml configures.
+hermes_phase() {
+  local phase="$1"; shift
+  local m_var="${phase^^}_MODEL"
+  local p_var="${phase^^}_PROVIDER"
+  local m="${!m_var:-}"
+  local p="${!p_var:-}"
+  if [[ -n "$m$p" ]]; then
+    env ${m:+HERMES_INFERENCE_MODEL="$m"} ${p:+HERMES_INFERENCE_PROVIDER="$p"} hermes "$@"
+  else
+    hermes "$@"
+  fi
+}
+
 say "wiki=$WIKI library=$LIBRARY"
 say "parallel=$PARALLEL vision=$VISION force=${FORCE:-no} lint-every=$LINT_EVERY"
+say "models: batch=${BATCH_MODEL:-default} ingest=${INGEST_MODEL:-default} lint=${LINT_MODEL:-default}"
+say "providers: batch=${BATCH_PROVIDER:-default} ingest=${INGEST_PROVIDER:-default} lint=${LINT_PROVIDER:-default}"
 say "state=$STATE log_dir=$LOG_DIR"
 
 # ---------- Phase 1: pdf-to-mdbook ----------
 if [[ -z "$SKIP_BATCH" ]]; then
   say "phase 1/3: ingest-pipeline-batch (parallel=$PARALLEL, no --wiki-root)"
-  if hermes -s ingest-pipeline-batch -z "Sweep the library at $LIBRARY using ingest-pipeline-batch. Run with --parallel $PARALLEL --vision $VISION ${FORCE}. Do not pass --wiki-root — wiki ingestion happens in a separate phase. Stop after each book reaches mdbook build success. The only ingest-pipeline runner you may invoke is the deployed skill at ~/.hermes/skills/ingest-pipeline/scripts/run_pipeline.py — do NOT search the library tree or any workspace path for an ad-hoc run_pipeline.py / convert_pdf_to_mdbook.py / similar; those produce stub one-page-per-file output and a falsified pipeline.json. If the deployed skill is missing, stop and report it; do not improvise." \
+  if hermes_phase batch -s ingest-pipeline-batch -z "Sweep the library at $LIBRARY using ingest-pipeline-batch. Run with --parallel $PARALLEL --vision $VISION ${FORCE}. Do not pass --wiki-root — wiki ingestion happens in a separate phase. Stop after each book reaches mdbook build success. The only ingest-pipeline runner you may invoke is the deployed skill at ~/.hermes/skills/ingest-pipeline/scripts/run_pipeline.py — do NOT search the library tree or any workspace path for an ad-hoc run_pipeline.py / convert_pdf_to_mdbook.py / similar; those produce stub one-page-per-file output and a falsified pipeline.json. If the deployed skill is missing, stop and report it; do not improvise." \
       >"$LOG_DIR/batch.log" 2>&1; then
     say "batch ok ($LOG_DIR/batch.log)"
   else
@@ -241,7 +296,7 @@ After finishing, emit a final line beginning \"Files touched:\" listing every wi
     esac
 
     INGEST_LOG="$LOG_DIR/ingest-${IDX}.log"
-    if ( cd "$WIKI" && hermes -s wiki-ingest -z "$INGEST_PROMPT" ) >"$INGEST_LOG" 2>&1; then
+    if ( cd "$WIKI" && hermes_phase ingest -s wiki-ingest -z "$INGEST_PROMPT" ) >"$INGEST_LOG" 2>&1; then
       printf '%s\t%s\n' "$SLUG" "$REL" >> "$STATE"
       STATE_MAP["${SLUG}|${REL}"]=1
       CHAPTERS_DONE=$((CHAPTERS_DONE + 1))
@@ -273,7 +328,7 @@ Read those files first; run all standard checks (orphans, dead links, broken bac
         LINT_PROMPT="Audit the wiki after the most recent chapter ingest ($SLUG :: $LABEL). Auto-fix safe issues (orphans, dead links, broken back-links, stale index counts, contradictions). Report the rest. Keep this scoped to a quick incremental sweep — the next chapter is queued."
       fi
 
-      if ( cd "$WIKI" && hermes -s wiki-lint -z "$LINT_PROMPT" ) >"$LINT_LOG" 2>&1; then
+      if ( cd "$WIKI" && hermes_phase lint -s wiki-lint -z "$LINT_PROMPT" ) >"$LINT_LOG" 2>&1; then
         say "  · lint ok ($LINT_LOG)$([[ -n \"$TOUCHED\" ]] && echo ' [scoped]')"
       else
         say "  ! lint FAILED ($LINT_LOG) — continuing"
@@ -292,7 +347,7 @@ fi
 # ---------- Phase 3: final lint sweep ----------
 if [[ -z "$SKIP_FINAL_LINT" ]]; then
   say "phase 3/3: final wiki-lint sweep"
-  if ( cd "$WIKI" && hermes -s wiki-lint -z "Final audit of this wiki: orphans, stale pages, dead links, contradictions, low-confidence pages, index/statistics drift. Auto-fix what is safe; report the rest." ) >"$LOG_DIR/wiki-lint-final.log" 2>&1; then
+  if ( cd "$WIKI" && hermes_phase lint -s wiki-lint -z "Final audit of this wiki: orphans, stale pages, dead links, contradictions, low-confidence pages, index/statistics drift. Auto-fix what is safe; report the rest." ) >"$LOG_DIR/wiki-lint-final.log" 2>&1; then
     say "final lint ok ($LOG_DIR/wiki-lint-final.log)"
   else
     say "final lint FAILED ($LOG_DIR/wiki-lint-final.log)"; exit 1
