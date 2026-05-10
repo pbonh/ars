@@ -41,10 +41,18 @@ Run detection at session start. If wiki detected, load this skill.
 When wiki work begins, check for existing wiki via detection. Then route:
 - No wiki → use `wiki-bootstrap`
 - Collect sources → use `wiki-collect`
-- Ingest sources → use `wiki-ingest`
+- Ingest sources → use `wiki-ingest` (writes fragments to `wiki/.fragments/`; canonical pages are produced by `wiki-merge`)
+- Consolidate fragments → use `wiki-merge` (called automatically by the parallel orchestrator; runnable on demand to drain any remaining fragments)
 - Answer questions → use `wiki-query`
 - Audit health → use `wiki-lint`
 - Log sessions → use `wiki-journal`
 - Generate artifacts → use `wiki-generate`
 
-**REQUIRED SUB-SKILLS:** wiki-bootstrap, wiki-collect, wiki-ingest, wiki-query, wiki-lint, wiki-journal, wiki-generate
+## Ingest pipeline modes
+
+Two orchestrator scripts drive multi-book ingest from the shell:
+
+- `hermes_wiki_ingest_batch` — serial. Per-chapter ingest+lint loop, one chapter at a time. Use this for small wikis or when debugging.
+- `hermes_wiki_ingest_batch_parallel` — per-book parallel via `xargs -P --ingest-parallel`. A background `wiki-merge` ticks under flock to consolidate fragments while workers continue. Use this for large wikis (multi-hundred chapters) where serial is too slow. Requires the fragment-mode `wiki-ingest` and the `wiki-merge` skill (both included in this skill set).
+
+**REQUIRED SUB-SKILLS:** wiki-bootstrap, wiki-collect, wiki-ingest, wiki-merge, wiki-query, wiki-lint, wiki-journal, wiki-generate

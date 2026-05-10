@@ -1,0 +1,472 @@
+#!/usr/bin/env bash
+#
+# hermes_wiki_ingest_batch_parallel
+#
+# Per-book parallel sibling of hermes_wiki_ingest_batch. Same three-phase
+# shape, but phase 2 runs N book-workers concurrently and a background
+# merger ticks under flock to consolidate their fragments into the
+# canonical wiki/concepts/, wiki/entities/, wiki/index.md, wiki/log.md.
+#
+#   Phase 1 — pdf-to-mdbook (parallel, ingest-pipeline-batch skill)
+#   Phase 2a — per-book wiki-ingest workers (xargs -P --ingest-parallel)
+#   Phase 2b — background wiki-merge tick every --merge-interval (flock)
+#   Phase 2c — drain merge after all workers exit
+#   Phase 3  — final wiki-lint sweep
+#
+# Why per-book instead of per-chapter parallel? Within a book, chapters
+# share wiki/summaries/<book-slug>.md (the same file). Across books they
+# don't — every other write goes through wiki/.fragments/, where the
+# (concept-slug, book-slug, chapter) filename scheme guarantees no
+# collisions. So per-BOOK parallelism is safe today; per-chapter would
+# require also splitting summaries into fragments.
+#
+# This script REQUIRES the fragment-mode wiki-ingest skill (the one that
+# writes wiki/.fragments/* instead of editing canonical pages) and the
+# wiki-merge skill. If you're running an older deployed skill set, use
+# the serial sibling hermes_wiki_ingest_batch instead.
+#
+# Idempotency / resumability:
+#   - Phase 1: ingest-pipeline-batch skips books with status:complete.
+#   - Phase 2: per-book state files at <wiki>/wiki/.ingest-state.<slug>.tsv
+#     record completed (slug, rel_path) pairs. No cross-worker race —
+#     each worker only appends to its own file. The orchestrator unions
+#     them into an in-memory skip-set before each pass.
+#   - The background merger is idempotent (re-running is a no-op when
+#     no fragments are present).
+#   - Phase 3 (final lint) is idempotent.
+#   - --force reprocesses everything and clears all per-book state files.
+#
+# Usage:
+#   hermes_wiki_ingest_batch_parallel <wiki_root> [options]
+#
+# Options:
+#   --ingest-parallel N   Per-book parallelism for phase 2. Default 4.
+#   --parallel N          pdf-to-mdbook fan-out (phase 1 only). Default 2.
+#   --vision MODE         vision mode passed to ingest-pipeline-batch. Default auto.
+#   --merge-interval D    background merger tick interval. Accepts s/m/h
+#                         (e.g. 600, 10m, 1h). Default 10m. 0 disables ticks
+#                         (only drain-merge at end).
+#   --force               reprocess everything (clears phase-2 state files too).
+#   --skip-batch          skip phase 1 (pdf-to-mdbook).
+#   --skip-ingest         skip phase 2 (per-book ingest + background merge).
+#   --skip-final-lint     skip phase 3.
+#   --model M             default model for all phases (HERMES_INFERENCE_MODEL).
+#   --provider P          default provider for all phases (HERMES_INFERENCE_PROVIDER).
+#   --batch-model M       override --model for phase 1.
+#   --batch-provider P    override --provider for phase 1.
+#   --ingest-model M      override --model for wiki-ingest workers.
+#   --ingest-provider P   override --provider for wiki-ingest workers.
+#   --merge-model M       override --model for wiki-merge calls.
+#   --merge-provider P    override --provider for wiki-merge calls.
+#   --lint-model M        override --model for final wiki-lint.
+#   --lint-provider P     override --provider for final wiki-lint.
+#   -h | --help           this help.
+#
+# Examples:
+#   # Default flow on a fresh library: parallel convert, then 4-way per-book ingest
+#   # with a merge tick every 10 minutes, then final lint.
+#   hermes_wiki_ingest_batch_parallel ~/wiki --parallel 3 --ingest-parallel 4
+#
+#   # Already converted; just per-book ingest + merge.
+#   hermes_wiki_ingest_batch_parallel ~/wiki --skip-batch --ingest-parallel 6
+#
+#   # Strong model for ingest, cheap one for merge prose.
+#   hermes_wiki_ingest_batch_parallel ~/wiki \
+#     --ingest-model anthropic/claude-sonnet-4.6 \
+#     --merge-model anthropic/claude-haiku-4.5
+
+set -Eeuo pipefail
+
+usage() { sed -n '2,/^$/p' "$0" | sed 's/^# \?//' >&2; exit 2; }
+
+# -------- Self-re-exec worker mode (called by xargs from phase 2a) --------
+#
+# The dispatcher fires `<script> --__worker <chapters_jsonl>` once per book
+# under xargs -P. The worker pulls all settings from exported env vars set
+# by the parent orchestrator before xargs ran. Functions and globals are
+# re-defined when the script runs again — that's fine, bash startup is
+# fast and they only get used inside the worker branch.
+#
+# Argument: a path to a per-book jsonl file (one chapter group per line).
+worker_main() {
+  local chapters_jsonl="$1"
+  local book_slug
+  book_slug="$(basename "$chapters_jsonl" .jsonl)"
+
+  local state_file="${WIKI}/wiki/.ingest-state.${book_slug}.tsv"
+  [[ -f "$state_file" ]] || : > "$state_file"
+
+  # Build skip-set from state file. Format: <slug>\t<rel_path>
+  declare -A SKIP
+  while IFS=$'\t' read -r _S _R; do
+    [[ -n "$_S$_R" ]] && SKIP["${_S}|${_R}"]=1
+  done < "$state_file"
+
+  local idx=0
+  local total
+  total=$(wc -l < "$chapters_jsonl" | tr -d ' ')
+
+  local _say_prefix="[$(date -u +%H:%M:%SZ)] [${book_slug}]"
+  printf '%s starting (%s chapter group[s])\n' "$_say_prefix" "$total" >> "${LOG_DIR}/per-book/${book_slug}.log"
+
+  while IFS= read -r LINE; do
+    [[ -z "$LINE" ]] && continue
+    idx=$((idx + 1))
+
+    eval "$(printf '%s' "$LINE" | python3 -c '
+import json, shlex, sys, re
+r = json.loads(sys.stdin.read())
+title = r["title"]
+m = re.search(r"\(part\s+(\d+)/(\d+)\)", title)
+is_part_n = "1" if (m and int(m.group(1)) > 1) else "0"
+files = []
+if r["rel_path"] != "-":
+    files.append("  - " + r["rel_path"] + " — " + title)
+for p, t in zip(r["sub_paths"], r["sub_titles"]):
+    files.append("  - " + p + " — " + t)
+files_block = "\n".join(files)
+print("SLUG=" + shlex.quote(r["slug"]))
+print("KIND=" + shlex.quote(r["kind"]))
+print("REL=" + shlex.quote(r["rel_path"]))
+print("TITLE=" + shlex.quote(title))
+print("IS_PART_N=" + is_part_n)
+print("NUM_FILES=" + str(len(files)))
+print("FILE_LIST_BLOCK=" + shlex.quote(files_block))
+')"
+
+    if [[ -n "${SKIP[${SLUG}|${REL}]:-}" ]]; then
+      printf '%s · [%s/%s] skip (state): %s\n' "$_say_prefix" "$idx" "$total" "$REL" \
+        >> "${LOG_DIR}/per-book/${book_slug}.log"
+      continue
+    fi
+
+    local label="$REL"
+    [[ "$REL" == "-" ]] && label="(whole source)"
+    printf '%s · [%s/%s] ingest: %s — %s (%s file[s])\n' \
+      "$_say_prefix" "$idx" "$total" "$label" "$TITLE" "$NUM_FILES" \
+      >> "${LOG_DIR}/per-book/${book_slug}.log"
+
+    local ingest_prompt
+    case "$KIND" in
+      mdbook)
+        local part_directive
+        if [[ "$IS_PART_N" == "1" ]]; then
+          part_directive="This is a continuation of an oversized chapter — extend the existing chapter section in wiki/summaries/$SLUG.md (the section was started by the prior \"part 1/N\" call). Do NOT create a new section header. Do NOT duplicate the chapter title in the log fragment."
+        else
+          part_directive="Add ONE new chapter section to wiki/summaries/$SLUG.md (creating the file if needed). Emit ONE log fragment for this chapter (not one per sub-file)."
+        fi
+        ingest_prompt="Ingest exactly ONE CHAPTER GROUP from ONE book under fragment mode. Do not touch any other chapter or book in this turn.
+
+Book slug: $SLUG
+Chapter: $TITLE  ($REL)
+Read ALL of these files in <mdbook_root>/src/ as a single chapter unit:
+$FILE_LIST_BLOCK
+
+$part_directive
+
+Emit per-(concept, book, chapter) fragments under wiki/.fragments/concepts/<concept-slug>/${SLUG}__<flat-chapter-rel>.md, per-(entity, book, chapter) fragments under wiki/.fragments/entities/<entity-slug>/${SLUG}__<flat-chapter-rel>.md, exactly ONE index-delta JSON at wiki/.fragments/index/${SLUG}__<flat-chapter-rel>.json, and exactly ONE log fragment at wiki/.fragments/log/<ISO timestamp>__${SLUG}__<flat-chapter-rel>.md. Do NOT touch wiki/concepts/, wiki/entities/, wiki/index.md, or wiki/log.md — those are owned by the wiki-merge skill.
+
+After finishing, emit a final line beginning \"Files touched:\" listing every wiki/* path you wrote (the summary plus all fragments + index delta), comma-separated. Do not parallelize. Do not start another chapter."
+        ;;
+      *)
+        ingest_prompt="Ingest exactly ONE source under fragment mode. Do not touch any other source in this turn.
+
+Source slug: $SLUG
+Source kind: $KIND (no mdBook available — fallback path)
+
+Use the wiki-ingest fragment-mode workflow scoped to this single source. Run triage with --source pointing at raw/$SLUG, read the source per its kind, and produce: wiki/summaries/$SLUG.md, per-concept/entity fragments under wiki/.fragments/, ONE index-delta JSON, and ONE log fragment. Do NOT touch any canonical wiki/concepts/, wiki/entities/, wiki/index.md, or wiki/log.md path.
+
+After finishing, emit a final line beginning \"Files touched:\" listing every wiki/* path you wrote, comma-separated. Do not parallelize. Do not start another source."
+        ;;
+    esac
+
+    local ingest_log="${LOG_DIR}/ingest-${book_slug}-${idx}.log"
+    if ( cd "$WIKI" && hermes_phase ingest -s wiki-ingest -z "$ingest_prompt" ) \
+        >"$ingest_log" 2>&1; then
+      printf '%s\t%s\n' "$SLUG" "$REL" >> "$state_file"
+      SKIP["${SLUG}|${REL}"]=1
+      printf '%s · [%s/%s] ok (%s)\n' \
+        "$_say_prefix" "$idx" "$total" "$ingest_log" \
+        >> "${LOG_DIR}/per-book/${book_slug}.log"
+    else
+      printf '%s ! [%s/%s] FAILED (%s) — leaving in state as not done; continuing\n' \
+        "$_say_prefix" "$idx" "$total" "$ingest_log" \
+        >> "${LOG_DIR}/per-book/${book_slug}.log"
+    fi
+  done < "$chapters_jsonl"
+
+  printf '%s done\n' "$_say_prefix" >> "${LOG_DIR}/per-book/${book_slug}.log"
+}
+
+# -------- Inference-phase wrapper (used by both orchestrator and worker) --------
+hermes_phase() {
+  local phase="$1"; shift
+  local m_var="${phase^^}_MODEL"
+  local p_var="${phase^^}_PROVIDER"
+  local m="${!m_var:-}"
+  local p="${!p_var:-}"
+  if [[ -n "$m$p" ]]; then
+    env ${m:+HERMES_INFERENCE_MODEL="$m"} ${p:+HERMES_INFERENCE_PROVIDER="$p"} hermes "$@"
+  else
+    hermes "$@"
+  fi
+}
+
+# -------- Worker dispatch (must come before arg parsing for re-exec) --------
+if [[ $# -ge 1 && "$1" == "--__worker" ]]; then
+  shift
+  : "${WIKI:?worker invoked without WIKI exported}"
+  : "${LOG_DIR:?worker invoked without LOG_DIR exported}"
+  worker_main "$1"
+  exit $?
+fi
+
+# -------- Main: orchestrator argument parsing --------
+[[ $# -ge 1 ]] || usage
+case "$1" in -h|--help) usage ;; esac
+
+WIKI="$(realpath "$1")"; shift
+SCRIPT_PATH="$(realpath "$0")"
+
+PARALLEL=2
+INGEST_PARALLEL=4
+VISION="auto"
+MERGE_INTERVAL_RAW="10m"
+FORCE=""
+SKIP_BATCH=""
+SKIP_INGEST=""
+SKIP_FINAL_LINT=""
+MODEL=""
+PROVIDER=""
+BATCH_MODEL=""
+BATCH_PROVIDER=""
+INGEST_MODEL=""
+INGEST_PROVIDER=""
+MERGE_MODEL=""
+MERGE_PROVIDER=""
+LINT_MODEL=""
+LINT_PROVIDER=""
+
+while (($#)); do
+  case "$1" in
+    --ingest-parallel)  INGEST_PARALLEL="$2"; shift 2 ;;
+    --parallel|-P)      PARALLEL="$2";        shift 2 ;;
+    --vision)           VISION="$2";          shift 2 ;;
+    --merge-interval)   MERGE_INTERVAL_RAW="$2"; shift 2 ;;
+    --force)            FORCE="--force";      shift ;;
+    --skip-batch)       SKIP_BATCH=1;         shift ;;
+    --skip-ingest)      SKIP_INGEST=1;        shift ;;
+    --skip-final-lint)  SKIP_FINAL_LINT=1;    shift ;;
+    --model)            MODEL="$2";           shift 2 ;;
+    --provider)         PROVIDER="$2";        shift 2 ;;
+    --batch-model)      BATCH_MODEL="$2";     shift 2 ;;
+    --batch-provider)   BATCH_PROVIDER="$2";  shift 2 ;;
+    --ingest-model)     INGEST_MODEL="$2";    shift 2 ;;
+    --ingest-provider)  INGEST_PROVIDER="$2"; shift 2 ;;
+    --merge-model)      MERGE_MODEL="$2";     shift 2 ;;
+    --merge-provider)   MERGE_PROVIDER="$2";  shift 2 ;;
+    --lint-model)       LINT_MODEL="$2";      shift 2 ;;
+    --lint-provider)    LINT_PROVIDER="$2";   shift 2 ;;
+    -h|--help)          usage ;;
+    *) printf 'unknown arg: %s\n' "$1" >&2; usage ;;
+  esac
+done
+
+# Per-phase defaults
+BATCH_MODEL="${BATCH_MODEL:-$MODEL}"
+INGEST_MODEL="${INGEST_MODEL:-$MODEL}"
+MERGE_MODEL="${MERGE_MODEL:-$MODEL}"
+LINT_MODEL="${LINT_MODEL:-$MODEL}"
+BATCH_PROVIDER="${BATCH_PROVIDER:-$PROVIDER}"
+INGEST_PROVIDER="${INGEST_PROVIDER:-$PROVIDER}"
+MERGE_PROVIDER="${MERGE_PROVIDER:-$PROVIDER}"
+LINT_PROVIDER="${LINT_PROVIDER:-$PROVIDER}"
+
+[[ "$INGEST_PARALLEL" =~ ^[0-9]+$ ]] && (( INGEST_PARALLEL >= 1 )) || {
+  echo "--ingest-parallel must be a positive integer" >&2; exit 2; }
+
+# --merge-interval parser (accepts e.g. 600, 10m, 1h, 0 to disable)
+parse_duration_seconds() {
+  local raw="$1"
+  if [[ "$raw" =~ ^[0-9]+$ ]]; then echo "$raw"; return; fi
+  if [[ "$raw" =~ ^([0-9]+)s$ ]]; then echo "${BASH_REMATCH[1]}"; return; fi
+  if [[ "$raw" =~ ^([0-9]+)m$ ]]; then echo "$(( BASH_REMATCH[1] * 60 ))"; return; fi
+  if [[ "$raw" =~ ^([0-9]+)h$ ]]; then echo "$(( BASH_REMATCH[1] * 3600 ))"; return; fi
+  echo "INVALID"
+}
+MERGE_INTERVAL_S="$(parse_duration_seconds "$MERGE_INTERVAL_RAW")"
+[[ "$MERGE_INTERVAL_S" != "INVALID" ]] || {
+  echo "--merge-interval: invalid duration '$MERGE_INTERVAL_RAW' (use 600, 10m, 1h, or 0)" >&2; exit 2; }
+
+LIBRARY="$WIKI/raw"
+TRIAGE="$HOME/.hermes/skills/wiki-ingest/scripts/triage_source.py"
+MERGE_SKILL_DIR="$HOME/.hermes/skills/wiki-merge"
+MERGE_LOCK="$WIKI/wiki/.merge.lock"
+
+[[ -d "$WIKI"    ]] || { echo "wiki not found: $WIKI" >&2; exit 1; }
+[[ -d "$LIBRARY" ]] || { echo "raw/ not found in wiki: $LIBRARY" >&2; exit 1; }
+[[ -f "$TRIAGE"  ]] || { echo "wiki-ingest triage script missing: $TRIAGE" >&2; exit 1; }
+[[ -d "$MERGE_SKILL_DIR" ]] || { echo "wiki-merge skill missing: $MERGE_SKILL_DIR" >&2; exit 1; }
+command -v hermes  >/dev/null || { echo "hermes not on PATH"  >&2; exit 1; }
+command -v python3 >/dev/null || { echo "python3 not on PATH" >&2; exit 1; }
+command -v flock   >/dev/null || { echo "flock not on PATH (util-linux)" >&2; exit 1; }
+command -v xargs   >/dev/null || { echo "xargs not on PATH" >&2; exit 1; }
+
+mkdir -p "$WIKI/wiki" "$WIKI/wiki/.fragments/concepts" "$WIKI/wiki/.fragments/entities" \
+         "$WIKI/wiki/.fragments/log" "$WIKI/wiki/.fragments/index" "$WIKI/wiki/.fragments/.merged"
+
+# State files: per-book TSVs
+if [[ -n "$FORCE" ]]; then
+  rm -f "$WIKI"/wiki/.ingest-state.*.tsv
+fi
+
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+LOG_DIR="${HERMES_INGEST_LOG_DIR:-$HOME/.hermes/logs/wiki-ingest-batch-parallel}/$RUN_ID"
+mkdir -p "$LOG_DIR/per-book" "$LOG_DIR/books"
+SUMMARY="$LOG_DIR/summary.log"
+say() { printf '[%s] %s\n' "$(date -u +%H:%M:%SZ)" "$*" | tee -a "$SUMMARY" >&2; }
+
+say "wiki=$WIKI library=$LIBRARY"
+say "ingest-parallel=$INGEST_PARALLEL parallel(phase 1)=$PARALLEL vision=$VISION force=${FORCE:-no}"
+say "merge-interval=${MERGE_INTERVAL_RAW} (${MERGE_INTERVAL_S}s, 0=disabled)"
+say "models: batch=${BATCH_MODEL:-default} ingest=${INGEST_MODEL:-default} merge=${MERGE_MODEL:-default} lint=${LINT_MODEL:-default}"
+say "providers: batch=${BATCH_PROVIDER:-default} ingest=${INGEST_PROVIDER:-default} merge=${MERGE_PROVIDER:-default} lint=${LINT_PROVIDER:-default}"
+say "log_dir=$LOG_DIR"
+
+# -------- Phase 1: pdf-to-mdbook --------
+if [[ -z "$SKIP_BATCH" ]]; then
+  say "phase 1/3: ingest-pipeline-batch (parallel=$PARALLEL, no --wiki-root)"
+  if hermes_phase batch -s ingest-pipeline-batch -z "Sweep the library at $LIBRARY using ingest-pipeline-batch. Run with --parallel $PARALLEL --vision $VISION ${FORCE}. Do not pass --wiki-root — wiki ingestion happens in a separate phase. Stop after each book reaches mdbook build success. The only ingest-pipeline runner you may invoke is the deployed skill at ~/.hermes/skills/ingest-pipeline/scripts/run_pipeline.py — do NOT search the library tree or any workspace path for an ad-hoc run_pipeline.py / convert_pdf_to_mdbook.py / similar; those produce stub one-page-per-file output and a falsified pipeline.json. If the deployed skill is missing, stop and report it; do not improvise." \
+      >"$LOG_DIR/batch.log" 2>&1; then
+    say "batch ok ($LOG_DIR/batch.log)"
+  else
+    say "batch FAILED ($LOG_DIR/batch.log) — phase 2 will only see books that completed."
+  fi
+else
+  say "phase 1/3: SKIPPED (--skip-batch)"
+fi
+
+# -------- Phase 2: per-book parallel ingest + background merger tick --------
+
+run_merge_once() {
+  local label="$1"
+  local mlog="${LOG_DIR}/merge-${label}-$(date -u +%Y%m%dT%H%M%SZ).log"
+  # cd "$WIKI" matters: the merge skill writes wiki/index.md, wiki/log.md,
+  # wiki/concepts/*, wiki/entities/* relative to cwd. Without this it
+  # would scribble in the orchestrator's current directory.
+  ( flock -x -w 60 200 || { echo "merge $label: failed to acquire lock"; exit 0; }
+    cd "$WIKI" && hermes_phase merge -s wiki-merge -z "Periodic merge tick (${label}). Triage wiki/.fragments/ via the helper script, merge each pending concept/entity, append the log batch, rebuild the index, and report. Use scripts/triage_fragments.py first. Single-pass — exit when done."
+  ) 200>"$MERGE_LOCK" >"$mlog" 2>&1
+  local rc=$?
+  if [[ $rc -eq 0 ]]; then
+    say "merge $label ok ($mlog)"
+  else
+    say "merge $label FAILED rc=$rc ($mlog) — continuing"
+  fi
+}
+
+if [[ -z "$SKIP_INGEST" ]]; then
+  say "phase 2/3: per-book parallel ingest (ingest-parallel=$INGEST_PARALLEL)"
+
+  # Triage all chapter groups, then split by book slug into per-book jsonl files.
+  CHAPTERS_JSONL="$LOG_DIR/chapters.jsonl"
+  if ! python3 "$TRIAGE" "$WIKI" --enumerate-chapters >"$CHAPTERS_JSONL" 2>"$LOG_DIR/triage.err"; then
+    say "triage FAILED — see $LOG_DIR/triage.err"; exit 1
+  fi
+  TOTAL=$(wc -l < "$CHAPTERS_JSONL" | tr -d ' ')
+  say "triage emitted $TOTAL chapter group(s)"
+
+  # Split into one .jsonl per book slug.
+  python3 - "$CHAPTERS_JSONL" "$LOG_DIR/books" <<'PY'
+import json, os, sys
+chapters_path, books_dir = sys.argv[1], sys.argv[2]
+os.makedirs(books_dir, exist_ok=True)
+fhs = {}
+n = 0
+for line in open(chapters_path):
+    line = line.strip()
+    if not line:
+        continue
+    try:
+        rec = json.loads(line)
+    except Exception:
+        continue
+    slug = rec["slug"]
+    if slug not in fhs:
+        fhs[slug] = open(os.path.join(books_dir, f"{slug}.jsonl"), "w")
+    fhs[slug].write(line + "\n")
+    n += 1
+for fh in fhs.values():
+    fh.close()
+print(f"split {n} chapter group(s) across {len(fhs)} book(s)", file=sys.stderr)
+PY
+
+  N_BOOKS=$(ls -1 "$LOG_DIR/books"/*.jsonl 2>/dev/null | wc -l | tr -d ' ')
+  say "split into $N_BOOKS per-book chapter file(s)"
+
+  # Background merger tick
+  MERGER_PID=""
+  if (( MERGE_INTERVAL_S > 0 )); then
+    (
+      tick=0
+      while sleep "$MERGE_INTERVAL_S"; do
+        tick=$((tick + 1))
+        run_merge_once "tick-$tick" || true
+      done
+    ) &
+    MERGER_PID=$!
+    say "background merger started (pid=$MERGER_PID, interval=${MERGE_INTERVAL_S}s)"
+    trap 'if [[ -n "$MERGER_PID" ]]; then kill "$MERGER_PID" 2>/dev/null || true; fi' EXIT INT TERM
+  else
+    say "background merger DISABLED (--merge-interval 0). Drain merge will run after workers."
+  fi
+
+  # Export everything the worker needs (re-exec inherits env)
+  export WIKI LOG_DIR
+  export INGEST_MODEL INGEST_PROVIDER
+
+  # Per-book parallel dispatch via xargs. Re-exec via `bash $SCRIPT_PATH`
+  # rather than relying on the +x bit — works when the script is invoked
+  # from the templated source tree without execute permissions.
+  if (( N_BOOKS > 0 )); then
+    DISPATCH_RC=0
+    ls -1 "$LOG_DIR/books"/*.jsonl \
+      | xargs -P "$INGEST_PARALLEL" -I {} bash "$SCRIPT_PATH" --__worker {} \
+      || DISPATCH_RC=$?
+    if (( DISPATCH_RC == 0 )); then
+      say "per-book workers complete"
+    else
+      say "per-book workers exited with rc=$DISPATCH_RC — continuing to drain merge"
+    fi
+  else
+    say "no books to ingest"
+  fi
+
+  # Stop the background merger before the drain merge so we don't race.
+  if [[ -n "$MERGER_PID" ]]; then
+    kill "$MERGER_PID" 2>/dev/null || true
+    wait "$MERGER_PID" 2>/dev/null || true
+    trap - EXIT INT TERM
+    say "background merger stopped"
+  fi
+
+  # Drain merge: ensure all fragments are consolidated before lint.
+  say "phase 2 drain: final wiki-merge to consolidate any remaining fragments"
+  run_merge_once "drain"
+else
+  say "phase 2/3: SKIPPED (--skip-ingest)"
+fi
+
+# -------- Phase 3: final lint sweep --------
+if [[ -z "$SKIP_FINAL_LINT" ]]; then
+  say "phase 3/3: final wiki-lint sweep"
+  if ( cd "$WIKI" && hermes_phase lint -s wiki-lint -z "Final audit of this wiki: orphans, stale pages, dead links, contradictions, low-confidence pages, index/statistics drift. Auto-fix what is safe; report the rest." ) >"$LOG_DIR/wiki-lint-final.log" 2>&1; then
+    say "final lint ok ($LOG_DIR/wiki-lint-final.log)"
+  else
+    say "final lint FAILED ($LOG_DIR/wiki-lint-final.log)"; exit 1
+  fi
+else
+  say "phase 3/3: SKIPPED (--skip-final-lint)"
+fi
+
+say "complete. summary: $SUMMARY"

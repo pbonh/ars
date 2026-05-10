@@ -24,10 +24,14 @@ Create all required directories with `.gitkeep` files:
 ```bash
 mkdir -p raw
 mkdir -p wiki/summaries wiki/concepts wiki/entities wiki/syntheses wiki/journal wiki/presentations
+mkdir -p wiki/.fragments/concepts wiki/.fragments/entities wiki/.fragments/log wiki/.fragments/index wiki/.fragments/.merged
 touch raw/.gitkeep
 touch wiki/summaries/.gitkeep wiki/concepts/.gitkeep wiki/entities/.gitkeep
 touch wiki/syntheses/.gitkeep wiki/journal/.gitkeep wiki/presentations/.gitkeep
+touch wiki/.fragments/.gitkeep
 ```
+
+The `wiki/.fragments/` tree is the staging area used by the parallel ingest pipeline (see `wiki-ingest` "Output mode" and the `wiki-merge` skill). Per-chapter fragments land under `wiki/.fragments/{concepts,entities,log,index}/...` and the `wiki-merge` skill consolidates them into the canonical `wiki/concepts/`, `wiki/entities/`, `wiki/index.md`, `wiki/log.md`. Consumed fragments are moved to `wiki/.fragments/.merged/` for post-mortem inspection. Serial ingest still works with this layout — a single ingest writes one fragment, the next merge consumes it.
 
 ### 3. Generate AGENTS.md
 
@@ -59,14 +63,15 @@ This is an LLM-maintained knowledge base on [YOUR TOPIC]. The LLM writes and mai
 ## Directory Layout
 
 - `raw/` — Immutable source documents (transcripts, articles, notes). Never modify these.
-- `wiki/index.md` — Master catalog. Every wiki page must appear here.
-- `wiki/log.md` — Append-only activity log.
-- `wiki/summaries/` — One summary page per raw source document.
-- `wiki/concepts/` — Concept, strategy, and framework pages.
-- `wiki/entities/` — Entity pages (people, tools, organizations, products — whatever "things" exist in your domain).
+- `wiki/index.md` — Master catalog. Every wiki page must appear here. **Owned by `wiki-merge`** — never edited from `wiki-ingest`.
+- `wiki/log.md` — Append-only activity log. **Owned by `wiki-merge`** — never edited from `wiki-ingest`.
+- `wiki/summaries/` — One summary page per raw source document. Per-book private (filename = source slug); safe to write directly from `wiki-ingest`.
+- `wiki/concepts/` — Concept, strategy, and framework pages. **Owned by `wiki-merge`** — `wiki-ingest` writes per-`(concept, book, chapter)` fragments into `wiki/.fragments/concepts/`, the merger consolidates.
+- `wiki/entities/` — Entity pages. Same ownership rule as concepts — written via fragments.
 - `wiki/syntheses/` — Comparison tables, decision frameworks, cross-cutting analyses.
 - `wiki/journal/` — Research or session journal entries.
 - `wiki/presentations/` — Marp slide decks generated from wiki content.
+- `wiki/.fragments/` — Staging area for the parallel ingest pipeline. `wiki-ingest` writes here; `wiki-merge` reads here and writes the canonical pages above. Subtree: `concepts/<concept>/<book>__<chapter>.md`, `entities/<entity>/<book>__<chapter>.md`, `log/<ts>__<book>__<chapter>.md`, `index/<book>__<chapter>.json`, `.merged/` (post-merge archive).
 
 ## File Naming
 
