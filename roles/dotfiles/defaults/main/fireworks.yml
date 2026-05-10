@@ -3,8 +3,15 @@
 fireworks_base_url: "https://api.fireworks.ai/inference/v1"
 fireworks_api_key_env: "FIREWORKS_API_KEY"
 
-# Default model ID used across tools
+# Firepass: Fireworks tier limited to Kimi K2.6 Turbo. Uses the same base URL
+# as the regular Fireworks API but a separate API key.
+fireworks_firepass_api_key_env: "FIREWORKS_FIREPASS_API_KEY"
+
+# Default model ID used across tools (regular fireworks_api_key tier)
 fireworks_default_model_id: "accounts/fireworks/models/kimi-k2p6"
+
+# Default model ID for the firepass tier (only model allowed by firepass)
+fireworks_firepass_default_model_id: "accounts/fireworks/routers/kimi-k2p6-turbo"
 
 # Canonical model definitions
 # Compatible with pi; hermes derives its narrower dict via Jinja2 transformation
@@ -13,7 +20,7 @@ fireworks_models:
     name: "GLM 5.1"
     context_length: 131072
     contextWindow: 202000
-    maxTokens: 25344
+    maxTokens: 32768
     reasoning: true
     input: ["text"]
     cost:
@@ -49,7 +56,7 @@ fireworks_models:
     name: "Qwen 3.6 Plus"
     context_length: 131072
     contextWindow: 128000
-    maxTokens: 16384
+    maxTokens: 32768
     reasoning: true
     input: ["text", "image"]
     cost:
@@ -61,7 +68,7 @@ fireworks_models:
     name: "MiniMax M2.7"
     context_length: 131072
     contextWindow: 196608
-    maxTokens: 24576
+    maxTokens: 32768
     reasoning: true
     input: ["text"]
     cost:
@@ -71,9 +78,9 @@ fireworks_models:
       cacheWrite: 0.30
   - id: "accounts/fireworks/models/deepseek-v4-pro"
     name: "DeepSeek V4 Pro"
-    context_length: 131072
+    context_length: 384000
     contextWindow: 1000000
-    maxTokens: 131072
+    maxTokens: 384000
     reasoning: true
     input: ["text"]
     cost:
@@ -81,3 +88,19 @@ fireworks_models:
       output: 3.48
       cacheRead: 0.15
       cacheWrite: 1.74
+
+# Models allowed by the firepass tier — currently Kimi K2.6 Turbo only.
+# Pricing mirrors kimi-k2p6 as a placeholder; adjust if firepass pricing differs.
+fireworks_firepass_models:
+  - id: "accounts/fireworks/routers/kimi-k2p6-turbo"
+    name: "Kimi K2.6 Turbo"
+    context_length: 131072
+    contextWindow: 262000
+    maxTokens: 32768
+    reasoning: true
+    input: ["text", "image"]
+    cost:
+      input: 0.95
+      output: 4.00
+      cacheRead: 0.16
+      cacheWrite: 0.95

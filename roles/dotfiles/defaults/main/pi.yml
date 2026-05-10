@@ -8,8 +8,8 @@ pi_sessions_dir: "{{ ansible_env.HOME }}/.pi/sessions"
 pi_prompts_dir: "{{ ansible_env.HOME }}/.pi/prompts"
 pi_harness_dir: "{{ ansible_env.HOME }}/.pi/harness"
 
-pi_default_provider: "fireworks"
-pi_default_model: "{{ fireworks_default_model_id }}"
+pi_default_provider: "firepass"
+pi_default_model: "{{ fireworks_firepass_default_model_id }}"
 pi_default_thinking_level: "high"
 pi_theme: "dark"
 
@@ -51,6 +51,18 @@ pi_fireworks_api: "openai-completions"
 pi_fireworks_auth_header: true
 
 pi_fireworks_models: "{{ fireworks_models }}"
+
+# Firepass tier — same template registers it as a second provider so the user
+# can pick `firepass/<model>` for the Kimi K2.6 Turbo tier and `fireworks/<model>`
+# for the regular catalog.
+pi_firepass_enabled: true
+pi_firepass_provider_name: "firepass"
+pi_firepass_base_url: "{{ fireworks_base_url }}"
+pi_firepass_api_key_env: "{{ fireworks_firepass_api_key_env }}"
+pi_firepass_api: "openai-completions"
+pi_firepass_auth_header: true
+
+pi_firepass_models: "{{ fireworks_firepass_models }}"
 
 pi_global_config:
   defaultProvider: "{{ pi_default_provider }}"

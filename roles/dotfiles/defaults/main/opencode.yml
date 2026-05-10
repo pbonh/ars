@@ -6,9 +6,11 @@ opencode_config_dir: "{{ xdg_config_dir }}/opencode"
 opencode_skills_dir: "{{ opencode_config_dir }}/skills"
 opencode_agents_dir: "{{ opencode_config_dir }}/agents"
 opencode_default_agent: "plan"
-opencode_default_model: "{{ (fireworks_api_key is defined) | ternary('fireworks/kimi-k2p5', 'moonshot/kimi-k2.5') }}"
+# Default to firepass tier (Kimi K2.6 Turbo) when its key is available.
+# Fall back to the regular Fireworks key (Kimi K2.5), then Moonshot.
+opencode_default_model: "{{ (fireworks_firepass_api_key is defined and fireworks_firepass_api_key | length > 0) | ternary('firepass/' ~ fireworks_firepass_default_model_id, (fireworks_api_key is defined) | ternary('fireworks/kimi-k2p5', 'moonshot/kimi-k2.5')) }}"
 opencode_orchestrator_model: "{{ opencode_default_model }}"
-opencode_implementer_model: "{{ (fireworks_api_key is defined) | ternary('fireworks/kimi-k2p5', 'moonshot/kimi-k2.5') }}"
+opencode_implementer_model: "{{ opencode_default_model }}"
 opencode_adversarial_prep_model: "{{ opencode_default_model }}"
 opencode_adversarial_build_model: "{{ opencode_default_model }}"
 opencode_adversarial_planner_model: "{{ opencode_default_model }}"
@@ -921,6 +923,10 @@ opencode_provider_anthropic: "{{ (anthropic_api_key is defined and anthropic_api
 opencode_provider_openai: "{{ (openai_api_key is defined and openai_api_key | length > 0) | ternary({'openai': {'models': {}, 'options': {'apiKey': openai_api_key}}}, {}) }}"
 opencode_provider_moonshot: "{{ (moonshot_api_key is defined and moonshot_api_key | length > 0) | ternary({'moonshot': {'models': {}, 'options': {'apiKey': moonshot_api_key}}}, {}) }}"
 opencode_provider_fireworks: "{{ (fireworks_api_key is defined and fireworks_api_key | length > 0) | ternary({'fireworks': {'models': {}, 'options': {'apiKey': fireworks_api_key}}}, {}) }}"
+# Firepass: openai-compatible custom provider (opencode has no built-in entry).
+# Limited to the Kimi K2.6 Turbo model defined in fireworks_firepass_models.
+opencode_firepass_models: "{{ dict(fireworks_firepass_models | map(attribute='id') | zip(fireworks_firepass_models | map(attribute='name') | map('community.general.dict_kv', 'name')) | list) }}"
+opencode_provider_firepass: "{{ (fireworks_firepass_api_key is defined and fireworks_firepass_api_key | length > 0) | ternary({'firepass': {'npm': '@ai-sdk/openai-compatible', 'name': 'Fireworks Firepass', 'options': {'baseURL': fireworks_base_url, 'apiKey': fireworks_firepass_api_key}, 'models': opencode_firepass_models}}, {}) }}"
 opencode_global_config:
   $schema: "https://opencode.ai/config.json"
   theme: "tokyonight"
@@ -932,7 +938,7 @@ opencode_global_config:
       "td": "allow"
       "internal-*": "deny"
       "experimental-*": "ask"
-  provider: "{{ {} | combine(opencode_provider_anthropic) | combine(opencode_provider_openai) | combine(opencode_provider_moonshot) | combine(opencode_provider_fireworks) }}"
+  provider: "{{ {} | combine(opencode_provider_anthropic) | combine(opencode_provider_openai) | combine(opencode_provider_moonshot) | combine(opencode_provider_fireworks) | combine(opencode_provider_firepass) }}"
 opencode_agent_example: |
   "agent": {
     "code-reviewer": {
