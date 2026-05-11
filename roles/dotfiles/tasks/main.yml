@@ -151,11 +151,11 @@
     - joplin
     - notes
 
-- name: Configure Superpowers
-  import_tasks: tasks/superpowers.yml
-  tags:
-    - superpowers
-    - ai
+# - name: Configure Superpowers
+#   import_tasks: tasks/superpowers.yml
+#   tags:
+#     - superpowers
+#     - ai
 
 - name: OpenCode Config
   import_tasks: tasks/opencode.yml
