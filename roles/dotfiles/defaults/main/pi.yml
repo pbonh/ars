@@ -50,6 +50,9 @@ pi_packages_git:
   - repo: "https://github.com/pbonh/pi-llm-wiki"
     version: "main"
     name: "pi-llm-wiki"
+  - repo: "https://github.com/nicobailon/pi-subagents"
+    version: "main"
+    name: "pi-subagents"
 
 pi_packages_git_dir: "{{ ansible_env.HOME }}/.pi/agent/git"
 
