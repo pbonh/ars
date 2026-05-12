@@ -88,17 +88,13 @@
     state: directory
     mode: "0755"
 
-- name: Pi | Deploy prep agent prompt
+- name: Pi | Deploy prompt files
   ansible.builtin.copy:
-    src: "pi/prompts/prep.md"
-    dest: "{{ pi_prompts_dir }}/prep.md"
+    src: "{{ item }}"
+    dest: "{{ pi_prompts_dir }}/{{ item | basename }}"
     mode: "0644"
-
-- name: Pi | Deploy planner agent prompt
-  ansible.builtin.copy:
-    src: "pi/prompts/plan.md"
-    dest: "{{ pi_prompts_dir }}/plan.md"
-    mode: "0644"
+  with_fileglob:
+    - "{{ role_path }}/files/pi/prompts/*"
 
 - name: Pi | Ensure harness directory exists
   ansible.builtin.file:
