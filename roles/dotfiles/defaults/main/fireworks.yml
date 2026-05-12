@@ -20,7 +20,7 @@ fireworks_models:
     name: "GLM 5.1"
     context_length: 131072
     contextWindow: 202000
-    maxTokens: 32768
+    maxTokens: 131072
     reasoning: true
     input: ["text"]
     cost:
@@ -32,7 +32,7 @@ fireworks_models:
     name: "Kimi K2.5"
     context_length: 131072
     contextWindow: 262000
-    maxTokens: 32768
+    maxTokens: 131072
     reasoning: true
     input: ["text", "image"]
     cost:
@@ -44,7 +44,7 @@ fireworks_models:
     name: "Kimi K2.6"
     context_length: 131072
     contextWindow: 262000
-    maxTokens: 32768
+    maxTokens: 131072
     reasoning: true
     input: ["text", "image"]
     cost:
@@ -56,7 +56,7 @@ fireworks_models:
     name: "Qwen 3.6 Plus"
     context_length: 131072
     contextWindow: 128000
-    maxTokens: 32768
+    maxTokens: 131072
     reasoning: true
     input: ["text", "image"]
     cost:
@@ -68,7 +68,7 @@ fireworks_models:
     name: "MiniMax M2.7"
     context_length: 131072
     contextWindow: 196608
-    maxTokens: 32768
+    maxTokens: 131072
     reasoning: true
     input: ["text"]
     cost:
@@ -96,7 +96,7 @@ fireworks_firepass_models:
     name: "Kimi K2.6 Turbo"
     context_length: 131072
     contextWindow: 262000
-    maxTokens: 32768
+    maxTokens: 131072
     reasoning: true
     input: ["text", "image"]
     cost:
