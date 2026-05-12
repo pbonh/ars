@@ -5,6 +5,68 @@
     state: directory
     mode: "0700"
 
+- name: Pi | Ensure git packages directory exists
+  ansible.builtin.file:
+    path: "{{ pi_packages_git_dir }}"
+    state: directory
+    mode: "0755"
+  when: pi_packages_git | length > 0
+
+- name: Pi | Clone git packages
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "{{ pi_packages_git_dir }}/{{ item.name | default(item.repo | basename | regex_replace('\\.git$', '')) }}"
+    version: "{{ item.version | default('HEAD') }}"
+  loop: "{{ pi_packages_git }}"
+  loop_control:
+    label: "{{ item.repo }}"
+  when: pi_packages_git | length > 0
+
+- name: Pi | Stat git package resource directories
+  ansible.builtin.stat:
+    path: "{{ pi_packages_git_dir }}/{{ item.0.name | default(item.0.repo | basename | regex_replace('\\.git$', '')) }}/{{ item.1 }}"
+  loop: "{{ pi_packages_git | product(['prompts', 'skills', 'extensions', 'themes']) | list }}"
+  loop_control:
+    loop_var: item
+  register: pi_git_package_stats
+  when: pi_packages_git | length > 0
+
+- name: Pi | Append git package prompt paths
+  ansible.builtin.set_fact:
+    pi_prompt_paths: "{{ pi_prompt_paths + [item.stat.path] }}"
+  loop: "{{ pi_git_package_stats.results | default([]) }}"
+  when:
+    - pi_packages_git | length > 0
+    - item.stat.exists | default(false)
+    - item.item[1] == 'prompts'
+
+- name: Pi | Append git package skill paths
+  ansible.builtin.set_fact:
+    pi_skill_paths: "{{ pi_skill_paths + [item.stat.path] }}"
+  loop: "{{ pi_git_package_stats.results | default([]) }}"
+  when:
+    - pi_packages_git | length > 0
+    - item.stat.exists | default(false)
+    - item.item[1] == 'skills'
+
+- name: Pi | Append git package extension paths
+  ansible.builtin.set_fact:
+    pi_extension_paths: "{{ pi_extension_paths + [item.stat.path] }}"
+  loop: "{{ pi_git_package_stats.results | default([]) }}"
+  when:
+    - pi_packages_git | length > 0
+    - item.stat.exists | default(false)
+    - item.item[1] == 'extensions'
+
+- name: Pi | Append git package theme paths
+  ansible.builtin.set_fact:
+    pi_theme_paths: "{{ pi_theme_paths + [item.stat.path] }}"
+  loop: "{{ pi_git_package_stats.results | default([]) }}"
+  when:
+    - pi_packages_git | length > 0
+    - item.stat.exists | default(false)
+    - item.item[1] == 'themes'
+
 - name: Pi | Check settings.json
   ansible.builtin.stat:
     path: "{{ pi_settings_path }}"

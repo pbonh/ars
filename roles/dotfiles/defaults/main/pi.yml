@@ -42,6 +42,17 @@ pi_skills: []
 #   - "my-extension"
 pi_extensions: []
 
+# Git packages cloned from git and managed by Ansible (not via `pi install`).
+# Each item must have a `repo` URL. Optional fields:
+#   - version: branch, tag, or commit ref (default: HEAD)
+#   - name:    directory name under ~/.pi/agent/git/ (default: repo basename)
+pi_packages_git:
+  - repo: "https://github.com/pbonh/pi-llm-wiki"
+    version: "main"
+    name: "pi-llm-wiki"
+
+pi_packages_git_dir: "{{ ansible_env.HOME }}/.pi/agent/git"
+
 # Fireworks provider extension (templated to roles/dotfiles/templates/pi/extensions/fireworks.ts.j2).
 pi_fireworks_enabled: true
 pi_fireworks_provider_name: "fireworks"
