@@ -147,6 +147,8 @@ mkdir -p "$LOG_DIR"
 SUMMARY="$LOG_DIR/summary.log"
 say()  { printf '[%s] %s\n' "$(date -u +%H:%M:%SZ)" "$*" | tee -a "$SUMMARY" >&2; }
 
+trap 'rc=$?; printf "[%s] ABORTED at line %s (exit %s)\n" "$(date -u +%H:%M:%SZ)" "$LINENO" "$rc" | tee -a "$SUMMARY" >&2' ERR
+
 # Run hermes for one phase (batch|ingest|lint), injecting the phase's
 # HERMES_INFERENCE_MODEL / HERMES_INFERENCE_PROVIDER if set; otherwise
 # defers to whatever ~/.hermes/config.yaml configures.
@@ -316,7 +318,7 @@ After finishing, emit a final line beginning \"Files touched:\" listing every wi
       # decoration) with "Files touched:". Fall back to whole-graph lint if absent.
       TOUCHED="$(grep -E '^[> *#-]*\s*Files touched:' "$INGEST_LOG" 2>/dev/null \
                  | tail -n 1 \
-                 | sed -E 's/^[> *#-]*\s*Files touched:\s*//')"
+                 | sed -E 's/^[> *#-]*\s*Files touched:\s*//' || true)"
 
       if [[ -n "$TOUCHED" ]]; then
         LINT_PROMPT="Scoped audit after chapter ingest ($SLUG :: $LABEL).
