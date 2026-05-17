@@ -50,8 +50,8 @@
   ansible.builtin.set_fact:
     ant_candidate_paths:
       - "{{ ant_install_dir }}/ant"
-      - "{{ ansible_env.HOME }}/.local/bin/ant"
-      - "{{ ansible_env.HOME }}/bin/ant"
+      - "{{ ansible_facts['env']['HOME'] }}/.local/bin/ant"
+      - "{{ ansible_facts['env']['HOME'] }}/bin/ant"
 
 - name: Ant | Check common install locations
   ansible.builtin.stat:

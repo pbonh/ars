@@ -1,6 +1,6 @@
 ---
 tool_system_path: ""
-nix_path: "{{ ansible_env.HOME }}/.nix-profile"
+nix_path: "{{ ansible_facts['env']['HOME'] }}/.nix-profile"
 nix_profile_path: "{{ nix_path }}/etc/profile.d"
 nix_shell_profile: "{{ nix_profile_path }}/nix.sh"
 nix_bin: "{{ nix_path }}/bin"

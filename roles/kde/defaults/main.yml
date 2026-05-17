@@ -1,6 +1,6 @@
 ---
-bin_directory: "{{ ansible_env.HOME }}/.local/bin"
-nix_bin: "{{ ansible_env.HOME }}/.nix-profile/bin"
+bin_directory: "{{ ansible_facts['env']['HOME'] }}/.local/bin"
+nix_bin: "{{ ansible_facts['env']['HOME'] }}/.nix-profile/bin"
 homebrew_install_path: "/home/linuxbrew/.linuxbrew"
 homebrew_path: "{{ homebrew_install_path }}/bin"
 pipx_exe: "{{ bin_directory }}/pipx"
@@ -9,7 +9,7 @@ devbox_exe: "/usr/local/bin/devbox"
 devbox_kde_tools:
   - konsave
   - kde-cli-tools
-xdg_config_dir: "{{ ansible_env.HOME }}/.config"
+xdg_config_dir: "{{ ansible_facts['env']['HOME'] }}/.config"
 kde_plasma_config_file: "{{ xdg_config_dir }}/plasma-org.kde.plasma.desktop-appletsrc"
 kwin_activity_config_file: "{{ xdg_config_dir }}/kactivitymanagerdrc"
 kwin_activity_group: "activities"

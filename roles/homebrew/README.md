@@ -13,7 +13,7 @@ Role Variables
 - `homebrew_bundle_check`: run `brew bundle check` before install (default `true`).
 - `homebrew_bundle_cleanup`: run `brew bundle cleanup --force` after install (default `true`).
 - `homebrew_bundle_bin_dir_default`, `homebrew_brew_bin_default`: OS-detected defaults (Darwin uses `homebrew_path_macos`, others use `homebrew_path`).
-- `homebrew_bundle_env_path`: default PATH seed; tasks recompute an OS-appropriate PATH (`homebrew_bundle_env_path_resolved`) using detected Homebrew bin dir + `ansible_env.PATH`.
+- `homebrew_bundle_env_path`: default PATH seed; tasks recompute an OS-appropriate PATH (`homebrew_bundle_env_path_resolved`) using detected Homebrew bin dir + `ansible_facts['env']['PATH']`.
 - `homebrew_brewfile_extra_taps`, `homebrew_brewfile_extra_formulae`, `homebrew_brewfile_extra_casks`: lists appended to the generated Brewfile.
 - `homebrew_cask_packages`, `homebrew_formula_packages_extra`, `homebrew_flatpak_packages`: derived from `flatpak_apps_bundle_map` in `group_vars/all.yml`.
 - `dev_packages.*.brew`: formulae included in the Brewfile.

@@ -30,7 +30,7 @@ superpowers_claude_skill_dirs:
 # Manual install: clone repo to ~/.codex/superpowers, symlink skills to ~/.agents/skills/superpowers
 superpowers_codex_enabled: true
 superpowers_codex_clone_dir: "{{ codex_home_dir }}/superpowers"
-superpowers_codex_agents_skills_dir: "{{ ansible_env.HOME }}/.agents/skills"
+superpowers_codex_agents_skills_dir: "{{ ansible_facts['env']['HOME'] }}/.agents/skills"
 
 # OpenCode integration
 # Plugin-based install: add plugin entry to opencode.json

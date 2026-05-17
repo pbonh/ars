@@ -1,7 +1,7 @@
 ---
 # Hermes agent uses ~/.hermes/ as its home directory
 # https://hermes-agent.nousresearch.com/docs/user-guide/configuration
-hermes_home_dir: "{{ ansible_env.HOME }}/.hermes"
+hermes_home_dir: "{{ ansible_facts['env']['HOME'] }}/.hermes"
 hermes_config_path: "{{ hermes_home_dir }}/config.yaml"
 hermes_env_path: "{{ hermes_home_dir }}/.env"
 hermes_config_dir: "{{ hermes_home_dir }}"

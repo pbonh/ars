@@ -5,7 +5,7 @@
     creates: "{{ acp_pnpm_home }}"
   environment:
     PNPM_HOME: "{{ acp_pnpm_home }}"
-    PATH: "{{ acp_pnpm_home }}:{{ ansible_env.PATH }}"
+    PATH: "{{ acp_pnpm_home }}:{{ ansible_facts['env']['PATH'] }}"
 
 - name: ACP | Install adapters
   community.general.pnpm:
@@ -17,4 +17,4 @@
   loop: "{{ acp_adapters }}"
   environment:
     PNPM_HOME: "{{ acp_pnpm_home }}"
-    PATH: "{{ acp_pnpm_home }}:{{ ansible_env.PATH }}"
+    PATH: "{{ acp_pnpm_home }}:{{ ansible_facts['env']['PATH'] }}"

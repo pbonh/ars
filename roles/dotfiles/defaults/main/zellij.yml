@@ -320,7 +320,7 @@ yazelix_swap_sidebar_closed_default: |
 yazelix_layouts:
   example:
     name: dev1
-    cwd: "{{ ansible_env.HOME }}"
+    cwd: "{{ ansible_facts['env']['HOME'] }}"
     tab_template: "{{ yazelix_tab_template_default }}"
     layout_info: "{{ yazelix_layout_info_default }}"
     keybindings: ""

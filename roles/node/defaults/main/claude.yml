@@ -1,6 +1,6 @@
 ---
 claude_anthropic_api_key: "sk-ant-api00-asdfjkl"
-claude_config_dir: "{{ ansible_env.HOME }}/.claude"
+claude_config_dir: "{{ ansible_facts['env']['HOME'] }}/.claude"
 claude_settings_path: "{{ claude_config_dir }}/settings.json"
 claude_api_key_helper_path: "{{ claude_config_dir }}/api-key-helper.sh"
 claude_skills_dir: "{{ claude_config_dir }}/skills"

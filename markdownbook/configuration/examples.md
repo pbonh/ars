@@ -31,7 +31,7 @@ extra_zsh_aliases: |
 zellij_kdl_layouts:
   dotfiles:
     name: dotfiles
-    cwd: "{{ ansible_env.HOME }}"
+    cwd: "{{ ansible_facts['env']['HOME'] }}"
     template_info: "{{ zellij_kdl_template_info_default }}"
     layout_info: |
       tab name="Ars" split_direction="vertical" cwd="{{ projects['ars']['path'] }}" focus=true {
@@ -110,7 +110,7 @@ extra_zsh_aliases: |
 zellij_kdl_layouts:
   dotfiles:
     name: dotfiles
-    cwd: "{{ ansible_env.HOME }}"
+    cwd: "{{ ansible_facts['env']['HOME'] }}"
     template_info: "{{ zellij_kdl_template_info_default }}"
     layout_info: |
       tab name="Neovim(Ollama): Lazy-Config" split_direction="vertical" cwd="{{ nvim_config_dir }}-lazy-modular" {

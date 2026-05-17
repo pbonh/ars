@@ -11,4 +11,4 @@ codex_config:
     multi_agent: true
 codex_config_dir: "{{ xdg_config_dir }}/codex"
 codex_config_path: "{{ codex_config_dir }}/config.toml"
-codex_home_dir: "{{ ansible_env.HOME }}/.codex"
+codex_home_dir: "{{ ansible_facts['env']['HOME'] }}/.codex"

@@ -46,7 +46,7 @@
 
 - name: Ollama | Add Current User to Ollama Group | user
   user:
-    name: "{{ ansible_env.USER }}"
+    name: "{{ ansible_facts['env']['USER'] }}"
     groups: ollama
     append: yes
 

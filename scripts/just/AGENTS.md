@@ -11,3 +11,4 @@ Justfile entrypoints:
 - `scripts/just/niri.just`: `workstation-niri`
 - `scripts/just/node.just`: `install-node-packages`
 - `scripts/just/ucore.just`: `regenerate-ignition-file`
+- `scripts/just/update.just`: `update`, `update-brew`, `update-node`, `update-pnpm`, `update-uv`, `update-mise`, `update-devbox`

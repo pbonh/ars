@@ -4,7 +4,7 @@
   ansible.builtin.set_fact:
     mise_version_effective: "{{ mise_version | default('v2026.1.6') }}"
     mise_version_no_v: "{{ (mise_version | default('v2026.1.6')) | regex_replace('^v', '') }}"
-    mise_install_path_effective: "{{ mise_install_path | default(ansible_env.HOME + '/.local/bin/mise') }}"
+    mise_install_path_effective: "{{ mise_install_path | default(ansible_facts['env']['HOME'] + '/.local/bin/mise') }}"
     mise_install_from_github_effective: "{{ mise_install_from_github | default(false) | bool }}"
     mise_install_help_effective: "{{ mise_install_help | default(false) | bool }}"
     mise_install_os_override: "{{ mise_install_os | default('') }}"

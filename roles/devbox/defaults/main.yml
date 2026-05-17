@@ -1,6 +1,6 @@
 ---
 devbox_exe: "/usr/local/bin/devbox"
-devbox_nix_path_default: "{{ ansible_env.HOME }}/.local/share/devbox/global/default/.devbox/nix/profile/default/bin"
+devbox_nix_path_default: "{{ ansible_facts['env']['HOME'] }}/.local/share/devbox/global/default/.devbox/nix/profile/default/bin"
 devbox_kde_tools:
   - konsave
   - kde-cli-tools

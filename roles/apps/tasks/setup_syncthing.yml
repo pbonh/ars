@@ -22,7 +22,7 @@
   notify: "{{ podman_quadlets_handler_migrate_name }}"
 
 - name: Execute id command to get UID
-  ansible.builtin.command: "id -u {{ ansible_env.USER }}"
+  ansible.builtin.command: "id -u {{ ansible_facts['env']['USER'] }}"
   register: user_uid_output
 
 - name: Set UID as a fact

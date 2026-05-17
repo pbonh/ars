@@ -1,6 +1,6 @@
 ---
 niri_desktop_shell: "dms"
-niri_config_dir: "{{ ansible_env.HOME }}/.config/niri"
+niri_config_dir: "{{ ansible_facts['env']['HOME'] }}/.config/niri"
 niri_config_filename: "local.kdl"
 niri_layout_profiles:
   laptop: "default-column-width { proportion 0.75; }"

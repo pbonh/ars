@@ -6,7 +6,7 @@ homebrew_install_path_macos: "/opt/homebrew"
 homebrew_path_macos: "{{ homebrew_install_path_macos }}/bin"
 homebrew_install_url: "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh"
 homebrew_install_cmd: "NONINTERACTIVE=1 /bin/bash -c \"$(curl -fsSL {{ homebrew_install_url }})\""
-homebrew_brewfile_path: "{{ (dotfiles_user_home | default(ansible_env.HOME, true)) | regex_replace('/$', '') }}/.Brewfile"
+homebrew_brewfile_path: "{{ (dotfiles_user_home | default(ansible_facts['env']['HOME'], true)) | regex_replace('/$', '') }}/.Brewfile"
 homebrew_bundle_cleanup: true
 homebrew_bundle_check: true
 # Defaults; resolved per-OS at runtime using ansible_facts.system
@@ -15,7 +15,7 @@ homebrew_bundle_bin_dir: "{{ homebrew_bundle_bin_dir_default }}"
 homebrew_brew_bin_default: "{{ homebrew_bundle_bin_dir_default }}/brew"
 homebrew_brew_bin: "{{ homebrew_brew_bin_default }}"
 # Fallback PATH; tasks will recompute a resolved PATH based on detected OS and overrides
-homebrew_bundle_env_path: "{{ homebrew_path }}:{{ homebrew_path_macos }}:{{ ansible_env.PATH }}"
+homebrew_bundle_env_path: "{{ homebrew_path }}:{{ homebrew_path_macos }}:{{ ansible_facts['env']['PATH'] }}"
 homebrew_is_darwin: "{{ (ansible_facts.system | default(ansible_system | default('Linux'))) == 'Darwin' }}"
 homebrew_is_linux: "{{ (ansible_facts.system | default(ansible_system | default('Linux'))) == 'Linux' }}"
 homebrew_cask_packages: "{{ (homebrew_cask_packages_raw | default([])) if homebrew_is_darwin else [] }}"

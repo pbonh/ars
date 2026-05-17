@@ -1,5 +1,5 @@
 ---
-zsh_username: "{{ ansible_env.USER }}"
+zsh_username: "{{ ansible_facts['env']['USER'] }}"
 zsh_plugins: "{{ dotfiles_user_home }}/.zsh"
 zsh_completions: "{{ zsh_plugins }}/completion"
 zsh_completion_just: "{{ zsh_completions }}/_just"
@@ -12,6 +12,8 @@ zsh_mise_env: |
 zsh_homebrew_env: ""
 zsh_nonroot_env: ""
 zsh_devbox_env: ""
+zsh_pnpm_env: |
+  source <(pnpm completion zsh)
 zsh_default_options: |
   HISTFILE=~/.histfile
   HISTSIZE=1000
@@ -43,6 +45,7 @@ zsh_default_plugins: |
   eval "$({{ direnv_exe }} hook zsh)"
   eval "$({{ starship_exe }} init zsh)"
   eval "$({{ zoxide_exe }} init zsh)"
+  {{ zsh_pnpm_env }}
 zsh_fzf_path: "export PATH=$PATH:{{ fzf_path }}"
 zsh_fzf_setup: |
   # Set up fzf key bindings and fuzzy completion
@@ -361,7 +364,7 @@ zsh_ssh_fido2_auto_add: true
 zsh_ssh_fido2_key_type: "ed25519-sk"
 zsh_ssh_fido2_key_file: "{{ dotfiles_user_home }}/.ssh/id_ed25519_sk"
 zsh_ssh_fido2_application: "ssh:default"
-zsh_ssh_fido2_comment: "{{ ansible_env.USER }}@yubikey-fido2"
+zsh_ssh_fido2_comment: "{{ ansible_facts['env']['USER'] }}@yubikey-fido2"
 zsh_ssh_setup_fido2: |
   env={{ dotfiles_user_home }}/.ssh/agent.env
   ssh_fido2_key_file="{{ zsh_ssh_fido2_key_file }}"

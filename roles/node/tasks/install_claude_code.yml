@@ -2,7 +2,7 @@
 - name: Claude | Set base variables
   ansible.builtin.set_fact:
     claude_gcs_bucket: "https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases"
-    claude_download_dir: "{{ ansible_env.HOME }}/.claude/downloads"
+    claude_download_dir: "{{ ansible_facts['env']['HOME'] }}/.claude/downloads"
     claude_target: "latest"
 
 - name: Claude | Determine OS
@@ -90,9 +90,9 @@
 - name: Claude | Set candidate install paths
   ansible.builtin.set_fact:
     claude_candidate_paths:
-      - "{{ ansible_env.HOME }}/.local/bin/claude"
-      - "{{ ansible_env.HOME }}/.claude/bin/claude"
-      - "{{ ansible_env.HOME }}/bin/claude"
+      - "{{ ansible_facts['env']['HOME'] }}/.local/bin/claude"
+      - "{{ ansible_facts['env']['HOME'] }}/.claude/bin/claude"
+      - "{{ ansible_facts['env']['HOME'] }}/bin/claude"
 
 - name: Claude | Check common install locations
   ansible.builtin.stat:

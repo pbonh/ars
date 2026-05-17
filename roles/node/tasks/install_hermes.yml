@@ -72,13 +72,13 @@
 
 - name: Hermes | Check ~/.local/bin/uv
   ansible.builtin.stat:
-    path: "{{ ansible_env.HOME }}/.local/bin/uv"
+    path: "{{ ansible_facts['env']['HOME'] }}/.local/bin/uv"
   register: hermes_uv_local
   when: hermes_which_uv.rc != 0
 
 - name: Hermes | Check ~/.cargo/bin/uv
   ansible.builtin.stat:
-    path: "{{ ansible_env.HOME }}/.cargo/bin/uv"
+    path: "{{ ansible_facts['env']['HOME'] }}/.cargo/bin/uv"
   register: hermes_uv_cargo
   when:
     - hermes_which_uv.rc != 0
@@ -90,9 +90,9 @@
       {% if hermes_which_uv.rc == 0 %}
         uv
       {% elif hermes_uv_local.stat.exists | default(false) %}
-        {{ ansible_env.HOME }}/.local/bin/uv
+        {{ ansible_facts['env']['HOME'] }}/.local/bin/uv
       {% elif hermes_uv_cargo.stat.exists | default(false) %}
-        {{ ansible_env.HOME }}/.cargo/bin/uv
+        {{ ansible_facts['env']['HOME'] }}/.cargo/bin/uv
       {% else %}
         ""
       {% endif %}
@@ -100,14 +100,14 @@
 - name: Hermes | Install uv
   ansible.builtin.shell: curl -LsSf https://astral.sh/uv/install.sh | sh
   args:
-    creates: "{{ ansible_env.HOME }}/.local/bin/uv"
+    creates: "{{ ansible_facts['env']['HOME'] }}/.local/bin/uv"
   environment:
-    PATH: "{{ ansible_env.HOME }}/.local/bin:{{ ansible_env.PATH }}"
+    PATH: "{{ ansible_facts['env']['HOME'] }}/.local/bin:{{ ansible_facts['env']['PATH'] }}"
   when: hermes_uv_cmd | length == 0
 
 - name: Hermes | Re-check uv after install
   ansible.builtin.set_fact:
-    hermes_uv_cmd: "{{ ansible_env.HOME }}/.local/bin/uv"
+    hermes_uv_cmd: "{{ ansible_facts['env']['HOME'] }}/.local/bin/uv"
   when: hermes_uv_cmd | length == 0
 
 - name: Hermes | Ensure Python {{ hermes_python_version }} is available

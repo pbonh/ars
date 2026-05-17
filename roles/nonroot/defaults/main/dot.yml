@@ -1,6 +1,6 @@
 ---
 system_home: "/home"
-dotfiles_user_home: "{{ ansible_env.HOME }}"
+dotfiles_user_home: "{{ ansible_facts['env']['HOME'] }}"
 default_home_local: "{{ dotfiles_user_home }}/.local"
 tool_install_dir: "{{ default_home_local }}"
 tool_install_bin: "{{ tool_install_dir }}/bin"

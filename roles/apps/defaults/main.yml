@@ -15,11 +15,11 @@ autostart_apps:
   obsidian: "{{ obsidian_desktop }}"
   ghostty: "{{ ghostty_desktop }}"
   # yakuake: "{{ yakuake_desktop }}"
-syncthing_directory: "{{ ansible_env.HOME }}/Syncthing"
+syncthing_directory: "{{ ansible_facts['env']['HOME'] }}/Syncthing"
 syncthing_config_directory: "{{ syncthing_directory }}/Config"
 syncthing_data_directory: "{{ syncthing_directory }}/Data"
 podman_quadlets_directory: "{{ xdg_config_dir }}/containers/systemd"
-podman_quadlets_user: "{{ ansible_env.USER }}"
+podman_quadlets_user: "{{ ansible_facts['env']['USER'] }}"
 podman_quadlets_user_uid: "1000"
 podman_quadlets_user_mapping:
   begin: "100000"

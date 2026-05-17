@@ -288,7 +288,7 @@
   ansible.builtin.debug:
     msg: |
       {% if mise_install_help_effective %}
-      {% set shell = ansible_env.SHELL | default('') %}
+      {% set shell = ansible_facts['env']['SHELL'] | default('') %}
       {% if shell.endswith('zsh') %}
       mise: run the following to activate mise in your shell:
       echo "eval \"\$({{ mise_install_path_effective }} activate zsh)\"" >> "${ZDOTDIR-$HOME}/.zshrc"

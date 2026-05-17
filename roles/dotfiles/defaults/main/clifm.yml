@@ -1,2 +1,2 @@
 ---
-clifm_config_file: "{{ xdg_config_dir }}/clifm/profiles/{{ ansible_env.USER }}/clifmrc"
+clifm_config_file: "{{ xdg_config_dir }}/clifm/profiles/{{ ansible_facts['env']['USER'] }}/clifmrc"

@@ -3,7 +3,7 @@
   ansible.builtin.set_fact:
     homebrew_bundle_bin_dir_resolved: "{{ homebrew_bundle_bin_dir | default(homebrew_bundle_bin_dir_default) }}"
     homebrew_brew_bin_resolved: "{{ homebrew_brew_bin | default(homebrew_brew_bin_default | default((homebrew_bundle_bin_dir | default(homebrew_bundle_bin_dir_default)) ~ '/brew')) }}"
-    homebrew_bundle_env_path_resolved: "{{ homebrew_bundle_env_path | default((homebrew_bundle_bin_dir | default(homebrew_bundle_bin_dir_default)) ~ ':' ~ ansible_env.PATH) }}"
+    homebrew_bundle_env_path_resolved: "{{ homebrew_bundle_env_path | default((homebrew_bundle_bin_dir | default(homebrew_bundle_bin_dir_default)) ~ ':' ~ ansible_facts['env']['PATH']) }}"
   tags:
     - always
 

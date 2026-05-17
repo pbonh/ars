@@ -71,7 +71,7 @@ Example Playbook
       vars:
         mise_install_help: true
         mise_config_files:
-          - path: "{{ ansible_env.HOME }}/work/mise.toml"
+          - path: "{{ ansible_facts['env']['HOME'] }}/work/mise.toml"
             vars:
               mise_env:
                 NODE_ENV: production
@@ -92,7 +92,7 @@ Example Playbook
               mise_settings:
                 jobs: 6
         mise_conf_d_fragments:
-          - path: "{{ ansible_env.HOME }}/.config/mise/conf.d/10-local-env.toml"
+          - path: "{{ ansible_facts['env']['HOME'] }}/.config/mise/conf.d/10-local-env.toml"
             vars:
               mise_env:
                 API_URL: "http://localhost:3000"

@@ -1,7 +1,7 @@
 ---
 tool_provider: "homebrew"
 system_home: "/home"
-dotfiles_user_home: "{{ ansible_env.HOME }}"
+dotfiles_user_home: "{{ ansible_facts['env']['HOME'] }}"
 default_home_local: "{{ dotfiles_user_home }}/.local"
 tool_install_dir: "{{ default_home_local }}"
 tool_install_bin: "{{ tool_install_dir }}/bin"
@@ -24,7 +24,7 @@ projects:
     url: "https://github.com/pbonh/term-dev.nix"
     path: "{{ code_checkout_path_github }}/pbonh/term-dev.nix"
 devbox_nix_root_path: /nix/var/nix/profiles/default/bin
-devbox_nix_path_default: "{{ ansible_env.HOME }}/.local/share/devbox/global/default/.devbox/nix/profile/default/bin"
+devbox_nix_path_default: "{{ ansible_facts['env']['HOME'] }}/.local/share/devbox/global/default/.devbox/nix/profile/default/bin"
 git_exe: "git"
 git_ssh: /usr/bin/ssh
 github_url: "https://github.com"

@@ -1,7 +1,7 @@
 ---
 hermes_repo: "NousResearch/hermes-agent"
 hermes_branch: "main"
-hermes_home: "{{ ansible_env.HOME }}/.hermes"
+hermes_home: "{{ ansible_facts['env']['HOME'] }}/.hermes"
 hermes_install_dir: "{{ hermes_home }}/hermes-agent"
 hermes_python_version: "3.11"
 hermes_use_venv: true
@@ -33,7 +33,7 @@ hermes_config_subdirs:
   - skills
 
 # Command symlink directory
-hermes_command_link_dir: "{{ ansible_env.HOME }}/.local/bin"
+hermes_command_link_dir: "{{ ansible_facts['env']['HOME'] }}/.local/bin"
 
 # Whether to clone via SSH (falls back to HTTPS)
 hermes_use_ssh: false

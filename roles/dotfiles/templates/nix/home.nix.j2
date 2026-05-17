@@ -3,8 +3,8 @@
 {
   # Home Manager needs a bit of information about you and the
   # paths it should manage.
-  home.username = "{{ ansible_env.USER }}";
-  home.homeDirectory = "{{ ansible_env.HOME }}";
+  home.username = "{{ ansible_facts['env']['USER'] }}";
+  home.homeDirectory = "{{ ansible_facts['env']['HOME'] }}";
 
   # Packages that should be installed to the user profile.
   home.packages = with pkgs; [

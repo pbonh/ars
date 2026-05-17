@@ -11,7 +11,7 @@ None.
 Role Variables
 --------------
 
-- `niri_config_dir`: Target configuration directory. Default: `{{ ansible_env.HOME }}/.config/niri`.
+- `niri_config_dir`: Target configuration directory. Default: `{{ ansible_facts['env']['HOME'] }}/.config/niri`.
 - `niri_config_filename`: Target configuration filename. Default: `local.kdl`.
 - `niri_local_kdl_content`: Raw KDL content to render. Default contains the provided layout override, named workspaces, and window rules.
 - `niri_named_workspaces`: Map of named workspaces (lowercase, hyphen-friendly keys). Each entry may define `name` (label, defaults to key), optional `open_on_output`, and optional `layout` overrides.

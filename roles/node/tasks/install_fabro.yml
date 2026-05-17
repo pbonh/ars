@@ -2,8 +2,8 @@
 - name: Fabro | Set install variables
   ansible.builtin.set_fact:
     fabro_repo: "fabro-sh/fabro"
-    fabro_install_dir: "{{ ansible_env.HOME }}/.fabro/bin"
-    fabro_download_dir: "{{ ansible_env.HOME }}/.fabro/downloads"
+    fabro_install_dir: "{{ ansible_facts['env']['HOME'] }}/.fabro/bin"
+    fabro_download_dir: "{{ ansible_facts['env']['HOME'] }}/.fabro/downloads"
 
 - name: Fabro | Determine OS
   ansible.builtin.set_fact:
@@ -68,7 +68,7 @@
   ansible.builtin.set_fact:
     fabro_candidate_paths:
       - "{{ fabro_install_dir }}/fabro"
-      - "{{ ansible_env.HOME }}/.fabro/bin/fabro"
+      - "{{ ansible_facts['env']['HOME'] }}/.fabro/bin/fabro"
 
 - name: Fabro | Check common install locations
   ansible.builtin.stat:

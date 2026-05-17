@@ -49,6 +49,18 @@ nushell_starship_config: |
 nushell_starship_env: |
   mkdir ($nu.data-dir | path join "vendor/autoload")
   {{ starship_exe }} init nu | save -f "{{ nushell_starship_source }}"
+nushell_pnpm_config_file: "{{ nushell_config_dir }}/completions/pnpm.nu"
+nushell_pnpm_env: |
+  mkdir "{{ nushell_config_dir }}/completions"
+  if not ("{{ nushell_pnpm_config_file }}" | path exists) {
+    "" | save --force "{{ nushell_pnpm_config_file }}"
+  }
+  try {
+    let pnpm_completion_output = (pnpm completion nushell)
+    $pnpm_completion_output | save --force "{{ nushell_pnpm_config_file }}"
+  }
+nushell_pnpm_config: |
+  source "{{ nushell_pnpm_config_file }}"
 nushell_custom_config: |
   $env.config = {
     show_banner: false

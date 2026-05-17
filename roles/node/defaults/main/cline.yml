@@ -3,7 +3,7 @@ cline_npm_package: "cline"
 cline_npm_state: "present"
 cline_npm_version: null
 cline_npm_executable: "npm"
-cline_config_dir: "{{ ansible_env.HOME }}/.cline/data"
+cline_config_dir: "{{ ansible_facts['env']['HOME'] }}/.cline/data"
 cline_global_state_path: "{{ cline_config_dir }}/globalState.json"
 cline_secrets_path: "{{ cline_config_dir }}/secrets.json"
 cline_global_state:

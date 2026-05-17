@@ -8,6 +8,7 @@ import 'scripts/just/mdbook.just'
 import 'scripts/just/niri.just'
 import 'scripts/just/node.just'
 import 'scripts/just/ucore.just'
+import 'scripts/just/update.just'
 
 set dotenv-load := true
 set shell := ["/bin/bash", "-cu"]

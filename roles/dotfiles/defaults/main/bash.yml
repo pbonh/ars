@@ -26,6 +26,8 @@ bash_mise_env: |
 bash_devbox_env: ""
 bash_homebrew_env: ""
 bash_nonroot_env: ""
+bash_pnpm_env: |
+  source <(pnpm completion bash)
 bash_extra_env: ""
 bash_default_plugins: |
   if [ -d {{ bash_plugins }} ]; then
@@ -360,7 +362,7 @@ bash_ssh_fido2_auto_add: true
 bash_ssh_fido2_key_type: "ed25519-sk"
 bash_ssh_fido2_key_file: "{{ dotfiles_user_home }}/.ssh/id_ed25519_sk"
 bash_ssh_fido2_application: "ssh:default"
-bash_ssh_fido2_comment: "{{ ansible_env.USER }}@yubikey-fido2"
+bash_ssh_fido2_comment: "{{ ansible_facts['env']['USER'] }}@yubikey-fido2"
 bash_ssh_setup_fido2: |
   env={{ dotfiles_user_home }}/.ssh/agent.env
   ssh_fido2_key_file="{{ bash_ssh_fido2_key_file }}"

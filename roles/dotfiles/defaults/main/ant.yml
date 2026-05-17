@@ -1,4 +1,4 @@
 ---
 ant_repo: "anthropics/anthropic-cli"
-ant_install_dir: "{{ ansible_env.HOME }}/.anthropic/bin"
-ant_download_dir: "{{ ansible_env.HOME }}/.anthropic/downloads"
+ant_install_dir: "{{ ansible_facts['env']['HOME'] }}/.anthropic/bin"
+ant_download_dir: "{{ ansible_facts['env']['HOME'] }}/.anthropic/downloads"

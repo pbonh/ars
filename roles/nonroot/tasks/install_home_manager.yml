@@ -24,7 +24,7 @@
 - name: Nix | Install Home-Manager | command
   when: home_manager_check.rc != 0
   shell:
-    cmd: "export NIX_PATH=$HOME/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/root/channels${NIX_PATH:+:$NIX_PATH} && . {{ ansible_env.HOME }}/.nix-profile/etc/profile.d/nix.sh && {{ nix_bin }}/nix-shell '<home-manager>' -A install"
+    cmd: "export NIX_PATH=$HOME/.nix-defexpr/channels:/nix/var/nix/profiles/per-user/root/channels${NIX_PATH:+:$NIX_PATH} && . {{ ansible_facts['env']['HOME'] }}/.nix-profile/etc/profile.d/nix.sh && {{ nix_bin }}/nix-shell '<home-manager>' -A install"
 
 - name: Nix | Copies Nix Home-Manager Config | template
   template:

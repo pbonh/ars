@@ -1,12 +1,12 @@
 ---
-pi_config_dir: "{{ ansible_env.HOME }}/.pi/agent"
+pi_config_dir: "{{ ansible_facts['env']['HOME'] }}/.pi/agent"
 pi_settings_path: "{{ pi_config_dir }}/settings.json"
 pi_skills_dir: "{{ pi_config_dir }}/skills"
 pi_extensions_dir: "{{ pi_config_dir }}/extensions"
-pi_sessions_dir: "{{ ansible_env.HOME }}/.pi/sessions"
+pi_sessions_dir: "{{ ansible_facts['env']['HOME'] }}/.pi/sessions"
 
-pi_prompts_dir: "{{ ansible_env.HOME }}/.pi/prompts"
-pi_harness_dir: "{{ ansible_env.HOME }}/.pi/harness"
+pi_prompts_dir: "{{ ansible_facts['env']['HOME'] }}/.pi/prompts"
+pi_harness_dir: "{{ ansible_facts['env']['HOME'] }}/.pi/harness"
 
 pi_default_provider: "firepass"
 pi_default_model: "{{ fireworks_firepass_default_model_id }}"
@@ -54,7 +54,7 @@ pi_packages_git:
     version: "main"
     name: "pi-subagents"
 
-pi_packages_git_dir: "{{ ansible_env.HOME }}/.pi/agent/git"
+pi_packages_git_dir: "{{ ansible_facts['env']['HOME'] }}/.pi/agent/git"
 
 # Fireworks provider extension (templated to roles/dotfiles/templates/pi/extensions/fireworks.ts.j2).
 pi_fireworks_enabled: true

@@ -116,7 +116,7 @@ Each task file in `roles/dotfiles/tasks/` changes in three ways:
 | Current variable | New value in template content |
 |---|---|
 | `{{ dotfiles_user_home }}` | `$HOME` (shell contexts) or `~` (tilde expansion contexts) |
-| `{{ ansible_env.HOME }}` | Same treatment as above |
+| `{{ ansible_facts['env']['HOME'] }}` | Same treatment as above |
 | `{{ claude_anthropic_api_key }}` | `__ANTHROPIC_API_KEY__` |
 | `{{ cline_secrets \| to_nice_json }}` | Entire file written by hook from secrets file (JSON blob, not simple sed substitution) |
 | Tool paths (`{{ fzf_exe }}`, etc.) | Still resolved by Ansible (machine-specific, not secrets) |
