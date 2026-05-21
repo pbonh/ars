@@ -47,9 +47,9 @@ pi_extensions: []
 #   - version: branch, tag, or commit ref (default: HEAD)
 #   - name:    directory name under ~/.pi/agent/git/ (default: repo basename)
 pi_packages_git:
-  - repo: "https://github.com/pbonh/pi-llm-wiki"
-    version: "main"
-    name: "pi-llm-wiki"
+  # - repo: "https://github.com/pbonh/pi-llm-wiki"
+  #   version: "main"
+  #   name: "pi-llm-wiki"
   - repo: "https://github.com/nicobailon/pi-subagents"
     version: "main"
     name: "pi-subagents"

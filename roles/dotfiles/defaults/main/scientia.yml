@@ -1,0 +1,20 @@
+---
+# Scientia agent skills bundle
+# https://github.com/pbonh/scientia/blob/main/docs/INSTALL.md
+
+scientia_enabled: true
+scientia_repo: "https://github.com/pbonh/scientia.git"
+scientia_dir: "{{ ansible_facts['env']['HOME'] }}/.agents/skills/scientia"
+scientia_skills_root: "{{ ansible_facts['env']['HOME'] }}/.agents/skills"
+
+# Hermes profiles bundled inside scientia
+scientia_hermes_profiles_enabled: true
+scientia_profiles_source_dir: "{{ scientia_dir }}/skills/scientia-kanban-init/assets/profiles"
+
+# Optional client symlinks for clients that don't walk ~/.agents/skills/.
+# Each item is a dict with `src` (source under ~/.agents/skills/) and `dest`
+# (absolute path to the symlink to create). Example:
+#   scientia_symlinks:
+#     - src: "{{ scientia_skills_root }}"
+#       dest: "{{ ansible_facts['env']['HOME'] }}/.opencode/skills"
+scientia_symlinks: []
