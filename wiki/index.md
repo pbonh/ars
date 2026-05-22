@@ -119,6 +119,13 @@ entry here.
 | [[concepts/decision-log]] | architecture, documentation, adr | high | 2026-05-21 |
 | [[concepts/architectural-knowledge-management]] | architecture, knowledge-management | high | 2026-05-21 |
 | [[concepts/y-statement-format]] | architecture, documentation, adr | medium | 2026-05-21 |
+| [[concepts/heavy-thinking]] | llm-reasoning, test-time-scaling, agentic-harness | high | 2026-05-21 |
+| [[concepts/parallel-reasoning]] | llm-reasoning, test-time-scaling, inference | high | 2026-05-21 |
+| [[concepts/sequential-deliberation]] | llm-reasoning, synthesis, agentic-harness | high | 2026-05-21 |
+| [[concepts/serialized-memory-cache]] | llm-reasoning, context-window, agentic-harness | high | 2026-05-21 |
+| [[concepts/iterative-deliberation]] | llm-reasoning, iterative-refinement, test-time-scaling | high | 2026-05-21 |
+| [[concepts/readable-skill]] | agentic-harness, llm-prompting, skill-system | high | 2026-05-21 |
+| [[concepts/heavy-thinking-rlvr]] | llm-reasoning, reinforcement-learning, test-time-scaling | medium | 2026-05-21 |
 
 ## Entities
 
@@ -174,6 +181,10 @@ entry here.
 | [[entities/michael-nygard]] | person, adr | 2026-05-21 |
 | [[entities/michael-keeling]] | person, adr | 2026-05-21 |
 | [[entities/mark-richards]] | person, adr | 2026-05-21 |
+| [[entities/heavyskill]] | ai-research, project, llm-reasoning | 2026-05-21 |
+| [[entities/kimi-k2]] | llm, reasoning-model, moonshot-ai | 2026-05-21 |
+| [[entities/pacore]] | framework, reasoning, stepfun-ai | 2026-05-21 |
+| [[entities/longcat-flash-thinking]] | llm, reasoning-model, meituan | 2026-05-21 |
 
 ## Summaries
 
@@ -197,6 +208,7 @@ entry here.
 | [[summaries/television-docs]] | raw/television-repo/docs | fuzzy-finder, channel, template, shell | 2026-05-21 |
 | [[summaries/llm-wiki]] | raw/llm-wiki.md | knowledge-management, llm, compounding | 2026-05-21 |
 | [[summaries/adr-github-home]] | raw/adr-github-home.html | architecture, documentation, adr | 2026-05-21 |
+| [[summaries/arxiv-heavyskill]] | raw/arxiv-2605.02396.pdf | ai-research, llm-reasoning, agentic-harness | 2026-05-21 |
 
 ## Syntheses
 

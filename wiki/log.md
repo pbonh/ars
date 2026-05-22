@@ -13,6 +13,18 @@ Append-only record of every change to the wiki. Each entry is one line:
 ```
 
 <!-- entries appended by scientia-wiki-* and scientia-ingest-* skills -->
+- 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — summaries/arxiv-heavyskill.md — from raw/arxiv-2605.02396.pdf
+- 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — concepts/heavy-thinking.md — from raw/arxiv-2605.02396.pdf
+- 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — concepts/parallel-reasoning.md — from raw/arxiv-2605.02396.pdf
+- 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — concepts/sequential-deliberation.md — from raw/arxiv-2605.02396.pdf
+- 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — concepts/serialized-memory-cache.md — from raw/arxiv-2605.02396.pdf
+- 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — concepts/iterative-deliberation.md — from raw/arxiv-2605.02396.pdf
+- 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — concepts/readable-skill.md — from raw/arxiv-2605.02396.pdf
+- 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — concepts/heavy-thinking-rlvr.md — from raw/arxiv-2605.02396.pdf
+- 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — entities/heavyskill.md — from raw/arxiv-2605.02396.pdf
+- 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — entities/kimi-k2.md — from raw/arxiv-2605.02396.pdf
+- 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — entities/pacore.md — from raw/arxiv-2605.02396.pdf
+- 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — entities/longcat-flash-thinking.md — from raw/arxiv-2605.02396.pdf
 - 2026-05-21T19:05:00Z — scientia-wiki-ingest — created — summaries/zellij-architecture.md — from raw/zellij-repo/docs/ARCHITECTURE.md
 - 2026-05-21T19:05:00Z — scientia-wiki-ingest — created — summaries/zellij-error-handling.md — from raw/zellij-repo/docs/ERROR_HANDLING.md
 - 2026-05-21T19:05:00Z — scientia-wiki-ingest — created — summaries/zellij-manpage.md — from raw/zellij-repo/docs/MANPAGE.md
