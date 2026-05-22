@@ -1,7 +1,7 @@
 ---
 title: "Knowledge Base Index"
 type: index
-updated: 2026-05-21
+updated: 2026-05-22
 ---
 
 # ars.scientia_rewrite — Knowledge Base Index
@@ -13,19 +13,57 @@ entry here.
 
 | Page | Tags | Confidence | Updated |
 |------|------|------------|---------|
-<!-- entries added by scientia-wiki-ingest / scientia-wiki-strategy -->
+| [[concepts/screen-zellij]] | architecture, terminal-multiplexer | high | 2026-05-21 |
+| [[concepts/terminal-pane]] | architecture, terminal-emulator | high | 2026-05-21 |
+| [[concepts/scroll-buffer]] | terminal-emulator, buffer | high | 2026-05-21 |
+| [[concepts/terminal-character]] | terminal-emulator, rendering | high | 2026-05-21 |
+| [[concepts/ansi-vt-stream]] | terminal, protocol | high | 2026-05-21 |
+| [[concepts/pane-boundaries]] | ui, rendering | high | 2026-05-21 |
+| [[concepts/pty-bus]] | architecture, ipc | high | 2026-05-21 |
+| [[concepts/error-propagation]] | rust, error-handling | high | 2026-05-21 |
+| [[concepts/error-context]] | rust, error-handling | high | 2026-05-21 |
+| [[concepts/fatal-error-handling]] | rust, error-handling | high | 2026-05-21 |
+| [[concepts/non-fatal-error-handling]] | rust, error-handling | high | 2026-05-21 |
+| [[concepts/panic-handling]] | rust, error-handling | high | 2026-05-21 |
+| [[concepts/custom-error-types]] | rust, error-handling | high | 2026-05-21 |
+| [[concepts/terminal-multiplexer]] | terminal, infrastructure | high | 2026-05-21 |
+| [[concepts/layout-system]] | configuration, ui | high | 2026-05-21 |
+| [[concepts/plugin-system]] | webassembly, extensibility | high | 2026-05-21 |
+| [[concepts/input-modes]] | ux, keybindings | high | 2026-05-21 |
+| [[concepts/keybindings]] | ux, configuration | high | 2026-05-21 |
+| [[concepts/pane]] | ui, terminal-multiplexer | high | 2026-05-21 |
+| [[concepts/tab]] | ui, workspace | high | 2026-05-21 |
+| [[concepts/session]] | workspace, persistence | high | 2026-05-21 |
+| [[concepts/theme-system]] | ui, theming | high | 2026-05-21 |
+| [[concepts/csi]] | terminal, protocol | high | 2026-05-21 |
+| [[concepts/osc]] | terminal, protocol | high | 2026-05-21 |
+| [[concepts/pty]] | terminal, linux, unix | high | 2026-05-21 |
+| [[concepts/cargo-registry]] | rust, packaging | high | 2026-05-21 |
+| [[concepts/release-simulation]] | release-engineering, testing | high | 2026-05-21 |
 
 ## Entities
 
 | Page | Tags | Updated |
 |------|------|---------|
-<!-- entries added by scientia-wiki-ingest -->
+| [[entities/zellij]] | tool, terminal-multiplexer | 2026-05-21 |
+| [[entities/anyhow]] | rust-crate, error-handling | 2026-05-21 |
+| [[entities/miette]] | rust-crate, diagnostics | 2026-05-21 |
+| [[entities/thiserror]] | rust-crate, error-handling | 2026-05-21 |
+| [[entities/tmux]] | tool, terminal-multiplexer | 2026-05-21 |
+| [[entities/gnu-screen]] | tool, terminal-multiplexer | 2026-05-21 |
+| [[entities/webassembly]] | technology, plugin | 2026-05-21 |
+| [[entities/ktra]] | tool, cargo, registry | 2026-05-21 |
 
 ## Summaries
 
 | Page | Source | Key Topics | Created |
 |------|--------|------------|---------|
-<!-- entries added by scientia-wiki-ingest -->
+| [[summaries/zellij-architecture]] | raw/zellij-repo/docs/ARCHITECTURE.md | architecture, terminal-pane, pty | 2026-05-21 |
+| [[summaries/zellij-error-handling]] | raw/zellij-repo/docs/ERROR_HANDLING.md | anyhow, miette, thiserror | 2026-05-21 |
+| [[summaries/zellij-manpage]] | raw/zellij-repo/docs/MANPAGE.md | multiplexer, layout, plugin | 2026-05-21 |
+| [[summaries/zellij-release-process]] | raw/zellij-repo/docs/RELEASE.md | cargo, ktra, simulation | 2026-05-21 |
+| [[summaries/zellij-terminology]] | raw/zellij-repo/docs/TERMINOLOGY.md | ansi, csi, osc, pty | 2026-05-21 |
+| [[summaries/zellij-third-party-install]] | raw/zellij-repo/docs/THIRD_PARTY_INSTALL.md | packaging, install | 2026-05-21 |
 
 ## Syntheses
 
@@ -59,7 +97,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 0
-- **Sources ingested**: 0
+- **Total pages**: 41
+- **Sources ingested**: 6
 - **Bounded contexts**: 0
 - **In-flight changes**: 0
