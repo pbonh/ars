@@ -159,3 +159,17 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-21T20:20:00Z — scientia-wiki-ingest — created — concepts/hermes-kanban-orchestrator-profile.md — from raw/hermes-kanban-v1-spec.pdf
 - 2026-05-21T20:20:00Z — scientia-wiki-ingest — created — concepts/hermes-kanban-tenant.md — from raw/hermes-kanban-v1-spec.pdf
 - 2026-05-21T20:20:00Z — scientia-wiki-ingest — updated — concepts/hermes-kanban-board.md — added v1 spec details from raw/hermes-kanban-v1-spec.pdf
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — summaries/television-docs.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — concepts/television-channel.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — concepts/television-cable.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — concepts/television-remote-control.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — concepts/television-template-system.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — concepts/television-frecency-sorting.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — concepts/television-shell-integration.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — concepts/television-search-pattern.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — concepts/television-inline-mode.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — concepts/television-watch-mode.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — entities/television.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — entities/string-pipeline.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — entities/nucleo-matcher.md — from raw/television-repo/docs
+- 2026-05-21T20:30:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 13 pages from raw/television-repo/docs

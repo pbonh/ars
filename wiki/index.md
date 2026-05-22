@@ -98,6 +98,15 @@ entry here.
 | [[concepts/hermes-kanban-dispatcher]] | ai-agent, kanban, dispatcher, sqlite | high | 2026-05-21 |
 | [[concepts/hermes-kanban-orchestrator-profile]] | ai-agent, kanban, orchestrator, profile | high | 2026-05-21 |
 | [[concepts/hermes-kanban-tenant]] | ai-agent, kanban, multi-tenant, namespace | high | 2026-05-21 |
+| [[concepts/television-channel]] | fuzzy-finder, configuration, terminal | high | 2026-05-21 |
+| [[concepts/television-cable]] | fuzzy-finder, configuration, extensibility | high | 2026-05-21 |
+| [[concepts/television-remote-control]] | fuzzy-finder, ui, navigation | high | 2026-05-21 |
+| [[concepts/television-template-system]] | fuzzy-finder, templating, string-processing | high | 2026-05-21 |
+| [[concepts/television-frecency-sorting]] | fuzzy-finder, ranking, algorithm | high | 2026-05-21 |
+| [[concepts/television-shell-integration]] | fuzzy-finder, shell, autocomplete | high | 2026-05-21 |
+| [[concepts/television-search-pattern]] | fuzzy-finder, search, query-syntax | high | 2026-05-21 |
+| [[concepts/television-inline-mode]] | fuzzy-finder, ui, embedding | high | 2026-05-21 |
+| [[concepts/television-watch-mode]] | fuzzy-finder, monitoring, realtime | high | 2026-05-21 |
 
 ## Entities
 
@@ -139,6 +148,9 @@ entry here.
 | [[entities/goose]] | tool, coding-agent, open-source, agent-skills | 2026-05-21 |
 | [[entities/spring-ai]] | framework, java, ai, agent-skills | 2026-05-21 |
 | [[entities/skills-ref]] | tool, cli, agent-skills, validation | 2026-05-21 |
+| [[entities/television]] | tool, fuzzy-finder, rust, terminal | 2026-05-21 |
+| [[entities/string-pipeline]] | rust-crate, templating, string-processing | 2026-05-21 |
+| [[entities/nucleo-matcher]] | rust-crate, fuzzy-matching, algorithm | 2026-05-21 |
 
 ## Summaries
 
@@ -159,6 +171,7 @@ entry here.
 | [[summaries/agentskills-io-home]] | raw/agentskills-io-home.md | agent-skills, specification, ecosystem | 2026-05-21 |
 | [[summaries/agentskills-io-specification]] | raw/agentskills-io-specification.md | agent-skills, specification, frontmatter | 2026-05-21 |
 | [[summaries/hermes-kanban-v1-spec]] | raw/hermes-kanban-v1-spec.pdf | ai-agent, kanban, multi-agent, coordination | 2026-05-21 |
+| [[summaries/television-docs]] | raw/television-repo/docs | fuzzy-finder, channel, template, shell | 2026-05-21 |
 
 ## Syntheses
 
@@ -192,7 +205,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 116
-- **Sources ingested**: 13
+- **Total pages**: 129
+- **Sources ingested**: 14
 - **Bounded contexts**: 0
 - **In-flight changes**: 0
