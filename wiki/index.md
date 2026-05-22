@@ -70,6 +70,14 @@ entry here.
 | [[concepts/obsidian-cli]] | obsidian, cli, automation | high | 2026-05-21 |
 | [[concepts/obsidian-cli-tui]] | obsidian, cli, tui, interactive | high | 2026-05-21 |
 | [[concepts/obsidian-cli-developer-commands]] | obsidian, cli, developer-tools, plugin-development | high | 2026-05-21 |
+| [[concepts/delta-spec]] | specification, brownfield, versioning | high | 2026-05-21 |
+| [[concepts/fluid-workflow]] | workflow, agile, ai-assisted-development | high | 2026-05-21 |
+| [[concepts/artifact-dependency-graph]] | workflow, dag, project-management | high | 2026-05-21 |
+| [[concepts/progressive-rigor]] | specification, risk-management, documentation | high | 2026-05-21 |
+| [[concepts/opsx-workflow]] | workflow, ai-assisted-development, openspec | high | 2026-05-21 |
+| [[concepts/coordination-workspace]] | workspace, multi-repo, planning, openspec | medium | 2026-05-21 |
+| [[concepts/custom-workflow-schema]] | workflow, customization, schema | high | 2026-05-21 |
+| [[concepts/brownfield-first]] | software-development, legacy-code, specification | high | 2026-05-21 |
 
 ## Entities
 
@@ -97,6 +105,8 @@ entry here.
 | [[entities/luajit]] | tool, lua, jit-compiler | 2026-05-21 |
 | [[entities/obsidian]] | tool, knowledge-base, markdown | 2026-05-21 |
 | [[entities/obsidian-headless]] | tool, obsidian, sync, headless | 2026-05-21 |
+| [[entities/openspec]] | tool, specification, ai-assisted-development, opensource | 2026-05-21 |
+| [[entities/fission-ai]] | organization, ai-assisted-development, openspec | 2026-05-21 |
 
 ## Summaries
 
@@ -112,6 +122,7 @@ entry here.
 | [[summaries/nushell-book]] | raw/nushell-book/book | shell, structured-pipeline, plugin, dataframe | 2026-05-21 |
 | [[summaries/nvim-core-docs]] | raw/nvim-docs/ | neovim, lua, lsp, treesitter | 2026-05-21 |
 | [[summaries/obsidian-cli-help]] | raw/obsidian-cli.md | obsidian-cli, tui, developer-commands | 2026-05-21 |
+| [[summaries/openspec-docs]] | raw/openspec-docs | delta-spec, opsx, fluid-workflow, schema | 2026-05-21 |
 
 ## Syntheses
 
@@ -145,7 +156,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 76
-- **Sources ingested**: 9
+- **Total pages**: 86
+- **Sources ingested**: 10
 - **Bounded contexts**: 0
 - **In-flight changes**: 0

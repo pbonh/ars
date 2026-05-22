@@ -105,3 +105,14 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-21T19:40:00Z — scientia-wiki-ingest — created — entities/obsidian.md — from raw/obsidian-cli.md
 - 2026-05-21T19:40:00Z — scientia-wiki-ingest — created — entities/obsidian-headless.md — from raw/obsidian-cli.md
 - 2026-05-21T19:40:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 6 pages from raw/obsidian-cli.md
+- 2026-05-21T19:45:00Z — scientia-wiki-ingest — created — summaries/openspec-docs.md — from raw/openspec-docs
+- 2026-05-21T19:45:00Z — scientia-wiki-ingest — created — concepts/delta-spec.md — from raw/openspec-docs
+- 2026-05-21T19:45:00Z — scientia-wiki-ingest — created — concepts/fluid-workflow.md — from raw/openspec-docs
+- 2026-05-21T19:45:00Z — scientia-wiki-ingest — created — concepts/artifact-dependency-graph.md — from raw/openspec-docs
+- 2026-05-21T19:45:00Z — scientia-wiki-ingest — created — concepts/progressive-rigor.md — from raw/openspec-docs
+- 2026-05-21T19:45:00Z — scientia-wiki-ingest — created — concepts/opsx-workflow.md — from raw/openspec-docs
+- 2026-05-21T19:45:00Z — scientia-wiki-ingest — created — concepts/coordination-workspace.md — from raw/openspec-docs
+- 2026-05-21T19:45:00Z — scientia-wiki-ingest — created — concepts/custom-workflow-schema.md — from raw/openspec-docs
+- 2026-05-21T19:45:00Z — scientia-wiki-ingest — created — concepts/brownfield-first.md — from raw/openspec-docs
+- 2026-05-21T19:45:00Z — scientia-wiki-ingest — created — entities/openspec.md — from raw/openspec-docs
+- 2026-05-21T19:45:00Z — scientia-wiki-ingest — created — entities/fission-ai.md — from raw/openspec-docs
