@@ -1,0 +1,36 @@
+# openspec/config.yaml — OpenSpec configuration, written by scientia-wiki-init.
+#
+# scientia writes this file once at init. After init, OpenSpec owns it;
+# scientia does not edit it without an explicit migration.
+
+schema: intent-driven
+
+# Mandatory skill bindings per OpenSpec stage.
+# All bindings point at scientia-owned skills (no upstream dependencies).
+rules:
+  proposal:
+    must_use: scientia-grill
+  spec:
+    must_use: scientia-intent-spec
+  design:
+    must_use: scientia-intent-design
+  adr:
+    must_use: scientia-intent-adr
+  tasks:
+    must_use: scientia-intent-tasks
+
+# Apply discipline.
+apply:
+  requires:
+    - tasks
+
+# Verify scoring dimensions and severities.
+verify:
+  dimensions:
+    - completeness
+    - correctness
+    - coherence
+  severities:
+    - critical
+    - warning
+    - suggestion

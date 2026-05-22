@@ -1,0 +1,41 @@
+# intent-driven OpenSpec schema — scientia v0.1 bundled copy.
+#
+# Lifecycle: proposal -> specs -> design -> adr -> tasks.
+# Each stage has a gate; the apply stage consumes tasks.md after all
+# upstream stages have merged to trunk.
+
+name: intent-driven
+
+stages:
+  - name: proposal
+    artifact: proposal.md
+    gate: grill-me-complete
+    mandatory: true
+  - name: spec
+    artifact: specs/<capability>/spec.md
+    cardinality: one-or-more
+    mandatory: true
+  - name: design
+    artifact: design.md
+    gate: in-force-adr-supersession-walk
+    mandatory: true
+  - name: adr
+    artifact: adr/NNNN-kebab-title.md
+    cardinality: zero-or-more
+    immutability: enforced     # supersede; never edit
+  - name: tasks
+    artifact: tasks.md
+    format: checkbox-list      # `- [ ]` / `- [x]`
+
+apply:
+  requires:
+    - tasks
+
+archive:
+  requires:
+    - apply-complete
+    - on-trunk
+
+verify:
+  dimensions: [completeness, correctness, coherence]
+  severities: [critical, warning, suggestion]

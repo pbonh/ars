@@ -1,0 +1,84 @@
+# development/config.yaml — scientia per-repo configuration.
+#
+# All keys are optional. Defaults shipped in the scientia bundle apply
+# when a key is absent.
+
+# Version pin. Bumped only by install.sh --upgrade migrations.
+scientia_schema_version: 1
+bundle_version_installed: 0.1.0
+
+# Where the wiki lives.
+wiki:
+  path: wiki/
+  raw_path: raw/
+
+# Hermes integration.
+hermes:
+  # Override per-repo if the host's kanban.db is project-specific.
+  kanban_db: ~/.hermes/kanban.db
+  # Parallel batch size per delegate_task call. Mapped to hermes'
+  # delegation.max_concurrent_children. Default 3, min 1.
+  # Applied to ~/.hermes/config.yaml when scientia-kanban-init runs;
+  # scientia-kanban-emit refuses if the host drifts from this value.
+  max_concurrent_children: 3
+  # Profile name overrides — leave blank to use defaults.
+  profile_names:
+    implementer: scientia-implementer
+    reviewer:    scientia-reviewer
+    integrator:  scientia-integrator
+    aggregator:  scientia-aggregator
+  # Per-profile model configuration. Optional; absent block = hands-off,
+  # every profile inherits Hermes' host-level defaults. Keys mirror
+  # Hermes' per-profile config.yaml schema 1:1 — copy/paste examples
+  # from https://hermes-agent.nousresearch.com/docs/user-guide/configuring-models
+  # work as-is. scientia-kanban-init applies any declared leaf via
+  # `hermes -p <name> config set`; scientia-kanban-emit refuses on
+  # drift between this block and the effective profile config.
+  # Schema reference:
+  #   skills/scientia-kanban-init/references/profile-models.md
+  #
+  # profiles:
+  #   implementer:
+  #     model:
+  #       provider: anthropic
+  #       default: claude-opus-4.7
+  #     auxiliary:
+  #       vision:
+  #         provider: openrouter
+  #         model: google/gemini-2.5-flash
+  #     model_aliases:
+  #       fav:
+  #         model: claude-sonnet-4.6
+  #         provider: anthropic
+  #   reviewer:
+  #     model:
+  #       default: claude-sonnet-4.6
+  #   # integrator and aggregator omitted -> Hermes defaults
+
+# Emit policy.
+emit:
+  # ADR-status -> collaboration pattern. The wiki documents these defaults.
+  default_pattern_by_adr_status:
+    accepted:    P2-pipeline
+    proposed:    P5-human-in-loop
+    deprecated:  refuse
+    superseded:  refuse
+  # Tenants in this list always emit with --require-approval, regardless of ADR status.
+  require_approval_tenants: []
+
+# Verify strictness. block_on_severity is the threshold for verify_all.py
+# (and the orchestrator) to refuse to advance.
+verify:
+  block_on_severity: critical    # critical | warning | suggestion
+
+# Ingest policy.
+ingest:
+  # When true, scientia-ingest-synthesize writes only proposed edits to
+  # wiki/syntheses/; direct writes to wiki/concepts/ and wiki/entities/
+  # are not allowed.
+  synthesize_proposes_only: true
+
+# Per-tenant overrides. Tenant name = bounded-context slug.
+tenants: {}
+#   billing:
+#     require_approval: true
