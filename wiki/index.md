@@ -126,6 +126,18 @@ entry here.
 | [[concepts/iterative-deliberation]] | llm-reasoning, iterative-refinement, test-time-scaling | high | 2026-05-21 |
 | [[concepts/readable-skill]] | agentic-harness, llm-prompting, skill-system | high | 2026-05-21 |
 | [[concepts/heavy-thinking-rlvr]] | llm-reasoning, reinforcement-learning, test-time-scaling | medium | 2026-05-21 |
+| [[concepts/ansible-async-tasks]] | automation, performance, concurrency | high | 2026-05-21 |
+| [[concepts/ansible-check-mode]] | automation, testing, dry-run | high | 2026-05-21 |
+| [[concepts/ansible-collections]] | automation, packaging, distribution | high | 2026-05-21 |
+| [[concepts/ansible-conditionals]] | automation, control-flow, jinja2 | high | 2026-05-21 |
+| [[concepts/ansible-delegation]] | automation, networking, control-flow | high | 2026-05-21 |
+| [[concepts/ansible-error-handling]] | automation, resilience, control-flow | high | 2026-05-21 |
+| [[concepts/ansible-facts]] | automation, introspection, discovery | high | 2026-05-21 |
+| [[concepts/ansible-inventory]] | automation, infrastructure, inventory | high | 2026-05-21 |
+| [[concepts/ansible-playbook]] | automation, orchestration, yaml | high | 2026-05-21 |
+| [[concepts/ansible-roles]] | automation, reuse, modularity | high | 2026-05-21 |
+| [[concepts/ansible-variables]] | automation, configuration, templating | high | 2026-05-21 |
+| [[concepts/ansible-vault]] | automation, security, encryption | high | 2026-05-21 |
 
 ## Entities
 
@@ -185,6 +197,9 @@ entry here.
 | [[entities/kimi-k2]] | llm, reasoning-model, moonshot-ai | 2026-05-21 |
 | [[entities/pacore]] | framework, reasoning, stepfun-ai | 2026-05-21 |
 | [[entities/longcat-flash-thinking]] | llm, reasoning-model, meituan | 2026-05-21 |
+| [[entities/ansible]] | tool, automation, configuration-management | 2026-05-21 |
+| [[entities/ansible-core]] | product, engine, python-package | 2026-05-21 |
+| [[entities/ansible-galaxy]] | tool, hub, registry | 2026-05-21 |
 
 ## Summaries
 
@@ -209,6 +224,7 @@ entry here.
 | [[summaries/llm-wiki]] | raw/llm-wiki.md | knowledge-management, llm, compounding | 2026-05-21 |
 | [[summaries/adr-github-home]] | raw/adr-github-home.html | architecture, documentation, adr | 2026-05-21 |
 | [[summaries/arxiv-heavyskill]] | raw/arxiv-2605.02396.pdf | ai-research, llm-reasoning, agentic-harness | 2026-05-21 |
+| [[summaries/ansible-user-guide]] | raw/ansible-user-guide.md | automation, infrastructure, configuration-management | 2026-05-21 |
 
 ## Syntheses
 

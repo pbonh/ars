@@ -8,11 +8,11 @@ updated: 2026-05-21
 
 Append-only record of every change to the wiki. Each entry is one line:
 
-```
-- YYYY-MM-DDTHH:MM:SSZ — <skill-or-actor> — <action> — <page-or-target> — <detail>
-```
+<!-- log entry template:
+`YYYY-MM-DDTHH:MM:SSZ — <skill-or-actor> — <action> — <page-or-target> — <detail>`
+-->
 
-<!-- entries appended by scientia-wiki-* and scientia-ingest-* skills -->
+<!-- entries appended by scientia-wiki-* and scientia-ingest-* skills below this line -->
 - 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — summaries/arxiv-heavyskill.md — from raw/arxiv-2605.02396.pdf
 - 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — concepts/heavy-thinking.md — from raw/arxiv-2605.02396.pdf
 - 2026-05-21T19:55:00Z — scientia-wiki-ingest — created — concepts/parallel-reasoning.md — from raw/arxiv-2605.02396.pdf
@@ -212,3 +212,20 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — entities/michael-keeling.md — from raw/adr-github-home.html
 - 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — entities/mark-richards.md — from raw/adr-github-home.html
 - 2026-05-21T21:00:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 11 pages from raw/adr-github-home.html
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — summaries/ansible-user-guide.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — concepts/ansible-async-tasks.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — concepts/ansible-check-mode.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — concepts/ansible-collections.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — concepts/ansible-conditionals.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — concepts/ansible-delegation.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — concepts/ansible-error-handling.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — concepts/ansible-facts.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — concepts/ansible-inventory.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — concepts/ansible-playbook.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — concepts/ansible-roles.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — concepts/ansible-variables.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — concepts/ansible-vault.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — entities/ansible.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — entities/ansible-core.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — entities/ansible-galaxy.md — from raw/ansible-user-guide.md
+- 2026-05-22T03:15:09Z — scientia-wiki-ingest — updated — wiki/index.md — added 16 pages from raw/ansible-user-guide.md
