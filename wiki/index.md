@@ -113,6 +113,12 @@ entry here.
 | [[concepts/wiki-query]] | knowledge-management, llm, workflow | high | 2026-05-21 |
 | [[concepts/wiki-lint]] | knowledge-management, llm, workflow | high | 2026-05-21 |
 | [[concepts/agent-schema-document]] | knowledge-management, llm, configuration | high | 2026-05-21 |
+| [[concepts/architectural-decision]] | architecture, documentation, adr | high | 2026-05-21 |
+| [[concepts/architecturally-significant-requirement]] | architecture, requirements, adr | high | 2026-05-21 |
+| [[concepts/architectural-decision-record]] | architecture, documentation, adr | high | 2026-05-21 |
+| [[concepts/decision-log]] | architecture, documentation, adr | high | 2026-05-21 |
+| [[concepts/architectural-knowledge-management]] | architecture, knowledge-management | high | 2026-05-21 |
+| [[concepts/y-statement-format]] | architecture, documentation, adr | medium | 2026-05-21 |
 
 ## Entities
 
@@ -164,6 +170,10 @@ entry here.
 | [[entities/dataview]] | plugin, obsidian, query, data | 2026-05-21 |
 | [[entities/obsidian-web-clipper]] | tool, browser-extension, obsidian, markdown | 2026-05-21 |
 | [[entities/memex]] | system, history, knowledge-management | 2026-05-21 |
+| [[entities/adr-github-org]] | organization, adr | 2026-05-21 |
+| [[entities/michael-nygard]] | person, adr | 2026-05-21 |
+| [[entities/michael-keeling]] | person, adr | 2026-05-21 |
+| [[entities/mark-richards]] | person, adr | 2026-05-21 |
 
 ## Summaries
 
@@ -186,6 +196,7 @@ entry here.
 | [[summaries/hermes-kanban-v1-spec]] | raw/hermes-kanban-v1-spec.pdf | ai-agent, kanban, multi-agent, coordination | 2026-05-21 |
 | [[summaries/television-docs]] | raw/television-repo/docs | fuzzy-finder, channel, template, shell | 2026-05-21 |
 | [[summaries/llm-wiki]] | raw/llm-wiki.md | knowledge-management, llm, compounding | 2026-05-21 |
+| [[summaries/adr-github-home]] | raw/adr-github-home.html | architecture, documentation, adr | 2026-05-21 |
 
 ## Syntheses
 
@@ -219,7 +230,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 143
-- **Sources ingested**: 15
+- **Total pages**: 154
+- **Sources ingested**: 16
 - **Bounded contexts**: 0
 - **In-flight changes**: 0

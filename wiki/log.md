@@ -188,3 +188,15 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — entities/obsidian-web-clipper.md — from raw/llm-wiki.md
 - 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — entities/memex.md — from raw/llm-wiki.md
 - 2026-05-21T20:45:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 14 pages from raw/llm-wiki.md
+- 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — summaries/adr-github-home.md — from raw/adr-github-home.html
+- 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — concepts/architectural-decision.md — from raw/adr-github-home.html
+- 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — concepts/architecturally-significant-requirement.md — from raw/adr-github-home.html
+- 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — concepts/architectural-decision-record.md — from raw/adr-github-home.html
+- 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — concepts/decision-log.md — from raw/adr-github-home.html
+- 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — concepts/architectural-knowledge-management.md — from raw/adr-github-home.html
+- 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — concepts/y-statement-format.md — from raw/adr-github-home.html
+- 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — entities/adr-github-org.md — from raw/adr-github-home.html
+- 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — entities/michael-nygard.md — from raw/adr-github-home.html
+- 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — entities/michael-keeling.md — from raw/adr-github-home.html
+- 2026-05-21T21:00:00Z — scientia-wiki-ingest — created — entities/mark-richards.md — from raw/adr-github-home.html
+- 2026-05-21T21:00:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 11 pages from raw/adr-github-home.html
