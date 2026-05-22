@@ -133,3 +133,18 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-21T20:00:00Z — scientia-wiki-ingest — created — concepts/hermes-tool-registry.md — from raw/hermes-agent-docs/website/docs
 - 2026-05-21T20:00:00Z — scientia-wiki-ingest — created — entities/hermes-agent.md — from raw/hermes-agent-docs/website/docs
 - 2026-05-21T20:00:00Z — scientia-wiki-ingest — created — entities/nous-research.md — from raw/hermes-agent-docs/website/docs
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — summaries/agentskills-io-home.md — from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — concepts/agent-skills-format.md — from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — concepts/progressive-disclosure.md — from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — updated — concepts/pi-skill.md — added cross-references from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — updated — entities/agentskills-io.md — expanded overview and ecosystem from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — entities/anthropic.md — from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — entities/cursor.md — from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — entities/claude-code.md — from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — entities/github-copilot.md — from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — entities/vscode.md — from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — entities/openai-codex.md — from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — entities/roo-code.md — from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — entities/goose.md — from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — entities/spring-ai.md — from raw/agentskills-io-home.md
+- 2026-05-21T20:05:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 12 pages from raw/agentskills-io-home.md

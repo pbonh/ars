@@ -92,6 +92,8 @@ entry here.
 | [[concepts/hermes-skills-system]] | ai-agent, skills, procedural-memory | high | 2026-05-21 |
 | [[concepts/hermes-subagent-delegation]] | ai-agent, parallelism, subagent | high | 2026-05-21 |
 | [[concepts/hermes-tool-registry]] | ai-agent, tools, registry, dispatch | high | 2026-05-21 |
+| [[concepts/agent-skills-format]] | agent-skills, specification, ai-tools | high | 2026-05-21 |
+| [[concepts/progressive-disclosure]] | agent-skills, context-window, loading | high | 2026-05-21 |
 
 ## Entities
 
@@ -123,6 +125,15 @@ entry here.
 | [[entities/fission-ai]] | organization, ai-assisted-development, openspec | 2026-05-21 |
 | [[entities/hermes-agent]] | tool, ai-agent, autonomous-agent | 2026-05-21 |
 | [[entities/nous-research]] | organization, ai-research, model-training | 2026-05-21 |
+| [[entities/anthropic]] | organization, ai-research, agent-skills | 2026-05-21 |
+| [[entities/cursor]] | tool, ai-editor, coding-agent, agent-skills | 2026-05-21 |
+| [[entities/claude-code]] | tool, coding-agent, terminal, agent-skills | 2026-05-21 |
+| [[entities/github-copilot]] | tool, ai-pair-programmer, agent-skills, microsoft | 2026-05-21 |
+| [[entities/vscode]] | tool, code-editor, ide, agent-skills, microsoft | 2026-05-21 |
+| [[entities/openai-codex]] | tool, coding-agent, openai, agent-skills | 2026-05-21 |
+| [[entities/roo-code]] | tool, coding-agent, open-source, agent-skills | 2026-05-21 |
+| [[entities/goose]] | tool, coding-agent, open-source, agent-skills | 2026-05-21 |
+| [[entities/spring-ai]] | framework, java, ai, agent-skills | 2026-05-21 |
 
 ## Summaries
 
@@ -140,6 +151,7 @@ entry here.
 | [[summaries/obsidian-cli-help]] | raw/obsidian-cli.md | obsidian-cli, tui, developer-commands | 2026-05-21 |
 | [[summaries/openspec-docs]] | raw/openspec-docs | delta-spec, opsx, fluid-workflow, schema | 2026-05-21 |
 | [[summaries/hermes-agent-docs]] | raw/hermes-agent-docs/website/docs | hermes, ai-agent, skills, kanban, mcp | 2026-05-21 |
+| [[summaries/agentskills-io-home]] | raw/agentskills-io-home.md | agent-skills, specification, ecosystem | 2026-05-21 |
 
 ## Syntheses
 
@@ -173,7 +185,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 101
-- **Sources ingested**: 11
+- **Total pages**: 113
+- **Sources ingested**: 12
 - **Bounded contexts**: 0
 - **In-flight changes**: 0

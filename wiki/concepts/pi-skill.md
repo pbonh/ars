@@ -4,7 +4,7 @@ type: concept
 tags: [concept, pi, agent-skills, workflow]
 created: 2026-05-21
 updated: 2026-05-21
-sources: ["raw/pi-repo/packages/coding-agent/docs/skills.md"]
+sources: ["raw/pi-repo/packages/coding-agent/docs/skills.md", "raw/agentskills-io-home.md"]
 confidence: high
 ---
 
@@ -47,6 +47,8 @@ Create a skill when:
 
 - [[concepts/pi-extension]]
 - [[concepts/pi-package]]
+- [[concepts/agent-skills-format]] — the broader folder and file specification Pi implements
+- [[concepts/progressive-disclosure]] — the three-stage loading mechanism Pi uses
 - [[entities/agentskills-io]]
 
 ## Sources
