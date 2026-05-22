@@ -5,7 +5,15 @@
     creates: "{{ acp_pnpm_home }}"
   environment:
     PNPM_HOME: "{{ acp_pnpm_home }}"
-    PATH: "{{ acp_pnpm_home }}:{{ ansible_facts['env']['PATH'] }}"
+    PATH: "{{ acp_pnpm_home }}/bin:{{ acp_pnpm_home }}:{{ ansible_facts['env']['PATH'] }}"
+
+- name: ACP | Query pnpm global bin directory
+  ansible.builtin.command: "{{ acp_pnpm_executable }} config get global-bin-dir"
+  register: acp_pnpm_global_bin_dir
+  changed_when: false
+  environment:
+    PNPM_HOME: "{{ acp_pnpm_home }}"
+    PATH: "{{ acp_pnpm_home }}/bin:{{ acp_pnpm_home }}:{{ ansible_facts['env']['PATH'] }}"
 
 - name: ACP | Install adapters
   community.general.pnpm:
@@ -17,4 +25,4 @@
   loop: "{{ acp_adapters }}"
   environment:
     PNPM_HOME: "{{ acp_pnpm_home }}"
-    PATH: "{{ acp_pnpm_home }}:{{ ansible_facts['env']['PATH'] }}"
+    PATH: "{{ acp_pnpm_global_bin_dir.stdout }}:{{ acp_pnpm_home }}/bin:{{ acp_pnpm_home }}:{{ ansible_facts['env']['PATH'] }}"
