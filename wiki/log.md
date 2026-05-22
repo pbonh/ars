@@ -55,3 +55,19 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-21T19:05:00Z — scientia-wiki-ingest — created — entities/webassembly.md — from raw/zellij-repo/docs/MANPAGE.md
 - 2026-05-21T19:05:00Z — scientia-wiki-ingest — created — entities/ktra.md — from raw/zellij-repo/docs/RELEASE.md
 - 2026-05-21T19:05:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 41 pages from 6 sources
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — summaries/pi-coding-agent-docs.md — from raw/pi-repo/packages/coding-agent/docs
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — concepts/pi-extension.md — from raw/pi-repo/packages/coding-agent/docs/extensions.md
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — concepts/pi-skill.md — from raw/pi-repo/packages/coding-agent/docs/skills.md
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — concepts/pi-theme.md — from raw/pi-repo/packages/coding-agent/docs/themes.md
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — concepts/pi-tui-component.md — from raw/pi-repo/packages/coding-agent/docs/tui.md
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — concepts/pi-compaction.md — from raw/pi-repo/packages/coding-agent/docs/compaction.md
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — concepts/pi-session-format.md — from raw/pi-repo/packages/coding-agent/docs/session-format.md
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — concepts/pi-provider.md — from raw/pi-repo/packages/coding-agent/docs/providers.md
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — concepts/pi-prompt-template.md — from raw/pi-repo/packages/coding-agent/docs/prompt-templates.md
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — concepts/pi-package.md — from raw/pi-repo/packages/coding-agent/docs/packages.md
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — concepts/pi-rpc-mode.md — from raw/pi-repo/packages/coding-agent/docs/rpc.md
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — concepts/pi-sdk.md — from raw/pi-repo/packages/coding-agent/docs/sdk.md
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — concepts/pi-custom-tool.md — from raw/pi-repo/packages/coding-agent/docs/extensions.md
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — entities/pi.md — from raw/pi-repo/packages/coding-agent/docs
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — entities/earendil-works.md — from raw/pi-repo/packages/coding-agent/docs
+- 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — entities/agentskills-io.md — from raw/pi-repo/packages/coding-agent/docs/skills.md

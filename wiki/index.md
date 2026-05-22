@@ -1,7 +1,7 @@
 ---
 title: "Knowledge Base Index"
 type: index
-updated: 2026-05-22
+updated: 2026-05-21
 ---
 
 # ars.scientia_rewrite — Knowledge Base Index
@@ -40,6 +40,18 @@ entry here.
 | [[concepts/pty]] | terminal, linux, unix | high | 2026-05-21 |
 | [[concepts/cargo-registry]] | rust, packaging | high | 2026-05-21 |
 | [[concepts/release-simulation]] | release-engineering, testing | high | 2026-05-21 |
+| [[concepts/pi-extension]] | pi, extensibility, typescript | high | 2026-05-21 |
+| [[concepts/pi-skill]] | pi, agent-skills, workflow | high | 2026-05-21 |
+| [[concepts/pi-theme]] | pi, theming, terminal | high | 2026-05-21 |
+| [[concepts/pi-tui-component]] | pi, tui, terminal-ui | high | 2026-05-21 |
+| [[concepts/pi-compaction]] | pi, context-window, llm | high | 2026-05-21 |
+| [[concepts/pi-session-format]] | pi, session, jsonl | high | 2026-05-21 |
+| [[concepts/pi-provider]] | pi, llm, api | high | 2026-05-21 |
+| [[concepts/pi-prompt-template]] | pi, prompt, slash-command | high | 2026-05-21 |
+| [[concepts/pi-package]] | pi, packaging, npm | high | 2026-05-21 |
+| [[concepts/pi-rpc-mode]] | pi, rpc, jsonl, headless | high | 2026-05-21 |
+| [[concepts/pi-sdk]] | pi, sdk, nodejs | high | 2026-05-21 |
+| [[concepts/pi-custom-tool]] | pi, tool, llm | high | 2026-05-21 |
 
 ## Entities
 
@@ -53,6 +65,9 @@ entry here.
 | [[entities/gnu-screen]] | tool, terminal-multiplexer | 2026-05-21 |
 | [[entities/webassembly]] | technology, plugin | 2026-05-21 |
 | [[entities/ktra]] | tool, cargo, registry | 2026-05-21 |
+| [[entities/pi]] | tool, coding-agent, terminal | 2026-05-21 |
+| [[entities/earendil-works]] | organization, pi | 2026-05-21 |
+| [[entities/agentskills-io]] | standard, specification | 2026-05-21 |
 
 ## Summaries
 
@@ -64,6 +79,7 @@ entry here.
 | [[summaries/zellij-release-process]] | raw/zellij-repo/docs/RELEASE.md | cargo, ktra, simulation | 2026-05-21 |
 | [[summaries/zellij-terminology]] | raw/zellij-repo/docs/TERMINOLOGY.md | ansi, csi, osc, pty | 2026-05-21 |
 | [[summaries/zellij-third-party-install]] | raw/zellij-repo/docs/THIRD_PARTY_INSTALL.md | packaging, install | 2026-05-21 |
+| [[summaries/pi-coding-agent-docs]] | raw/pi-repo/packages/coding-agent/docs | pi, extensions, skills, themes | 2026-05-21 |
 
 ## Syntheses
 
@@ -97,7 +113,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 41
-- **Sources ingested**: 6
+- **Total pages**: 55
+- **Sources ingested**: 7
 - **Bounded contexts**: 0
 - **In-flight changes**: 0
