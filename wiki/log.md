@@ -173,3 +173,18 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — entities/string-pipeline.md — from raw/television-repo/docs
 - 2026-05-21T20:30:00Z — scientia-wiki-ingest — created — entities/nucleo-matcher.md — from raw/television-repo/docs
 - 2026-05-21T20:30:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 13 pages from raw/television-repo/docs
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — summaries/llm-wiki.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — concepts/llm-wiki-pattern.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — concepts/compounding-knowledge.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — concepts/wiki-ingest.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — concepts/wiki-query.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — concepts/wiki-lint.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — concepts/agent-schema-document.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — entities/andrej-karpathy.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — entities/notebooklm.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — entities/qmd.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — entities/marp.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — entities/dataview.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — entities/obsidian-web-clipper.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — created — entities/memex.md — from raw/llm-wiki.md
+- 2026-05-21T20:45:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 14 pages from raw/llm-wiki.md

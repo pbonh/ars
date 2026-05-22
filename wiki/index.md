@@ -107,6 +107,12 @@ entry here.
 | [[concepts/television-search-pattern]] | fuzzy-finder, search, query-syntax | high | 2026-05-21 |
 | [[concepts/television-inline-mode]] | fuzzy-finder, ui, embedding | high | 2026-05-21 |
 | [[concepts/television-watch-mode]] | fuzzy-finder, monitoring, realtime | high | 2026-05-21 |
+| [[concepts/llm-wiki-pattern]] | knowledge-management, llm, ai-assisted-development | high | 2026-05-21 |
+| [[concepts/compounding-knowledge]] | knowledge-management, llm | high | 2026-05-21 |
+| [[concepts/wiki-ingest]] | knowledge-management, llm, workflow | high | 2026-05-21 |
+| [[concepts/wiki-query]] | knowledge-management, llm, workflow | high | 2026-05-21 |
+| [[concepts/wiki-lint]] | knowledge-management, llm, workflow | high | 2026-05-21 |
+| [[concepts/agent-schema-document]] | knowledge-management, llm, configuration | high | 2026-05-21 |
 
 ## Entities
 
@@ -151,6 +157,13 @@ entry here.
 | [[entities/television]] | tool, fuzzy-finder, rust, terminal | 2026-05-21 |
 | [[entities/string-pipeline]] | rust-crate, templating, string-processing | 2026-05-21 |
 | [[entities/nucleo-matcher]] | rust-crate, fuzzy-matching, algorithm | 2026-05-21 |
+| [[entities/andrej-karpathy]] | person, ai-researcher | 2026-05-21 |
+| [[entities/notebooklm]] | tool, google, rag, note-taking | 2026-05-21 |
+| [[entities/qmd]] | tool, search-engine, markdown, local-first | 2026-05-21 |
+| [[entities/marp]] | tool, presentation, markdown, obsidian | 2026-05-21 |
+| [[entities/dataview]] | plugin, obsidian, query, data | 2026-05-21 |
+| [[entities/obsidian-web-clipper]] | tool, browser-extension, obsidian, markdown | 2026-05-21 |
+| [[entities/memex]] | system, history, knowledge-management | 2026-05-21 |
 
 ## Summaries
 
@@ -172,6 +185,7 @@ entry here.
 | [[summaries/agentskills-io-specification]] | raw/agentskills-io-specification.md | agent-skills, specification, frontmatter | 2026-05-21 |
 | [[summaries/hermes-kanban-v1-spec]] | raw/hermes-kanban-v1-spec.pdf | ai-agent, kanban, multi-agent, coordination | 2026-05-21 |
 | [[summaries/television-docs]] | raw/television-repo/docs | fuzzy-finder, channel, template, shell | 2026-05-21 |
+| [[summaries/llm-wiki]] | raw/llm-wiki.md | knowledge-management, llm, compounding | 2026-05-21 |
 
 ## Syntheses
 
@@ -205,7 +219,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 129
-- **Sources ingested**: 14
+- **Total pages**: 143
+- **Sources ingested**: 15
 - **Bounded contexts**: 0
 - **In-flight changes**: 0
