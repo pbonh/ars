@@ -148,3 +148,9 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — entities/goose.md — from raw/agentskills-io-home.md
 - 2026-05-21T20:05:00Z — scientia-wiki-ingest — created — entities/spring-ai.md — from raw/agentskills-io-home.md
 - 2026-05-21T20:05:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 12 pages from raw/agentskills-io-home.md
+- 2026-05-21T20:15:00Z — scientia-wiki-ingest — created — summaries/agentskills-io-specification.md — from raw/agentskills-io-specification.md
+- 2026-05-21T20:15:00Z — scientia-wiki-ingest — updated — concepts/agent-skills-format.md — added frontmatter schema and directory details from raw/agentskills-io-specification.md
+- 2026-05-21T20:15:00Z — scientia-wiki-ingest — updated — concepts/progressive-disclosure.md — added token budgets and file-size guidance from raw/agentskills-io-specification.md
+- 2026-05-21T20:15:00Z — scientia-wiki-ingest — created — concepts/skill-validation.md — from raw/agentskills-io-specification.md
+- 2026-05-21T20:15:00Z — scientia-wiki-ingest — created — entities/skills-ref.md — from raw/agentskills-io-specification.md
+- 2026-05-21T20:15:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 3 pages from raw/agentskills-io-specification.md

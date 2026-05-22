@@ -4,7 +4,7 @@ type: concept
 tags: [concept, agent-skills, specification, ai-tools]
 created: 2026-05-21
 updated: 2026-05-21
-sources: ["raw/agentskills-io-home.md"]
+sources: ["raw/agentskills-io-home.md", "raw/agentskills-io-specification.md"]
 confidence: high
 ---
 
@@ -25,16 +25,28 @@ my-skill/
 └── ...               # Any additional files or directories
 ```
 
-The `SKILL.md` file must include at minimum:
-- `name` — a short identifier for the skill
-- `description` — a concise explanation of what the skill does
+The `SKILL.md` file must contain YAML frontmatter followed by Markdown content. The frontmatter fields are:
 
-Additional instructions in the file tell the agent how to perform the specific task. The agent reads the full file only when the skill is activated, keeping the permanent context footprint small.
+| Field | Required | Constraints |
+|-------|----------|-------------|
+| `name` | Yes | 1–64 chars; lowercase `a-z`, `0-9`, hyphens only; no leading, trailing, or consecutive hyphens; must match the parent directory name |
+| `description` | Yes | 1–1024 chars; describes what the skill does and when to use it |
+| `license` | No | Short license name or bundled file reference |
+| `compatibility` | No | 1–500 chars; environment requirements (product, packages, network) |
+| `metadata` | No | Arbitrary string-key-to-string-value map for client extensions |
+| `allowed-tools` | No | Space-separated pre-approved tool list (experimental) |
+
+The Markdown body after the frontmatter contains the skill instructions. There are no format restrictions; recommended content includes step-by-step instructions, input/output examples, and common edge cases. The agent loads the full body only when the skill is activated, keeping the permanent context footprint small.
 
 ## Key Parameters
 
-- **Required file**: `SKILL.md` with `name` and `description`
-- **Optional folders**: `scripts/`, `references/`, `assets/`, or any other files
+- **Required file**: `SKILL.md` with valid frontmatter (`name` and `description` are mandatory)
+- **Optional folders**:
+  - `scripts/` — executable code (self-contained or clearly documented; Python, Bash, JavaScript common)
+  - `references/` — on-demand docs (`REFERENCE.md`, `FORMS.md`, domain-specific files)
+  - `assets/` — static resources (templates, images, data files)
+- **File references**: Use relative paths from the skill root; keep references one level deep; avoid deeply nested chains
+- **Line budget**: Keep `SKILL.md` under ~500 lines; move detailed reference material to `references/`
 - **Versioning**: Skills are plain folders, so they can be tracked in Git or distributed as archives
 - **Portability**: Any agent that implements the standard can consume the same skill folder
 
@@ -50,14 +62,18 @@ Use the Agent Skills format when:
 - Skills can instruct the model to perform any action and may include executable code; review before use.
 - Because the format is open and folder-based, there is no built-in sandboxing — the agent's execution environment determines safety.
 - Name collisions can occur when multiple skill sources are merged; agents typically keep the first discovered skill and warn.
+- The `allowed-tools` field is experimental and not uniformly supported across implementations.
+- Frontmatter YAML errors or constraint violations can prevent a skill from loading at all; validate with [[entities/skills-ref|skills-ref]] before publishing.
 
 ## Related Concepts
 
 - [[concepts/progressive-disclosure]] — how agents load skills without keeping full instructions in context at all times
+- [[concepts/skill-validation]] — validation process and tooling
 - [[concepts/pi-skill]] — Pi's implementation and discovery-path conventions
 - [[concepts/hermes-skills-system]] — Hermes Agent's skill installation and tap system
 
 ## Sources
 
 - [agentskills.io home page](raw/agentskills-io-home.md)
-- [Agent Skills Specification](https://agentskills.io/specification)
+- [Agent Skills Specification](raw/agentskills-io-specification.md)
+- https://agentskills.io/specification

@@ -94,6 +94,7 @@ entry here.
 | [[concepts/hermes-tool-registry]] | ai-agent, tools, registry, dispatch | high | 2026-05-21 |
 | [[concepts/agent-skills-format]] | agent-skills, specification, ai-tools | high | 2026-05-21 |
 | [[concepts/progressive-disclosure]] | agent-skills, context-window, loading | high | 2026-05-21 |
+| [[concepts/skill-validation]] | agent-skills, validation, tooling | high | 2026-05-21 |
 
 ## Entities
 
@@ -134,6 +135,7 @@ entry here.
 | [[entities/roo-code]] | tool, coding-agent, open-source, agent-skills | 2026-05-21 |
 | [[entities/goose]] | tool, coding-agent, open-source, agent-skills | 2026-05-21 |
 | [[entities/spring-ai]] | framework, java, ai, agent-skills | 2026-05-21 |
+| [[entities/skills-ref]] | tool, cli, agent-skills, validation | 2026-05-21 |
 
 ## Summaries
 
@@ -152,6 +154,7 @@ entry here.
 | [[summaries/openspec-docs]] | raw/openspec-docs | delta-spec, opsx, fluid-workflow, schema | 2026-05-21 |
 | [[summaries/hermes-agent-docs]] | raw/hermes-agent-docs/website/docs | hermes, ai-agent, skills, kanban, mcp | 2026-05-21 |
 | [[summaries/agentskills-io-home]] | raw/agentskills-io-home.md | agent-skills, specification, ecosystem | 2026-05-21 |
+| [[summaries/agentskills-io-specification]] | raw/agentskills-io-specification.md | agent-skills, specification, frontmatter | 2026-05-21 |
 
 ## Syntheses
 
@@ -185,7 +188,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 113
-- **Sources ingested**: 12
+- **Total pages**: 116
+- **Sources ingested**: 13
 - **Bounded contexts**: 0
 - **In-flight changes**: 0

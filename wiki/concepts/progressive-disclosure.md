@@ -4,7 +4,7 @@ type: concept
 tags: [concept, agent-skills, context-window, loading, optimization]
 created: 2026-05-21
 updated: 2026-05-21
-sources: ["raw/agentskills-io-home.md"]
+sources: ["raw/agentskills-io-home.md", "raw/agentskills-io-specification.md"]
 confidence: high
 ---
 
@@ -20,12 +20,21 @@ Progressive disclosure is the three-stage loading mechanism by which Agent Skill
 
 3. **Execution**: The agent follows the loaded instructions, optionally executing bundled scripts or loading additional referenced files as needed. After the task completes, the full skill instructions may be dropped from context, leaving only the catalog metadata.
 
+### Token budgets
+
+The specification recommends concrete size targets to keep context usage predictable:
+
+- **Metadata** (~100 tokens): `name` and `description` for every skill, loaded permanently.
+- **Instructions** (< 5000 tokens recommended): the full `SKILL.md` body, loaded only on activation. Keep the file under ~500 lines.
+- **Resources** (as needed): files in `scripts/`, `references/`, or `assets/` are loaded only when explicitly referenced by the active instructions.
+
 ## Key Parameters
 
-- **Permanent context**: Only skill names and descriptions (a few lines per skill).
-- **On-demand context**: Full `SKILL.md` plus any scripts, references, or assets required for the specific task.
+- **Permanent context**: Only skill names and descriptions (~100 tokens per skill).
+- **On-demand context**: Full `SKILL.md` body (< 5000 tokens recommended) plus any referenced scripts, references, or assets.
 - **Matching heuristic**: Typically natural-language similarity between the user request and the skill `description`.
 - **Context footprint**: Enables agents to carry dozens or hundreds of skills without exhausting the context window.
+- **File-size guidance**: Keep `SKILL.md` under 500 lines; move detailed reference material to `references/` and load on demand.
 
 ## When To Use
 
@@ -37,7 +46,9 @@ Progressive disclosure is built into the Agent Skills standard, so agents that i
 
 - If a skill `description` is vague or too generic, the agent may fail to activate the skill when needed.
 - If a skill `description` is overly broad, the agent may activate it for unrelated tasks, wasting tokens and producing irrelevant behavior.
+- A `SKILL.md` that exceeds the recommended token budget inflates the context window every time it activates, reducing room for agent reasoning.
 - Skills that depend on external state (e.g., files in `assets/`) must ensure those resources are reachable at execution time, because they are not loaded during discovery.
+- Deeply nested file-reference chains increase context complexity; keep references one level deep from `SKILL.md`.
 
 ## Related Concepts
 
@@ -48,3 +59,4 @@ Progressive disclosure is built into the Agent Skills standard, so agents that i
 ## Sources
 
 - [agentskills.io home page](raw/agentskills-io-home.md)
+- [Agent Skills Specification](raw/agentskills-io-specification.md)
