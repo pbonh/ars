@@ -87,3 +87,14 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — entities/polars.md — from raw/nushell-book/book
 - 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — entities/nana.md — from raw/nushell-book/book
 - 2026-05-21T19:30:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 15 pages from raw/nushell-book/book
+- 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — summaries/nvim-core-docs.md — from raw/nvim-docs/
+- 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — concepts/nvim-lua-scripting.md — from raw/nvim-docs/lua.txt
+- 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — concepts/nvim-lsp-client.md — from raw/nvim-docs/lsp.txt
+- 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — concepts/nvim-treesitter-integration.md — from raw/nvim-docs/treesitter.txt
+- 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — concepts/nvim-async-jobs.md — from raw/nvim-docs/lua.txt
+- 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — concepts/nvim-diagnostic-framework.md — from raw/nvim-docs/lsp.txt
+- 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — entities/neovim.md — from raw/nvim-docs/help.txt
+- 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — entities/tree-sitter.md — from raw/nvim-docs/treesitter.txt
+- 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — entities/nvim-lspconfig.md — from raw/nvim-docs/lsp.txt
+- 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — entities/nvim-treesitter.md — from raw/nvim-docs/treesitter.txt
+- 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — entities/luajit.md — from raw/nvim-docs/lua.txt

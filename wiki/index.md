@@ -62,6 +62,11 @@ entry here.
 | [[concepts/nushell-module-system]] | shell, modularity, code-organization | high | 2026-05-21 |
 | [[concepts/nushell-plugin-system]] | shell, extensibility, plugin | high | 2026-05-21 |
 | [[concepts/nushell-dataframe]] | shell, data-processing, analytics, columnar | high | 2026-05-21 |
+| [[concepts/nvim-lua-scripting]] | neovim, lua, scripting, configuration | high | 2026-05-21 |
+| [[concepts/nvim-lsp-client]] | neovim, lsp, language-server, ide | high | 2026-05-21 |
+| [[concepts/nvim-treesitter-integration]] | neovim, treesitter, parsing, syntax-highlighting | high | 2026-05-21 |
+| [[concepts/nvim-async-jobs]] | neovim, async, jobs, lua, channels | high | 2026-05-21 |
+| [[concepts/nvim-diagnostic-framework]] | neovim, diagnostics, lsp, error-reporting | high | 2026-05-21 |
 
 ## Entities
 
@@ -82,6 +87,11 @@ entry here.
 | [[entities/reedline]] | tool, line-editor, rust, nushell | 2026-05-21 |
 | [[entities/polars]] | library, dataframe, rust, data-processing | 2026-05-21 |
 | [[entities/nana]] | tool, gui, experimental, nushell | 2026-05-21 |
+| [[entities/neovim]] | tool, text-editor, vim-fork | 2026-05-21 |
+| [[entities/tree-sitter]] | library, parsing, syntax-highlighting | 2026-05-21 |
+| [[entities/nvim-lspconfig]] | plugin, neovim, lsp | 2026-05-21 |
+| [[entities/nvim-treesitter]] | plugin, neovim, treesitter | 2026-05-21 |
+| [[entities/luajit]] | tool, lua, jit-compiler | 2026-05-21 |
 
 ## Summaries
 
@@ -95,6 +105,7 @@ entry here.
 | [[summaries/zellij-third-party-install]] | raw/zellij-repo/docs/THIRD_PARTY_INSTALL.md | packaging, install | 2026-05-21 |
 | [[summaries/pi-coding-agent-docs]] | raw/pi-repo/packages/coding-agent/docs | pi, extensions, skills, themes | 2026-05-21 |
 | [[summaries/nushell-book]] | raw/nushell-book/book | shell, structured-pipeline, plugin, dataframe | 2026-05-21 |
+| [[summaries/nvim-core-docs]] | raw/nvim-docs/ | neovim, lua, lsp, treesitter | 2026-05-21 |
 
 ## Syntheses
 
