@@ -78,6 +78,20 @@ entry here.
 | [[concepts/coordination-workspace]] | workspace, multi-repo, planning, openspec | medium | 2026-05-21 |
 | [[concepts/custom-workflow-schema]] | workflow, customization, schema | high | 2026-05-21 |
 | [[concepts/brownfield-first]] | software-development, legacy-code, specification | high | 2026-05-21 |
+| [[concepts/hermes-agent-loop]] | ai-agent, orchestration, llm | high | 2026-05-21 |
+| [[concepts/hermes-context-compression]] | ai-agent, context-window, prompt-caching | high | 2026-05-21 |
+| [[concepts/hermes-cron-scheduler]] | ai-agent, cron, scheduling, automation | high | 2026-05-21 |
+| [[concepts/hermes-gateway]] | ai-agent, gateway, messaging, platform-adapter | high | 2026-05-21 |
+| [[concepts/hermes-kanban-board]] | ai-agent, kanban, multi-agent, coordination | high | 2026-05-21 |
+| [[concepts/hermes-mcp-integration]] | ai-agent, mcp, tools, extensibility | high | 2026-05-21 |
+| [[concepts/hermes-persistent-memory]] | ai-agent, memory, sqlite, context-window | high | 2026-05-21 |
+| [[concepts/hermes-plugin-system]] | ai-agent, plugin, extensibility | high | 2026-05-21 |
+| [[concepts/hermes-profile-isolation]] | ai-agent, profile, isolation | high | 2026-05-21 |
+| [[concepts/hermes-provider-resolution]] | ai-agent, llm-provider, api-routing | high | 2026-05-21 |
+| [[concepts/hermes-session-storage]] | ai-agent, sqlite, fts5, persistence | high | 2026-05-21 |
+| [[concepts/hermes-skills-system]] | ai-agent, skills, procedural-memory | high | 2026-05-21 |
+| [[concepts/hermes-subagent-delegation]] | ai-agent, parallelism, subagent | high | 2026-05-21 |
+| [[concepts/hermes-tool-registry]] | ai-agent, tools, registry, dispatch | high | 2026-05-21 |
 
 ## Entities
 
@@ -107,6 +121,8 @@ entry here.
 | [[entities/obsidian-headless]] | tool, obsidian, sync, headless | 2026-05-21 |
 | [[entities/openspec]] | tool, specification, ai-assisted-development, opensource | 2026-05-21 |
 | [[entities/fission-ai]] | organization, ai-assisted-development, openspec | 2026-05-21 |
+| [[entities/hermes-agent]] | tool, ai-agent, autonomous-agent | 2026-05-21 |
+| [[entities/nous-research]] | organization, ai-research, model-training | 2026-05-21 |
 
 ## Summaries
 
@@ -123,6 +139,7 @@ entry here.
 | [[summaries/nvim-core-docs]] | raw/nvim-docs/ | neovim, lua, lsp, treesitter | 2026-05-21 |
 | [[summaries/obsidian-cli-help]] | raw/obsidian-cli.md | obsidian-cli, tui, developer-commands | 2026-05-21 |
 | [[summaries/openspec-docs]] | raw/openspec-docs | delta-spec, opsx, fluid-workflow, schema | 2026-05-21 |
+| [[summaries/hermes-agent-docs]] | raw/hermes-agent-docs/website/docs | hermes, ai-agent, skills, kanban, mcp | 2026-05-21 |
 
 ## Syntheses
 
@@ -156,7 +173,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 86
-- **Sources ingested**: 10
+- **Total pages**: 101
+- **Sources ingested**: 11
 - **Bounded contexts**: 0
 - **In-flight changes**: 0

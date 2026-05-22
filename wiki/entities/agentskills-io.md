@@ -1,33 +1,30 @@
 ---
-title: "Agent Skills Standard"
+title: "agentskills.io"
 type: entity
-tags: [entity, standard, specification, agent-skills]
+tags: [entity, standard, specification, ai-skills]
 created: 2026-05-21
 updated: 2026-05-21
-sources: ["raw/pi-repo/packages/coding-agent/docs/skills.md"]
+sources: ["raw/hermes-agent-docs/website/docs"]
 confidence: high
 ---
 
 ## Overview
 
-Agent Skills (agentskills.io) is an open specification for packaging reusable agent capabilities. It defines a directory structure, required `SKILL.md` frontmatter, and XML-based integration into system prompts. Pi implements this standard, remaining lenient about minor violations such as skill names not matching parent directories.
+agentskills.io is an open standard for AI agent skills. Hermes Agent is compatible with this specification, making its skills portable, shareable, and interoperable with other agents that support the standard.
 
 ## Characteristics
 
-- **Specification**: https://agentskills.io/specification
-- **Required file**: `SKILL.md` with `name` and `description` frontmatter
-- **Integration**: Skills are advertised to models via XML in the system prompt
-- **Discovery**: Recursive directory scanning for `SKILL.md` files
-- **Ecosystem**: Shared skill repositories exist for Claude Code, OpenAI Codex, and Pi
+- **Open standard**: Published specification for skill documents.
+- **Hermes compatibility**: Hermes skills follow the agentskills.io format with additional Hermes-specific metadata extensions.
+- **Skills Hub integration**: Hermes can install skills from multiple sources including skills.sh (Vercel's public skills directory), well-known endpoints, GitHub repos, and direct URLs.
+- **Portable**: Skills written for Hermes can theoretically be used by other agentskills.io-compatible agents.
 
 ## Common Strategies
 
-- Write skills with specific descriptions so the model knows when to load them
-- Store shared skills in `~/.agents/skills/` for cross-tool compatibility
-- Reference the specification when building skills intended for multiple agent harnesses
-- Use relative paths inside skill directories for scripts and assets
+- **Publishing skills**: Write skills following the standard SKILL.md format and publish to GitHub or well-known endpoints.
+- **Team taps**: Create a GitHub tap (repo of skills) that team members subscribe to with `hermes skills tap add`.
+- **Cross-agent reuse**: Use skills across different agent platforms that support agentskills.io.
 
 ## Sources
 
-- [Pi Skills Documentation](raw/pi-repo/packages/coding-agent/docs/skills.md)
-- [Agent Skills Specification](https://agentskills.io/specification)
+- `user-guide/features/skills.md`
