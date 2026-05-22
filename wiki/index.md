@@ -52,6 +52,16 @@ entry here.
 | [[concepts/pi-rpc-mode]] | pi, rpc, jsonl, headless | high | 2026-05-21 |
 | [[concepts/pi-sdk]] | pi, sdk, nodejs | high | 2026-05-21 |
 | [[concepts/pi-custom-tool]] | pi, tool, llm | high | 2026-05-21 |
+| [[concepts/nushell-structured-pipeline]] | shell, data-processing, pipeline | high | 2026-05-21 |
+| [[concepts/nushell-implicit-return]] | shell, programming-language, control-flow | high | 2026-05-21 |
+| [[concepts/nushell-static-parsing]] | shell, compiler, static-analysis | high | 2026-05-21 |
+| [[concepts/nushell-scoped-environment]] | shell, environment-variables, scope | high | 2026-05-21 |
+| [[concepts/nushell-immutable-variables]] | shell, functional-programming, immutability | high | 2026-05-21 |
+| [[concepts/nushell-data-types]] | shell, type-system, data-structures | high | 2026-05-21 |
+| [[concepts/nushell-custom-command]] | shell, functions, extensibility | high | 2026-05-21 |
+| [[concepts/nushell-module-system]] | shell, modularity, code-organization | high | 2026-05-21 |
+| [[concepts/nushell-plugin-system]] | shell, extensibility, plugin | high | 2026-05-21 |
+| [[concepts/nushell-dataframe]] | shell, data-processing, analytics, columnar | high | 2026-05-21 |
 
 ## Entities
 
@@ -68,6 +78,10 @@ entry here.
 | [[entities/pi]] | tool, coding-agent, terminal | 2026-05-21 |
 | [[entities/earendil-works]] | organization, pi | 2026-05-21 |
 | [[entities/agentskills-io]] | standard, specification | 2026-05-21 |
+| [[entities/nushell]] | tool, shell, programming-language, rust | 2026-05-21 |
+| [[entities/reedline]] | tool, line-editor, rust, nushell | 2026-05-21 |
+| [[entities/polars]] | library, dataframe, rust, data-processing | 2026-05-21 |
+| [[entities/nana]] | tool, gui, experimental, nushell | 2026-05-21 |
 
 ## Summaries
 
@@ -80,6 +94,7 @@ entry here.
 | [[summaries/zellij-terminology]] | raw/zellij-repo/docs/TERMINOLOGY.md | ansi, csi, osc, pty | 2026-05-21 |
 | [[summaries/zellij-third-party-install]] | raw/zellij-repo/docs/THIRD_PARTY_INSTALL.md | packaging, install | 2026-05-21 |
 | [[summaries/pi-coding-agent-docs]] | raw/pi-repo/packages/coding-agent/docs | pi, extensions, skills, themes | 2026-05-21 |
+| [[summaries/nushell-book]] | raw/nushell-book/book | shell, structured-pipeline, plugin, dataframe | 2026-05-21 |
 
 ## Syntheses
 
@@ -113,7 +128,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 55
-- **Sources ingested**: 7
+- **Total pages**: 70
+- **Sources ingested**: 8
 - **Bounded contexts**: 0
 - **In-flight changes**: 0

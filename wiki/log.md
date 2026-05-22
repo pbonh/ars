@@ -71,3 +71,19 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — entities/pi.md — from raw/pi-repo/packages/coding-agent/docs
 - 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — entities/earendil-works.md — from raw/pi-repo/packages/coding-agent/docs
 - 2026-05-21T19:10:00Z — scientia-wiki-ingest — created — entities/agentskills-io.md — from raw/pi-repo/packages/coding-agent/docs/skills.md
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — summaries/nushell-book.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — concepts/nushell-structured-pipeline.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — concepts/nushell-implicit-return.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — concepts/nushell-static-parsing.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — concepts/nushell-scoped-environment.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — concepts/nushell-immutable-variables.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — concepts/nushell-data-types.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — concepts/nushell-custom-command.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — concepts/nushell-module-system.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — concepts/nushell-plugin-system.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — concepts/nushell-dataframe.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — entities/nushell.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — entities/reedline.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — entities/polars.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — created — entities/nana.md — from raw/nushell-book/book
+- 2026-05-21T19:30:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 15 pages from raw/nushell-book/book
