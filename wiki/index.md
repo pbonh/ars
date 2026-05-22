@@ -67,6 +67,9 @@ entry here.
 | [[concepts/nvim-treesitter-integration]] | neovim, treesitter, parsing, syntax-highlighting | high | 2026-05-21 |
 | [[concepts/nvim-async-jobs]] | neovim, async, jobs, lua, channels | high | 2026-05-21 |
 | [[concepts/nvim-diagnostic-framework]] | neovim, diagnostics, lsp, error-reporting | high | 2026-05-21 |
+| [[concepts/obsidian-cli]] | obsidian, cli, automation | high | 2026-05-21 |
+| [[concepts/obsidian-cli-tui]] | obsidian, cli, tui, interactive | high | 2026-05-21 |
+| [[concepts/obsidian-cli-developer-commands]] | obsidian, cli, developer-tools, plugin-development | high | 2026-05-21 |
 
 ## Entities
 
@@ -92,6 +95,8 @@ entry here.
 | [[entities/nvim-lspconfig]] | plugin, neovim, lsp | 2026-05-21 |
 | [[entities/nvim-treesitter]] | plugin, neovim, treesitter | 2026-05-21 |
 | [[entities/luajit]] | tool, lua, jit-compiler | 2026-05-21 |
+| [[entities/obsidian]] | tool, knowledge-base, markdown | 2026-05-21 |
+| [[entities/obsidian-headless]] | tool, obsidian, sync, headless | 2026-05-21 |
 
 ## Summaries
 
@@ -106,6 +111,7 @@ entry here.
 | [[summaries/pi-coding-agent-docs]] | raw/pi-repo/packages/coding-agent/docs | pi, extensions, skills, themes | 2026-05-21 |
 | [[summaries/nushell-book]] | raw/nushell-book/book | shell, structured-pipeline, plugin, dataframe | 2026-05-21 |
 | [[summaries/nvim-core-docs]] | raw/nvim-docs/ | neovim, lua, lsp, treesitter | 2026-05-21 |
+| [[summaries/obsidian-cli-help]] | raw/obsidian-cli.md | obsidian-cli, tui, developer-commands | 2026-05-21 |
 
 ## Syntheses
 
@@ -139,7 +145,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 70
-- **Sources ingested**: 8
+- **Total pages**: 76
+- **Sources ingested**: 9
 - **Bounded contexts**: 0
 - **In-flight changes**: 0

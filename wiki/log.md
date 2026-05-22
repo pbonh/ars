@@ -98,3 +98,10 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — entities/nvim-lspconfig.md — from raw/nvim-docs/lsp.txt
 - 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — entities/nvim-treesitter.md — from raw/nvim-docs/treesitter.txt
 - 2026-05-21T19:35:00Z — scientia-wiki-ingest — created — entities/luajit.md — from raw/nvim-docs/lua.txt
+- 2026-05-21T19:40:00Z — scientia-wiki-ingest — created — summaries/obsidian-cli-help.md — from raw/obsidian-cli.md
+- 2026-05-21T19:40:00Z — scientia-wiki-ingest — created — concepts/obsidian-cli.md — from raw/obsidian-cli.md
+- 2026-05-21T19:40:00Z — scientia-wiki-ingest — created — concepts/obsidian-cli-tui.md — from raw/obsidian-cli.md
+- 2026-05-21T19:40:00Z — scientia-wiki-ingest — created — concepts/obsidian-cli-developer-commands.md — from raw/obsidian-cli.md
+- 2026-05-21T19:40:00Z — scientia-wiki-ingest — created — entities/obsidian.md — from raw/obsidian-cli.md
+- 2026-05-21T19:40:00Z — scientia-wiki-ingest — created — entities/obsidian-headless.md — from raw/obsidian-cli.md
+- 2026-05-21T19:40:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 6 pages from raw/obsidian-cli.md
