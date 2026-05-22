@@ -154,3 +154,8 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-21T20:15:00Z — scientia-wiki-ingest — created — concepts/skill-validation.md — from raw/agentskills-io-specification.md
 - 2026-05-21T20:15:00Z — scientia-wiki-ingest — created — entities/skills-ref.md — from raw/agentskills-io-specification.md
 - 2026-05-21T20:15:00Z — scientia-wiki-ingest — updated — wiki/index.md — added 3 pages from raw/agentskills-io-specification.md
+- 2026-05-21T20:20:00Z — scientia-wiki-ingest — created — summaries/hermes-kanban-v1-spec.md — from raw/hermes-kanban-v1-spec.pdf
+- 2026-05-21T20:20:00Z — scientia-wiki-ingest — created — concepts/hermes-kanban-dispatcher.md — from raw/hermes-kanban-v1-spec.pdf
+- 2026-05-21T20:20:00Z — scientia-wiki-ingest — created — concepts/hermes-kanban-orchestrator-profile.md — from raw/hermes-kanban-v1-spec.pdf
+- 2026-05-21T20:20:00Z — scientia-wiki-ingest — created — concepts/hermes-kanban-tenant.md — from raw/hermes-kanban-v1-spec.pdf
+- 2026-05-21T20:20:00Z — scientia-wiki-ingest — updated — concepts/hermes-kanban-board.md — added v1 spec details from raw/hermes-kanban-v1-spec.pdf

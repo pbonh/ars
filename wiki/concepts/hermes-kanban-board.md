@@ -4,7 +4,7 @@ type: concept
 tags: [concept, ai-agent, kanban, multi-agent, coordination, sqlite]
 created: 2026-05-21
 updated: 2026-05-21
-sources: ["raw/hermes-agent-docs/website/docs"]
+sources: ["raw/hermes-agent-docs/website/docs", "raw/hermes-kanban-v1-spec.pdf"]
 confidence: high
 ---
 
@@ -91,13 +91,80 @@ The board supports 8 canonical patterns:
 - **Protocol violation**: If a worker exits without `kanban_complete` / `kanban_block`, the dispatcher auto-blocks the task on the next tick.
 - **Heartbeat neglect**: Tasks without heartbeats for >1 hour during operations >4 hours are reclaimed. Call `kanban_heartbeat` at least hourly for long work.
 
+## v1 Specification Details
+
+The April 2026 v1 design spec formalizes the kernel boundary and adds explicit semantics not present in the general user-guide description.
+
+### SQLite schema (v1)
+
+Four tables, three indexes, no JSON masquerading as schema:
+
+- `tasks` — id, title, body, assignee, status, priority, created_by, created_at, started_at, completed_at, workspace_kind, workspace_path, claim_lock, claim_expires
+- `task_links` — parent_id → child_id foreign-key pairs
+- `task_comments` — id, task_id, author, body, created_at
+- `task_events` — id, task_id, kind, payload (opaque JSON diagnostics only), created_at
+
+### Status semantics and ownership
+
+| Status | Owner | Meaning |
+|--------|-------|---------|
+| `todo` | creator | Created, one or more parents not yet done. |
+| `ready` | dispatcher | All parents done; eligible for atomic claim. |
+| `running` | worker | Claimed by a profile process; worker is executing. |
+| `blocked` | worker | Requires peer or human input to proceed. |
+| `done` | worker | Completion result written; triggers child re-evaluation. |
+| `archived` | user | Removed from default views; workspace may be GC’d. |
+
+Only one role may transition each status. This separation eliminates write contention.
+
+### Assignment semantics (v1)
+
+- Exactly one assignee per task (profile name). No multi-assignee, no round-robin pools, no auto-claim queues in v1.
+- Worker prompt contains, in order: task title, task body, every comment chronologically, completion results of every parent task, and the worker’s normal skills/memory.
+- If it is not visible on `hermes kanban show <id>`, the worker cannot see it.
+
+### Scope boundaries: explicitly out of kernel
+
+| Proposed feature | User-space realization |
+|------------------|----------------------|
+| Smart routing / auto-assignment | Router profile scans unassigned tasks and reassigns. |
+| Org chart / hierarchy | Profile naming convention + skills. |
+| Budgets per agent | Plugin wrapping spawn to enforce limits. |
+| Fleet dashboards | Dashboard plugin reading the board. |
+| Approval gates | Reuse `tools/approval.py`. |
+| Governance control plane | Router + budget plugin + audit-export plugin. |
+
+### Collaboration patterns (P1–P8)
+
+The v1 spec documents eight reusable idioms:
+
+- **P1 Fan-out** — one role, N siblings, no dependencies.
+- **P2 Pipeline** — role-specialized chain (scout → editor → writer).
+- **P3 Voting / Quorum** — N workers race or vote; an aggregator picks.
+- **P4 Long-running journal** — same profile + shared dir + recurring tasks.
+- **P5 Human-in-the-loop** — block → comment → unblock.
+- **P6 @mention delegation** — `@<profile-name>` implicitly creates a task.
+- **P7 Thread-scoped workspace** — workspace pinned to a conversation thread.
+- **P8 Fleet farming** — one specialist, N parallel tasks, one workspace per subject.
+
+### Kanban vs `delegate_task` (v1)
+
+The v1 spec offers a twelve-dimension comparison. The one-sentence distinction: `delegate_task` is a function call; Kanban is a durable work queue where every handoff is a row any profile (or human) can read and edit.
+
+- Use `delegate_task` for short, self-contained reasoning subtasks (seconds to minutes, no human in the loop, result consumed immediately by parent).
+- Use Kanban for work that crosses agent boundaries, needs to survive restarts, might need human input, might be picked up by a different role, or needs to be discoverable after the fact.
+
 ## Related Concepts
 
 - [[concepts/hermes-subagent-delegation]]
 - [[concepts/hermes-cron-scheduler]]
 - [[concepts/hermes-profile-isolation]]
 - [[concepts/hermes-agent-loop]]
+- [[concepts/hermes-kanban-dispatcher]]
+- [[concepts/hermes-kanban-orchestrator-profile]]
+- [[concepts/hermes-kanban-tenant]]
 
 ## Sources
 
 - `user-guide/features/kanban.md`
+- `docs/hermes-kanban-v1-spec.pdf` §1–§5, §9–§11, §14–§17

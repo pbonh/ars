@@ -95,6 +95,9 @@ entry here.
 | [[concepts/agent-skills-format]] | agent-skills, specification, ai-tools | high | 2026-05-21 |
 | [[concepts/progressive-disclosure]] | agent-skills, context-window, loading | high | 2026-05-21 |
 | [[concepts/skill-validation]] | agent-skills, validation, tooling | high | 2026-05-21 |
+| [[concepts/hermes-kanban-dispatcher]] | ai-agent, kanban, dispatcher, sqlite | high | 2026-05-21 |
+| [[concepts/hermes-kanban-orchestrator-profile]] | ai-agent, kanban, orchestrator, profile | high | 2026-05-21 |
+| [[concepts/hermes-kanban-tenant]] | ai-agent, kanban, multi-tenant, namespace | high | 2026-05-21 |
 
 ## Entities
 
@@ -155,6 +158,7 @@ entry here.
 | [[summaries/hermes-agent-docs]] | raw/hermes-agent-docs/website/docs | hermes, ai-agent, skills, kanban, mcp | 2026-05-21 |
 | [[summaries/agentskills-io-home]] | raw/agentskills-io-home.md | agent-skills, specification, ecosystem | 2026-05-21 |
 | [[summaries/agentskills-io-specification]] | raw/agentskills-io-specification.md | agent-skills, specification, frontmatter | 2026-05-21 |
+| [[summaries/hermes-kanban-v1-spec]] | raw/hermes-kanban-v1-spec.pdf | ai-agent, kanban, multi-agent, coordination | 2026-05-21 |
 
 ## Syntheses
 
