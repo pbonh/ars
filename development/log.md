@@ -15,16 +15,4 @@ Events include: `bootstrap-complete`, `manifest-bound`, `proposal-drafted`,
 `gate-override`, `gate-blocked`.
 
 <!-- entries appended by scientia skills -->
-- 2026-05-22T02:03:21Z — scientia-wiki-init — bootstrap-complete — bundle 0.1.0
-- 2026-05-22T02:03:24Z — orchestrator — bootstrap-ack — — scaffolding verified; next: scientia-wiki-ingest or scientia-wiki-strategy
-- 2026-05-22T02:07:24Z — orchestrator — ingest-complete — — 6 sources ingested; 41 pages created; next: scientia-wiki-strategy or scientia-wiki-lint
-- 2026-05-22T02:09:23Z — scientia-wiki-lint — completed — — critical=0 warning=0 suggestion=35 (all orphan-page, pre-strategy)
-- 2026-05-21T19:12:00Z — scientia-wiki-lint — completed — — critical=0 warning=0 suggestion=50
-- 2026-05-21T19:35:00Z — scientia-wiki-lint — completed — — critical=0 warning=0 suggestion=64
-- 2026-05-21T19:35:00Z — scientia-wiki-lint — completed — — critical=0 warning=0 suggestion=74
-- 2026-05-21T19:42:00Z — scientia-wiki-lint — completed — — critical=0 warning=0 suggestion=79
-- 2026-05-21T20:05:00Z — scientia-wiki-lint — completed — — critical=0 warning=0 suggestion=105
-- 2026-05-21T20:22:00Z — scientia-wiki-lint — completed — — critical=0 warning=0 suggestion=121
-- 2026-05-21T20:50:00Z — scientia-wiki-lint — completed — — critical=0 warning=0 suggestion=146
-- 2026-05-21T21:10:00Z — scientia-wiki-lint — completed — — critical=0 warning=0 suggestion=156
-- 2026-05-22T03:20:00Z — scientia-wiki-lint — completed — — critical=0 warning=1 suggestion=182
+- 2026-05-23T21:15:28Z — scientia-wiki-init — bootstrap-complete — bundle 0.1.0
