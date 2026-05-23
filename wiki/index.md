@@ -52,6 +52,14 @@ entry here.
 | [[concepts/pi-rpc-mode]] | pi, rpc, jsonl, headless | high | 2026-05-21 |
 | [[concepts/pi-sdk]] | pi, sdk, nodejs | high | 2026-05-21 |
 | [[concepts/pi-custom-tool]] | pi, tool, llm | high | 2026-05-21 |
+| [[concepts/pi-subagent]] | pi, subagent, delegation | high | 2026-05-23 |
+| [[concepts/pi-agent-definition]] | pi, subagent, frontmatter | high | 2026-05-23 |
+| [[concepts/pi-subagent-chain]] | pi, subagent, workflow | high | 2026-05-23 |
+| [[concepts/pi-subagent-execution-mode]] | pi, subagent, async | high | 2026-05-23 |
+| [[concepts/pi-forked-context]] | pi, subagent, session | high | 2026-05-23 |
+| [[concepts/pi-subagent-recursion-guard]] | pi, subagent, depth-limit | high | 2026-05-23 |
+| [[concepts/pi-subagent-child-safety-boundary]] | pi, subagent, isolation | high | 2026-05-23 |
+| [[concepts/pi-worktree-isolation]] | pi, subagent, git | high | 2026-05-23 |
 | [[concepts/nushell-structured-pipeline]] | shell, data-processing, pipeline | high | 2026-05-21 |
 | [[concepts/nushell-implicit-return]] | shell, programming-language, control-flow | high | 2026-05-21 |
 | [[concepts/nushell-static-parsing]] | shell, compiler, static-analysis | high | 2026-05-21 |
@@ -170,6 +178,11 @@ entry here.
 | [[entities/ktra]] | tool, cargo, registry | 2026-05-21 |
 | [[entities/pi]] | tool, coding-agent, terminal | 2026-05-21 |
 | [[entities/earendil-works]] | organization, pi | 2026-05-21 |
+| [[entities/pi-subagents]] | tool, pi-extension, subagent | 2026-05-23 |
+| [[entities/pi-intercom]] | tool, pi-extension, coordination | 2026-05-23 |
+| [[entities/pi-web-access]] | tool, pi-extension, web-search | 2026-05-23 |
+| [[entities/pi-mcp-adapter]] | tool, pi-extension, mcp | 2026-05-23 |
+| [[entities/pi-prompt-template-model]] | tool, pi-extension, prompt-template | 2026-05-23 |
 | [[entities/agentskills-io]] | standard, specification | 2026-05-21 |
 | [[entities/nushell]] | tool, shell, programming-language, rust | 2026-05-21 |
 | [[entities/reedline]] | tool, line-editor, rust, nushell | 2026-05-21 |
@@ -233,6 +246,7 @@ entry here.
 | [[summaries/zellij-terminology]] | raw/zellij-repo/docs/TERMINOLOGY.md | ansi, csi, osc, pty | 2026-05-21 |
 | [[summaries/zellij-third-party-install]] | raw/zellij-repo/docs/THIRD_PARTY_INSTALL.md | packaging, install | 2026-05-21 |
 | [[summaries/pi-coding-agent-docs]] | raw/pi-repo/packages/coding-agent/docs | pi, extensions, skills, themes | 2026-05-21 |
+| [[summaries/pi-subagents-readme]] | raw/pi-subagents-readme.md | pi, subagent, delegation, multi-agent | 2026-05-23 |
 | [[summaries/nushell-book]] | raw/nushell-book/book | shell, structured-pipeline, plugin, dataframe | 2026-05-21 |
 | [[summaries/nvim-core-docs]] | raw/nvim-docs/ | neovim, lua, lsp, treesitter | 2026-05-21 |
 | [[summaries/obsidian-cli-help]] | raw/obsidian-cli.md | obsidian-cli, tui, developer-commands | 2026-05-21 |
@@ -280,7 +294,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 176
-- **Sources ingested**: 17
+- **Total pages**: 190
+- **Sources ingested**: 18
 - **Bounded contexts**: 0
 - **In-flight changes**: 0

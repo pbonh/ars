@@ -251,3 +251,18 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — entities/pytest.md — from raw/practices-of-the-python-pro-book/
 - 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — entities/sqlite.md — from raw/practices-of-the-python-pro-book/
 - 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — entities/requests.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — summaries/pi-subagents-readme.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — concepts/pi-subagent.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — concepts/pi-agent-definition.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — concepts/pi-subagent-chain.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — concepts/pi-subagent-execution-mode.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — concepts/pi-forked-context.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — concepts/pi-subagent-recursion-guard.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — concepts/pi-subagent-child-safety-boundary.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — concepts/pi-worktree-isolation.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — entities/pi-subagents.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — entities/pi-intercom.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — entities/pi-web-access.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — entities/pi-mcp-adapter.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — created — entities/pi-prompt-template-model.md — from raw/pi-subagents-readme.md
+- 2026-05-23T23:16:43Z — scientia-wiki-ingest — updated — index.md — added 8 concepts, 5 entities, 1 summary; stats 190 pages / 18 sources
