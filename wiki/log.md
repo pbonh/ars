@@ -229,3 +229,25 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — entities/ansible-core.md — from raw/ansible-user-guide.md
 - 2026-05-22T03:15:09Z — scientia-wiki-ingest — created — entities/ansible-galaxy.md — from raw/ansible-user-guide.md
 - 2026-05-22T03:15:09Z — scientia-wiki-ingest — updated — wiki/index.md — added 16 pages from raw/ansible-user-guide.md
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — summaries/practices-of-the-python-pro.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/separation-of-concerns.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/abstraction.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/encapsulation.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/decomposition.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/big-o-notation.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/lazy-evaluation.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/test-driven-development.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/test-pyramid.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/command-pattern.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/extensibility.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/inversion-of-control.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/loose-coupling.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/inheritance.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/liskov-substitution-principle.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/cyclomatic-complexity.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/abstract-base-class.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — concepts/composition-over-inheritance.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — entities/dane-hillard.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — entities/pytest.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — entities/sqlite.md — from raw/practices-of-the-python-pro-book/
+- 2026-05-23T15:30:00Z — scientia-wiki-ingest — created — entities/requests.md — from raw/practices-of-the-python-pro-book/

@@ -1,7 +1,7 @@
 ---
 title: "Knowledge Base Index"
 type: index
-updated: 2026-05-21
+updated: 2026-05-23
 ---
 
 # ars.scientia_rewrite — Knowledge Base Index
@@ -138,6 +138,23 @@ entry here.
 | [[concepts/ansible-roles]] | automation, reuse, modularity | high | 2026-05-21 |
 | [[concepts/ansible-variables]] | automation, configuration, templating | high | 2026-05-21 |
 | [[concepts/ansible-vault]] | automation, security, encryption | high | 2026-05-21 |
+| [[concepts/separation-of-concerns]] | software-design, python, modularity | high | 2026-05-23 |
+| [[concepts/abstraction]] | software-design, cognitive-load, python | high | 2026-05-23 |
+| [[concepts/encapsulation]] | software-design, object-oriented-programming, python | high | 2026-05-23 |
+| [[concepts/decomposition]] | software-design, refactoring, python | high | 2026-05-23 |
+| [[concepts/big-o-notation]] | algorithms, performance, python, complexity-analysis | high | 2026-05-23 |
+| [[concepts/lazy-evaluation]] | performance, memory, python, generators | high | 2026-05-23 |
+| [[concepts/test-driven-development]] | software-testing, agile, python | high | 2026-05-23 |
+| [[concepts/test-pyramid]] | software-testing, strategy, python | high | 2026-05-23 |
+| [[concepts/command-pattern]] | design-pattern, software-design, python | high | 2026-05-23 |
+| [[concepts/extensibility]] | software-design, maintainability, python | high | 2026-05-23 |
+| [[concepts/inversion-of-control]] | software-design, dependency-management, python | high | 2026-05-23 |
+| [[concepts/loose-coupling]] | software-design, maintainability, python | high | 2026-05-23 |
+| [[concepts/inheritance]] | object-oriented-programming, software-design, python | high | 2026-05-23 |
+| [[concepts/liskov-substitution-principle]] | object-oriented-programming, software-design, python | high | 2026-05-23 |
+| [[concepts/cyclomatic-complexity]] | code-quality, metrics, python | high | 2026-05-23 |
+| [[concepts/abstract-base-class]] | object-oriented-programming, python, interfaces | high | 2026-05-23 |
+| [[concepts/composition-over-inheritance]] | object-oriented-programming, software-design, python | high | 2026-05-23 |
 
 ## Entities
 
@@ -200,6 +217,10 @@ entry here.
 | [[entities/ansible]] | tool, automation, configuration-management | 2026-05-21 |
 | [[entities/ansible-core]] | product, engine, python-package | 2026-05-21 |
 | [[entities/ansible-galaxy]] | tool, hub, registry | 2026-05-21 |
+| [[entities/dane-hillard]] | person, author, python | 2026-05-23 |
+| [[entities/pytest]] | tool, testing-framework, python | 2026-05-23 |
+| [[entities/sqlite]] | tool, database, sql, python | 2026-05-23 |
+| [[entities/requests]] | library, python, http | 2026-05-23 |
 
 ## Summaries
 
@@ -225,6 +246,7 @@ entry here.
 | [[summaries/adr-github-home]] | raw/adr-github-home.html | architecture, documentation, adr | 2026-05-21 |
 | [[summaries/arxiv-heavyskill]] | raw/arxiv-2605.02396.pdf | ai-research, llm-reasoning, agentic-harness | 2026-05-21 |
 | [[summaries/ansible-user-guide]] | raw/ansible-user-guide.md | automation, infrastructure, configuration-management | 2026-05-21 |
+| [[summaries/practices-of-the-python-pro]] | raw/practices-of-the-python-pro-book/ | python, software-design, object-oriented-programming | 2026-05-23 |
 
 ## Syntheses
 
@@ -258,7 +280,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 154
-- **Sources ingested**: 16
+- **Total pages**: 176
+- **Sources ingested**: 17
 - **Bounded contexts**: 0
 - **In-flight changes**: 0
