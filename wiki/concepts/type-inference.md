@@ -4,7 +4,7 @@ type: concept
 tags: [concept, typescript, type-system, compiler]
 created: 2026-05-23
 updated: 2026-05-23
-sources: ["raw/essential-typescript-5-book/"]
+sources: ["raw/essential-typescript-5-book/", "raw/programming-with-types-book/"]
 confidence: high
 ---
 
@@ -23,6 +23,7 @@ Inference flows through control structures as well: a variable initialized as `s
 - Inference is the default behavior; annotations are only required where the compiler lacks enough context.
 - `noImplicitAny` forces an error when the compiler cannot infer a type and no annotation is present.
 - The `const` assertion (`as const`) tells the compiler to infer the narrowest literal type rather than widening to the base primitive.
+- **Readability trade-off**: A spelled-out type is more valuable than a comment because it is enforced by the compiler. When inference produces a type that is too complex for a human reader to reconstruct (e.g., nested conditional types), an explicit annotation improves maintainability.
 
 ## When To Use
 
@@ -33,6 +34,7 @@ Inference flows through control structures as well: a variable initialized as `s
 
 - **Widening**: `let arr = [1, 2]` infers `number[]`, losing the information that it has exactly two elements. Use `as const` or a tuple annotation to preserve length information.
 - **Any creep**: Without `noImplicitAny`, uninitialized or ambiguous variables silently receive the `any` type, bypassing type safety.
+- **Human vs. compiler comprehension**: The compiler can infer types that a developer would struggle to read. When code review or debugging requires understanding the contract, prefer explicit annotations over deep inference.
 
 ## Related Concepts
 
@@ -43,3 +45,4 @@ Inference flows through control structures as well: a variable initialized as `s
 ## Sources
 
 - *Essential TypeScript 5, Third Edition* (Adam Freeman), Chapter 7
+- *Programming with Types*, Chapter 1 — Types of type systems (type inference and readability)

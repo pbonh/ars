@@ -4,7 +4,7 @@ type: concept
 tags: [concept, software-design, object-oriented-programming, python]
 created: 2026-05-23
 updated: 2026-05-23
-sources: ["raw/practices-of-the-python-pro-book/"]
+sources: ["raw/practices-of-the-python-pro-book/", "raw/programming-with-types-book/"]
 confidence: high
 ---
 
@@ -14,11 +14,18 @@ Encapsulation is the grouping of related functions and data into a larger constr
 
 ## How It Works
 
-Python provides several encapsulation constructs, from smallest to largest:
+Encapsulation applies across languages and paradigms:
+
+**Python constructs** (from smallest to largest):
 
 1. **Class** — The most common encapsulation unit. Functions become methods; data becomes attributes. Methods receive the instance as `self`, allowing them to access or mutate state.
 2. **Module** — A `.py` file that groups multiple related classes and functions. For example, an HTTP module might contain request/response classes and URL-parsing utilities.
 3. **Package** — A directory with `__init__.py` that encapsulates related modules. Packages can be nested to create navigable hierarchies.
+
+**Type-system perspective** (from *Programming with Types*):
+- The type checker enforces encapsulation by rejecting references to private or read-only variables outside their scope.
+- Immutability is a form of encapsulation: declaring data as read-only prevents external mutation, so internal state cannot be corrupted by callers.
+- Even when data in memory is physically accessible, the type system can make certain operations illegal at compile time, providing a stronger guarantee than runtime access control.
 
 Encapsulation creates a "castle wall" around code. The functions and methods are the drawbridge for getting information in or out. Cooperation between encapsulated activities is coordinated at a higher level.
 
@@ -35,6 +42,7 @@ Use encapsulation when:
 - You need to protect internal state from being manipulated directly by external code.
 - A set of behaviors and data clearly belongs to a single concept (e.g., a shopping cart, a database connection).
 - You want to distribute code as a reusable package via PyPI.
+- You are leveraging a type system to enforce visibility or immutability at compile time, preventing an entire class of state-corruption bugs.
 
 ## Risks & Pitfalls
 
@@ -43,6 +51,8 @@ Use encapsulation when:
 
 ## Related Concepts
 
+- [[concepts/type-safety]] — type checkers enforce encapsulation by restricting access to private and read-only members
+- [[concepts/immutability]] — a strong form of encapsulation that prevents mutation
 - [[concepts/abstraction]] — hides details behind simplified interfaces
 - [[concepts/separation-of-concerns]] — divides distinct behaviors into separate pieces
 - [[concepts/loose-coupling]] — the desired outcome of strong encapsulation
@@ -50,3 +60,4 @@ Use encapsulation when:
 ## Sources
 
 - *Practices of the Python Pro*, Chapter 3 — Abstraction and encapsulation
+- *Programming with Types*, Chapter 1 — Benefits of type systems (encapsulation and immutability)

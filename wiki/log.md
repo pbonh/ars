@@ -297,3 +297,35 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-23T16:45:00Z — scientia-wiki-ingest — created — entities/manning-publications.md — from raw/essential-typescript-5-book/
 - 2026-05-23T16:45:00Z — scientia-wiki-ingest — created — entities/angular.md — from raw/essential-typescript-5-book/
 - 2026-05-23T16:45:00Z — scientia-wiki-ingest — created — entities/react.md — from raw/essential-typescript-5-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — summaries/programming-with-types-book.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — entities/vlad-riscutia.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/algebraic-data-types.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/primitive-obsession.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/type-safety.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/first-class-functions.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/closure.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/map-filter-reduce.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/visitor-pattern.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/strategy-pattern.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/decorator-pattern.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/state-machine.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/iterator-pattern.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/promises.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/async-await.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/short-circuit-evaluation.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/unit-type.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/bottom-type.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/top-type.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/nominal-subtyping.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/variance.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/functor.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/monad.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/higher-kinded-types.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/immutability.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — created — concepts/composability.md — from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — updated — concepts/structural-typing.md — added nominal subtyping contrast from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — updated — concepts/encapsulation.md — added type-system perspective from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — updated — concepts/lazy-evaluation.md — added lambda/deferred computation perspective from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — updated — concepts/type-assertions.md — added type casting and safe deserialization perspective from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — updated — concepts/typescript-generics.md — added generic algorithms and iterators perspective from raw/programming-with-types-book/
+- 2026-05-23T20:00:00Z — scientia-wiki-ingest — updated — concepts/type-inference.md — added readability trade-off perspective from raw/programming-with-types-book/

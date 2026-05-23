@@ -4,7 +4,7 @@ type: concept
 tags: [concept, performance, memory, python, generators]
 created: 2026-05-23
 updated: 2026-05-23
-sources: ["raw/practices-of-the-python-pro-book/"]
+sources: ["raw/practices-of-the-python-pro-book/", "raw/programming-with-types-book/"]
 confidence: high
 ---
 
@@ -14,6 +14,7 @@ Lazy evaluation is the strategy of producing values only when explicitly request
 
 ## How It Works
 
+**Generators (Python perspective)**
 A generator produces a single value at a time, pausing until the next value is requested. This avoids storing all produced values in memory at once. The `yield` keyword is central: after producing a value, it yields execution back to the caller. The generator's internal state is preserved, so it can resume where it left off.
 
 The standard pattern for writing a generator:
@@ -25,6 +26,9 @@ The standard pattern for writing a generator:
 Python's built-in `range` is a familiar example of lazy evaluation. `range(100_000_000)` does not allocate 100 million integers; it stores only the bounds and produces values on demand.
 
 Generators can be chained. For example, `squares(range(100_000_000))` stores only one item from `range` and one squared result at a time, even though the conceptual pipeline is enormous.
+
+**Lambdas and deferred computation (TypeScript perspective)**
+In languages with first-class functions, a lambda (anonymous function) can encapsulate an expensive computation without executing it. The lambda acts as a thunk: it captures the expression and its environment in a closure, and the computation runs only when the lambda is invoked. This is another form of lazy evaluation, useful when the result may never be needed (e.g., conditional logging, optional sorting).
 
 ## Key Parameters
 
@@ -48,8 +52,11 @@ Use lazy evaluation when:
 
 ## Related Concepts
 
+- [[concepts/closure]] — lambdas and generators use closures to preserve state between evaluations
+- [[concepts/first-class-functions]] — deferred computation relies on functions as first-class values
 - [[concepts/big-o-notation]] — space complexity is the primary metric improved by lazy evaluation
 
 ## Sources
 
 - *Practices of the Python Pro*, Chapter 4 — Designing for high performance
+- *Programming with Types*, Chapter 5 — Function types (lazy values and lambdas)

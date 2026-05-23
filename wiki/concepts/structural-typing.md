@@ -4,7 +4,7 @@ type: concept
 tags: [concept, typescript, type-system, compatibility]
 created: 2026-05-23
 updated: 2026-05-23
-sources: ["raw/essential-typescript-5-book/"]
+sources: ["raw/essential-typescript-5-book/", "raw/programming-with-types-book/"]
 confidence: high
 ---
 
@@ -23,7 +23,7 @@ class Person { constructor(public name: string) {} }
 let n: Named = new Person("Ada"); // OK, because Person has a `name` string
 ```
 
-This contrasts with nominal typing (used in Java, C#, and Swift), where compatibility is based on explicit class/interface declarations and inheritance.
+This contrasts with [[concepts/nominal-subtyping|nominal typing]] (used in Java, C#, and Swift), where compatibility is based on explicit class/interface declarations and inheritance. In nominal systems, two classes with identical shapes but no declared relationship are not interchangeable. In structural systems, they are.
 
 ## Key Parameters
 
@@ -38,11 +38,13 @@ This contrasts with nominal typing (used in Java, C#, and Swift), where compatib
 
 ## Risks & Pitfalls
 
-- **Accidental compatibility**: Two unrelated types with the same shape are silently interchangeable, which can allow logically wrong assignments.
+- **Accidental compatibility**: Two unrelated types with the same shape are silently interchangeable, which can allow logically wrong assignments. This is the primary risk when representing domain concepts (e.g., units of measure) as plain shapes rather than branded types.
+- **Nominal simulation cost**: Developers who need nominal safety in a structural language must apply branding techniques (unique symbols, phantom types) manually.
 - **Excess property confusion**: The difference between object-literal and variable assignment rules is a frequent source of confusion for new TypeScript developers.
 
 ## Related Concepts
 
+- [[concepts/nominal-subtyping]] — the alternative approach that prevents accidental shape-based substitution
 - [[concepts/interfaces-in-typescript]]
 - [[concepts/shape-types]]
 - [[concepts/type-aliases]]

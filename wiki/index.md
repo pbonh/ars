@@ -186,6 +186,30 @@ entry here.
 | [[concepts/structural-typing]] | typescript, type-system | high | 2026-05-23 |
 | [[concepts/tuples-in-typescript]] | typescript, type-system | high | 2026-05-23 |
 | [[concepts/enums-in-typescript]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/algebraic-data-types]] | type-system, functional-programming, software-design | high | 2026-05-23 |
+| [[concepts/primitive-obsession]] | software-design, antipattern, type-safety | high | 2026-05-23 |
+| [[concepts/type-safety]] | type-system, software-correctness, software-design | high | 2026-05-23 |
+| [[concepts/first-class-functions]] | functional-programming, type-system, software-design | high | 2026-05-23 |
+| [[concepts/closure]] | functional-programming, type-system, scope | high | 2026-05-23 |
+| [[concepts/map-filter-reduce]] | functional-programming, data-processing, algorithms | high | 2026-05-23 |
+| [[concepts/visitor-pattern]] | design-pattern, algebraic-data-types, functional-programming | high | 2026-05-23 |
+| [[concepts/strategy-pattern]] | design-pattern, functional-programming, first-class-functions | high | 2026-05-23 |
+| [[concepts/decorator-pattern]] | design-pattern, functional-programming, extensibility | high | 2026-05-23 |
+| [[concepts/state-machine]] | software-design, functional-programming, state-management | high | 2026-05-23 |
+| [[concepts/iterator-pattern]] | design-pattern, data-structures, generic-programming | high | 2026-05-23 |
+| [[concepts/promises]] | asynchronous-programming, concurrency, functional-programming | high | 2026-05-23 |
+| [[concepts/async-await]] | asynchronous-programming, concurrency, syntax | high | 2026-05-23 |
+| [[concepts/short-circuit-evaluation]] | boolean-logic, control-flow, optimization | high | 2026-05-23 |
+| [[concepts/unit-type]] | type-system, functional-programming | high | 2026-05-23 |
+| [[concepts/bottom-type]] | type-system, functional-programming, control-flow | high | 2026-05-23 |
+| [[concepts/top-type]] | type-system, functional-programming | high | 2026-05-23 |
+| [[concepts/nominal-subtyping]] | type-system, object-oriented-programming | high | 2026-05-23 |
+| [[concepts/variance]] | type-system, generics, subtyping | high | 2026-05-23 |
+| [[concepts/functor]] | type-system, functional-programming, category-theory | high | 2026-05-23 |
+| [[concepts/monad]] | type-system, functional-programming, category-theory | high | 2026-05-23 |
+| [[concepts/higher-kinded-types]] | type-system, functional-programming, generics | high | 2026-05-23 |
+| [[concepts/immutability]] | functional-programming, type-system, software-design | high | 2026-05-23 |
+| [[concepts/composability]] | software-design, functional-programming, type-system | high | 2026-05-23 |
 
 ## Entities
 
@@ -264,6 +288,7 @@ entry here.
 | [[entities/manning-publications]] | publisher, technical-books, education | 2026-05-23 |
 | [[entities/angular]] | framework, google, typescript, frontend | 2026-05-23 |
 | [[entities/react]] | library, meta, typescript, frontend, jsx | 2026-05-23 |
+| [[entities/vlad-riscutia]] | person, author, software-engineer | 2026-05-23 |
 
 ## Summaries
 
@@ -292,6 +317,7 @@ entry here.
 | [[summaries/ansible-user-guide]] | raw/ansible-user-guide.md | automation, infrastructure, configuration-management | 2026-05-21 |
 | [[summaries/practices-of-the-python-pro]] | raw/practices-of-the-python-pro-book/ | python, software-design, object-oriented-programming | 2026-05-23 |
 | [[summaries/essential-typescript-5-book]] | raw/essential-typescript-5-book/ | typescript, programming-language, web-development | 2026-05-23 |
+| [[summaries/programming-with-types-book]] | raw/programming-with-types-book/ | typescript, type-system, software-design, programming-language | 2026-05-23 |
 
 ## Syntheses
 
