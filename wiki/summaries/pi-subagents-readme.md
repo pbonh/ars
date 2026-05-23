@@ -3,6 +3,7 @@ title: "pi-subagents README"
 type: summary
 tags: [summary, pi, subagent, multi-agent, delegation, extension]
 created: 2026-05-23
+updated: 2026-05-23
 sources: ["raw/pi-subagents-readme.md"]
 confidence: high
 ---

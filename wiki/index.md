@@ -163,6 +163,29 @@ entry here.
 | [[concepts/cyclomatic-complexity]] | code-quality, metrics, python | high | 2026-05-23 |
 | [[concepts/abstract-base-class]] | object-oriented-programming, python, interfaces | high | 2026-05-23 |
 | [[concepts/composition-over-inheritance]] | object-oriented-programming, software-design, python | high | 2026-05-23 |
+| [[concepts/static-typing-in-typescript]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/type-annotations]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/type-inference]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/type-unions]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/type-assertions]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/type-guards]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/unknown-type]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/nullable-types]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/type-aliases]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/literal-value-types]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/type-intersections]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/shape-types]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/interfaces-in-typescript]] | typescript, object-oriented-programming | high | 2026-05-23 |
+| [[concepts/typescript-generics]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/generic-constraints]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/conditional-types]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/decorators-in-typescript]] | typescript, metaprogramming | high | 2026-05-23 |
+| [[concepts/declaration-files]] | typescript, interoperability | high | 2026-05-23 |
+| [[concepts/tsconfig-configuration]] | typescript, compiler | high | 2026-05-23 |
+| [[concepts/jsx-in-typescript]] | typescript, jsx | high | 2026-05-23 |
+| [[concepts/structural-typing]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/tuples-in-typescript]] | typescript, type-system | high | 2026-05-23 |
+| [[concepts/enums-in-typescript]] | typescript, type-system | high | 2026-05-23 |
 
 ## Entities
 
@@ -234,6 +257,13 @@ entry here.
 | [[entities/pytest]] | tool, testing-framework, python | 2026-05-23 |
 | [[entities/sqlite]] | tool, database, sql, python | 2026-05-23 |
 | [[entities/requests]] | library, python, http | 2026-05-23 |
+| [[entities/typescript]] | programming-language, microsoft, compiler | 2026-05-23 |
+| [[entities/node-js]] | runtime, javascript, server-side | 2026-05-23 |
+| [[entities/npm]] | package-manager, registry, javascript | 2026-05-23 |
+| [[entities/adam-freeman]] | person, author, technical-writer | 2026-05-23 |
+| [[entities/manning-publications]] | publisher, technical-books, education | 2026-05-23 |
+| [[entities/angular]] | framework, google, typescript, frontend | 2026-05-23 |
+| [[entities/react]] | library, meta, typescript, frontend, jsx | 2026-05-23 |
 
 ## Summaries
 
@@ -261,6 +291,7 @@ entry here.
 | [[summaries/arxiv-heavyskill]] | raw/arxiv-2605.02396.pdf | ai-research, llm-reasoning, agentic-harness | 2026-05-21 |
 | [[summaries/ansible-user-guide]] | raw/ansible-user-guide.md | automation, infrastructure, configuration-management | 2026-05-21 |
 | [[summaries/practices-of-the-python-pro]] | raw/practices-of-the-python-pro-book/ | python, software-design, object-oriented-programming | 2026-05-23 |
+| [[summaries/essential-typescript-5-book]] | raw/essential-typescript-5-book/ | typescript, programming-language, web-development | 2026-05-23 |
 
 ## Syntheses
 
@@ -294,7 +325,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 190
-- **Sources ingested**: 18
+- **Total pages**: 223
+- **Sources ingested**: 19
 - **Bounded contexts**: 0
 - **In-flight changes**: 0
