@@ -68,6 +68,8 @@ hermes_config:
   delegation:
     max_iterations: 150
     max_spawn_depth: 2
+  security:
+    redact_secrets: true
 
 # ── .env contents (secrets) ──────────────────────────────────────────────
 # Written to ~/.hermes/.env — Hermes reads this for API keys
