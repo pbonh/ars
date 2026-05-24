@@ -20,11 +20,11 @@ entry here.
 | [[concepts/ansi-vt-stream]] | terminal, protocol | high | 2026-05-21 |
 | [[concepts/pane-boundaries]] | ui, rendering | high | 2026-05-21 |
 | [[concepts/pty-bus]] | architecture, ipc | high | 2026-05-21 |
-| [[concepts/error-propagation]] | rust, error-handling | high | 2026-05-21 |
+| [[concepts/error-propagation]] | rust, error-handling | high | 2026-05-23 |
 | [[concepts/error-context]] | rust, error-handling | high | 2026-05-21 |
 | [[concepts/fatal-error-handling]] | rust, error-handling | high | 2026-05-21 |
 | [[concepts/non-fatal-error-handling]] | rust, error-handling | high | 2026-05-21 |
-| [[concepts/panic-handling]] | rust, error-handling | high | 2026-05-21 |
+| [[concepts/panic-handling]] | rust, error-handling | high | 2026-05-23 |
 | [[concepts/custom-error-types]] | rust, error-handling | high | 2026-05-21 |
 | [[concepts/terminal-multiplexer]] | terminal, infrastructure | high | 2026-05-21 |
 | [[concepts/layout-system]] | configuration, ui | high | 2026-05-21 |
@@ -38,7 +38,7 @@ entry here.
 | [[concepts/csi]] | terminal, protocol | high | 2026-05-21 |
 | [[concepts/osc]] | terminal, protocol | high | 2026-05-21 |
 | [[concepts/pty]] | terminal, linux, unix | high | 2026-05-21 |
-| [[concepts/cargo-registry]] | rust, packaging | high | 2026-05-21 |
+| [[concepts/cargo-registry]] | rust, packaging | high | 2026-05-23 |
 | [[concepts/release-simulation]] | release-engineering, testing | high | 2026-05-21 |
 | [[concepts/pi-extension]] | pi, extensibility, typescript | high | 2026-05-21 |
 | [[concepts/pi-skill]] | pi, agent-skills, workflow | high | 2026-05-21 |
@@ -210,6 +210,24 @@ entry here.
 | [[concepts/higher-kinded-types]] | type-system, functional-programming, generics | high | 2026-05-23 |
 | [[concepts/immutability]] | functional-programming, type-system, software-design | high | 2026-05-23 |
 | [[concepts/composability]] | software-design, functional-programming, type-system | high | 2026-05-23 |
+| [[concepts/rust-ownership]] | rust, memory-management, systems-programming | high | 2026-05-23 |
+| [[concepts/rust-borrowing]] | rust, memory-management, references | high | 2026-05-23 |
+| [[concepts/rust-slice-type]] | rust, collections, references | high | 2026-05-23 |
+| [[concepts/rust-struct]] | rust, data-structures, type-system | high | 2026-05-23 |
+| [[concepts/rust-enum]] | rust, algebraic-data-types, type-system | high | 2026-05-23 |
+| [[concepts/rust-pattern-matching]] | rust, control-flow, algebraic-data-types | high | 2026-05-23 |
+| [[concepts/rust-generics]] | rust, type-system, generic-programming | high | 2026-05-23 |
+| [[concepts/rust-traits]] | rust, type-system, interfaces, polymorphism | high | 2026-05-23 |
+| [[concepts/rust-lifetimes]] | rust, memory-management, type-system | high | 2026-05-23 |
+| [[concepts/rust-error-handling]] | rust, error-handling, reliability | high | 2026-05-23 |
+| [[concepts/rust-closure]] | rust, functional-programming, first-class-functions | high | 2026-05-23 |
+| [[concepts/rust-iterator]] | rust, functional-programming, performance | high | 2026-05-23 |
+| [[concepts/rust-concurrency]] | rust, concurrency, parallelism, fearless-concurrency | high | 2026-05-23 |
+| [[concepts/rust-unsafe]] | rust, systems-programming, memory-safety | high | 2026-05-23 |
+| [[concepts/rust-macros]] | rust, metaprogramming, code-generation | high | 2026-05-23 |
+| [[concepts/rust-smart-pointers]] | rust, memory-management, data-structures | high | 2026-05-23 |
+| [[concepts/rust-cargo-workspaces]] | rust, build-tool, project-management | high | 2026-05-23 |
+| [[concepts/rust-modules]] | rust, code-organization, namespaces | high | 2026-05-23 |
 
 ## Entities
 
@@ -289,6 +307,9 @@ entry here.
 | [[entities/angular]] | framework, google, typescript, frontend | 2026-05-23 |
 | [[entities/react]] | library, meta, typescript, frontend, jsx | 2026-05-23 |
 | [[entities/vlad-riscutia]] | person, author, software-engineer | 2026-05-23 |
+| [[entities/rust]] | programming-language, systems-programming, mozilla | 2026-05-23 |
+| [[entities/cargo]] | build-tool, package-manager, rust | 2026-05-23 |
+| [[entities/crates-io]] | registry, rust, package-distribution | 2026-05-23 |
 
 ## Summaries
 
@@ -318,6 +339,7 @@ entry here.
 | [[summaries/practices-of-the-python-pro]] | raw/practices-of-the-python-pro-book/ | python, software-design, object-oriented-programming | 2026-05-23 |
 | [[summaries/essential-typescript-5-book]] | raw/essential-typescript-5-book/ | typescript, programming-language, web-development | 2026-05-23 |
 | [[summaries/programming-with-types-book]] | raw/programming-with-types-book/ | typescript, type-system, software-design, programming-language | 2026-05-23 |
+| [[summaries/rust-book]] | raw/rust-book-book/ | rust, programming-language, systems-programming | 2026-05-23 |
 
 ## Syntheses
 
@@ -351,7 +373,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 223
-- **Sources ingested**: 19
+- **Total pages**: 245
+- **Sources ingested**: 20
 - **Bounded contexts**: 0
 - **In-flight changes**: 0

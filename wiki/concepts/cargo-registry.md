@@ -3,8 +3,8 @@ title: "Cargo Registry"
 type: concept
 tags: [concept, rust, packaging, release-engineering]
 created: 2026-05-21
-updated: 2026-05-21
-sources: ["raw/zellij-repo/docs/RELEASE.md"]
+updated: 2026-05-23
+sources: ["raw/zellij-repo/docs/RELEASE.md", "raw/rust-book-book/"]
 confidence: high
 ---
 
@@ -19,7 +19,7 @@ A registry consists of:
 - A **download endpoint**: an HTTP server serving `.crate` tarball files
 - An **API endpoint**: for publishing, yanking, and authentication
 
-Cargo resolves dependencies from the index, downloads tarballs, and verifies checksums.
+Cargo resolves dependencies from the index, downloads tarballs, and verifies checksums. The official registry for the Rust ecosystem is [[entities/crates-io|crates.io]], which hosts open-source crates alongside documentation on docs.rs. Private registries follow the same index-plus-tarball protocol and are used by organizations that need internal artifact distribution.
 
 ## Key Parameters
 
@@ -43,7 +43,9 @@ Relevant when:
 ## Related Concepts
 
 - [[concepts/release-simulation]]
+- [[concepts/rust-cargo-workspaces]]
 - [[entities/ktra]]
+- [[entities/crates-io]]
 
 ## Sources
 

@@ -329,3 +329,29 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-23T20:00:00Z — scientia-wiki-ingest — updated — concepts/type-assertions.md — added type casting and safe deserialization perspective from raw/programming-with-types-book/
 - 2026-05-23T20:00:00Z — scientia-wiki-ingest — updated — concepts/typescript-generics.md — added generic algorithms and iterators perspective from raw/programming-with-types-book/
 - 2026-05-23T20:00:00Z — scientia-wiki-ingest — updated — concepts/type-inference.md — added readability trade-off perspective from raw/programming-with-types-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — summaries/rust-book.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-ownership.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-borrowing.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-slice-type.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-struct.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-enum.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-pattern-matching.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-generics.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-traits.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-lifetimes.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-error-handling.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-closure.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-iterator.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-concurrency.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-unsafe.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-macros.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-smart-pointers.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-cargo-workspaces.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — concepts/rust-modules.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — entities/rust.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — entities/cargo.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — created — entities/crates-io.md — from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — updated — concepts/cargo-registry.md — extended with general Rust ecosystem context from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — updated — concepts/closure.md — extended with Rust-specific capture mechanics from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — updated — concepts/panic-handling.md — extended with general Rust panic semantics from raw/rust-book-book/
+- 2026-05-23T16:58:00Z — scientia-wiki-ingest — updated — concepts/error-propagation.md — extended with general Rust Result/? patterns from raw/rust-book-book/
