@@ -3,8 +3,8 @@ title: "Custom Workflow Schema"
 type: concept
 tags: [concept, workflow, customization, schema]
 created: 2026-05-21
-updated: 2026-05-21
-sources: ["raw/openspec-docs"]
+updated: 2026-05-23
+sources: ["raw/openspec-docs", "raw/openspec-schemas/"]
 confidence: high
 ---
 
@@ -81,15 +81,18 @@ Avoid when:
 - **Template bloat:** Overly long templates increase token usage and may degrade AI output quality. Keep templates concise and focused on structure, not content.
 - **Circular dependencies:** `openspec schema validate` catches cycles, but they can still be introduced by hand-editing `schema.yaml`.
 - **Schema drift across projects:** User-global schemas are convenient but not version-controlled with the repo. Project-local schemas are recommended for reproducibility.
-- **Community schema maintenance:** Community schemas (e.g., `superpowers-bridge`) live in separate repositories with independent release cadence. Vetting and pinning versions is the user's responsibility.
+- **Community schema maintenance:** Community schemas live in separate repositories with independent release cadence. Vetting and pinning versions is the user's responsibility. Concrete catalogs include `superpowers-bridge` and the [[entities/openspec-schemas|openspec-schemas]] repo, which ships six schemas (`minimalist`, `event-driven`, `behaviour-driven`, `intent-driven`, `linearized`, and [[concepts/spec-driven-with-adr-schema|`spec-driven-with-adr`]]) under an MIT license maintained by [[entities/intent-driven-dev]].
 
 ## Related Concepts
 
 - [[concepts/artifact-dependency-graph]] — The DAG a schema defines
 - [[concepts/opsx-workflow]] — The engine that consumes schemas
 - [[concepts/fluid-workflow]] — Custom schemas are how teams encode their own fluidity
+- [[concepts/spec-driven-with-adr-schema]] — a concrete schema that adds a durable ADR stage
+- [[concepts/durable-artifacts-vs-scaffolding]] — the lifecycle question every schema must answer per artifact
 
 ## Sources
 
 - OpenSpec Customization Guide (`raw/openspec-docs/customization.md`)
 - OpenSpec CLI Reference (`raw/openspec-docs/cli.md`)
+- [openspec-schemas](https://github.com/intent-driven-dev/openspec-schemas) — example schema catalog (`raw/openspec-schemas/`)

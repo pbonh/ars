@@ -355,3 +355,14 @@ Append-only record of every change to the wiki. Each entry is one line:
 - 2026-05-23T16:58:00Z — scientia-wiki-ingest — updated — concepts/closure.md — extended with Rust-specific capture mechanics from raw/rust-book-book/
 - 2026-05-23T16:58:00Z — scientia-wiki-ingest — updated — concepts/panic-handling.md — extended with general Rust panic semantics from raw/rust-book-book/
 - 2026-05-23T16:58:00Z — scientia-wiki-ingest — updated — concepts/error-propagation.md — extended with general Rust Result/? patterns from raw/rust-book-book/
+- 2026-05-23T21:30:00Z — scientia-wiki-ingest — created — summaries/spec-driven-development-with-adr.md — from raw/spec-driven-development-with-adr.md
+- 2026-05-23T21:30:00Z — scientia-wiki-ingest — created — summaries/openspec-schemas.md — from raw/openspec-schemas/
+- 2026-05-23T21:30:00Z — scientia-wiki-ingest — created — concepts/spec-driven-with-adr-schema.md — from raw/spec-driven-development-with-adr.md
+- 2026-05-23T21:30:00Z — scientia-wiki-ingest — created — concepts/durable-artifacts-vs-scaffolding.md — from raw/spec-driven-development-with-adr.md
+- 2026-05-23T21:30:00Z — scientia-wiki-ingest — created — concepts/spec-adr-dual-representation.md — from raw/spec-driven-development-with-adr.md
+- 2026-05-23T21:30:00Z — scientia-wiki-ingest — created — entities/intent-driven-dev.md — from raw/spec-driven-development-with-adr.md
+- 2026-05-23T21:30:00Z — scientia-wiki-ingest — created — entities/openspec-schemas.md — from raw/openspec-schemas/
+- 2026-05-23T21:30:00Z — scientia-wiki-ingest — created — entities/hari-krishnan.md — from raw/spec-driven-development-with-adr.md
+- 2026-05-23T21:30:00Z — scientia-wiki-ingest — updated — concepts/custom-workflow-schema.md — added spec-driven-with-adr variant and openspec-schemas catalog from raw/openspec-schemas/
+- 2026-05-23T21:30:00Z — scientia-wiki-ingest — updated — concepts/architectural-decision-record.md — added OpenSpec durable-ADR storage perspective from raw/spec-driven-development-with-adr.md
+- 2026-05-23T21:30:00Z — scientia-wiki-ingest — updated — index.md — added 2 summaries, 3 concepts, 3 entities; stats 253 pages / 22 sources

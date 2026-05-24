@@ -228,6 +228,9 @@ entry here.
 | [[concepts/rust-smart-pointers]] | rust, memory-management, data-structures | high | 2026-05-23 |
 | [[concepts/rust-cargo-workspaces]] | rust, build-tool, project-management | high | 2026-05-23 |
 | [[concepts/rust-modules]] | rust, code-organization, namespaces | high | 2026-05-23 |
+| [[concepts/spec-driven-with-adr-schema]] | openspec, adr, schema, workflow | medium | 2026-05-23 |
+| [[concepts/durable-artifacts-vs-scaffolding]] | architecture, documentation, openspec, lifecycle | medium | 2026-05-23 |
+| [[concepts/spec-adr-dual-representation]] | architecture, documentation, adr | medium | 2026-05-23 |
 
 ## Entities
 
@@ -310,6 +313,9 @@ entry here.
 | [[entities/rust]] | programming-language, systems-programming, mozilla | 2026-05-23 |
 | [[entities/cargo]] | build-tool, package-manager, rust | 2026-05-23 |
 | [[entities/crates-io]] | registry, rust, package-distribution | 2026-05-23 |
+| [[entities/intent-driven-dev]] | organization, openspec, adr | 2026-05-23 |
+| [[entities/openspec-schemas]] | repository, openspec, schema | 2026-05-23 |
+| [[entities/hari-krishnan]] | person, openspec, adr | 2026-05-23 |
 
 ## Summaries
 
@@ -340,6 +346,8 @@ entry here.
 | [[summaries/essential-typescript-5-book]] | raw/essential-typescript-5-book/ | typescript, programming-language, web-development | 2026-05-23 |
 | [[summaries/programming-with-types-book]] | raw/programming-with-types-book/ | typescript, type-system, software-design, programming-language | 2026-05-23 |
 | [[summaries/rust-book]] | raw/rust-book-book/ | rust, programming-language, systems-programming | 2026-05-23 |
+| [[summaries/spec-driven-development-with-adr]] | raw/spec-driven-development-with-adr.md | adr, openspec, spec-driven-development | 2026-05-23 |
+| [[summaries/openspec-schemas]] | raw/openspec-schemas/ | openspec, schema, workflow | 2026-05-23 |
 
 ## Syntheses
 
@@ -373,7 +381,7 @@ entry here.
 
 ## Statistics
 
-- **Total pages**: 245
-- **Sources ingested**: 20
+- **Total pages**: 253
+- **Sources ingested**: 22
 - **Bounded contexts**: 0
 - **In-flight changes**: 0
