@@ -3,7 +3,7 @@ keybinds {
     shared_except "locked" {
         {% for name, plugin in zellij_plugins.items() if plugin.launch_keybinding is defined %}
         bind "{{ plugin.launch_keybinding.key }}" {
-            LaunchOrFocusPlugin "file:{{ zellij_plugin_dir }}/{{ plugin.url | basename }}" {
+            LaunchOrFocusPlugin "file:{{ zellij_plugin_dir }}/{{ plugin.wasm if plugin.wasm is defined else (plugin.url | basename) }}" {
                 {% for k, v in (plugin.launch_keybinding.args | default({})).items() %}
                 {{ k | to_json }} {{ v | to_json }}
                 {% endfor %}
@@ -78,7 +78,7 @@ plugins {
 // eg. "https://example.com/my-plugin.wasm"
 load_plugins {
     {% for name, plugin in zellij_plugins.items() if plugin.load_on_startup is defined %}
-    "file:{{ zellij_plugin_dir }}/{{ plugin.url | basename }}" {
+    "file:{{ zellij_plugin_dir }}/{{ plugin.wasm if plugin.wasm is defined else (plugin.url | basename) }}" {
         {% for k, v in (plugin.load_on_startup.args | default({})).items() %}
         {{ k | to_json }} {{ v | to_json }}
         {% endfor %}

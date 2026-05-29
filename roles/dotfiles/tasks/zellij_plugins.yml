@@ -1,13 +1,127 @@
 ---
 - name: Zellij | Setup Zellij Plugin Directory | file
-  file:
+  ansible.builtin.file:
     path: "{{ zellij_plugin_dir }}"
     state: directory
     mode: '0755'
 
 - name: Zellij | Download Zellij Plugins | get_url
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ item.value.url }}"
     dest: "{{ zellij_plugin_dir }}"
-    mode: 0755
-  loop: "{{ zellij_plugins | dict2items }}"
+    mode: '0755'
+  loop: "{{ zellij_plugins | dict2items | selectattr('value.url', 'defined') | list }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+# --- Source-built plugins (clone + cargo build wasm) ---
+# Plugins carrying a `source` block have no downloadable release .wasm; build
+# them from the pinned repo/branch and drop the artifact into the plugin dir
+# under its declared `wasm` filename (matching the config template).
+
+- name: Zellij | Source Plugins | Set source plugin list | set_fact
+  ansible.builtin.set_fact:
+    zellij_source_plugins: "{{ zellij_plugins | dict2items | selectattr('value.source', 'defined') | list }}"
+
+- name: Zellij | Source Plugins | Ensure cargo toolchain present | stat
+  ansible.builtin.stat:
+    path: "{{ cargo_bin }}"
+  register: zellij_cargo_stat
+  when: zellij_source_plugins | length > 0
+
+# cargo missing → bootstrap the rust toolchain from the upstream rustup
+# installer (https://sh.rustup.rs) rather than failing. Download + run mirror
+# nonroot's rust-tools flow; the tool_install_dir-scoped RUSTUP_HOME/CARGO_HOME
+# come from zellij_plugin_build_env and --no-modify-path keeps shell rc files
+# untouched.
+- name: Zellij | Source Plugins | Download rustup installer | get_url
+  ansible.builtin.get_url:
+    url: "{{ zellij_rustup_url }}"
+    dest: "{{ zellij_rustup_installer_path }}"
+    mode: '0755'
+  when:
+    - zellij_source_plugins | length > 0
+    - not zellij_cargo_stat.stat.exists
+
+- name: Zellij | Source Plugins | Bootstrap rust toolchain via rustup | command
+  ansible.builtin.command: >-
+    {{ zellij_rustup_installer_path }} -y --no-modify-path
+    --default-toolchain {{ zellij_rustup_toolchain }}
+  args:
+    creates: "{{ cargo_bin }}"
+  environment: "{{ zellij_plugin_build_env }}"
+  when:
+    - zellij_source_plugins | length > 0
+    - not zellij_cargo_stat.stat.exists
+
+- name: Zellij | Source Plugins | Remove rustup installer | file
+  ansible.builtin.file:
+    path: "{{ zellij_rustup_installer_path }}"
+    state: absent
+  when: zellij_source_plugins | length > 0
+
+- name: Zellij | Source Plugins | Re-check cargo toolchain | stat
+  ansible.builtin.stat:
+    path: "{{ cargo_bin }}"
+  register: zellij_cargo_stat
+  when: zellij_source_plugins | length > 0
+
+- name: Zellij | Source Plugins | Assert cargo is available | assert
+  ansible.builtin.assert:
+    that:
+      - zellij_cargo_stat.stat.exists
+    fail_msg: >-
+      cargo still not found at {{ cargo_bin }} after running the rustup
+      installer ({{ zellij_rustup_url }}). Check the install output above.
+  when: zellij_source_plugins | length > 0
+
+- name: Zellij | Source Plugins | Ensure build directory | file
+  ansible.builtin.file:
+    path: "{{ zellij_plugin_src_dir }}"
+    state: directory
+    mode: '0755'
+  when: zellij_source_plugins | length > 0
+
+- name: Zellij | Source Plugins | Clone/update repositories | git
+  ansible.builtin.git:
+    repo: "{{ item.value.source.repo }}"
+    dest: "{{ zellij_plugin_src_dir }}/{{ item.key }}"
+    version: "{{ item.value.source.version }}"
+  loop: "{{ zellij_source_plugins }}"
+  loop_control:
+    label: "{{ item.key }} ({{ item.value.source.version }})"
+
+- name: Zellij | Source Plugins | Add wasm Rust target | command
+  ansible.builtin.command: "{{ rustup_exe }} target add {{ item.value.source.target }}"
+  environment: "{{ zellij_plugin_build_env }}"
+  loop: "{{ zellij_source_plugins }}"
+  loop_control:
+    label: "{{ item.key }} ({{ item.value.source.target }})"
+  register: zellij_target_add
+  # ansible-core 2.20's templating no longer auto-exposes bare stdout/stderr in
+  # changed_when, so reference the registered per-item result explicitly.
+  changed_when: "'installing' in ((zellij_target_add.stdout | default('')) ~ (zellij_target_add.stderr | default('')))"
+
+- name: Zellij | Source Plugins | Build wasm | command
+  ansible.builtin.command: >-
+    {{ cargo_bin }} build --release
+    --target {{ item.value.source.target }}
+    -p {{ item.value.source.package }}
+  args:
+    chdir: "{{ zellij_plugin_src_dir }}/{{ item.key }}"
+  environment: "{{ zellij_plugin_build_env }}"
+  loop: "{{ zellij_source_plugins }}"
+  loop_control:
+    label: "{{ item.key }} (-p {{ item.value.source.package }})"
+  register: zellij_build_wasm
+  changed_when: "'Compiling' in ((zellij_build_wasm.stdout | default('')) ~ (zellij_build_wasm.stderr | default('')))"
+
+- name: Zellij | Source Plugins | Install built wasm into plugin dir | copy
+  ansible.builtin.copy:
+    src: "{{ zellij_plugin_src_dir }}/{{ item.key }}/target/{{ item.value.source.target }}/release/{{ item.value.source.artifact }}"
+    dest: "{{ zellij_plugin_dir }}/{{ item.value.wasm }}"
+    mode: '0755'
+    remote_src: true
+  loop: "{{ zellij_source_plugins }}"
+  loop_control:
+    label: "{{ item.key }} -> {{ item.value.wasm }}"

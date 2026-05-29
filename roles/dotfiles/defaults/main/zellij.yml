@@ -1,6 +1,26 @@
 ---
-zellij_version: "0.39.1"
+zellij_version: "0.44.3"
 zellij_plugin_dir: "{{ tool_install_dir }}/.zellij-plugins"
+# Checkout/build dir for plugins compiled from source (see zellij_plugins[*].source).
+zellij_plugin_src_dir: "{{ tool_install_dir }}/src/zellij-plugins"
+# Environment for cargo/rustup when building source plugins. Rust lives under a
+# non-standard prefix (tool_install_dir), so RUSTUP_HOME/CARGO_HOME must be set
+# explicitly or the proxies look in ~/.rustup/~/.cargo (mirrors nonroot's
+# rust_tools_env).
+zellij_plugin_build_env:
+  RUSTUP_HOME: "{{ tool_install_dir }}/.rustup"
+  CARGO_HOME: "{{ cargo_home }}"
+  PATH: "{{ cargo_path }}:{{ ansible_facts['env']['PATH'] }}"
+# rustup installer used to bootstrap the rust toolchain when a host has no
+# cargo yet (source plugins like zesh need cargo to build). Adapted from the
+# upstream https://sh.rustup.rs one-liner: the script is downloaded then run
+# with --no-modify-path (PATH is supplied via zellij_plugin_build_env, so shell
+# rc files are left untouched) into the tool_install_dir-scoped
+# RUSTUP_HOME/CARGO_HOME. The per-plugin wasm target is added separately in
+# zellij_plugins.yml once the toolchain exists.
+zellij_rustup_url: "https://sh.rustup.rs"
+zellij_rustup_installer_path: "{{ tool_install_dir }}/zellij-rustup-init.sh"
+zellij_rustup_toolchain: "{{ rustup_toolchain | default('stable') }}"
 zellij_shell: "{{ interactive_shell }}"
 zellij_shell_cmd: "{{ interactive_shell_cmd }}"
 zellij_nvim_app: "{{ nvim_default_profile }}"
@@ -33,12 +53,26 @@ zellij_plugins:
         floating: true
         ignore_case: true
   harpoon:
+    # Launch keybinding (Ctrl z) handed off to the zesh plugin below; harpoon is
+    # still downloaded and available (launch via the plugin-manager if needed).
     url: "https://github.com/Nacho114/harpoon/releases/download/v0.1.0/harpoon.wasm"
+  zesh:
+    # Built from source — the fork's feat/zellij-plugin branch ships no release
+    # .wasm, so zellij_plugins.yml clones the repo and cargo-builds the
+    # zesh_plugin crate for the wasm target. Plugins with a `source` block carry
+    # an explicit `wasm` filename instead of a download `url`; the config
+    # template resolves the on-disk name from `wasm` when there's no `url`.
+    wasm: "zesh.wasm"
+    source:
+      repo: "https://github.com/pbonh/zesh"
+      version: "feat/zellij-plugin"
+      package: "zesh_plugin"
+      target: "wasm32-wasip1"
+      artifact: "zesh.wasm"
     launch_keybinding:
       key: "Ctrl z"
       args:
         floating: true
-        move_to_focused_tab: true
   worktree:
     url: "https://github.com/sharph/zellij-worktree/releases/latest/download/zellij-worktree.wasm"
     launch_keybinding:
