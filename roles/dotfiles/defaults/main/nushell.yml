@@ -49,6 +49,26 @@ nushell_starship_config: |
 nushell_starship_env: |
   mkdir ($nu.data-dir | path join "vendor/autoload")
   {{ starship_exe }} init nu | save -f "{{ nushell_starship_source }}"
+nushell_zoxide_config_file: "{{ nushell_config_dir }}/zoxide.nu"
+nushell_zoxide_config: |
+  source "{{ nushell_zoxide_config_file }}"
+nushell_zoxide_env: |
+  {{ zoxide_exe }} init nushell | save --force "{{ nushell_zoxide_config_file }}"
+nushell_ghq_config: |
+  # ghq is the preferred checkout tool; new clones are auto-registered with zoxide.
+  def ghq-zoxide-sync [] {
+    ^ghq list --full-path | lines | where ($it | str length) > 0 | each { |repo| ^{{ zoxide_exe }} add $repo } | ignore
+  }
+  def --wrapped ghq [...args] {
+    ^ghq ...$args
+    if ($env.LAST_EXIT_CODE == 0) and (($args | length) > 0) and (($args | first) in ["get" "create"]) {
+      ghq-zoxide-sync
+    }
+  }
+  def --env ghcd [] {
+    let dir = (^ghq list --full-path | {{ fzf_exe }} | decode utf-8 | str trim)
+    if ($dir | is-not-empty) { cd $dir }
+  }
 nushell_pnpm_config_file: "{{ nushell_config_dir }}/completions/pnpm.nu"
 nushell_pnpm_env: |
   mkdir "{{ nushell_config_dir }}/completions"

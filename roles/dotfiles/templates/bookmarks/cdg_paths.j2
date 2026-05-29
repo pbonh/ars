@@ -1,5 +1,4 @@
-{% for project in projects %}
-{{ projects[project]['path'] }}
-{% endfor %}
+{# Repository checkouts are sourced live from `ghq list` (single source of    #}
+{# truth) by cdscuts_glob_echo. Only non-repo shortcuts are pinned here.       #}
 {{ nvim_config_dir }}
 {{ code_checkout_path_github }}

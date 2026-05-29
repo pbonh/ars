@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 
+# ghq is the single source of truth for repository checkouts. The cdg bookmark
+# list is driven by `ghq list`, with the optional global/user cdg_paths files
+# kept for pinning non-repo shortcuts. Entries are de-duplicated, order-stable.
+
+ghq_filelist=''
 system_wide_filelist=''
 user_filelist=''
 
+if command -v ghq >/dev/null 2>&1; then
+   ghq_filelist=$(ghq list --full-path)
+fi
 if [ -r {{ cdg_paths_global }} ]; then
    system_wide_filelist=$(cdscuts_list_echo {{ cdg_paths_global }})
 fi
@@ -10,4 +18,5 @@ if [ -r {{ cdg_paths_user }} ]; then
    user_filelist=$(cdscuts_list_echo {{ cdg_paths_user }})
 fi
 
-echo -e "$system_wide_filelist\n$user_filelist" | sed '/^\s*$/d'
+printf '%s\n%s\n%s\n' "$ghq_filelist" "$system_wide_filelist" "$user_filelist" \
+   | sed '/^\s*$/d' | awk '!seen[$0]++'

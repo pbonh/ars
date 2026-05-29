@@ -140,4 +140,29 @@ shell_aliases:
     sh: "{{ navi_shell_cmd }}"
     csh: "`navi --print`"
 extra_shell_aliases: {}
+# Shared (bash/zsh) glue making ghq the preferred checkout tool whose entries
+# are automatically managed by and visible to zoxide. Sourced by both bashrc.j2
+# and zshrc.j2 after zoxide has been initialized.
+ghq_zoxide_shell_init: |
+  # Register every ghq-managed repo with zoxide (bulk import / re-sync).
+  ghq-zoxide-sync() {
+    command ghq list --full-path 2>/dev/null | while IFS= read -r _repo; do
+      "{{ zoxide_exe }}" add "$_repo"
+    done
+  }
+  # Wrap ghq so new checkouts are added to zoxide's database immediately,
+  # without having to cd into them first.
+  ghq() {
+    command ghq "$@"
+    local _rc=$?
+    case "$1" in
+      get|create) [ "$_rc" -eq 0 ] && ghq-zoxide-sync ;;
+    esac
+    return "$_rc"
+  }
+  # Fuzzy-pick any ghq repo and jump to it (the cd is recorded by zoxide).
+  ghcd() {
+    local _dir
+    _dir="$(command ghq list --full-path | {{ fzf_exe }})" && cd "$_dir"
+  }
 lang_tools_nix: "{{ cpp_tools_nix + python_tools_nix }}"
