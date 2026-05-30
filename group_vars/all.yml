@@ -747,6 +747,9 @@ dev_packages:
       - "nox"
     devbox:
       - "nox"
+  herdr:
+    brew:
+      - "herdr"
   opencode:
     brew:
       - "sst/tap/opencode"
