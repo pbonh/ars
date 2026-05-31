@@ -57,7 +57,7 @@ pi_packages_git:
 pi_packages_git_dir: "{{ ansible_facts['env']['HOME'] }}/.pi/agent/git"
 
 # Fireworks provider extension (templated to roles/dotfiles/templates/pi/extensions/fireworks.ts.j2).
-pi_fireworks_enabled: true
+pi_fireworks_enabled: false
 pi_fireworks_provider_name: "fireworks"
 pi_fireworks_base_url: "{{ fireworks_base_url }}"
 pi_fireworks_api_key_env: "{{ fireworks_api_key_env }}"
@@ -73,7 +73,7 @@ pi_firepass_enabled: true
 pi_firepass_provider_name: "firepass"
 pi_firepass_base_url: "{{ fireworks_base_url }}"
 pi_firepass_api_key_env: "{{ fireworks_firepass_api_key_env }}"
-pi_firepass_api: "openai-completions"
+pi_firepass_api: "anthropic-messages"
 pi_firepass_auth_header: true
 
 pi_firepass_models: "{{ fireworks_firepass_models }}"

@@ -18,8 +18,8 @@ fireworks_firepass_default_model_id: "accounts/fireworks/routers/kimi-k2p6-turbo
 fireworks_models:
   - id: "accounts/fireworks/models/glm-5p1"
     name: "GLM 5.1"
-    context_length: 131072
-    contextWindow: 202000
+    context_length: 202800
+    contextWindow: 202800
     maxTokens: 131072
     reasoning: true
     input: ["text"]
@@ -27,58 +27,106 @@ fireworks_models:
       input: 1.40
       output: 4.40
       cacheRead: 0.26
-      cacheWrite: 1.40
+      cacheWrite: 0.00
+  - id: "accounts/fireworks/models/gpt-oss-120b"
+    name: "GPT OSS 120B"
+    context_length: 131072
+    contextWindow: 131072
+    maxTokens: 32768
+    reasoning: true
+    input: ["text"]
+    cost:
+      input: 0.15
+      output: 0.60
+      cacheRead: 0.015
+      cacheWrite: 0.00
+  - id: "accounts/fireworks/models/gpt-oss-20b"
+    name: "GPT OSS 20B"
+    context_length: 131072
+    contextWindow: 131072
+    maxTokens: 32768
+    reasoning: true
+    input: ["text"]
+    cost:
+      input: 0.07
+      output: 0.30
+      cacheRead: 0.035
+      cacheWrite: 0.00
   - id: "accounts/fireworks/models/kimi-k2p5"
     name: "Kimi K2.5"
-    context_length: 131072
-    contextWindow: 262000
-    maxTokens: 131072
+    context_length: 256000
+    contextWindow: 256000
+    maxTokens: 256000
     reasoning: true
     input: ["text", "image"]
     cost:
       input: 0.60
       output: 3.00
       cacheRead: 0.10
-      cacheWrite: 0.60
+      cacheWrite: 0.00
   - id: "accounts/fireworks/models/kimi-k2p6"
     name: "Kimi K2.6"
-    context_length: 131072
+    context_length: 262000
     contextWindow: 262000
-    maxTokens: 131072
+    maxTokens: 262000
     reasoning: true
     input: ["text", "image"]
     cost:
       input: 0.95
       output: 4.00
       cacheRead: 0.16
-      cacheWrite: 0.95
-  - id: "accounts/fireworks/models/qwen3p6-plus"
-    name: "Qwen 3.6 Plus"
-    context_length: 131072
-    contextWindow: 128000
-    maxTokens: 131072
+      cacheWrite: 0.00
+  - id: "accounts/fireworks/models/minimax-m2p5"
+    name: "MiniMax M2.5"
+    context_length: 196608
+    contextWindow: 196608
+    maxTokens: 196608
     reasoning: true
-    input: ["text", "image"]
+    input: ["text"]
     cost:
-      input: 0.50
-      output: 3.00
-      cacheRead: 0.10
-      cacheWrite: 0.50
+      input: 0.30
+      output: 1.20
+      cacheRead: 0.03
+      cacheWrite: 0.00
   - id: "accounts/fireworks/models/minimax-m2p7"
     name: "MiniMax M2.7"
-    context_length: 131072
+    context_length: 196608
     contextWindow: 196608
-    maxTokens: 131072
+    maxTokens: 196608
     reasoning: true
     input: ["text"]
     cost:
       input: 0.30
       output: 1.20
       cacheRead: 0.06
-      cacheWrite: 0.30
+      cacheWrite: 0.00
+  - id: "accounts/fireworks/models/qwen3p6-plus"
+    name: "Qwen 3.6 Plus"
+    context_length: 128000
+    contextWindow: 128000
+    maxTokens: 8192
+    reasoning: true
+    input: ["text", "image"]
+    cost:
+      input: 0.50
+      output: 3.00
+      cacheRead: 0.10
+      cacheWrite: 0.00
+  - id: "accounts/fireworks/models/deepseek-v4-flash"
+    name: "DeepSeek V4 Flash"
+    context_length: 1000000
+    contextWindow: 1000000
+    maxTokens: 384000
+    reasoning: true
+    input: ["text"]
+    cost:
+      input: 0.14
+      output: 0.28
+      cacheRead: 0.03
+      cacheWrite: 0.00
   - id: "accounts/fireworks/models/deepseek-v4-pro"
     name: "DeepSeek V4 Pro"
-    context_length: 384000
+    context_length: 1000000
     contextWindow: 1000000
     maxTokens: 384000
     reasoning: true
@@ -86,21 +134,32 @@ fireworks_models:
     cost:
       input: 1.74
       output: 3.48
-      cacheRead: 0.15
-      cacheWrite: 1.74
+      cacheRead: 0.145
+      cacheWrite: 0.00
 
-# Models allowed by the firepass tier — currently Kimi K2.6 Turbo only.
-# Pricing mirrors kimi-k2p6 as a placeholder; adjust if firepass pricing differs.
+# Models allowed by the firepass tier — /routers/* paths require FIREWORKS_FIREPASS_API_KEY.
 fireworks_firepass_models:
   - id: "accounts/fireworks/routers/kimi-k2p6-turbo"
     name: "Kimi K2.6 Turbo"
-    context_length: 131072
+    context_length: 262000
     contextWindow: 262000
-    maxTokens: 131072
+    maxTokens: 262000
     reasoning: true
     input: ["text", "image"]
     cost:
-      input: 0.95
-      output: 4.00
-      cacheRead: 0.16
-      cacheWrite: 0.95
+      input: 2.00
+      output: 8.00
+      cacheRead: 0.30
+      cacheWrite: 0.00
+  - id: "accounts/fireworks/routers/glm-5p1-fast"
+    name: "GLM 5.1 Fast"
+    context_length: 202800
+    contextWindow: 202800
+    maxTokens: 131072
+    reasoning: true
+    input: ["text"]
+    cost:
+      input: 2.80
+      output: 8.80
+      cacheRead: 0.52
+      cacheWrite: 0.00
