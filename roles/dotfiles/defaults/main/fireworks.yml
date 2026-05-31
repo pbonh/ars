@@ -1,6 +1,8 @@
 ---
 # Fireworks AI provider settings — canonical source of truth for all tools
 fireworks_base_url: "https://api.fireworks.ai/inference/v1"
+# Base URL for anthropic-messages API (no /v1 suffix — pi appends /v1/messages itself)
+fireworks_anthropic_base_url: "https://api.fireworks.ai/inference"
 fireworks_api_key_env: "FIREWORKS_API_KEY"
 
 # Firepass: Fireworks tier limited to Kimi K2.6 Turbo. Uses the same base URL

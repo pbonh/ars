@@ -71,7 +71,7 @@ pi_fireworks_models: "{{ fireworks_models }}"
 # for the regular catalog.
 pi_firepass_enabled: true
 pi_firepass_provider_name: "firepass"
-pi_firepass_base_url: "{{ fireworks_base_url }}"
+pi_firepass_base_url: "{{ fireworks_anthropic_base_url }}"
 pi_firepass_api_key_env: "{{ fireworks_firepass_api_key_env }}"
 pi_firepass_api: "anthropic-messages"
 pi_firepass_auth_header: true
