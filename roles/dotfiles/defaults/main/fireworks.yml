@@ -15,6 +15,9 @@ fireworks_default_model_id: "accounts/fireworks/models/kimi-k2p6"
 # Default model ID for the firepass tier (only model allowed by firepass)
 fireworks_firepass_default_model_id: "accounts/fireworks/routers/kimi-k2p6-turbo"
 
+# Canonical short name for the default firepass model (used by omp, etc.)
+fireworks_firepass_default_model_name: "kimi-k2.6-turbo"
+
 # Canonical model definitions
 # Compatible with pi; hermes derives its narrower dict via Jinja2 transformation
 fireworks_models:

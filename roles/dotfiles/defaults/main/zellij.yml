@@ -157,6 +157,11 @@ zellij_ai_agents:
     pane_alias: "zpp"
     pane_name: "AI - Pi"
     command: "pi"
+  omp:
+    alias: "zomp"
+    pane_alias: "zompp"
+    pane_name: "AI - Oh My Pi"
+    command: "omp"
   hermes:
     alias: "zh"
     pane_alias: "zhp"
