@@ -173,7 +173,7 @@ television_channels:
           {%- set plugins = zellij_plugins | default({}) %}
           case {} in
           {%- for k, v in plugins.items() if v.launch_keybinding is defined %}
-            {{ k }}) zellij action launch-or-focus-plugin "file:{{ zellij_plugin_dir }}/{{ v.url | basename }}" ;;
+            {{ k }}) zellij action launch-or-focus-plugin "file:{{ zellij_plugin_dir }}/{{ v.url | default(v.wasm) | basename }}" ;;
           {%- endfor %}
           esac
         mode: "execute"
