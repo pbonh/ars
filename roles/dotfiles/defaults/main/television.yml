@@ -251,3 +251,427 @@ television_channels:
             (cd {} && zellij)
           fi
         mode: "execute"
+
+  # ---------------------------------------------------------------------------
+  # herdr channels — pickers for the herdr terminal multiplexer / agent manager.
+  # Absorbed from hand-authored ~/.config/television/cable/herdr*.toml files.
+  # Each `shortcut` registers a global F-key; the `herdr` master channel (F1) is
+  # a launcher that exec's the chosen sub-picker as a fresh tv invocation.
+  # NOTE: `\t` in display/output/header strings is a literal backslash-t — it is
+  # television's split-field escape, NOT a YAML/TOML tab, so these use single- or
+  # block-quoted scalars (never double quotes) to preserve it verbatim.
+  herdr:
+    description: "Master picker for herdr — choose a herdr picker to launch"
+    requirements: ["herdr"]
+    source:
+      command: |-
+        printf '%s\n' herdr-sessions herdr-workspaces herdr-worktrees herdr-tabs herdr-panes herdr-agents herdr-integrations herdr-server herdr-commands
+    preview:
+      command: |-
+        case {} in
+          herdr-sessions)     printf '%s\n\n%s\n' 'herdr-sessions'     'Sessions — attach, stop, delete' ;;
+          herdr-workspaces)   printf '%s\n\n%s\n' 'herdr-workspaces'   'Workspaces — focus, rename, close, create' ;;
+          herdr-worktrees)    printf '%s\n\n%s\n' 'herdr-worktrees'    'Git worktrees — open, remove, create' ;;
+          herdr-tabs)         printf '%s\n\n%s\n' 'herdr-tabs'         'Tabs — focus, rename, close, create' ;;
+          herdr-panes)        printf '%s\n\n%s\n' 'herdr-panes'        'Panes — focus, split, run, close (live preview, Ctrl+S cycles views)' ;;
+          herdr-agents)       printf '%s\n\n%s\n' 'herdr-agents'       'Agents — focus, attach, send, wait (Ctrl+S cycles by state)' ;;
+          herdr-integrations) printf '%s\n\n%s\n' 'herdr-integrations' 'Integrations — install, uninstall, status' ;;
+          herdr-server)       printf '%s\n\n%s\n' 'herdr-server'       'Server / status / channel / update command palette' ;;
+          herdr-commands)     printf '%s\n\n%s\n' 'herdr-commands'     'Searchable reference of every herdr subcommand' ;;
+        esac
+    ui:
+      layout: "portrait"
+      preview_panel:
+        size: 55
+        header: '{}'
+      remote_control:
+        show_channel_descriptions: true
+    keybindings:
+      shortcut: "f1"
+      enter: "actions:launch"
+    actions:
+      launch:
+        description: "Launch the selected herdr picker"
+        command: "tv {}"
+        mode: "execute"
+
+  herdr-sessions:
+    description: "herdr sessions — attach, stop, delete"
+    requirements: ["herdr", "jq"]
+    source:
+      command:
+        - |-
+          herdr session list --json | jq -r '(if type=="array" then . else (to_entries|map(.value)|map(select(type=="array"))|add) end) // [] | .[] | [ (.name // .id // .session // "?"), (.status // .state // ""), (.cwd // .label // "") ] | @tsv'
+      display: '{split:\t:0}  ({split:\t:1})  {split:\t:2}'
+      output: '{split:\t:0}'
+    preview:
+      command: |-
+        herdr session list --json | jq -C '(if type=="array" then . else (to_entries|map(.value)|map(select(type=="array"))|add) end) // [] | map(select((.name // .id // .session)=="{split:\t:0}")) | (.[0] // {})' 2>/dev/null || herdr status server
+    ui:
+      layout: "portrait"
+      preview_panel:
+        size: 55
+        header: 'session: {split:\t:0}'
+      status_bar:
+        separator_open: ""
+        separator_close: ""
+    keybindings:
+      shortcut: "f2"
+      enter: "actions:attach"
+      alt-s: "actions:stop"
+      ctrl-d: "actions:delete"
+      ctrl-r: ["reload_source", "go_to_input_start"]
+    actions:
+      attach:
+        description: "Attach to the selected session"
+        command: |-
+          herdr session attach '{split:\t:0}'
+        mode: "execute"
+      stop:
+        description: "Stop the selected session"
+        command: |-
+          herdr session stop '{split:\t:0}'
+        mode: "fork"
+      delete:
+        description: "Delete the selected session"
+        command: |-
+          herdr session delete '{split:\t:0}'
+        mode: "fork"
+
+  herdr-workspaces:
+    description: "herdr workspaces — focus, rename, close, create"
+    requirements: ["herdr", "jq"]
+    source:
+      command:
+        - |-
+          herdr workspace list --json | jq -r '(if type=="array" then . else (to_entries|map(.value)|map(select(type=="array"))|add) end) // [] | .[] | [ (.id // .workspace_id // "?"), (.label // .name // ""), (.cwd // "") ] | @tsv'
+      display: '{split:\t:1}  [{split:\t:0}]  {split:\t:2}'
+      output: '{split:\t:0}'
+    preview:
+      command: |-
+        herdr workspace get '{split:\t:0}' | jq -C . 2>/dev/null || herdr workspace list --json | jq -C .
+    ui:
+      layout: "portrait"
+      preview_panel:
+        size: 60
+        header: 'workspace: {split:\t:0}'
+    keybindings:
+      shortcut: "f3"
+      enter: "actions:focus"
+      alt-r: "actions:rename"
+      alt-n: "actions:create"
+      ctrl-d: "actions:close"
+    actions:
+      focus:
+        description: "Focus the selected workspace"
+        command: |-
+          herdr workspace focus '{split:\t:0}'
+        mode: "fork"
+      rename:
+        description: "Rename the selected workspace"
+        command: |-
+          printf 'New label for {split:\t:0}: '; read -r lbl; herdr workspace rename '{split:\t:0}' "$lbl"
+        mode: "execute"
+      create:
+        description: "Create a workspace in the current directory (no focus steal)"
+        command: |-
+          herdr workspace create --cwd "$PWD" --no-focus
+        mode: "fork"
+      close:
+        description: "Close the selected workspace (state only)"
+        command: |-
+          herdr workspace close '{split:\t:0}'
+        mode: "fork"
+
+  herdr-worktrees:
+    description: "herdr git worktrees — open, remove, create"
+    requirements: ["herdr", "jq"]
+    source:
+      command:
+        - |-
+          herdr worktree list --json | jq -r '(if type=="array" then . else (to_entries|map(.value)|map(select(type=="array"))|add) end) // [] | .[] | [ (.workspace // .workspace_id // .id // "?"), (.branch // .label // ""), (.path // .cwd // "") ] | @tsv'
+      display: '{split:\t:1}  {split:\t:2}'
+      output: '{split:\t:0}'
+    preview:
+      command: |-
+        git -C '{split:\t:2}' log --oneline -15 2>/dev/null || herdr worktree list --json | jq -C .
+    ui:
+      layout: "portrait"
+      preview_panel:
+        size: 55
+        header: 'worktree: {split:\t:1}'
+    keybindings:
+      shortcut: "f4"
+      enter: "actions:open"
+      alt-n: "actions:create"
+      ctrl-d: "actions:remove"
+    actions:
+      open:
+        description: "Open the worktree checkout as a focused workspace"
+        command: |-
+          herdr worktree open --path '{split:\t:2}' --focus
+        mode: "fork"
+      create:
+        description: "Create a new git worktree on a new branch"
+        command: |-
+          printf 'New branch name: '; read -r br; herdr worktree create --branch "$br" --focus
+        mode: "execute"
+      remove:
+        description: "Remove the worktree checkout (git worktree remove --force)"
+        command: |-
+          herdr worktree remove --workspace '{split:\t:0}' --force
+        mode: "fork"
+
+  herdr-tabs:
+    description: "herdr tabs — focus, rename, close, create"
+    requirements: ["herdr", "jq"]
+    source:
+      command:
+        - |-
+          herdr tab list --json | jq -r '(if type=="array" then . else (to_entries|map(.value)|map(select(type=="array"))|add) end) // [] | .[] | [ (.id // .tab_id // "?"), (.label // .name // ""), (.workspace // .workspace_id // "") ] | @tsv'
+      display: '{split:\t:1}  [{split:\t:0}]'
+      output: '{split:\t:0}'
+    preview:
+      command: |-
+        herdr tab get '{split:\t:0}' | jq -C . 2>/dev/null || herdr tab list --json | jq -C .
+    ui:
+      layout: "portrait"
+      preview_panel:
+        size: 55
+        header: 'tab: {split:\t:0}'
+    keybindings:
+      shortcut: "f5"
+      enter: "actions:focus"
+      alt-r: "actions:rename"
+      alt-n: "actions:create"
+      ctrl-d: "actions:close"
+    actions:
+      focus:
+        description: "Focus the selected tab"
+        command: |-
+          herdr tab focus '{split:\t:0}'
+        mode: "fork"
+      rename:
+        description: "Rename the selected tab"
+        command: |-
+          printf 'New label for {split:\t:0}: '; read -r lbl; herdr tab rename '{split:\t:0}' "$lbl"
+        mode: "execute"
+      create:
+        description: "Create a new tab (no focus steal)"
+        command: |-
+          herdr tab create --no-focus
+        mode: "fork"
+      close:
+        description: "Close the selected tab"
+        command: |-
+          herdr tab close '{split:\t:0}'
+        mode: "fork"
+
+  herdr-panes:
+    description: "herdr panes — focus, split, run, close (live preview)"
+    requirements: ["herdr", "jq"]
+    source:
+      command:
+        - |-
+          herdr pane list --json | jq -r '(if type=="array" then . else (to_entries|map(.value)|map(select(type=="array"))|add) end) // [] | .[] | [ (.id // .pane_id // "?"), (.label // .title // ""), (.cwd // .foreground_cwd // "") ] | @tsv'
+        - |-
+          herdr pane list --json | jq -r '(if type=="array" then . else (to_entries|map(.value)|map(select(type=="array"))|add) end) // [] | .[] | [ (.id // .pane_id // "?"), (.label // .title // ""), (.foreground_cwd // .cwd // "") ] | @tsv'
+      display: '{split:\t:0}  {split:\t:1}  {split:\t:2}'
+      output: '{split:\t:0}'
+    preview:
+      command: |-
+        herdr pane read '{split:\t:0}' --source visible --ansi 2>/dev/null || herdr pane get '{split:\t:0}' | jq -C .
+      ansi: true
+    ui:
+      layout: "portrait"
+      preview_panel:
+        size: 65
+        header: 'pane: {split:\t:0}'
+    keybindings:
+      shortcut: "f6"
+      enter: "actions:focus"
+      alt-r: "actions:split_right"
+      alt-d: "actions:split_down"
+      alt-e: "actions:run"
+      ctrl-d: "actions:close_selected"
+    actions:
+      focus:
+        description: "Focus the selected pane"
+        command: |-
+          herdr pane focus '{split:\t:0}'
+        mode: "fork"
+      split_right:
+        description: "Split the selected pane to the right"
+        command: |-
+          herdr pane split '{split:\t:0}' --direction right
+        mode: "fork"
+      split_down:
+        description: "Split the selected pane downward"
+        command: |-
+          herdr pane split '{split:\t:0}' --direction down
+        mode: "fork"
+      run:
+        description: "Run a command in the selected pane"
+        command: |-
+          printf 'Command to run in {split:\t:0}: '; read -r cmd; herdr pane run '{split:\t:0}' "$cmd"
+        mode: "execute"
+      close_selected:
+        description: "Close all selected panes (Tab to multi-select)"
+        command: |-
+          for id in {split:\n:..|map:{split:\t:0}|join: }; do herdr pane close "$id"; done
+        mode: "fork"
+        separator: "\n"
+
+  herdr-agents:
+    description: "herdr agents — focus, attach, send, wait (Ctrl+S cycles by state)"
+    requirements: ["herdr", "jq"]
+    source:
+      command:
+        - |-
+          herdr agent list --json | jq -r '(if type=="array" then . else (to_entries|map(.value)|map(select(type=="array"))|add) end) // [] | .[] | [ (.target // .name // .id // "?"), (.state // .status // ""), (.label // .title // "") ] | @tsv'
+        - |-
+          herdr agent list --json | jq -r '(if type=="array" then . else (to_entries|map(.value)|map(select(type=="array"))|add) end) // [] | map(select((.state // .status // "")=="idle"))    | .[] | [ (.target // .name // .id // "?"), (.state // .status // ""), (.label // .title // "") ] | @tsv'
+        - |-
+          herdr agent list --json | jq -r '(if type=="array" then . else (to_entries|map(.value)|map(select(type=="array"))|add) end) // [] | map(select((.state // .status // "")=="working")) | .[] | [ (.target // .name // .id // "?"), (.state // .status // ""), (.label // .title // "") ] | @tsv'
+        - |-
+          herdr agent list --json | jq -r '(if type=="array" then . else (to_entries|map(.value)|map(select(type=="array"))|add) end) // [] | map(select((.state // .status // "")=="blocked")) | .[] | [ (.target // .name // .id // "?"), (.state // .status // ""), (.label // .title // "") ] | @tsv'
+      display: '{split:\t:0}  [{split:\t:1}]  {split:\t:2}'
+      output: '{split:\t:0}'
+    preview:
+      command: |-
+        herdr agent read '{split:\t:0}' --source visible --ansi 2>/dev/null || herdr agent get '{split:\t:0}' | jq -C .
+      ansi: true
+    ui:
+      layout: "portrait"
+      preview_panel:
+        size: 65
+        header: 'agent: {split:\t:0}  [{split:\t:1}]'
+    keybindings:
+      shortcut: "f7"
+      enter: "actions:focus"
+      alt-a: "actions:attach"
+      alt-s: "actions:send"
+      alt-w: "actions:wait_idle"
+    actions:
+      focus:
+        description: "Focus the selected agent"
+        command: |-
+          herdr agent focus '{split:\t:0}'
+        mode: "fork"
+      attach:
+        description: "Attach to the selected agent (takeover)"
+        command: |-
+          herdr agent attach '{split:\t:0}' --takeover
+        mode: "execute"
+      send:
+        description: "Send text to the selected agent"
+        command: |-
+          printf 'Text to send to {split:\t:0}: '; read -r txt; herdr agent send '{split:\t:0}' "$txt"
+        mode: "execute"
+      wait_idle:
+        description: "Wait for the selected agent to become idle"
+        command: |-
+          herdr agent wait '{split:\t:0}' --status idle
+        mode: "fork"
+
+  herdr-integrations:
+    description: "herdr integrations — install, uninstall, status (Ctrl+S toggles outdated)"
+    requirements: ["herdr"]
+    source:
+      command:
+        - |-
+          printf '%s\n' pi omp claude codex copilot opencode hermes qodercli
+        - |-
+          herdr integration status --outdated-only 2>/dev/null | awk '{print $1}' | grep -v '^$' || printf '%s\n' pi omp claude codex copilot opencode hermes qodercli
+    preview:
+      command: |-
+        herdr integration status 2>/dev/null | grep -i -- '{}' || printf 'Integration: %s\n\nEnter: install   ctrl-d: uninstall   alt-s: status\n' '{}'
+    ui:
+      layout: "portrait"
+      preview_panel:
+        size: 55
+        header: 'integration: {}'
+    keybindings:
+      shortcut: "f8"
+      enter: "actions:install"
+      ctrl-d: "actions:uninstall"
+      alt-s: "actions:status"
+    actions:
+      install:
+        description: "Install the selected integration"
+        command: |-
+          herdr integration install {}
+        mode: "fork"
+      uninstall:
+        description: "Uninstall the selected integration"
+        command: |-
+          herdr integration uninstall {}
+        mode: "fork"
+      status:
+        description: "Show integration status"
+        command: |-
+          herdr integration status
+        mode: "fork"
+
+  herdr-server:
+    description: "herdr server / status / channel / update command palette"
+    requirements: ["herdr"]
+    source:
+      command: |-
+        printf '%s\n' 'status' 'status server' 'status client' 'server' 'server reload-config' 'server stop' 'channel show' 'channel set preview' 'channel set stable' 'update' 'update --handoff' '--version' '--default-config'
+    preview:
+      command: |-
+        case {} in
+          'status')              printf '%s\n\n%s\n' 'herdr status'              'Overall server + client status' ;;
+          'status server')       printf '%s\n\n%s\n' 'herdr status server'       'Headless server status' ;;
+          'status client')       printf '%s\n\n%s\n' 'herdr status client'       'Client status' ;;
+          'server')              printf '%s\n\n%s\n' 'herdr server'              'Run the headless server explicitly (supervised/service setups)' ;;
+          'server reload-config')printf '%s\n\n%s\n' 'herdr server reload-config' 'Apply reloadable settings without restarting panes' ;;
+          'server stop')         printf '%s\n\n%s\n' 'herdr server stop'         'Stop the running server' ;;
+          'channel show')        printf '%s\n\n%s\n' 'herdr channel show'        'Print the current release channel (stable/preview)' ;;
+          'channel set preview') printf '%s\n\n%s\n' 'herdr channel set preview' 'Opt into preview builds' ;;
+          'channel set stable')  printf '%s\n\n%s\n' 'herdr channel set stable'  'Return to stable releases' ;;
+          'update')              printf '%s\n\n%s\n' 'herdr update'              'Download and install from the configured channel' ;;
+          'update --handoff')    printf '%s\n\n%s\n' 'herdr update --handoff'    'Update with live handoff for supported running servers' ;;
+          '--version')           printf '%s\n\n%s\n' 'herdr --version'           'Print version' ;;
+          '--default-config')    printf '%s\n\n%s\n' 'herdr --default-config'    'Print the default config' ;;
+        esac
+    ui:
+      layout: "portrait"
+      preview_panel:
+        size: 55
+        header: 'herdr {}'
+    keybindings:
+      shortcut: "f9"
+      enter: "actions:run"
+      ctrl-y: "copy_entry_to_clipboard"
+    actions:
+      run:
+        description: "Run the selected herdr command"
+        command: "herdr {}"
+        mode: "execute"
+
+  herdr-commands:
+    description: "Searchable reference of every herdr subcommand (Enter copies to clipboard)"
+    source:
+      command: |-
+        printf '%s\n' 'session list' 'session attach <name>' 'session stop <name>' 'session delete <name>' 'workspace list' 'workspace create [--cwd PATH] [--label TEXT]' 'workspace get <id>' 'workspace focus <id>' 'workspace rename <id> <label>' 'workspace close <id>' 'worktree list' 'worktree create [--branch NAME] [--base REF]' 'worktree open (--path PATH | --branch NAME)' 'worktree remove --workspace ID [--force]' 'tab list' 'tab create [--cwd PATH] [--label TEXT]' 'tab focus <id>' 'tab rename <id> <label>' 'tab close <id>' 'pane list' 'pane get <id>' 'pane split <id> --direction right|down' 'pane close <id>' 'pane read <id> [--source visible|recent|recent-unwrapped]' 'pane send-text <id> <text>' 'pane send-keys <id> <key>...' 'pane run <id> <command>' 'agent list' 'agent get <target>' 'agent read <target>' 'agent send <target> <text>' 'agent focus <target>' 'agent wait <target> --status idle|working|blocked' 'agent attach <target> [--takeover]' 'agent start <name> -- <argv...>' 'terminal attach <id> [--takeover]' 'wait output <pane> --match <text>' 'wait agent-status <pane> --status <state>' 'integration install <name>' 'integration uninstall <name>' 'integration status [--outdated-only]'
+    preview:
+      command: |-
+        printf 'herdr %s\n\nDocs: https://herdr.dev/docs/cli-reference/\n\nEnter: copy to clipboard\n' '{}'
+    ui:
+      layout: "portrait"
+      preview_panel:
+        size: 50
+        header: 'herdr {}'
+      help_panel:
+        show_categories: true
+    keybindings:
+      shortcut: "f10"
+      enter: ["copy_entry_to_clipboard", "quit"]
+      ctrl-y: "copy_entry_to_clipboard"
+    actions:
+      noop:
+        description: "Reference only"
+        command: "true"
+        mode: "fork"

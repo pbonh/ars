@@ -10,6 +10,9 @@ requirements = {{ tv_channel.requirements | to_json }}
 
 [source]
 command = {{ tv_channel.source.command | to_json }}
+{% if tv_channel.source.display is defined %}
+display = {{ tv_channel.source.display | to_json }}
+{% endif %}
 {% if tv_channel.source.output is defined %}
 output = {{ tv_channel.source.output | to_json }}
 {% endif %}
@@ -20,12 +23,66 @@ entry_delimiter = {{ tv_channel.source.entry_delimiter | to_json }}
 {% if tv_channel.preview is defined %}
 [preview]
 command = {{ tv_channel.preview.command | to_json }}
+{% if tv_channel.preview.ansi is defined %}
+ansi = {{ tv_channel.preview.ansi | to_json }}
+{% endif %}
+{% endif %}
+{% if tv_channel.ui is defined %}
+
+[ui]
+{% if tv_channel.ui.layout is defined %}
+layout = {{ tv_channel.ui.layout | to_json }}
+{% endif %}
+{% if tv_channel.ui.preview_panel is defined %}
+
+[ui.preview_panel]
+{% if tv_channel.ui.preview_panel.size is defined %}
+size = {{ tv_channel.ui.preview_panel.size }}
+{% endif %}
+{% if tv_channel.ui.preview_panel.header is defined %}
+header = {{ tv_channel.ui.preview_panel.header | to_json }}
+{% endif %}
+{% endif %}
+{% if tv_channel.ui.remote_control is defined %}
+
+[ui.remote_control]
+{% if tv_channel.ui.remote_control.show_channel_descriptions is defined %}
+show_channel_descriptions = {{ tv_channel.ui.remote_control.show_channel_descriptions | to_json }}
+{% endif %}
+{% endif %}
+{% if tv_channel.ui.help_panel is defined %}
+
+[ui.help_panel]
+{% if tv_channel.ui.help_panel.show_categories is defined %}
+show_categories = {{ tv_channel.ui.help_panel.show_categories | to_json }}
+{% endif %}
+{% endif %}
+{% if tv_channel.ui.status_bar is defined %}
+
+[ui.status_bar]
+{% if tv_channel.ui.status_bar.separator_open is defined %}
+separator_open = {{ tv_channel.ui.status_bar.separator_open | to_json }}
+{% endif %}
+{% if tv_channel.ui.status_bar.separator_close is defined %}
+separator_close = {{ tv_channel.ui.status_bar.separator_close | to_json }}
+{% endif %}
+{% endif %}
 {% endif %}
 
 {% if tv_channel.keybindings is defined %}
 [keybindings]
-{% for shortcut, action_name in tv_channel.keybindings.items() %}
-{{ shortcut }} = "actions:{{ action_name }}"
+{# Keybinding values are emitted verbatim when they already reference an action
+   (value contains ':', e.g. "actions:focus"), name a built-in tv action, are a
+   list of actions, or belong to the special `shortcut` key. A bare string action
+   name is auto-prefixed with `actions:` — this preserves the original zellij
+   channel definitions, which use the bare-name form. #}
+{% set tv_builtin_keybinding_actions = ["copy_entry_to_clipboard", "quit", "reload_source", "go_to_input_start", "go_to_input_end", "toggle_help", "toggle_preview", "toggle_remote_control", "select_next_entry", "select_prev_entry", "confirm_selection", "select_next_page", "select_prev_page"] %}
+{% for key, value in tv_channel.keybindings.items() %}
+{% if key == 'shortcut' or value is not string or ':' in value or value in tv_builtin_keybinding_actions %}
+{{ key }} = {{ value | to_json }}
+{% else %}
+{{ key }} = "actions:{{ value }}"
+{% endif %}
 {% endfor %}
 {% endif %}
 
@@ -35,6 +92,9 @@ command = {{ tv_channel.preview.command | to_json }}
 description = {{ action.description | to_json }}
 command = {{ action.command | to_json }}
 mode = {{ action.mode | default('execute') | to_json }}
+{% if action.separator is defined %}
+separator = {{ action.separator | to_json }}
+{% endif %}
 
 {% endfor %}
 {% endif %}
