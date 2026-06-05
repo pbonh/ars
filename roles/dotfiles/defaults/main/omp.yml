@@ -1,0 +1,50 @@
+---
+# oh-my-pi (omp) configuration.
+# omp stores global settings in ~/.omp/agent/config.yml, with optional
+# project-level overrides via ./.claude/settings.yml. This role manages the
+# global config only; the omp binary itself is installed elsewhere.
+omp_config_dir: "{{ ansible_facts['env']['HOME'] }}/.omp/agent"
+omp_config_path: "{{ omp_config_dir }}/config.yml"
+
+# Disable the hindsight/memory system.
+omp_memory_enabled: false
+
+# Keep MCP auto-discovery enabled.
+omp_mcp_discovery_mode: true
+
+# Prevent omp from loading skills/commands out of the ~/.claude/ library.
+omp_skills_enable_claude_user: false
+omp_commands_enable_claude_user: false
+
+# Subagents to disable.
+omp_disabled_agents:
+  - explore
+  - oracle
+  - librarian
+
+# Context management — compact early and hand off to a fresh session.
+omp_compaction_enabled: true
+omp_compaction_strategy: "handoff"
+omp_compaction_threshold_percent: 25
+
+# Task concurrency.
+omp_task_concurrency: 4
+
+# Final config merged into ~/.omp/agent/config.yml. Override individual values
+# above, or replace this dict wholesale for full control.
+omp_global_config:
+  memory:
+    enabled: "{{ omp_memory_enabled }}"
+  mcp:
+    discoveryMode: "{{ omp_mcp_discovery_mode }}"
+  skills:
+    enableClaudeUser: "{{ omp_skills_enable_claude_user }}"
+  commands:
+    enableClaudeUser: "{{ omp_commands_enable_claude_user }}"
+  disabledAgents: "{{ omp_disabled_agents }}"
+  compaction:
+    enabled: "{{ omp_compaction_enabled }}"
+    strategy: "{{ omp_compaction_strategy }}"
+    thresholdPercent: "{{ omp_compaction_threshold_percent }}"
+  task:
+    concurrency: "{{ omp_task_concurrency }}"

@@ -169,6 +169,12 @@
     - pi
     - ai
 
+- name: OMP Config
+  import_tasks: tasks/omp.yml
+  tags:
+    - omp
+    - ai
+
 - name: Configure Scientia
   import_tasks: tasks/configure_scientia.yml
   tags:

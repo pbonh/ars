@@ -1,0 +1,31 @@
+---
+- name: OMP | Ensure config directory exists
+  ansible.builtin.file:
+    path: "{{ omp_config_dir }}"
+    state: directory
+    mode: "0700"
+
+- name: OMP | Check config.yml
+  ansible.builtin.stat:
+    path: "{{ omp_config_path }}"
+  register: dotfiles_omp_config_stat
+
+- name: OMP | Read config.yml
+  ansible.builtin.slurp:
+    src: "{{ omp_config_path }}"
+  register: dotfiles_omp_config_raw
+  when: dotfiles_omp_config_stat.stat.exists
+
+- name: OMP | Parse config.yml
+  ansible.builtin.set_fact:
+    dotfiles_omp_config_existing: "{{ (dotfiles_omp_config_raw.content | b64decode | from_yaml) if dotfiles_omp_config_stat.stat.exists else {} }}"
+
+- name: OMP | Merge config.yml
+  ansible.builtin.set_fact:
+    dotfiles_omp_config_merged: "{{ (dotfiles_omp_config_existing | default({})) | combine(omp_global_config, recursive=True) }}"
+
+- name: OMP | Write config.yml
+  ansible.builtin.template:
+    src: "omp/config.yml.j2"
+    dest: "{{ omp_config_path }}"
+    mode: "0600"
