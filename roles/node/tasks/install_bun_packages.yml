@@ -1,0 +1,30 @@
+---
+- name: Node | Install bun global packages
+  ansible.builtin.command:
+    cmd: >-
+      {{ item.executable | default(node_bun_executable) }} add --global
+      {{ item.name }}{% if item.version | default(false) %}@{{ item.version }}{% endif %}
+  loop: "{{ node_bun_packages }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: node_bun_install
+  changed_when: >-
+    'package installed' in (node_bun_install.stdout | default('') ~ node_bun_install.stderr | default(''))
+  when:
+    - item.enabled | default(true)
+    - (item.state | default('present')) == 'present'
+
+- name: Node | Uninstall bun global packages
+  ansible.builtin.command:
+    cmd: "{{ item.executable | default(node_bun_executable) }} remove --global {{ item.name }}"
+  loop: "{{ node_bun_packages }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: node_bun_uninstall
+  changed_when: "'package removed' in (node_bun_uninstall.stdout | default('') ~ node_bun_uninstall.stderr | default(''))"
+  failed_when:
+    - node_bun_uninstall.rc != 0
+    - "'nothing to remove' not in (node_bun_uninstall.stdout | default('') ~ node_bun_uninstall.stderr | default(''))"
+  when:
+    - item.enabled | default(true)
+    - (item.state | default('present')) == 'absent'

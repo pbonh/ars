@@ -1,0 +1,5 @@
+---
+oh_my_pi_bun_package: "oh-my-pi"
+oh_my_pi_bun_state: "present"
+oh_my_pi_bun_version: null
+oh_my_pi_bun_executable: "bun"

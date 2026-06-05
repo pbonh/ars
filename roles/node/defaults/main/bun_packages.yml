@@ -1,0 +1,6 @@
+---
+node_bun_packages:
+  - name: "{{ oh_my_pi_bun_package }}"
+    state: "{{ oh_my_pi_bun_state }}"
+    version: "{{ oh_my_pi_bun_version }}"
+    executable: "{{ oh_my_pi_bun_executable }}"
