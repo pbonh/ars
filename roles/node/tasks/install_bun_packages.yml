@@ -2,8 +2,10 @@
 - name: Node | Install bun global packages
   ansible.builtin.command:
     cmd: >-
-      {{ item.executable | default(node_bun_executable) }} add --global
+      {{ item.executable | default(node_bun_executable) }} install --global
       {{ item.name }}{% if item.version | default(false) %}@{{ item.version }}{% endif %}
+  environment:
+    BUN_INSTALL: "{{ bun_install_dir }}"
   loop: "{{ node_bun_packages }}"
   loop_control:
     label: "{{ item.name }}"
@@ -17,6 +19,8 @@
 - name: Node | Uninstall bun global packages
   ansible.builtin.command:
     cmd: "{{ item.executable | default(node_bun_executable) }} remove --global {{ item.name }}"
+  environment:
+    BUN_INSTALL: "{{ bun_install_dir }}"
   loop: "{{ node_bun_packages }}"
   loop_control:
     label: "{{ item.name }}"

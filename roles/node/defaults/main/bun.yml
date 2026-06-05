@@ -1,2 +1,3 @@
 ---
 node_bun_executable: "bun"
+bun_install_dir: "{{ ansible_facts['env']['HOME'] }}/.bun"
