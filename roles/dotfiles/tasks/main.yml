@@ -174,7 +174,6 @@
   tags:
     - omp
     - ai
-    - herdr
 
 - name: Configure Scientia
   import_tasks: tasks/configure_scientia.yml
@@ -211,6 +210,7 @@
   tags:
     - sidecar
     - ai
+
 - name: Configure Herdr
   import_tasks: tasks/configure_herdr.yml
   tags:
