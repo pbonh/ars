@@ -17,10 +17,12 @@ omp_skills_enable_claude_user: false
 omp_commands_enable_claude_user: false
 
 # Subagents to disable.
-omp_disabled_agents:
-  - explore
-  - oracle
-  - librarian
+omp_disabled_agents: []
+# omp_disabled_agents:
+#   - explore
+#   - oracle
+#   - librarian
+#   - designer
 
 # Context management — compact early and hand off to a fresh session.
 omp_compaction_enabled: true
