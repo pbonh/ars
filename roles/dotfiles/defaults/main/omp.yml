@@ -56,3 +56,5 @@ omp_global_config:
     concurrency: "{{ omp_task_concurrency }}"
   modelRoles:
     default: "{{ omp_default_model }}"
+  providers:
+    webSearch: kagi

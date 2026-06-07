@@ -33,6 +33,7 @@ zellij_env_variables:
   nvim_appname: "{{ zellij_nvim_app }}"
   fireworks_api_key: "{{ fireworks_api_key }}"
   fireworks_firepass_api_key: "{{ fireworks_firepass_api_key }}"
+  kagi_api_key: "{{ kagi_api_key }}"
   # shell: "{{ zellij_shell }}"
   # anthropic_api_key: "{{ anthropic_api_key }}"
   # openai_api_key: "{{ openai_api_key }}"
