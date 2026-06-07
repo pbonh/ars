@@ -1,0 +1,6 @@
+---
+api_keys:
+  kagi_api_key: "{{ kagi_api_key | default('') }}"
+  fireworks_api_key: "{{ fireworks_api_key | default('') }}"
+  fireworks_firepass_api_key: "{{ fireworks_firepass_api_key | default('') }}"
+  anthropic_api_key: "{{ anthropic_api_key | default('') }}"
