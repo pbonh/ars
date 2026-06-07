@@ -1,0 +1,18 @@
+---
+- name: Herdr | Check if herdr is available
+  ansible.builtin.command:
+    cmd: which herdr
+  register: herdr_check
+  changed_when: false
+  failed_when: false
+
+- name: Herdr | Install agent integrations
+  ansible.builtin.command:
+    cmd: herdr integration install {{ item }}
+  loop: "{{ herdr_integrations }}"
+  loop_control:
+    label: "{{ item }}"
+  changed_when: false
+  when:
+    - herdr_check.rc == 0
+    - herdr_integrations | length > 0

@@ -1,0 +1,8 @@
+---
+herdr_integrations:
+  - pi
+  - omp
+  - claude
+  - codex
+  - opencode
+  - hermes

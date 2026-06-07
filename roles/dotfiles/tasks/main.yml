@@ -210,3 +210,8 @@
   tags:
     - sidecar
     - ai
+- name: Configure Herdr
+  import_tasks: tasks/configure_herdr.yml
+  tags:
+    - herdr
+    - ai
