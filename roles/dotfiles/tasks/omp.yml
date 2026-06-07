@@ -5,6 +5,12 @@
     state: directory
     mode: "0700"
 
+- name: OMP | Ensure extensions directory exists
+  ansible.builtin.file:
+    path: "{{ omp_extensions_dir }}"
+    state: directory
+    mode: "0755"
+
 - name: OMP | Check config.yml
   ansible.builtin.stat:
     path: "{{ omp_config_path }}"

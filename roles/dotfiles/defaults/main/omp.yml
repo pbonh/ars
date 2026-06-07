@@ -4,6 +4,7 @@
 # project-level overrides via ./.claude/settings.yml. This role manages the
 # global config only; the omp binary itself is installed elsewhere.
 omp_config_dir: "{{ ansible_facts['env']['HOME'] }}/.omp/agent"
+omp_extensions_dir: "{{ omp_config_dir }}/extensions"
 omp_config_path: "{{ omp_config_dir }}/config.yml"
 
 # Disable the hindsight/memory system.
