@@ -175,11 +175,11 @@
     - omp
     - ai
 
-- name: Configure Scientia
-  import_tasks: tasks/configure_scientia.yml
-  tags:
-    - scientia
-    - ai
+# - name: Configure Scientia
+#   import_tasks: tasks/configure_scientia.yml
+#   tags:
+#     - scientia
+#     - ai
 
 - name: Configure Hermes
   import_tasks: tasks/configure_hermes.yml
